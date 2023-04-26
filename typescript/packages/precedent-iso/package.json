@@ -1,0 +1,35 @@
+{
+  "name": "@dalia/precedent-iso",
+  "version": "0.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "packageManager": "yarn@3.3.0",
+  "private": true,
+  "devDependencies": {
+    "@types/eslint": "^8.21.3",
+    "@types/prettier": "^2.7.2",
+    "@typescript-eslint/eslint-plugin": "^5.56.0",
+    "@typescript-eslint/parser": "^5.56.0",
+    "eslint": "^8.36.0",
+    "eslint-plugin-simple-import-sort": "^10.0.0",
+    "prettier": "^2.8.5",
+    "typescript": "^5.0.2",
+    "vitest": "^0.29.7"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w -b",
+    "test": "vitest src/tests",
+    "fix": "yarn fix::lint; yarn fix::format",
+    "fix::lint": "eslint . --ext .ts --fix",
+    "fix::format": "prettier --write .",
+    "check": "yarn check::lint && yarn  check::format",
+    "check::lint": "eslint . --ext .ts",
+    "check::format": "prettier --check .",
+    "clean": "yarn clean::dist",
+    "clean::dist": "rm -rf tsconfig.tsbuildinfo dist"
+  },
+  "dependencies": {
+    "zod": "^3.21.4"
+  }
+}
