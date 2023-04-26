@@ -7,7 +7,7 @@ export default defineConfig({
     useAtomics: true,
     env: {
       SQL_URI:
-        "postgres://postgres:postgres@localhost:5432/dalia-test?sslmode=disable",
+        "postgres://postgres:postgres@localhost:5432/fgpt-test?sslmode=disable",
     },
   },
 });

@@ -17,12 +17,12 @@ COPY packages/precedent-node packages/precedent-node
 COPY packages/api packages/api
 
 
-RUN yarn workspaces focus @dalia/api && \
-    yarn workspaces foreach -tvp --include @dalia/api --include @dalia/precedent-iso run build && \
+RUN yarn workspaces focus @fgpt/api && \
+    yarn workspaces foreach -tvp --include @fgpt/api --include @fgpt/precedent-iso run build && \
     yarn cache clean;
 
 WORKDIR "/usr/src/target/packages/api"
 
 ENTRYPOINT ["/app/datadog-init"]
 
-CMD ["yarn", "workspace", "@dalia/api", "run-server::prod"]
+CMD ["yarn", "workspace", "@fgpt/api", "run-server::prod"]

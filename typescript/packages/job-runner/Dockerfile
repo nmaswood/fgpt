@@ -17,12 +17,12 @@ COPY packages/precedent-node packages/precedent-node
 COPY packages/job-runner packages/job-runner
 
 
-RUN yarn workspaces focus @dalia/job-runner && \
-    yarn workspaces foreach -tvp --include @dalia/job-runner --include @dalia/precedent-iso run build && \
+RUN yarn workspaces focus @fgpt/job-runner && \
+    yarn workspaces foreach -tvp --include @fgpt/job-runner --include @fgpt/precedent-iso run build && \
     yarn cache clean;
 
 WORKDIR "/usr/src/target/packages/job-runner"
 
 ENTRYPOINT ["/app/datadog-init"]
 
-CMD ["yarn", "workspace", "@dalia/job-runner", "run-server::prod"]
+CMD ["yarn", "workspace", "@fgpt/job-runner", "run-server::prod"]
