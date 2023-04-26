@@ -1,9 +1,9 @@
 export interface TranscriptLink {
-  displayName: string;
-  ticker: string;
-  publishDate: Date;
   title: string;
-  link: string;
+  tickers: string[];
+  quarter: string;
+  year: string;
+  href: string;
 }
 
 export interface Transcript {
