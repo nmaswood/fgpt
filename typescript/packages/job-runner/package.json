@@ -15,6 +15,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -b -w",
+    "dev": "node dist/index.js | pino-pretty",
     "run-job-runner": "node dist/index.js",
     "test:sql": "docker compose run --build db_test_migration",
     "test": "yarn vitest --threads=false src/tests",
