@@ -1,5 +1,5 @@
 {
-  "name": "dalia",
+  "name": "fgpt",
   "packageManager": "yarn@3.3.0",
   "private": true,
   "workspaces": [
@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "build": "yarn workspaces foreach -tvp run build",
-    "build:api": "yarn workspaces foreach -tvp --exclude @dalia/app run build",
+    "build:api": "yarn workspaces foreach -tvp --exclude @fgpt/app run build",
     "fix": "yarn workspaces foreach -vp run fix",
     "check": "yarn workspaces foreach -vp run check",
     "test": "yarn workspaces foreach -vp run test",

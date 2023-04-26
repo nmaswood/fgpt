@@ -635,22 +635,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@fgpt/iac@workspace:packages/iac":
-  version: 0.0.0-use.local
-  resolution: "@fgpt/iac@workspace:packages/iac"
-  dependencies:
-    "@types/eslint": ^8.37.0
-    "@types/prettier": ^2.7.2
-    "@typescript-eslint/eslint-plugin": ^5.59.1
-    "@typescript-eslint/parser": ^5.59.1
-    eslint: ^8.39.0
-    eslint-plugin-simple-import-sort: ^10.0.0
-    prettier: ^2.8.8
-    typescript: ^5.0.4
-    vitest: ^0.30.1
-  languageName: unknown
-  linkType: soft
-
 "@fgpt/job-runner@workspace:packages/job-runner":
   version: 0.0.0-use.local
   resolution: "@fgpt/job-runner@workspace:packages/job-runner"
@@ -2446,12 +2430,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dalia@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "dalia@workspace:."
-  languageName: unknown
-  linkType: soft
-
 "date-fns@npm:^2.29.3":
   version: 2.29.3
   resolution: "date-fns@npm:2.29.3"
@@ -3227,6 +3205,12 @@ __metadata:
   checksum: 0170e6bfcd5d57a70412440b8ef600da6de3b2a6c5966aeaf0a852d542daff506a0ee92d6de7679d1de82e644bce69d7a574a6c93f0b03964b5337eed75ada1a
   languageName: node
   linkType: hard
+
+"fgpt@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "fgpt@workspace:."
+  languageName: unknown
+  linkType: soft
 
 "file-entry-cache@npm:^6.0.1":
   version: 6.0.1

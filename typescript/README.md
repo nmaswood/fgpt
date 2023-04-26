@@ -1,3 +1,3 @@
 # Songbird typescript
 
-Basic typescript monorepo for all dalia services.
+Basic typescript monorepo for all fgpt services.
