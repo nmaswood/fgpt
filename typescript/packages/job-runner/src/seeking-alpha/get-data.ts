@@ -1,73 +1,97 @@
-import { TranscriptLink } from "@fgpt/precedent-iso";
-import z from "zod";
-import { isNotNull } from "@fgpt/precedent-iso";
+import * as timers from "node:timers/promises";
 
+import { EarningsCallHref } from "@fgpt/precedent-iso";
+import { isNotNull } from "@fgpt/precedent-iso";
+import { Browser, ElementHandle } from "puppeteer";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
+import z from "zod";
 
 puppeteer.use(StealthPlugin());
 
 import { LOGGER } from "../logger";
+import { Settings } from "../settings";
+import { login } from "./login";
+import { PuppeteerTranscriptFetcher } from "./transcript";
 
-interface TranscriptLinkGenerator {
-  getLinks(): AsyncIterator<TranscriptLink>;
+interface GetHrefsOptions {
+  maxPages: number;
 }
 
-class SeekingAlphaGenerator implements TranscriptLinkGenerator {
-  async *getLinks() {
-    yield undefined!;
-    throw new Error("Method not implemented.");
-  }
+interface EarningsCallHrefFetcher {
+  getLinks(opts: GetHrefsOptions): AsyncIterator<EarningsCallHref>;
 }
 
-export async function run() {
-  const generator = new SeekingAlphaGenerator();
-  LOGGER.info(generator, "Starting generator");
-
-  await launch();
-}
-
-const TRANSCRIPT_SITE =
-  "https://seekingalpha.com/earnings/earnings-call-transcripts";
-
-async function launch() {
+export async function run({ seekingAlpha: { email, password } }: Settings) {
   const browser = await puppeteer.launch({
     headless: false,
   });
+  false && (await login(browser, email, password));
 
-  const page = await browser.newPage();
+  const fetcher = new PuppeteerTranscriptFetcher(browser);
+  false &&
+    fetcher.getTranscript(
+      "https://seekingalpha.com/article/4597178-stmicroelectronics-nv-stm-q1-2023-earnings-call-transcript"
+    );
 
-  await page.setViewport({ width: 2400, height: 720 });
+  const generator = new PuppeteerEarningsCallHrefFetcher(browser);
+  LOGGER.info(generator, "Starting generator");
 
-  await page.goto(TRANSCRIPT_SITE, {
-    waitUntil: "networkidle0",
-  });
+  for await (const foo of generator.getLinks({ maxPages: 10 })) {
+    console.log(foo);
+  }
+}
+const TRANSCRIPT_SITE =
+  "https://seekingalpha.com/earnings/earnings-call-transcripts";
 
-  const articles = await page.$$("article > div > div");
+class PuppeteerEarningsCallHrefFetcher implements EarningsCallHrefFetcher {
+  constructor(private readonly browser: Browser) {}
 
-  const data = await Promise.all(
-    articles.map(async (article) => {
-      const aTag = await article.$eval("a", (a) => ({
-        title: a.textContent,
-        href: a.href,
-      }));
+  async *getLinks({ maxPages }: GetHrefsOptions) {
+    const page = await this.browser.newPage();
+    await page.goto(TRANSCRIPT_SITE, {
+      waitUntil: "networkidle0",
+    });
 
-      const tickers = await article.$$eval(
-        'a[data-test-id="post-list-ticker"]',
-        (anchors) => anchors.map((anchor) => anchor.textContent)
+    for (let pageNumber = 1; pageNumber < maxPages; pageNumber++) {
+      await timers.setTimeout(5_000);
+      const articles = await page.$$("article > div > div");
+
+      const data = await Promise.all(articles.map(parseArticleTags));
+
+      const showMoreButton = await page.$(
+        "#content > div > div.d-h.Q-b8.Q-cp.Q-cs > div > div > div > div > section > div > div > div > div:nth-child(3) > a"
       );
 
-      const date = await article.$eval(
-        'span[data-test-id="post-list-date"]',
-        (t) => t.textContent
-      );
+      yield* data.map((d) => toTranscriptLink(d)).filter(isNotNull);
+      if (!showMoreButton) {
+        throw new Error("could not find button");
+      }
+      await showMoreButton.scrollIntoView();
+      await showMoreButton.click();
+    }
+  }
+}
 
-      return ZRawTranscript.parse({ tickers: tickers, date, ...aTag });
-    })
+async function parseArticleTags(
+  article: ElementHandle
+): Promise<RawTranscript> {
+  const aTag = await article.$eval("a", (a) => ({
+    title: a.textContent,
+    href: a.href,
+  }));
+
+  const tickers = await article.$$eval(
+    'a[data-test-id="post-list-ticker"]',
+    (anchors) => anchors.map((anchor) => anchor.textContent)
   );
 
-  const parsed = data.map((d) => toTranscriptLink(d)).filter(isNotNull);
-  console.log(parsed);
+  const date = await article.$eval(
+    'span[data-test-id="post-list-date"]',
+    (t) => t.textContent
+  );
+
+  return ZRawTranscript.parse({ tickers: tickers, date, ...aTag });
 }
 
 const ZRawTranscript = z.object({
@@ -84,7 +108,7 @@ function toTranscriptLink({
   href,
   title,
   tickers,
-}: RawTranscript): TranscriptLink | undefined {
+}: RawTranscript): EarningsCallHref | undefined {
   const [match] = [...title.matchAll(transcriptRegex)];
   if (match === undefined) {
     return undefined;

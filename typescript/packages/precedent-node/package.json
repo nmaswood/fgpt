@@ -19,7 +19,8 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w -b",
-    "test": "vitest src/tests",
+    "test:sql": "docker compose run --build db_test_migration",
+    "test": "yarn vitest --threads=false src/tests",
     "fix": "yarn fix::lint; yarn fix::format",
     "fix::lint": "eslint . --ext .ts --fix",
     "fix::format": "prettier --write .",
@@ -30,6 +31,7 @@
     "clean::dist": "rm -rf tsconfig.tsbuildinfo dist"
   },
   "dependencies": {
+    "@fgpt/precedent-iso": "workspace:^",
     "zod": "^3.21.4"
   }
 }

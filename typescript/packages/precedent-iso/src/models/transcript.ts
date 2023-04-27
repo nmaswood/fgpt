@@ -1,4 +1,4 @@
-export interface TranscriptLink {
+export interface EarningsCallHref {
   title: string;
   tickers: string[];
   quarter: string;
@@ -7,13 +7,10 @@ export interface TranscriptLink {
 }
 
 export interface Transcript {
-  id: string;
-  ticker: string;
-  publishDate: Date;
   blocks: TextBlock[];
 }
 
 export interface TextBlock {
-  header: string;
-  body: string;
+  isStrong: boolean;
+  text: string;
 }

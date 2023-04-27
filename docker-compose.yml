@@ -1,0 +1,36 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:14.4-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=songbird
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+  db_migration:
+    image: db_migration
+    build: ./db
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/fgpt?sslmode=disable
+  db_test_migration:
+    image: db_migration
+    build: ./db
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/fgpt-test?sslmode=disable
+
+volumes:
+  db:
+    driver: local

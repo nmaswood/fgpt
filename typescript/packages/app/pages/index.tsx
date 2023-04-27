@@ -1,5 +1,5 @@
-import { Box } from "@mui/system";
 import { Button, Typography } from "@mui/material";
+import { Box } from "@mui/system";
 import * as React from "react";
 
 const Home: React.FC = () => {

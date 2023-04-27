@@ -1,4 +1,4 @@
-import { test, expect } from "vitest";
+import { expect, test } from "vitest";
 
 test("classify", () => {
   const result1 = classify("4104123456789123");

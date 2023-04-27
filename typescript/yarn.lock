@@ -689,6 +689,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@fgpt/precedent-node@workspace:packages/precedent-node"
   dependencies:
+    "@fgpt/precedent-iso": "workspace:^"
     "@types/eslint": ^8.37.0
     "@types/prettier": ^2.7.2
     "@typescript-eslint/eslint-plugin": ^5.59.1

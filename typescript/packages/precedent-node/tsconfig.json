@@ -13,5 +13,7 @@
     "sourceMap": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "src/tests*/**/"]
+
+  "exclude": ["node_modules", "dist", "src/tests*/**/"],
+  "references": [{ "path": "../precedent-iso" }]
 }
