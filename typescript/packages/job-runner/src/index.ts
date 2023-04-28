@@ -8,8 +8,8 @@ import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 
 import { LOGGER } from "./logger";
-import { PuppeteerEarningsCallHrefFetcher } from "./seeking-alpha/get-data";
-import { StoreTrainingDataImpl } from "./seeking-alpha/run";
+import { PuppeteerEarningsCallHrefFetcher } from "./seeking-alpha/earnings-call-href-fetcher";
+import { FetchAndStoreEarningCallsDataImpl } from "./seeking-alpha/run";
 import { PuppeteerTranscriptFetcher } from "./seeking-alpha/transcript";
 import { SETTINGS, Settings } from "./settings";
 
@@ -30,7 +30,7 @@ async function start(settings: Settings) {
       const transcriptFetcher = new PuppeteerTranscriptFetcher(browser);
       const earningsCallFetcher = new PuppeteerEarningsCallHrefFetcher(browser);
 
-      const storeTrainingData = new StoreTrainingDataImpl(
+      const storeTrainingData = new FetchAndStoreEarningCallsDataImpl(
         transcriptStore,
         transcriptFetcher,
         earningsCallFetcher

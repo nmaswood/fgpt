@@ -1,5 +1,5 @@
 import { TextBlock } from "@fgpt/precedent-iso";
-import { Browser } from "puppeteer";
+import { Browser, Page } from "puppeteer";
 
 export interface TranscriptFetcher {
   getTranscript(url: string): Promise<TextBlock[]>;
@@ -7,10 +7,11 @@ export interface TranscriptFetcher {
 
 const CONTENT_SELECTOR = 'div[data-test-id="content-container"] > p';
 export class PuppeteerTranscriptFetcher implements TranscriptFetcher {
+  #page: Page | undefined;
   constructor(private readonly browser: Browser) {}
 
   async getTranscript(url: string): Promise<TextBlock[]> {
-    const page = await this.browser.newPage();
+    const page = await this.#getPage();
     await page.goto(url);
 
     return page.$$eval(CONTENT_SELECTOR, (pTags) =>
@@ -21,5 +22,10 @@ export class PuppeteerTranscriptFetcher implements TranscriptFetcher {
         };
       })
     );
+  }
+
+  async #getPage(): Promise<Page> {
+    this.#page = this.#page || (await this.browser.newPage());
+    return this.#page;
   }
 }

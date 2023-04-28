@@ -1,13 +1,18 @@
+import * as T from "node:timers/promises";
+
 import { TranscriptStore } from "@fgpt/precedent-node";
 
+import { LOGGER } from "../logger";
 import { EarningsCallHrefFetcher } from "./earnings-call-href-fetcher";
 import { TranscriptFetcher } from "./transcript";
 
-export interface StoreTrainingData {
+export interface FetchAndStoreEarningsCallData {
   run(): Promise<void>;
 }
 
-export class StoreTrainingDataImpl implements StoreTrainingData {
+export class FetchAndStoreEarningCallsDataImpl
+  implements FetchAndStoreEarningsCallData
+{
   constructor(
     private readonly transcriptStore: TranscriptStore,
     private readonly transcriptFetcher: TranscriptFetcher,
@@ -16,14 +21,17 @@ export class StoreTrainingDataImpl implements StoreTrainingData {
 
   async run(): Promise<void> {
     for await (const href of this.earningsCallHrefFetcher.getLinks({
-      maxPages: 10,
+      maxPages: 500,
     })) {
+      LOGGER.info(`Upserting ${href.title}`);
       await this.transcriptStore.upsertHref(href);
     }
 
     for await (const { id, href } of this.transcriptStore.unprocessedHrefs()) {
+      LOGGER.info(`Fetching ${href}`);
       const transcript = await this.transcriptFetcher.getTranscript(href);
       await this.transcriptStore.storeTranscript(id, { blocks: transcript });
+      await T.setTimeout(5_000);
     }
   }
 }
