@@ -14,13 +14,11 @@ CREATE INDEX IF NOT EXISTS "transcript_href_ticker" ON "transcript_href" ("ticke
 CREATE TABLE
   IF NOT EXISTS transcript_content (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
-    transcript_id UUID REFERENCES "transcript_href" (id),
+    href_id UUID UNIQUE REFERENCES "transcript_href" (id),
     content jsonb
   );
 
-CREATE INDEX IF NOT EXISTS "transcript_href_ticker" ON "transcript_href" ("ticker");
-
-CREATE INDEX IF NOT EXISTS "transcript_content_transcript_id" ON "transcript_content" ("transcript_id");
+CREATE INDEX IF NOT EXISTS "transcript_href_ticker" ON "transcript_content" ("href_id");
 
 -- migrate:down
 DROP TABLE IF EXISTS transcript_href

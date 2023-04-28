@@ -10,7 +10,7 @@ interface GetHrefsOptions {
 }
 
 export interface EarningsCallHrefFetcher {
-  getLinks(opts: GetHrefsOptions): AsyncIterator<EarningsCallHref>;
+  getLinks(opts: GetHrefsOptions): AsyncIterable<EarningsCallHref>;
 }
 
 const TRANSCRIPT_SITE =

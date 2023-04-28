@@ -1,3 +1,3 @@
 # Overview
 
-Songbird frontend services
+FGPT frontend services

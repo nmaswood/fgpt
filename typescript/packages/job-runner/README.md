@@ -1,3 +1,3 @@
 # api
 
-Songbird Node api server
+FGPT Node api server

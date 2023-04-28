@@ -1,3 +1,3 @@
-# Songbird typescript
+# FGPT typescript
 
 Basic typescript monorepo for all fgpt services.

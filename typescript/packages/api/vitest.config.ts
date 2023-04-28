@@ -2,7 +2,7 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    name: "Songbird API",
+    name: "FGPT API",
     setupFiles: [],
     useAtomics: true,
     env: {
