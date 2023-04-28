@@ -48,6 +48,9 @@ test("upsertHref", async () => {
     ],
   });
   expect((await collect(transcriptStore.unprocessedHrefs())).length).toEqual(0);
+
+  const value = await transcriptStore.getTickers();
+  expect(value).toEqual(["AAPL"]);
 });
 
 async function collect<T>(iterable: AsyncIterable<T>): Promise<T[]> {

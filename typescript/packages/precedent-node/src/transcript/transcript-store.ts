@@ -73,7 +73,24 @@ DO NOTHING;
       );
     });
   }
+
+  getTickers(): Promise<string[]> {
+    return this.pool.connect(async (cnx) => {
+      const response = await cnx.query(
+        sql.type(ZGetTickers)`
+SELECT distinct ticker FROM
+transcript_href JOIN transcript_content ON transcript_href.id = transcript_content.href_id
+LIMIT 100`
+      );
+
+      return response.rows.map((row) => row.ticker);
+    });
+  }
 }
+
+const ZGetTickers = z.object({
+  ticker: z.string(),
+});
 
 const ZHrefToProcess = z.object({
   id: z.string(),
@@ -86,4 +103,5 @@ export interface TranscriptStore {
   upsertHref(body: EarningsCallHref): Promise<void>;
   unprocessedHrefs(): AsyncIterable<HrefToProcess>;
   storeTranscript(href: string, body: Transcript): Promise<void>;
+  getTickers(): Promise<string[]>;
 }

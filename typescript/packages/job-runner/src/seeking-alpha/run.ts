@@ -6,8 +6,12 @@ import { LOGGER } from "../logger";
 import { EarningsCallHrefFetcher } from "./earnings-call-href-fetcher";
 import { TranscriptFetcher } from "./transcript";
 
+export interface RunOptions {
+  skipHrefs: boolean;
+}
+
 export interface FetchAndStoreEarningsCallData {
-  run(): Promise<void>;
+  run(opts: RunOptions): Promise<void>;
 }
 
 export class FetchAndStoreEarningCallsDataImpl
@@ -19,12 +23,14 @@ export class FetchAndStoreEarningCallsDataImpl
     private readonly earningsCallHrefFetcher: EarningsCallHrefFetcher
   ) {}
 
-  async run(): Promise<void> {
-    for await (const href of this.earningsCallHrefFetcher.getLinks({
-      maxPages: 500,
-    })) {
-      LOGGER.info(`Upserting ${href.title}`);
-      await this.transcriptStore.upsertHref(href);
+  async run(opts: RunOptions): Promise<void> {
+    if (!opts.skipHrefs) {
+      for await (const href of this.earningsCallHrefFetcher.getLinks({
+        maxPages: 500,
+      })) {
+        LOGGER.info(`Upserting ${href.title}`);
+        await this.transcriptStore.upsertHref(href);
+      }
     }
 
     for await (const { id, href } of this.transcriptStore.unprocessedHrefs()) {

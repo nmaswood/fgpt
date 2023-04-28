@@ -35,7 +35,7 @@ async function start(settings: Settings) {
         transcriptFetcher,
         earningsCallFetcher
       );
-      await storeTrainingData.run();
+      await storeTrainingData.run({ skipHrefs: true });
 
       break;
     }
