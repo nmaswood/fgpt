@@ -7,7 +7,9 @@ description = ""
 authors = [
     {name = "Nasr Maswood", email = "nasr@songbirdcare.com"},
 ]
-dependencies = []
+dependencies = [
+    "fastapi>=0.95.1",
+]
 requires-python = ">=3.11"
 readme = "README.md"
 license = {text = "MIT"}
