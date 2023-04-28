@@ -1,6 +1,5 @@
-def func(x):
-    return x + 1
+from springtime.llm.foo import add1
 
 
 def test_answer():
-    assert func(3) == 5
+    assert add1(4) == 5
