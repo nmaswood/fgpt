@@ -1,5 +1,5 @@
 import { createTheme } from "@mui/material/styles";
-import { Castoro, IBM_Plex_Sans } from "@next/font/google";
+import { Castoro, IBM_Plex_Sans } from "next/font/google";
 
 import {
   SONG_BIRD_DISABLED_GREY,

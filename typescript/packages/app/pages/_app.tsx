@@ -12,7 +12,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>Nuwas | Change this later</title>
+        <title>FGPT</title>
         <meta name="description" content="Innovative care" />
         <link rel="icon" href="/favicon.svg" />
       </Head>
