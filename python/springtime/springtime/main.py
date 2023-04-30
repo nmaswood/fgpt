@@ -26,7 +26,8 @@ class PredictionInput(BaseModel):
 async def predict_for_ticker(prompt: PredictionInput):
 
     resp = message_completions(prompt.content)
-    return {"resp": resp}
+    text = resp.content
+    return {"resp": resp.content}
 
 
 def start():

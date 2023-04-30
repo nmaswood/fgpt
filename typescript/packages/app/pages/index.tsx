@@ -1,16 +1,14 @@
+import { Autocomplete, Box, TextField, LinearProgress } from "@mui/material";
 import * as React from "react";
 
-import { useFetchTickers } from "../src/hooks/use-fetch-tickers";
-
-import { Box, TextField, Autocomplete } from "@mui/material";
 import { useFetchDataForTicker } from "../src/hooks/use-fetch-data-for-ticker";
+import { useFetchTickers } from "../src/hooks/use-fetch-tickers";
 
 const Home: React.FC = () => {
   const { data } = useFetchTickers();
   const [ticker, setTicker] = React.useState<string | undefined>(undefined);
-  const tickerResponse = useFetchDataForTicker(ticker);
-  console.log(tickerResponse);
-  console.log(ticker);
+  const { isLoading, data: questions } = useFetchDataForTicker(ticker);
+  console.log({ questions });
 
   return (
     <Box padding={3}>
@@ -32,6 +30,9 @@ const Home: React.FC = () => {
           />
         )}
       />
+      <Box display="flex" width="100%">
+        {isLoading && <LinearProgress />}
+      </Box>
     </Box>
   );
 };

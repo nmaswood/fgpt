@@ -30,14 +30,11 @@ export class MLServiceImpl implements MLService {
     return "pong";
   }
 
-  async predict(args: PredictArguments): Promise<PredictResponse> {
+  async predict({ content }: PredictArguments): Promise<PredictResponse> {
     const response = await this.#client.post<PredictResponse>(
       "/predict-for-ticker",
-      args
+      { content: content.slice(4012) }
     );
-
-    const parsed = ZPredictionResponse.parse(response.data);
-
-    return parsed;
+    return ZPredictionResponse.parse(response.data);
   }
 }

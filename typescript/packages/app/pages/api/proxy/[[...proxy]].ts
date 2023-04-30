@@ -1,6 +1,6 @@
-import { SETTINGS } from "../../../src/settings";
-
 import type { NextApiRequest, NextApiResponse } from "next";
+
+import { SETTINGS } from "../../../src/settings";
 
 export default async function proxy(req: NextApiRequest, res: NextApiResponse) {
   const proxy = (() => {

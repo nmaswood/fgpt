@@ -1,4 +1,4 @@
-import { TranscriptStore, MLService } from "@fgpt/precedent-node";
+import { MLService, TranscriptStore } from "@fgpt/precedent-node";
 import express from "express";
 
 export class TranscriptRouter {
@@ -28,9 +28,8 @@ export class TranscriptRouter {
 
         const content = await this.transcriptStore.getTextForTicker(ticker);
         const data = await this.mlService.predict({ content });
-        console.log({ data });
 
-        res.json({ ticker: data });
+        res.json({ data });
       }
     );
 
