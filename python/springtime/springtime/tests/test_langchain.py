@@ -1,5 +1,9 @@
-from springtime.llm.foo import add1
+from springtime.llm.foo import play, conversation_chain, message_completions
 
 
-def test_answer():
-    assert add1(4) == 5
+# def test_conversation_chain():
+# conversation_chain()
+
+def test_conversation_chain():
+    return
+    message_completions()

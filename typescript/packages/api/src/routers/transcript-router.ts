@@ -15,6 +15,18 @@ export class TranscriptRouter {
       }
     );
 
+    router.post(
+      "/data-for-ticker/:ticker",
+      async (req: express.Request, res: express.Response) => {
+        const { ticker } = req.params;
+        if (typeof ticker !== "string") {
+          throw new Error("illegal state");
+        }
+
+        res.json({ ticker });
+      }
+    );
+
     return router;
   }
 }
