@@ -64,7 +64,7 @@ def message_completions(input_text: str):
     chat = ChatOpenAI(temperature=0)
     prompt = PromptTemplate(
         input_variables=["context"],
-        template="Given the following context: {context}, what are some interesting questions you would ask the client?"
+        template="Given the following context: {context}, what are some interesting, specific questions you would ask the client?"
     )
     formatted_message = prompt.format(context=input_text[:3500])
 

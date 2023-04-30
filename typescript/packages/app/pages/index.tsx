@@ -4,6 +4,7 @@ import {
   LinearProgress,
   TextField,
   Typography,
+  Paper,
 } from "@mui/material";
 import * as React from "react";
 
@@ -13,8 +14,9 @@ import { useFetchTickers } from "../src/hooks/use-fetch-tickers";
 const Home: React.FC = () => {
   const { data } = useFetchTickers();
   const [ticker, setTicker] = React.useState<string | undefined>(undefined);
-  const { isLoading, data: questions } = useFetchDataForTicker(ticker);
-  console.log({ questions });
+  const { isLoading, data: resp } = useFetchDataForTicker(ticker);
+
+  const [showPrompt, setShowPrompt] = React.useState(false);
 
   return (
     <Box padding={3} gap={3}>
@@ -51,16 +53,22 @@ const Home: React.FC = () => {
           />
         )}
       </Box>
-      {questions.length > 0 && (
-        <Box display="flex" flexDirection="column">
-          <Typography>Questions to consider:</Typography>
-          <Box display="flex" flexDirection="column">
-            {questions.map((question) => (
-              <Typography key={question} variant="body1">
-                {question}
-              </Typography>
-            ))}
-          </Box>
+      {resp && (
+        <Box display="flex" flexDirection="column" gap={5}>
+          <Paper>
+            <Typography variant="caption">Questions to consider:</Typography>
+            <Box display="flex" flexDirection="column">
+              {resp.resp.map((question) => (
+                <Typography key={question} variant="body1">
+                  {question}
+                </Typography>
+              ))}
+            </Box>
+          </Paper>
+          <Paper>
+            <Typography variant="caption">Content</Typography>
+            <Typography>{resp.content}</Typography>
+          </Paper>
         </Box>
       )}
     </Box>

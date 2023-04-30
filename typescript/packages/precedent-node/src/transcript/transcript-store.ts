@@ -89,14 +89,13 @@ LIMIT 100`
 
   async getTextForTicker(ticker: string): Promise<string> {
     const res = await this.pool.connect(async (cnx) => {
-      const response = await cnx.query(
-        sql.type(ZGetTextForTicker)`
-SELECT jsonb_path_query_array(content, '$[*].text') as text
-FROM transcript_content
-WHERE href_id IN (
-  SELECT href_id FROM transcript_href WHERE ticker = ${ticker}
-)`
-      );
+      const myQuery = sql.type(ZGetTextForTicker)`
+
+SELECT *, jsonb_path_query_array(content, '$[*].text') as text
+FROM transcript_content JOIN  transcript_href th on transcript_content.href_id = th.id
+WHERE th.ticker = ${ticker}
+`;
+      const response = await cnx.query(myQuery);
 
       return response.rows.flatMap((row) => row.text);
     });

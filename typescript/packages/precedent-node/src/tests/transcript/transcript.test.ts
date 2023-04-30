@@ -57,6 +57,43 @@ test("upsertHref", async () => {
   expect(textForTickers).toEqual("hi");
 });
 
+test("unprocessedHrefs", async () => {
+  const { transcriptStore } = await setup();
+
+  await transcriptStore.upsertHref({
+    tickers: ["AAPL"],
+    quarter: "Q1",
+    year: "2021",
+    href: "https://example.com",
+    title: "foo",
+  });
+
+  await transcriptStore.upsertHref({
+    tickers: ["GOOG"],
+    quarter: "Q2",
+    year: "2021",
+    href: "https://googl.com",
+    title: "baz",
+  });
+
+  const values = await collect(transcriptStore.unprocessedHrefs());
+
+  expect(values.length).toEqual(2);
+
+  await transcriptStore.storeTranscript(values[0]!.id, {
+    blocks: [
+      {
+        text: "hi",
+        isStrong: false,
+      },
+    ],
+  });
+
+  const valuesPrime = await collect(transcriptStore.unprocessedHrefs());
+
+  expect(valuesPrime.length).toEqual(1);
+});
+
 async function collect<T>(iterable: AsyncIterable<T>): Promise<T[]> {
   const values: T[] = [];
   for await (const value of iterable) {

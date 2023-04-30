@@ -29,7 +29,7 @@ export class TranscriptRouter {
         const content = await this.transcriptStore.getTextForTicker(ticker);
         const data = await this.mlService.predict({ content });
 
-        res.json({ data });
+        res.json({ resp: data.resp, content });
       }
     );
 
