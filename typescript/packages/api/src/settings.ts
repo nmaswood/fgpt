@@ -6,6 +6,7 @@ const ZSettings = z.object({
   sql: z.object({
     uri: z.string(),
   }),
+  mlServiceUri: z.string(),
 });
 
 export const SETTINGS = ZSettings.parse({
@@ -14,4 +15,5 @@ export const SETTINGS = ZSettings.parse({
   sql: {
     uri: process.env["SQL_URI"] ?? "test",
   },
+  mlServiceUri: process.env["ML_SERVICE_URI"],
 });

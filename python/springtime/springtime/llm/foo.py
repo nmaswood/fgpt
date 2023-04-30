@@ -60,15 +60,20 @@ def conversation_chain():
     print(output)
 
 
-def message_completions():
+def message_completions(input_text: str):
     chat = ChatOpenAI(temperature=0)
-    x = chat([HumanMessage(
-        content="Translate this sentence from English to French. I love programming.")])
+    prompt = PromptTemplate(
+        input_variables=["context"],
+        template="Given the following context: {context}, what are some interesting questions you would ask the client?"
+    )
+    formatted_message = prompt.format(context=input_text)
+
     messages = [
         SystemMessage(
-            content="You are a helpful assistant that translates English to French."),
+            content="You are an expert financial analyst that is helping a client make an investment decision"),
         HumanMessage(
-            content="Translate this sentence from English to French. I love programming.")
+            content=formatted_message),
+
     ]
-    y = chat(messages)
-    print(y)
+
+    return chat(messages)

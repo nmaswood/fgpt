@@ -14,7 +14,7 @@ import { SETTINGS } from "./settings";
 import { dataBasePool } from "./sql";
 import { TranscriptRouter } from "./routers/transcript-router";
 
-import { PsqlTranscriptStore } from "@fgpt/precedent-node";
+import { PsqlTranscriptStore, MLServiceImpl } from "@fgpt/precedent-node";
 
 LOGGER.info("Server starting ...");
 
@@ -33,10 +33,14 @@ async function start() {
 
   const pool = await dataBasePool(SETTINGS.sql.uri);
   const transcriptStore = new PsqlTranscriptStore(pool);
+  const mlService = new MLServiceImpl(SETTINGS.mlServiceUri);
 
   app.use(cors({ origin: "*" }));
 
-  app.use("/api/v1/transcript", new TranscriptRouter(transcriptStore).init());
+  app.use(
+    "/api/v1/transcript",
+    new TranscriptRouter(transcriptStore, mlService).init()
+  );
 
   app.use(errorLogger);
   app.use(errorResponder);

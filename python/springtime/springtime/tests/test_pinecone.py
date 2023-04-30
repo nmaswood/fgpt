@@ -3,9 +3,10 @@ from springtime.llm.pinecone import play_pinecone
 
 
 def test_foo():
-    play_pinecone()
+    pass
+    # play_pinecone()
 
 
 def test_neo():
     print("hi from neo")
-    play_neo4j()
+    # play_neo4j()

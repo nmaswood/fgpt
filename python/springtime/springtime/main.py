@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 import uvicorn
 from fastapi import FastAPI, Body
+
+from springtime.llm.foo import message_completions
 from .settings import SETTINGS
 
 app = FastAPI()
@@ -11,19 +13,20 @@ async def root():
     return {"ping": "ping"}
 
 
+@app.get("/ping")
+async def ping():
+    return {"ping": "ping"}
+
+
 class PredictionInput(BaseModel):
-    prompt: str
+    content: str
 
 
-@app.post("/predict")
-async def predict(prompt: PredictionInput):
-    return prompt
+@app.post("/predict-for-ticker")
+async def predict_for_ticker(prompt: PredictionInput):
 
-
-@app.post("/items/")
-async def create_item(item_name: str, item_description: str = Body(...)):
-    item = {"name": item_name, "description": item_description}
-    return item
+    resp = message_completions(prompt.content)
+    return {"resp": resp}
 
 
 def start():

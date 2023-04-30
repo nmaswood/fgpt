@@ -51,6 +51,10 @@ test("upsertHref", async () => {
 
   const value = await transcriptStore.getTickers();
   expect(value).toEqual(["AAPL"]);
+
+  const textForTickers = await transcriptStore.getTextForTicker("AAPL");
+
+  expect(textForTickers).toEqual("hi");
 });
 
 async function collect<T>(iterable: AsyncIterable<T>): Promise<T[]> {

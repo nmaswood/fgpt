@@ -86,7 +86,32 @@ LIMIT 100`
       return response.rows.map((row) => row.ticker);
     });
   }
+
+  async getTextForTicker(ticker: string): Promise<string> {
+    const res = await this.pool.connect(async (cnx) => {
+      const response = await cnx.query(
+        sql.type(ZGetTextForTicker)`
+SELECT jsonb_path_query_array(content, '$[*].text') as text
+FROM transcript_content
+WHERE href_id IN (
+  SELECT href_id FROM transcript_href WHERE ticker = ${ticker}
+)`
+      );
+
+      return response.rows.flatMap((row) => row.text);
+    });
+
+    if (res.length === 0) {
+      throw new Error("no results");
+    }
+
+    return res.join(" ");
+  }
 }
+
+const ZGetTextForTicker = z.object({
+  text: z.string().array(),
+});
 
 const ZGetTickers = z.object({
   ticker: z.string(),
@@ -104,4 +129,5 @@ export interface TranscriptStore {
   unprocessedHrefs(): AsyncIterable<HrefToProcess>;
   storeTranscript(href: string, body: Transcript): Promise<void>;
   getTickers(): Promise<string[]>;
+  getTextForTicker(ticker: string): Promise<string>;
 }

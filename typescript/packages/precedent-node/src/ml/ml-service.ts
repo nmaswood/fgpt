@@ -2,17 +2,18 @@ import axios, { AxiosInstance } from "axios";
 import z from "zod";
 
 interface PredictArguments {
-  prompt: string;
+  content: string;
 }
 
 const ZPredictionResponse = z.object({
-  answer: z.string(),
+  resp: z.string(),
 });
 
 type PredictResponse = z.infer<typeof ZPredictionResponse>;
 
 export interface MLService {
   predict: (args: PredictArguments) => Promise<PredictResponse>;
+  ping: () => Promise<"pong">;
 }
 
 export class MLServiceImpl implements MLService {
@@ -24,8 +25,16 @@ export class MLServiceImpl implements MLService {
     });
   }
 
+  async ping(): Promise<"pong"> {
+    await this.#client.get<PredictResponse>("/ping");
+    return "pong";
+  }
+
   async predict(args: PredictArguments): Promise<PredictResponse> {
-    const response = await this.#client.post<PredictResponse>("/predict", args);
+    const response = await this.#client.post<PredictResponse>(
+      "/predict-for-ticker",
+      args
+    );
 
     const parsed = ZPredictionResponse.parse(response.data);
 

@@ -1,8 +1,11 @@
-import { TranscriptStore } from "@fgpt/precedent-node";
+import { TranscriptStore, MLService } from "@fgpt/precedent-node";
 import express from "express";
 
 export class TranscriptRouter {
-  constructor(private readonly transcriptStore: TranscriptStore) {}
+  constructor(
+    private readonly transcriptStore: TranscriptStore,
+    private readonly mlService: MLService
+  ) {}
 
   init() {
     const router = express.Router();
@@ -23,7 +26,10 @@ export class TranscriptRouter {
           throw new Error("illegal state");
         }
 
-        res.json({ ticker });
+        const content = await this.transcriptStore.getTextForTicker(ticker);
+        const data = await this.mlService.predict({ content });
+
+        res.json({ ticker: data });
       }
     );
 
