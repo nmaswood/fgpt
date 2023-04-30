@@ -2,9 +2,9 @@ import {
   Autocomplete,
   Box,
   LinearProgress,
+  Paper,
   TextField,
   Typography,
-  Paper,
 } from "@mui/material";
 import * as React from "react";
 
@@ -15,8 +15,6 @@ const Home: React.FC = () => {
   const { data } = useFetchTickers();
   const [ticker, setTicker] = React.useState<string | undefined>(undefined);
   const { isLoading, data: resp } = useFetchDataForTicker(ticker);
-
-  const [showPrompt, setShowPrompt] = React.useState(false);
 
   return (
     <Box padding={3} gap={3}>
