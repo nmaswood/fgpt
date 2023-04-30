@@ -66,7 +66,7 @@ def message_completions(input_text: str):
         input_variables=["context"],
         template="Given the following context: {context}, what are some interesting questions you would ask the client?"
     )
-    formatted_message = prompt.format(context=input_text)
+    formatted_message = prompt.format(context=input_text[:3500])
 
     messages = [
         SystemMessage(
