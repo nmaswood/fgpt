@@ -2,8 +2,7 @@ from springtime.llm.neo4j import play_neo4j
 from springtime.llm.pinecone import play_pinecone
 
 
-def test_foo():
-    pass
+def test_pinecone():
     # play_pinecone()
 
 

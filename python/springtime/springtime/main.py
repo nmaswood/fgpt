@@ -2,7 +2,8 @@ from pydantic import BaseModel
 import uvicorn
 from fastapi import FastAPI, Body
 
-from springtime.llm.foo import message_completions
+
+from springtime.llm.ml import message_completions
 from .settings import SETTINGS
 
 app = FastAPI()
