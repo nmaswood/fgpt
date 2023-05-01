@@ -7,11 +7,11 @@ export interface TextChunkResponse {
   chunks: string[];
 }
 export interface TextChunker {
-  chunk(args: ChunkTextArgs): TextChunkResponse;
+  chunk(args: ChunkTextArgs): string[];
 }
 
 export class GreedyTextChunker implements TextChunker {
-  chunk({ text, tokenChunkLimit }: ChunkTextArgs): TextChunkResponse {
+  chunk({ text, tokenChunkLimit }: ChunkTextArgs): string[] {
     const chunks: string[] = [];
 
     let currentChunk: string[] = [];
@@ -32,9 +32,6 @@ export class GreedyTextChunker implements TextChunker {
     if (currentChunk.length > 0) {
       chunks.push(currentChunk.join(" "));
     }
-
-    return {
-      chunks,
-    };
+    return chunks;
   }
 }

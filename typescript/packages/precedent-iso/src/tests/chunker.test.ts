@@ -10,14 +10,12 @@ test("GreedyTextChunker", () => {
 
       tokenChunkLimit: 10,
     })
-  ).toEqual({
-    chunks: [
-      "I love cats.",
-      "They are",
-      "really so",
-      "fantastic.",
-      "They are the",
-      "best",
-    ],
-  });
+  ).toEqual([
+    "I love cats.",
+    "They are",
+    "really so",
+    "fantastic.",
+    "They are the",
+    "best",
+  ]);
 });
