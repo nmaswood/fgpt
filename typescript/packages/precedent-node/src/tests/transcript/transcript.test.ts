@@ -1,3 +1,4 @@
+import { collect } from "@fgpt/precedent-iso";
 import { sql } from "slonik";
 import { beforeEach, expect, test } from "vitest";
 
@@ -93,12 +94,3 @@ test("unprocessedHrefs", async () => {
 
   expect(valuesPrime.length).toEqual(1);
 });
-
-async function collect<T>(iterable: AsyncIterable<T>): Promise<T[]> {
-  const values: T[] = [];
-  for await (const value of iterable) {
-    values.push(value);
-  }
-
-  return values;
-}

@@ -16,6 +16,22 @@ from langchain.schema import (
     SystemMessage
 )
 
+from langchain.embeddings import OpenAIEmbeddings
+
+
+embeddings = OpenAIEmbeddings()
+
+
+def embeddings_for_documents(documents: list[str]):
+    doc_result = embeddings.embed_documents(documents)
+    return doc_result
+
+
+def embedding_for_query(query: str):
+    query_result = embeddings.embed_query(query)
+    return query_result
+
+
 chat = ChatOpenAI(temperature=0)
 
 

@@ -11,12 +11,30 @@ const ZPredictionResponse = z.object({
 
 type PredictResponse = z.infer<typeof ZPredictionResponse>;
 
-export interface MLService {
-  predict: (args: PredictArguments) => Promise<PredictResponse>;
-  ping: () => Promise<"pong">;
+interface GetEmbeddingsArgs {
+  documents: string[];
 }
 
-export class MLServiceImpl implements MLService {
+interface GetEmbeddingsResponse {
+  embeddings: number[][];
+}
+
+interface SummarizeArgs {
+  text: string;
+}
+
+interface SummarizeResponse {
+  response: string;
+}
+
+export interface MLServiceClient {
+  predict: (args: PredictArguments) => Promise<PredictResponse>;
+  ping: () => Promise<"pong">;
+  getEmbeddings: (args: GetEmbeddingsArgs) => Promise<GetEmbeddingsResponse>;
+  summarize: (args: SummarizeArgs) => Promise<SummarizeResponse>;
+}
+
+export class MLServiceImpl implements MLServiceClient {
   #client: AxiosInstance;
 
   constructor(baseURL: string) {
@@ -36,5 +54,14 @@ export class MLServiceImpl implements MLService {
       { content: content.slice(4012) }
     );
     return ZPredictionResponse.parse(response.data);
+  }
+
+  async getEmbeddings(_: GetEmbeddingsArgs): Promise<GetEmbeddingsResponse> {
+    //
+    throw new Error("not implemented");
+  }
+
+  async summarize(_: SummarizeArgs): Promise<SummarizeResponse> {
+    throw new Error("not implemented");
   }
 }

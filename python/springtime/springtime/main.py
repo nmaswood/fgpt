@@ -3,7 +3,7 @@ import uvicorn
 from fastapi import FastAPI, Body
 
 
-from springtime.llm.ml import message_completions
+from springtime.llm.ml import embeddings_for_documents, message_completions
 from .settings import SETTINGS
 
 app = FastAPI()
@@ -29,6 +29,16 @@ async def predict_for_ticker(prompt: PredictionInput):
     resp = message_completions(prompt.content)
     text = resp.content
     return {"resp": resp.content}
+
+
+class EmbeddingForDocument(BaseModel):
+    documents: list[str]
+
+
+@app.post("/embedding-for-document")
+async def embeddings_for_documents_route(params: EmbeddingForDocument):
+    res = embeddings_for_documents(params.documents)
+    return {"resp": res}
 
 
 def start():
