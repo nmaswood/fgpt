@@ -35,11 +35,18 @@ interface SummarizeResponse {
   response: string;
 }
 
+interface UpsertVector {
+  id: string;
+  vector: number[];
+}
+
 export interface MLServiceClient {
   predict: (args: PredictArguments) => Promise<PredictResponse>;
   ping: () => Promise<"pong">;
+  getEmbedding: (query: string) => Promise<number[]>;
   getEmbeddings: (args: GetEmbeddingsArgs) => Promise<GetEmbeddingsResponse>;
   summarize: (args: SummarizeArgs) => Promise<SummarizeResponse>;
+  upsertVectors: (args: UpsertVector[]) => Promise<void>;
 }
 
 export class MLServiceClientImpl implements MLServiceClient {
@@ -73,11 +80,22 @@ export class MLServiceClientImpl implements MLServiceClient {
     return parsed;
   }
 
+  async getEmbedding(query: string): Promise<number[]> {
+    const { response } = await this.getEmbeddings({ documents: [query] });
+    return response[0]!;
+  }
+
   async summarize({ text }: SummarizeArgs): Promise<SummarizeResponse> {
     const response = await this.#client.post<PredictResponse>("/summarize", {
       text,
     });
     const parsed = ZSummaryResponse.parse(response.data);
     return parsed;
+  }
+
+  async upsertVectors(vectors: UpsertVector[]): Promise<void> {
+    await this.#client.put<PredictResponse>("/upsert-vectors", {
+      vectors,
+    });
   }
 }

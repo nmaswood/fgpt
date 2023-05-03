@@ -1,5 +1,4 @@
-import { TranscriptStore, MLServiceClient } from "@fgpt/precedent-node";
-
+import { MLServiceClient, TranscriptStore } from "@fgpt/precedent-node";
 import express from "express";
 
 export class TranscriptRouter {

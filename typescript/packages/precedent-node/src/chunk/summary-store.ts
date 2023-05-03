@@ -32,7 +32,6 @@ export class PsqlSummaryStore implements SummaryStore {
             diff: z.number(),
           })
         )`
-
 INSERT INTO summary (raw_chunk_id, content, num_tokens, diff)
     VALUES (${rawChunkId}, ${content}, ${numTokens}, ${diff})
 RETURNING

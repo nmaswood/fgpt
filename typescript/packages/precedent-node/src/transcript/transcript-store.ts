@@ -161,13 +161,17 @@ WHERE
         z.object({
           content: z.string(),
         })
-      )`SELECT S.content 
-FROM transcript_href TH
-         JOIN transcript_content TC on TH.id = tc.href_id
-         JOIN raw_chunk RC ON RC.transcript_content_id = TC.id
-         JOIN summary S ON S.raw_chunk_id = RC.id
-         JOIN chunk_post_summary CPS ON CPS.summary_id = S.id
-WHERE TH.ticker = ${ticker}
+      )`
+SELECT
+    S.content
+FROM
+    transcript_href TH
+    JOIN transcript_content TC on TH.id = tc.href_id
+    JOIN raw_chunk RC ON RC.transcript_content_id = TC.id
+    JOIN summary S ON S.raw_chunk_id = RC.id
+    JOIN chunk_post_summary CPS ON CPS.summary_id = S.id
+WHERE
+    TH.ticker = ${ticker}
 `);
 
       return resp.rows.map((row) => row.content);
