@@ -1,13 +1,12 @@
 import { DatabasePool, sql } from "slonik";
 
-interface RawChunk {
-  id: string;
+export interface RawChunk {
   transcriptContentId: string;
   content: string;
-  num_tokens: number;
+  numTokens: number;
 }
 
-interface RawChunkStore {
+export interface RawChunkStore {
   insertMany(rawChunks: RawChunk[]): Promise<void>;
 }
 
@@ -17,16 +16,19 @@ export class PsqlRawChunkStore implements RawChunkStore {
   async insertMany(chunks: RawChunk[]): Promise<void> {
     const rawChunkValues = chunks.map(
       (chunk) =>
-        sql.fragment`(${chunk.transcriptContentId}, ${chunk.content}, ${chunk.num_tokens})`
+        sql.fragment`(${chunk.transcriptContentId}, ${chunk.content}, ${chunk.numTokens})`
     );
 
     return this.pool.connect(async (cnx) => {
       await cnx.query(
         sql.unsafe`
+
 INSERT INTO raw_chunk (id, transcript_content_id, content, num_tokens)
-VALUES ${sql.join(rawChunkValues, sql.fragment`, `)}
-ON CONFLICT (id)
-    DO NOTHING;
+    VALUES
+        ${sql.join(rawChunkValues, sql.fragment`, `)}
+    ON CONFLICT (id)
+        DO NOTHING;
+
 `
       );
     });

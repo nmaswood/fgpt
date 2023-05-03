@@ -1,7 +1,7 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "simple-import-sort"],
+  "plugins": ["@typescript-eslint", "sql", "simple-import-sort"],
   "extends": [
     "../.eslintrc.base.json",
     "eslint:recommended",
@@ -9,6 +9,14 @@
     "plugin:@typescript-eslint/recommended"
   ],
   "rules": {
+    "sql/format": [
+      2,
+      {
+        "ignoreExpressions": false,
+        "ignoreInline": true,
+        "ignoreTagless": true
+      }
+    ],
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error"
   }

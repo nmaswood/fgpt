@@ -554,6 +554,7 @@ __metadata:
     axios: ^1.4.0
     eslint: ^8.39.0
     eslint-plugin-simple-import-sort: ^10.0.0
+    eslint-plugin-sql: ^2.3.2
     prettier: ^2.8.8
     typescript: ^5.0.4
     vitest: ^0.30.1

@@ -2,6 +2,10 @@ import { EarningsCallHref, Transcript } from "@fgpt/precedent-iso";
 import { DatabasePool, sql } from "slonik";
 import { z } from "zod";
 
+const ZSelectId = z.object({
+  id: z.string(),
+});
+
 export class PsqlTranscriptStore implements TranscriptStore {
   constructor(private readonly pool: DatabasePool) {}
 
@@ -10,18 +14,24 @@ export class PsqlTranscriptStore implements TranscriptStore {
     quarter,
     year,
     href,
-  }: EarningsCallHref): Promise<void> {
+  }: EarningsCallHref): Promise<string> {
     return this.pool.connect(async (cnx) => {
       await cnx.query(
         sql.unsafe`
-INSERT INTO transcript_href(href, year, quarter, ticker, allTickers) VALUES (${href}, ${year}, ${quarter}, ${
+
+INSERT INTO transcript_href (href, year, quarter, ticker, allTickers)
+    VALUES (${href}, ${year}, ${quarter}, ${
           tickers[0] ?? null
         }, ${JSON.stringify(tickers)})
-
 ON CONFLICT (href)
     DO NOTHING;
+
 `
       );
+      const row = await cnx.one(
+        sql.type(ZSelectId)`SELECT id FROM transcript_href WHERE href = ${href}`
+      );
+      return row.id;
     });
   }
 
@@ -31,17 +41,28 @@ ON CONFLICT (href)
       const rows = await this.pool.connect(async (cnx) => {
         const response = await cnx.query(
           sql.type(ZHrefToProcess)`
-SELECT id, href FROM
-transcript_href 
-${
-  lastId === undefined
-    ? sql.fragment`WHERE TRUE`
-    : sql.fragment` WHERE id > ${lastId}`
-} AND 
 
-NOT EXISTS (SELECT 1 FROM transcript_content WHERE transcript_href.id = transcript_content.href_id)
+SELECT
+    id,
+    href
+FROM
+    transcript_href ${
+      lastId === undefined
+        ? sql.fragment`WHERE TRUE`
+        : sql.fragment` WHERE id > ${lastId}`
+    }
+    AND NOT EXISTS (
+        SELECT
+            1
+        FROM
+            transcript_content
+        WHERE
+            transcript_href.id = transcript_content.href_id)
+ORDER BY
+    id ASC
+LIMIT 1;
 
-          ORDER BY id ASC LIMIT 1;`
+`
         );
 
         return response.rows;
@@ -59,18 +80,27 @@ NOT EXISTS (SELECT 1 FROM transcript_content WHERE transcript_href.id = transcri
     }
   }
 
-  storeTranscript(transcriptId: string, { blocks }: Transcript): Promise<void> {
+  storeTranscript(
+    transcriptId: string,
+    { blocks }: Transcript
+  ): Promise<string> {
     return this.pool.connect(async (cnx) => {
       await cnx.query(
         sql.unsafe`
-INSERT INTO transcript_content(href_id, content) VALUES (
-  ${transcriptId},
-  ${JSON.stringify(blocks)}
-)
+
+INSERT INTO transcript_content (href_id, content)
+    VALUES (${transcriptId}, ${JSON.stringify(blocks)})
 ON CONFLICT (href_id)
-DO NOTHING;
+    DO NOTHING;
+
 `
       );
+      const row = await cnx.one(
+        sql.type(
+          ZSelectId
+        )`SELECT id FROM transcript_content WHERE href_id = ${transcriptId}`
+      );
+      return row.id;
     });
   }
 
@@ -78,9 +108,14 @@ DO NOTHING;
     return this.pool.connect(async (cnx) => {
       const response = await cnx.query(
         sql.type(ZGetTickers)`
-SELECT distinct ticker FROM
-transcript_href JOIN transcript_content ON transcript_href.id = transcript_content.href_id
-LIMIT 100`
+
+SELECT distinct
+    ticker
+FROM
+    transcript_href
+    JOIN transcript_content ON transcript_href.id = transcript_content.href_id
+LIMIT 100
+`
       );
 
       return response.rows.map((row) => row.ticker);
@@ -91,9 +126,14 @@ LIMIT 100`
     const res = await this.pool.connect(async (cnx) => {
       const myQuery = sql.type(ZGetTextForTicker)`
 
-SELECT *, jsonb_path_query_array(content, '$[*].text') as text
-FROM transcript_content JOIN  transcript_href th on transcript_content.href_id = th.id
-WHERE th.ticker = ${ticker}
+SELECT
+    *,
+    jsonb_path_query_array(content, '$[*].text') as text
+FROM
+    transcript_content
+    JOIN transcript_href th on transcript_content.href_id = th.id
+WHERE
+    th.ticker = ${ticker}
 `;
       const response = await cnx.query(myQuery);
 
@@ -124,9 +164,9 @@ const ZHrefToProcess = z.object({
 type HrefToProcess = z.infer<typeof ZHrefToProcess>;
 
 export interface TranscriptStore {
-  upsertHref(body: EarningsCallHref): Promise<void>;
+  upsertHref(body: EarningsCallHref): Promise<string>;
   unprocessedHrefs(): AsyncIterable<HrefToProcess>;
-  storeTranscript(href: string, body: Transcript): Promise<void>;
+  storeTranscript(href: string, body: Transcript): Promise<string>;
   getTickers(): Promise<string[]>;
   getTextForTicker(ticker: string): Promise<string>;
 }
