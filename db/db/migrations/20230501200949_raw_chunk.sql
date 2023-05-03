@@ -2,7 +2,7 @@
 CREATE TABLE
   IF NOT EXISTS raw_chunk (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
-    transcript_content_id UUID UNIQUE REFERENCES "transcript_content" (id),
+    transcript_content_id UUID REFERENCES "transcript_content" (id),
     content text,
     num_tokens integer
   );

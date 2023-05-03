@@ -1,10 +1,6 @@
-import { EarningsCallHref, Transcript } from "@fgpt/precedent-iso";
+import { EarningsCallHref, Transcript, ZSelectId } from "@fgpt/precedent-iso";
 import { DatabasePool, sql } from "slonik";
 import { z } from "zod";
-
-const ZSelectId = z.object({
-  id: z.string(),
-});
 
 export class PsqlTranscriptStore implements TranscriptStore {
   constructor(private readonly pool: DatabasePool) {}
@@ -18,7 +14,6 @@ export class PsqlTranscriptStore implements TranscriptStore {
     return this.pool.connect(async (cnx) => {
       await cnx.query(
         sql.unsafe`
-
 INSERT INTO transcript_href (href, year, quarter, ticker, allTickers)
     VALUES (${href}, ${year}, ${quarter}, ${
           tickers[0] ?? null
@@ -41,7 +36,6 @@ ON CONFLICT (href)
       const rows = await this.pool.connect(async (cnx) => {
         const response = await cnx.query(
           sql.type(ZHrefToProcess)`
-
 SELECT
     id,
     href
@@ -80,16 +74,12 @@ LIMIT 1;
     }
   }
 
-  storeTranscript(
-    transcriptId: string,
-    { blocks }: Transcript
-  ): Promise<string> {
+  storeTranscript(hrefId: string, { blocks }: Transcript): Promise<string> {
     return this.pool.connect(async (cnx) => {
       await cnx.query(
         sql.unsafe`
-
 INSERT INTO transcript_content (href_id, content)
-    VALUES (${transcriptId}, ${JSON.stringify(blocks)})
+    VALUES (${hrefId}, ${JSON.stringify(blocks)})
 ON CONFLICT (href_id)
     DO NOTHING;
 
@@ -98,7 +88,7 @@ ON CONFLICT (href_id)
       const row = await cnx.one(
         sql.type(
           ZSelectId
-        )`SELECT id FROM transcript_content WHERE href_id = ${transcriptId}`
+        )`SELECT id FROM transcript_content WHERE href_id = ${hrefId}`
       );
       return row.id;
     });
@@ -108,7 +98,6 @@ ON CONFLICT (href_id)
     return this.pool.connect(async (cnx) => {
       const response = await cnx.query(
         sql.type(ZGetTickers)`
-
 SELECT distinct
     ticker
 FROM
@@ -125,9 +114,7 @@ LIMIT 100
   async getTextForTicker(ticker: string): Promise<string> {
     const res = await this.pool.connect(async (cnx) => {
       const myQuery = sql.type(ZGetTextForTicker)`
-
 SELECT
-    *,
     jsonb_path_query_array(content, '$[*].text') as text
 FROM
     transcript_content
@@ -136,7 +123,6 @@ WHERE
     th.ticker = ${ticker}
 `;
       const response = await cnx.query(myQuery);
-
       return response.rows.flatMap((row) => row.text);
     });
 
