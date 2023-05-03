@@ -111,6 +111,28 @@ LIMIT 100
     });
   }
 
+  getTickersWithSummary(): Promise<string[]> {
+    return this.pool.connect(async (cnx) => {
+      const response = await cnx.query(sql.type(ZGetTickers)`
+SELECT distinct
+    ticker
+FROM
+    transcript_href TH
+WHERE
+    TH.id IN (
+        SELECT
+            TC.href_id
+        FROM
+            transcript_content TC
+            JOIN raw_chunk RC ON RC.transcript_content_id = TC.id
+            JOIN summary S ON S.raw_chunk_id = RC.id
+            JOIN chunk_post_summary CPS ON CPS.summary_id = S.id)
+`);
+
+      return response.rows.map((row) => row.ticker);
+    });
+  }
+
   async getTextForTicker(ticker: string): Promise<string> {
     const res = await this.pool.connect(async (cnx) => {
       const myQuery = sql.type(ZGetTextForTicker)`
@@ -154,5 +176,6 @@ export interface TranscriptStore {
   unprocessedHrefs(): AsyncIterable<HrefToProcess>;
   storeTranscript(href: string, body: Transcript): Promise<string>;
   getTickers(): Promise<string[]>;
+  getTickersWithSummary(): Promise<string[]>;
   getTextForTicker(ticker: string): Promise<string>;
 }

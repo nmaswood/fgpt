@@ -60,7 +60,7 @@ test("raw-chunk-store", async () => {
     text: "foo baz baz baz foo",
   });
 
-  const [rawChunkId] = await rawChunkStore.insertMany(
+  const [rawChunk] = await rawChunkStore.insertMany(
     chunks.map((content) => ({
       content,
       transcriptContentId,
@@ -75,15 +75,15 @@ test("raw-chunk-store", async () => {
   );
 
   const fakeSummary = "this is a fake summary dude";
-  const summaryId = await summaryStore.insert({
-    rawChunkId,
+  const summary = await summaryStore.insert({
+    rawChunkId: rawChunk.id,
     content: fakeSummary,
     numTokens: fakeSummary.length,
     diff: 2,
   });
 
   await chunkPostSummaryStore.insert({
-    summaryId: summaryId,
+    summaryId: summary.id,
     content: "This is just a chunk",
     embedding: [1, 2, 3],
   });

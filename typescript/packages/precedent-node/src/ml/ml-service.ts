@@ -6,7 +6,7 @@ interface PredictArguments {
 }
 
 const ZPredictionResponse = z.object({
-  resp: z.string(),
+  response: z.string(),
 });
 
 type PredictResponse = z.infer<typeof ZPredictionResponse>;
@@ -15,9 +15,17 @@ interface GetEmbeddingsArgs {
   documents: string[];
 }
 
-interface GetEmbeddingsResponse {
-  embeddings: number[][];
-}
+const ZEmbeddingsResponse = z.object({
+  response: z.array(z.array(z.number())),
+});
+
+type GetEmbeddingsResponse = z.infer<typeof ZEmbeddingsResponse>;
+
+const ZSummaryResponse = z.object({
+  response: z.string(),
+});
+
+type ZSummaryResponse = z.infer<typeof ZEmbeddingsResponse>;
 
 interface SummarizeArgs {
   text: string;
@@ -34,7 +42,7 @@ export interface MLServiceClient {
   summarize: (args: SummarizeArgs) => Promise<SummarizeResponse>;
 }
 
-export class MLServiceImpl implements MLServiceClient {
+export class MLServiceClientImpl implements MLServiceClient {
   #client: AxiosInstance;
 
   constructor(baseURL: string) {
@@ -56,12 +64,20 @@ export class MLServiceImpl implements MLServiceClient {
     return ZPredictionResponse.parse(response.data);
   }
 
-  async getEmbeddings(_: GetEmbeddingsArgs): Promise<GetEmbeddingsResponse> {
-    //
-    throw new Error("not implemented");
+  async getEmbeddings(args: GetEmbeddingsArgs): Promise<GetEmbeddingsResponse> {
+    const response = await this.#client.post<PredictResponse>(
+      "/embedding-for-documents",
+      { documents: args.documents }
+    );
+    const parsed = ZEmbeddingsResponse.parse(response.data);
+    return parsed;
   }
 
-  async summarize(_: SummarizeArgs): Promise<SummarizeResponse> {
-    throw new Error("not implemented");
+  async summarize({ text }: SummarizeArgs): Promise<SummarizeResponse> {
+    const response = await this.#client.post<PredictResponse>("/summarize", {
+      text,
+    });
+    const parsed = ZSummaryResponse.parse(response.data);
+    return parsed;
   }
 }

@@ -7,8 +7,8 @@ import { PsqlRawChunkStore } from "../../chunk/raw-chunk-store";
 import { PsqlSummaryStore } from "../../chunk/summary-store";
 import { dataBasePool } from "../../data-base-pool";
 import { PsqlTranscriptStore } from "../../transcript/transcript-store";
-import { TEST_SETTINGS } from "../test-settings";
 import { PsqlTranscriptForProcessing } from "../../transcript/transcripts-for-processing";
+import { TEST_SETTINGS } from "../test-settings";
 
 async function setup() {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
@@ -34,7 +34,7 @@ beforeEach(async () => {
   const { pool } = await setup();
 
   await pool.query(
-    sql.unsafe`TRUNCATE TABLE chunk_post_summary, summary, raw_chunk CASCADE`
+    sql.unsafe`TRUNCATE TABLE chunk_post_summary, summary, raw_chunk, transcript_content, transcript_href CASCADE`
   );
 });
 
@@ -61,14 +61,14 @@ test("PsqlTranscriptStore", async () => {
 
   const transcript = await collect(forProcessing.getTranscripts());
 
-  expect(transcript.length).toBe(1);
+  expect(transcript.length).toEqual(1);
 
   const chunks = chunker.chunk({
     tokenChunkLimit: 3,
     text: "foo baz baz baz foo",
   });
 
-  const [rawChunkId] = await rawChunkStore.insertMany(
+  const [rawChunk] = await rawChunkStore.insertMany(
     chunks.map((content) => ({
       content,
       transcriptContentId,
@@ -83,15 +83,15 @@ test("PsqlTranscriptStore", async () => {
   );
 
   const fakeSummary = "this is a fake summary dude";
-  const summaryId = await summaryStore.insert({
-    rawChunkId,
+  const summary = await summaryStore.insert({
+    rawChunkId: rawChunk.id,
     content: fakeSummary,
     numTokens: fakeSummary.length,
     diff: 2,
   });
 
   await chunkPostSummaryStore.insert({
-    summaryId: summaryId,
+    summaryId: summary.id,
     content: "This is just a chunk",
     embedding: [1, 2, 3],
   });
