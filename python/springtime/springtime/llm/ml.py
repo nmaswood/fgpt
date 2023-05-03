@@ -53,7 +53,7 @@ def message_completions(input_text: str):
 def summarize(input_text: str):
     prompt = PromptTemplate(
         input_variables=["context"],
-        template="Given the following text: {context}, please summarize the text to key points / phrases / ideas."
+        template="Given the following text: {context}, please summarize the text to key points / phrases / ideas. Use a '-' to denote each point."
     )
     formatted_message = prompt.format(context=input_text[:3500])
 

@@ -90,11 +90,13 @@ test("PsqlTranscriptStore", async () => {
     diff: 2,
   });
 
-  await chunkPostSummaryStore.insert({
-    summaryId: summary.id,
-    content: "This is just a chunk",
-    embedding: [1, 2, 3],
-  });
+  await chunkPostSummaryStore.insertMany([
+    {
+      summaryId: summary.id,
+      content: "This is just a chunk",
+      embedding: [1, 2, 3],
+    },
+  ]);
 
   expect((await collect(forProcessing.getTranscripts())).length).toBe(0);
 });

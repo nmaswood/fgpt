@@ -54,6 +54,16 @@ const Home: React.FC = () => {
       {resp && (
         <Box display="flex" flexDirection="column" gap={5}>
           <Paper>
+            <Typography variant="caption">Summary:</Typography>
+            <Box display="flex" flexDirection="column">
+              {resp.summary.map((summary, idx) => (
+                <Typography key={idx} variant="body1">
+                  {summary}
+                </Typography>
+              ))}
+            </Box>
+          </Paper>
+          <Paper>
             <Typography variant="caption">Questions to consider:</Typography>
             <Box display="flex" flexDirection="column">
               {resp.resp.map((question) => (

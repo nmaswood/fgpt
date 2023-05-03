@@ -8,31 +8,33 @@ export interface ChunkPostSummary {
 }
 
 export interface ChunkPostSummaryStore {
-  insert(chunk: ChunkPostSummary): Promise<string>;
+  insertMany(chunks: ChunkPostSummary[]): Promise<string[]>;
 }
 
 export class PsqlChunkPostSummaryStore implements ChunkPostSummaryStore {
   constructor(private readonly pool: DatabasePool) {}
-  async insert({
-    summaryId,
-    content,
-    embedding,
-  }: ChunkPostSummary): Promise<string> {
+  async insertMany(chunks: ChunkPostSummary[]): Promise<string[]> {
     return this.pool.connect(async (cnx) => {
-      const row = await cnx.one(
-        sql.type(ZSelectId)`
+      const rawChunkValues = chunks.map(
+        ({ summaryId, content, embedding }) =>
+          sql.fragment`(${summaryId}, ${content}, ${JSON.stringify({
+            embedding,
+          })})`
+      );
 
+      const resp = await cnx.query(
+        sql.type(ZSelectId)`
 INSERT INTO chunk_post_summary (summary_id, content, embedding)
-    VALUES (${summaryId}, ${content}, ${JSON.stringify({
-          embedding,
-        })})
+    VALUES 
+        ${sql.join(rawChunkValues, sql.fragment`, `)}
+    
 RETURNING
     id;
 
 `
       );
 
-      return row.id;
+      return resp.rows.map((row) => row.id);
     });
   }
 }

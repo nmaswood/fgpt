@@ -1,4 +1,5 @@
 import { TranscriptStore, MLServiceClient } from "@fgpt/precedent-node";
+
 import express from "express";
 
 export class TranscriptRouter {
@@ -18,6 +19,14 @@ export class TranscriptRouter {
       }
     );
 
+    router.get(
+      "/tickers-with-summaries",
+      async (_: express.Request, res: express.Response) => {
+        const tickers = await this.transcriptStore.getTickersWithSummary();
+        res.json({ tickers });
+      }
+    );
+
     router.post(
       "/data-for-ticker/:ticker",
       async (req: express.Request, res: express.Response) => {
@@ -27,9 +36,12 @@ export class TranscriptRouter {
         }
 
         const content = await this.transcriptStore.getTextForTicker(ticker);
-        const data = await this.mlService.predict({ content });
+        const summary = await this.transcriptStore.fetchSummaries(ticker);
+        const data = await this.mlService.predict({
+          content: summary.join(" "),
+        });
 
-        res.json({ resp: data.response, content });
+        res.json({ resp: data.response, content, summary });
       }
     );
 

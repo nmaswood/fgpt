@@ -4,6 +4,7 @@ from fastapi import FastAPI, Body
 
 
 from springtime.llm.ml import embeddings_for_documents, message_completions, summarize
+from springtime.llm.pinecone import UpsertVector, upsert_vectors
 from .settings import SETTINGS
 
 app = FastAPI()
@@ -54,6 +55,12 @@ class SummaryResponse(BaseModel):
 async def summarize_route(req: SummaryRequest) -> SummaryResponse:
     response = summarize(req.text)
     return SummaryResponse(response=response.content)
+
+
+@app.put("/upsert-vectors")
+async def upsert_vectors_route(vectors: list[UpsertVector]) -> None:
+    upsert_vectors(vectors)
+    return None
 
 
 def start():

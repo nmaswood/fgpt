@@ -9,4 +9,5 @@ def test_conversation_chain():
     # res = message_completions(DUMMY)
     # print(res)
 
-    print(embeddings_for_documents(["This is a test dude"]))
+    # print(embeddings_for_documents(["This is a test dude"]))
+    pass

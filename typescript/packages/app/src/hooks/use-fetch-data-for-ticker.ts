@@ -8,10 +8,14 @@ export const useFetchDataForTicker = (ticker: string | undefined) => {
         method: "POST",
       });
       const data = await response.json();
+      console.log(data);
+
+      const summary: string[] = data.summary;
 
       return {
         resp: data.resp.split("\n"),
         content: data.content,
+        summary: summary.flatMap((s) => s.split("\n")),
       };
     }
   );
@@ -21,5 +25,6 @@ export const useFetchDataForTicker = (ticker: string | undefined) => {
 
 interface Response {
   resp: string[];
+  summary: string[];
   content: string;
 }

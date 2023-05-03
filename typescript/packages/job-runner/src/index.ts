@@ -100,13 +100,13 @@ async function start(settings: Settings) {
             documents: chunksForSummary,
           });
 
-          for (const [idx, chunkForSummary] of chunksForSummary.entries()) {
-            await postSummaryStore.insert({
+          await postSummaryStore.insertMany(
+            chunksForSummary.map((chunkForSummary, idx) => ({
               summaryId: summary.id,
               content: chunkForSummary,
               embedding: embeddings.response[idx]!,
-            });
-          }
+            }))
+          );
         }
       }
 
