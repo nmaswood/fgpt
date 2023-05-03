@@ -48,7 +48,6 @@ INSERT INTO raw_chunk (transcript_content_id, content, num_tokens)
             content: z.string(),
           })
         )`
-
 SELECT
     content
 FROM

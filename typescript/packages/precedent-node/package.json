@@ -19,7 +19,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "watch": "tsc -w -b",
+    "watch": "tsc -b -w",
     "test:sql": "docker compose run --build db_test_migration",
     "test": "yarn vitest --threads=false src/tests",
     "fix": "yarn fix::lint; yarn fix::format",

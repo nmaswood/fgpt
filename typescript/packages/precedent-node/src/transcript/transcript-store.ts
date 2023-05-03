@@ -54,7 +54,7 @@ FROM
             transcript_href.id = transcript_content.href_id)
 ORDER BY
     id ASC
-LIMIT 1;
+LIMIT 100;
 
 `
         );

@@ -1,4 +1,4 @@
-import { GreedyTextChunker } from "@fgpt/precedent-iso";
+import { collect, GreedyTextChunker } from "@fgpt/precedent-iso";
 import { sql } from "slonik";
 import { beforeEach, expect, test } from "vitest";
 
@@ -8,6 +8,7 @@ import { PsqlSummaryStore } from "../../chunk/summary-store";
 import { dataBasePool } from "../../data-base-pool";
 import { PsqlTranscriptStore } from "../../transcript/transcript-store";
 import { TEST_SETTINGS } from "../test-settings";
+import { PsqlTranscriptForProcessing } from "../../transcript/transcripts-for-processing";
 
 async function setup() {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
@@ -17,6 +18,7 @@ async function setup() {
   const summaryStore = new PsqlSummaryStore(pool);
   const chunker = new GreedyTextChunker();
   const chunkPostSummaryStore = new PsqlChunkPostSummaryStore(pool);
+  const forProcessing = new PsqlTranscriptForProcessing(pool);
   return {
     pool,
     rawChunkStore,
@@ -24,6 +26,7 @@ async function setup() {
     chunker,
     summaryStore,
     chunkPostSummaryStore,
+    forProcessing,
   };
 }
 
@@ -35,13 +38,14 @@ beforeEach(async () => {
   );
 });
 
-test("raw-chunk-store", async () => {
+test("PsqlTranscriptStore", async () => {
   const {
     chunker,
     transcriptStore,
     rawChunkStore,
     summaryStore,
     chunkPostSummaryStore,
+    forProcessing,
   } = await setup();
   const hrefId = await transcriptStore.upsertHref({
     tickers: ["AAPL"],
@@ -54,6 +58,10 @@ test("raw-chunk-store", async () => {
   const transcriptContentId = await transcriptStore.storeTranscript(hrefId, {
     blocks: [{ isStrong: false, text: "foo baz baz baz foo" }],
   });
+
+  const transcript = await collect(forProcessing.getTranscripts());
+
+  expect(transcript.length).toBe(1);
 
   const chunks = chunker.chunk({
     tokenChunkLimit: 3,
@@ -87,4 +95,6 @@ test("raw-chunk-store", async () => {
     content: "This is just a chunk",
     embedding: [1, 2, 3],
   });
+
+  expect((await collect(forProcessing.getTranscripts())).length).toBe(0);
 });
