@@ -1,10 +1,12 @@
+from typing import Any
 from pydantic import BaseModel
+from pydantic.schema import get_schema_ref
 import uvicorn
 from fastapi import FastAPI, Body
 
 
 from springtime.llm.ml import embeddings_for_documents, message_completions, summarize
-from springtime.llm.pinecone import UpsertVector, upsert_vectors
+from springtime.llm.pinecone import UpsertVector, get_similar, upsert_vectors
 from .settings import SETTINGS
 
 app = FastAPI()
@@ -57,10 +59,26 @@ async def summarize_route(req: SummaryRequest) -> SummaryResponse:
     return SummaryResponse(response=response.content)
 
 
+class UpsertVectorRequest(BaseModel):
+    vectors: list[UpsertVector]
+
+
 @app.put("/upsert-vectors")
-async def upsert_vectors_route(vectors: list[UpsertVector]) -> None:
-    upsert_vectors(vectors)
-    return None
+async def upsert_vectors_route(req: UpsertVectorRequest):
+    if req.vectors:
+        upsert_vectors(req.vectors)
+    return {"upsert_count": len(req.vectors)}
+
+
+class SimilarVectorRequest(BaseModel):
+    vector: list[float]
+    metadata: dict[str, Any]
+
+
+@app.put("/similar-vectors")
+async def similar_vectors_route(req: SimilarVectorRequest):
+    ids = get_similar(req.vector, req.metadata)
+    return {"ids": ids}
 
 
 def start():

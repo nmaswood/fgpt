@@ -19,8 +19,18 @@ export interface LoadedChunkPostSummary {
 }
 export interface ChunkPostSummaryStore {
   insertMany(chunks: ChunkPostSummary[]): Promise<string[]>;
-  get(): AsyncIterator<LoadedChunkPostSummary>;
+  getLoaded(): AsyncIterable<LoadedChunkPostSummary>;
 }
+
+const ZLoadedRow = z.object({
+  ticker: z.string(),
+  href_id: z.string(),
+  transcript_content_id: z.string(),
+  chunk_id: z.string(),
+  summary_id: z.string(),
+  post_summary_chunk_id: z.string(),
+  embedding: z.string(),
+});
 
 export class PsqlChunkPostSummaryStore implements ChunkPostSummaryStore {
   constructor(private readonly pool: DatabasePool) {}
@@ -35,7 +45,6 @@ export class PsqlChunkPostSummaryStore implements ChunkPostSummaryStore {
 
       const resp = await cnx.query(
         sql.type(ZSelectId)`
-
 INSERT INTO chunk_post_summary (summary_id, content, embedding)
     VALUES
         ${sql.join(rawChunkValues, sql.fragment`, `)}
@@ -49,43 +58,31 @@ INSERT INTO chunk_post_summary (summary_id, content, embedding)
     });
   }
 
-  async *get(): AsyncIterator<LoadedChunkPostSummary, any, undefined> {
+  async *getLoaded(): AsyncIterable<LoadedChunkPostSummary> {
     let lastId: string | undefined = undefined;
 
     while (true) {
       const rows = await this.pool.connect(async (cnx) => {
         const response = await cnx.query(
-          sql.type(
-            z.object({
-              ticker: z.string(),
-              hrefId: z.string(),
-              transcriptContentId: z.string(),
-              chunkId: z.string(),
-              summaryId: z.string(),
-              postSummaryChunkId: z.string(),
-              embedding: z.number().array(),
-            })
-          )`
+          sql.type(ZLoadedRow)`
 
 SELECT
     TH.ticker,
-    TC.href_id as hrefId,
-    TC.id as transcriptContentId,
-    RC.id as chunkId,
-    S.id as summaryId,
-    CPS.id as postSummaryChunkId,
-    CPS.embedding
+    TC.href_id as href_id,
+    TC.id as transcript_content_id,
+    RC.id as chunk_id,
+    S.id as summary_id,
+    CPS.id as post_summary_chunk_id,
+    CPS.embedding ->> 'embedding' as embedding
 FROM
     transcript_href TH
     JOIN transcript_content TC on TH.id = tc.href_id
     JOIN raw_chunk RC ON RC.transcript_content_id = TC.id
     JOIN summary S ON S.raw_chunk_id = RC.id
-    JOIN chunk_post_summary CPS ON CPS.summary_id = S.id
-WHERE
-    ${
+    JOIN chunk_post_summary CPS ON CPS.summary_id = S.id ${
       lastId === undefined
         ? sql.fragment`WHERE TRUE`
-        : sql.fragment` WHERE id > ${lastId}`
+        : sql.fragment` WHERE CPS.id > ${lastId}`
     }
 ORDER BY
     CPS.id ASC;
@@ -93,7 +90,15 @@ ORDER BY
 `
         );
 
-        return response.rows;
+        return response.rows.map((row) => ({
+          ticker: row.ticker,
+          hrefId: row.href_id,
+          transcriptContentId: row.transcript_content_id,
+          chunkId: row.chunk_id,
+          postSummaryChunkId: row.post_summary_chunk_id,
+          summaryId: row.summary_id,
+          embedding: JSON.parse(row.embedding),
+        }));
       });
       if (rows.length === 0) {
         return;

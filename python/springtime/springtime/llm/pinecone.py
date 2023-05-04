@@ -29,6 +29,21 @@ def upsert_vectors(upsert_vectors: list[UpsertVector]):
     )
 
 
+def get_similar(vector: list[float], metadata: dict[str, str]) -> list[str]:
+    index = get_pinecone_index()
+
+    result = index.query(
+        vector=vector,
+        top_k=15,
+        include_values=True,
+        filter=metadata,
+        namespace=SETTINGS.pinecone_namespace
+    )
+    matches = result['matches']
+
+    return [match['id'] for match in matches]
+
+
 def get_pinecone_index():
     global INDEX
     if INDEX is None:
@@ -41,13 +56,16 @@ def generate_fake_vector(size: int):
 
 
 def play_pinecone():
-    index = get_pinecone_index()
+    # index = get_pinecone_index()
 
-    upsert_response = index.upsert(
-        vectors=[
-            ("vec1", generate_fake_vector(1536), {"genre": "drama"}),
-            ("vec2", generate_fake_vector(1536), {"genre": "action"}),
-        ],
-        namespace=SETTINGS.pinecone_namespace
-    )
-    print(upsert_response)
+    # upsert_response = index.upsert(
+    # vectors=[
+    # ("vec1", generate_fake_vector(1536), {"genre": "drama"}),
+    # ("vec2", generate_fake_vector(1536), {"genre": "action"}),
+    # ],
+    # namespace=SETTINGS.pinecone_namespace
+    # )
+
+    fake = generate_fake_vector(1536)
+    get_similar(fake, {})
+    # print(upsert_response)

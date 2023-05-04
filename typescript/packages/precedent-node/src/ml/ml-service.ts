@@ -27,6 +27,10 @@ const ZSummaryResponse = z.object({
 
 type ZSummaryResponse = z.infer<typeof ZEmbeddingsResponse>;
 
+const ZSimilarResponse = z.object({
+  ids: z.string().array(),
+});
+
 interface SummarizeArgs {
   text: string;
 }
@@ -38,6 +42,12 @@ interface SummarizeResponse {
 interface UpsertVector {
   id: string;
   vector: number[];
+  metadata: Record<string, any>;
+}
+
+interface SimiliarSearch {
+  vector: number[];
+  metadata: Record<string, string>;
 }
 
 export interface MLServiceClient {
@@ -47,6 +57,7 @@ export interface MLServiceClient {
   getEmbeddings: (args: GetEmbeddingsArgs) => Promise<GetEmbeddingsResponse>;
   summarize: (args: SummarizeArgs) => Promise<SummarizeResponse>;
   upsertVectors: (args: UpsertVector[]) => Promise<void>;
+  getKSimilar: (args: SimiliarSearch) => Promise<string[]>;
 }
 
 export class MLServiceClientImpl implements MLServiceClient {
@@ -97,5 +108,16 @@ export class MLServiceClientImpl implements MLServiceClient {
     await this.#client.put<PredictResponse>("/upsert-vectors", {
       vectors,
     });
+  }
+
+  async getKSimilar({ vector, metadata }: SimiliarSearch): Promise<string[]> {
+    const response = await this.#client.post<PredictResponse>(
+      "/similar-vectors",
+      {
+        vector,
+        metadata,
+      }
+    );
+    return ZSimilarResponse.parse(response.data).ids;
   }
 }

@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-const ZJobType = z.enum(["get-earnings-call-href", "process-earnings-call"]);
+const ZJobType = z.enum([
+  "get-earnings-call-href",
+  "process-earnings-call",
+  "load-into-vector-db",
+]);
 
 const ZSettings = z.object({
   sql: z.object({

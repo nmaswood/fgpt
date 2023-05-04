@@ -1,5 +1,11 @@
 import { MLServiceClient, TranscriptStore } from "@fgpt/precedent-node";
 import express from "express";
+import { z } from "zod";
+
+const ZAskQuestion = z.object({
+  question: z.string(),
+  ticker: z.string().optional(),
+});
 
 export class TranscriptRouter {
   constructor(
@@ -33,6 +39,28 @@ export class TranscriptRouter {
         if (typeof ticker !== "string") {
           throw new Error("illegal state");
         }
+
+        const content = await this.transcriptStore.getTextForTicker(ticker);
+        const summary = await this.transcriptStore.fetchSummaries(ticker);
+        const data = await this.mlService.predict({
+          content: summary.join(" "),
+        });
+
+        res.json({ resp: data.response, content, summary });
+      }
+    );
+
+    router.post(
+      "/ask-question",
+      async (req: express.Request, res: express.Response) => {
+        const body = ZAskQuestion.parse(req.body);
+
+        const vector = await this.mlService.getEmbedding(body.question);
+
+        const similar = await this.mlService.getKSimilar({
+          vector,
+          metadata: body.ticker ? { ticker: body.ticker } : {},
+        });
 
         const content = await this.transcriptStore.getTextForTicker(ticker);
         const summary = await this.transcriptStore.fetchSummaries(ticker);

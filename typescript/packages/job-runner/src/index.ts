@@ -112,6 +112,40 @@ async function start(settings: Settings) {
 
       break;
     }
+
+    case "load-into-vector-db": {
+      const postSummaryStore = new PsqlChunkPostSummaryStore(pool);
+      const mlService = new MLServiceClientImpl(SETTINGS.mlServiceUri);
+
+      for await (const {
+        ticker,
+        hrefId,
+        transcriptContentId,
+        chunkId,
+        postSummaryChunkId,
+        summaryId,
+        embedding,
+      } of postSummaryStore.getLoaded()) {
+        LOGGER.info(`Writing vector ${postSummaryChunkId} for ${ticker}`);
+        console.log({ ticker });
+        await mlService.upsertVectors([
+          {
+            id: postSummaryChunkId,
+            vector: embedding,
+            metadata: {
+              ticker,
+              hrefId,
+              transcriptContentId,
+              chunkId,
+
+              summaryId,
+            },
+          },
+        ]);
+      }
+
+      break;
+    }
     default:
       assertNever(settings.jobType);
   }
