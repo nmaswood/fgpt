@@ -5,7 +5,7 @@ import uvicorn
 from fastapi import FastAPI, Body
 
 
-from springtime.llm.ml import embeddings_for_documents, message_completions, summarize
+from springtime.llm.ml import ask_question, embeddings_for_documents, message_completions, summarize
 from springtime.llm.pinecone import UpsertVector, get_similar, upsert_vectors
 from .settings import SETTINGS
 
@@ -29,6 +29,21 @@ class PredictForTickerResponse(BaseModel):
 async def predict_for_ticker_route(prompt: PredictForTickerRequest) -> PredictForTickerResponse:
     response = message_completions(prompt.content)
     return PredictForTickerResponse(response=response.content)
+
+
+class AskQuestionRequest(BaseModel):
+    context: str
+    question: str
+
+
+class AskQuestionResponse(BaseModel):
+    response: str
+
+
+@app.post("/ask-question")
+async def ask_question_route(req: AskQuestionRequest) -> AskQuestionResponse:
+    answer = ask_question(req.context, req.question)
+    return AskQuestionResponse(response=answer.content)
 
 
 class EmbeddingForDocumentRequest(BaseModel):

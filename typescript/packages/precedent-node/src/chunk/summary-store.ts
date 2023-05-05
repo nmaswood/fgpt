@@ -11,7 +11,7 @@ export interface Summary {
 
 export interface SummaryStore {
   insert(summary: Omit<Summary, "id">): Promise<Summary>;
-  getMany(ids: string[]): Promise<Summary>;
+  getMany(ids: string[]): Promise<Summary[]>;
 }
 
 const ZSummaryRow = z.object({
@@ -54,9 +54,8 @@ RETURNING
   }
 
   async getMany(ids: string[]): Promise<Summary[]> {
-    const raw = this.pool.connect(async (cnx) => {
+    return this.pool.connect(async (cnx) => {
       const response = await cnx.query(sql.type(ZSummaryRow)`
-
 SELECT
     id,
     raw_chunk_id,
@@ -69,7 +68,7 @@ WHERE
     id IN (${sql.join(ids, sql.fragment`, `)})
 `);
 
-      return [];
+      return response.rows.map(toSummary);
     });
   }
 }

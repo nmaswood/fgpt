@@ -50,6 +50,15 @@ interface SimiliarSearch {
   metadata: Record<string, string>;
 }
 
+export interface AskQuestionArgs {
+  context: string;
+  question: string;
+}
+
+const ZAskQuestionResponse = z.object({
+  response: z.string(),
+});
+
 export interface MLServiceClient {
   predict: (args: PredictArguments) => Promise<PredictResponse>;
   ping: () => Promise<"pong">;
@@ -58,6 +67,7 @@ export interface MLServiceClient {
   summarize: (args: SummarizeArgs) => Promise<SummarizeResponse>;
   upsertVectors: (args: UpsertVector[]) => Promise<void>;
   getKSimilar: (args: SimiliarSearch) => Promise<string[]>;
+  askQuestion(args: AskQuestionArgs): Promise<string>;
 }
 
 export class MLServiceClientImpl implements MLServiceClient {
@@ -119,5 +129,13 @@ export class MLServiceClientImpl implements MLServiceClient {
       }
     );
     return ZSimilarResponse.parse(response.data).ids;
+  }
+
+  async askQuestion({ context, question }: AskQuestionArgs): Promise<string> {
+    const response = await this.#client.post<PredictResponse>("/ask-question", {
+      context,
+      question,
+    });
+    return ZAskQuestionResponse.parse(response.data).response;
   }
 }

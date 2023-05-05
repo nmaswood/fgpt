@@ -3,10 +3,17 @@ import { DatabasePool, sql } from "slonik";
 import { z } from "zod";
 
 export interface ChunkPostSummary {
+  id: string;
   summaryId: string;
   content: string;
   embedding: number[];
 }
+
+const ZChunkPostSummaryRow = z.object({
+  id: z.string(),
+  summary_id: z.string(),
+  content: z.string(),
+});
 
 export interface LoadedChunkPostSummary {
   ticker: string;
@@ -18,8 +25,9 @@ export interface LoadedChunkPostSummary {
   embedding: number[];
 }
 export interface ChunkPostSummaryStore {
-  insertMany(chunks: ChunkPostSummary[]): Promise<string[]>;
+  insertMany(chunks: Omit<ChunkPostSummary, "id">[]): Promise<string[]>;
   getLoaded(): AsyncIterable<LoadedChunkPostSummary>;
+  getMany(ids: string[]): Promise<Omit<ChunkPostSummary, "embedding">[]>;
 }
 
 const ZLoadedRow = z.object({
@@ -34,7 +42,7 @@ const ZLoadedRow = z.object({
 
 export class PsqlChunkPostSummaryStore implements ChunkPostSummaryStore {
   constructor(private readonly pool: DatabasePool) {}
-  async insertMany(chunks: ChunkPostSummary[]): Promise<string[]> {
+  async insertMany(chunks: Omit<ChunkPostSummary, "id">[]): Promise<string[]> {
     return this.pool.connect(async (cnx) => {
       const rawChunkValues = chunks.map(
         ({ summaryId, content, embedding }) =>
@@ -65,7 +73,6 @@ INSERT INTO chunk_post_summary (summary_id, content, embedding)
       const rows = await this.pool.connect(async (cnx) => {
         const response = await cnx.query(
           sql.type(ZLoadedRow)`
-
 SELECT
     TH.ticker,
     TC.href_id as href_id,
@@ -111,5 +118,26 @@ ORDER BY
       }
       lastId = lastIdFromRows;
     }
+  }
+
+  async getMany(ids: string[]): Promise<Omit<ChunkPostSummary, "embedding">[]> {
+    return this.pool.connect(async (cnx) => {
+      const response = await cnx.query(sql.type(ZChunkPostSummaryRow)`
+SELECT
+    id,
+    summary_id,
+    content
+FROM
+    chunk_post_summary
+WHERE
+    id IN (${sql.join(ids, sql.fragment`, `)})
+`);
+
+      return response.rows.map((row) => ({
+        id: row.id,
+        summaryId: row.summary_id,
+        content: row.content,
+      }));
+    });
   }
 }

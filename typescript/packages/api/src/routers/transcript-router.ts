@@ -1,4 +1,8 @@
-import { MLServiceClient, TranscriptStore } from "@fgpt/precedent-node";
+import {
+  ChunkPostSummaryStore,
+  MLServiceClient,
+  TranscriptStore,
+} from "@fgpt/precedent-node";
 import express from "express";
 import { z } from "zod";
 
@@ -10,7 +14,8 @@ const ZAskQuestion = z.object({
 export class TranscriptRouter {
   constructor(
     private readonly transcriptStore: TranscriptStore,
-    private readonly mlService: MLServiceClient
+    private readonly mlService: MLServiceClient,
+    private readonly chunkPostSummaryStore: ChunkPostSummaryStore
   ) {}
 
   init() {
@@ -62,13 +67,14 @@ export class TranscriptRouter {
           metadata: body.ticker ? { ticker: body.ticker } : {},
         });
 
-        const content = await this.transcriptStore.getTextForTicker(ticker);
-        const summary = await this.transcriptStore.fetchSummaries(ticker);
-        const data = await this.mlService.predict({
-          content: summary.join(" "),
+        const summaries = await this.chunkPostSummaryStore.getMany(similar);
+
+        const answer = await this.mlService.askQuestion({
+          context: summaries.join(" "),
+          question: body.question,
         });
 
-        res.json({ resp: data.response, content, summary });
+        res.json({ summaries, answer });
       }
     );
 

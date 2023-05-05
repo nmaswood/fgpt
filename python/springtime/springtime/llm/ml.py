@@ -32,6 +32,26 @@ def embedding_for_query(query: str) -> list[float]:
     return embeddings.embed_query(query)
 
 
+def ask_question(context: str, question: str):
+    prompt = PromptTemplate(
+        input_variables=["context"],
+        template="Given the following context: {context} answer the following question."
+    )
+    formatted_message = prompt.format(context=context[:3500])
+
+    messages = [
+        SystemMessage(
+            content="You are an expert financial analyst."),
+        HumanMessage(
+            content=formatted_message),
+        HumanMessage(
+            content=question),
+
+    ]
+
+    return chat(messages)
+
+
 def message_completions(input_text: str):
     prompt = PromptTemplate(
         input_variables=["context"],
