@@ -1,34 +1,32 @@
-import useSWR, { Fetcher } from "swr";
+import useSWRMutation from "swr/mutation";
+
+interface Request {
+  ticker: string | undefined;
+  question: string;
+}
 
 interface Response {
   summaries: string[];
   answer: string;
 }
 
-export const useAskQuestion = (
-  ticker: string | undefined,
-  question: string
-) => {
-  const fetcher: Fetcher<
+export const useAskQuestion = () => {
+  const { data, trigger, isMutating } = useSWRMutation<
     Response,
-    ["/api/proxy/transcript/ask-quetion", string | undefined, string]
-  > = async ([url, t, q]) => {
-    const response = await fetch(url, {
+    unknown,
+    "/api/proxy/transcript/ask-question",
+    Request
+  >("/api/proxy/transcript/ask-question", async (url: string, { arg }) => {
+    const res = await fetch(url, {
       method: "POST",
-      body: JSON.stringify({
-        ticker: t,
-        question: q,
-      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(arg),
     });
-    const data = await response.json();
-    console.log({ data });
+    const data = await res.json();
     return data;
-  };
+  });
 
-  const { data, isLoading } = useSWR(
-    ["/api/proxy/transcript/ask-quetion", ticker, question],
-    fetcher
-  );
-
-  return { data, isLoading };
+  return { data, trigger, isMutating };
 };

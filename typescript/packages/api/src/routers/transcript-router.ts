@@ -69,12 +69,14 @@ export class TranscriptRouter {
 
         const summaries = await this.chunkPostSummaryStore.getMany(similar);
 
+        const summaryTexts = summaries.map((s) => s.content);
+
         const answer = await this.mlService.askQuestion({
-          context: summaries.join(" "),
+          context: summaryTexts.join(" "),
           question: body.question,
         });
 
-        res.json({ summaries, answer });
+        res.json({ summaries: summaryTexts, answer });
       }
     );
 

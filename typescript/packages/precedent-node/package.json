@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@fgpt/precedent-iso": "workspace:^",
+    "@google-cloud/storage": "^6.10.0",
     "axios": "^1.4.0",
     "zod": "^3.21.4"
   }

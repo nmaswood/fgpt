@@ -90,7 +90,7 @@ class SimilarVectorRequest(BaseModel):
     metadata: dict[str, Any]
 
 
-@app.put("/similar-vectors")
+@app.post("/similar-vectors")
 async def similar_vectors_route(req: SimilarVectorRequest):
     ids = get_similar(req.vector, req.metadata)
     return {"ids": ids}

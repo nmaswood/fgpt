@@ -1,20 +1,22 @@
 import {
   Autocomplete,
   Box,
+  Button,
   LinearProgress,
   Paper,
   TextField,
   Typography,
-  Button,
 } from "@mui/material";
 import * as React from "react";
 
 import { useFetchDataForTicker } from "../src/hooks/use-fetch-data-for-ticker";
+import { useAskQuestion } from "../src/hooks/use-fetch-question";
 import { useFetchTickers } from "../src/hooks/use-fetch-tickers";
 
 interface QuestionWithAnswer {
   question: string;
   answer: string;
+  summaries: string[];
 }
 
 const Home: React.FC = () => {
@@ -22,10 +24,13 @@ const Home: React.FC = () => {
   const [ticker, setTicker] = React.useState<string | undefined>(undefined);
   const { isLoading, data: resp } = useFetchDataForTicker(ticker);
 
-  const [questionsWithAnswers, setQuestionsWithAnswers] =
-    React.useState<QuestionWithAnswer>([]);
+  const [questionsWithAnswers, setQuestionsWithAnswers] = React.useState<
+    QuestionWithAnswer[]
+  >([]);
 
   const [content, setContent] = React.useState<string>("");
+
+  const { trigger, isMutating } = useAskQuestion();
 
   return (
     <Box padding={3} gap={3}>
@@ -53,6 +58,24 @@ const Home: React.FC = () => {
           )}
         />
       </Box>
+
+      {questionsWithAnswers.length > 0 && (
+        <Box>
+          {questionsWithAnswers.map((qwa, index) => (
+            <Box key={index}>
+              <Typography fontWeight="800">{qwa.question}</Typography>
+              <Typography>{qwa.answer}</Typography>
+              <ul>
+                {qwa.summaries.map((summary, idx) => (
+                  <li key={idx}>
+                    <Typography>{summary}</Typography>
+                  </li>
+                ))}
+              </ul>
+            </Box>
+          ))}
+        </Box>
+      )}
       <Box display="flex" width="900px" flexDirection="column" gap={3}>
         <TextField
           id="filled-multiline-static"
@@ -64,7 +87,39 @@ const Home: React.FC = () => {
           value={content}
           onChange={(e) => setContent(e.target.value)}
         />
-        <Button>Ask</Button>
+        <Box display="flex" width="100%">
+          {isMutating && (
+            <LinearProgress
+              sx={{
+                width: "100%",
+              }}
+            />
+          )}
+        </Box>
+        <Button
+          disabled={content.length === 0}
+          variant="contained"
+          onClick={async () => {
+            const data = await trigger({
+              ticker,
+              question: content,
+            });
+            if (!data) {
+              return;
+            }
+
+            setQuestionsWithAnswers((prev) => [
+              ...prev,
+              {
+                question: content,
+                answer: data.answer,
+                summaries: data.summaries,
+              },
+            ]);
+          }}
+        >
+          Ask
+        </Button>
       </Box>
       <Box display="flex" width="100%">
         {isLoading && (
