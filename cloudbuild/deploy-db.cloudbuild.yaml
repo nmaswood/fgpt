@@ -1,0 +1,15 @@
+steps:
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "beta",
+        "run",
+        "jobs",
+        "update",
+        "db",
+        "--image",
+        "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/db:${_TAG}",
+        "--region",
+        "${_LOCATION}",
+        "--wait",
+      ]
