@@ -3,7 +3,7 @@ steps:
     args:
       [
         "--dockerfile=./python/springtime/Dockerfile",
-        "--context=./python",
+        "--context=./python/springtime",
         "--destination=${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/ml-svc:$SHORT_SHA",
         "--cache=true",
         "--cache-ttl=6h",
