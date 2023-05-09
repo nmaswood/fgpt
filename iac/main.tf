@@ -61,13 +61,15 @@ resource "google_cloudbuild_trigger" "build-api" {
     }
   }
 
+
   substitutions = {
     _LOCATION     = var.region
     _REPOSITORY   = var.artifact_repo_name
     _PROJECT_SLUG = var.project_slug
   }
 
-  filename = "cloudbuild/build-api.cloudbuild.yaml"
+  filename       = "cloudbuild/build-api.cloudbuild.yaml"
+  included_files = ["typescript/packages/**"]
 }
 
 resource "google_cloudbuild_trigger" "build-ml" {
@@ -88,7 +90,8 @@ resource "google_cloudbuild_trigger" "build-ml" {
     _PROJECT_SLUG = var.project_slug
   }
 
-  filename = "cloudbuild/build-ml.cloudbuild.yaml"
+  filename       = "cloudbuild/build-ml.cloudbuild.yaml"
+  included_files = ["python/springtime/**"]
 }
 
 resource "google_cloudbuild_trigger" "build_db" {
@@ -109,7 +112,8 @@ resource "google_cloudbuild_trigger" "build_db" {
     _PROJECT_SLUG = var.project_slug
   }
 
-  filename = "cloudbuild/build-db.cloudbuild.yaml"
+  filename       = "cloudbuild/build-db.cloudbuild.yaml"
+  included_files = ["db/**"]
 }
 
 
