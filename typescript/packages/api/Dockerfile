@@ -18,7 +18,7 @@ COPY packages/api packages/api
 
 
 RUN yarn workspaces focus @fgpt/api && \
-    yarn workspaces foreach -tvp --include @fgpt/api --include @fgpt/precedent-iso run build && \
+    yarn workspaces foreach -tvp --include @fgpt/api --include @fgpt/precedent-iso --include @fgpt/precedent-node run build && \
     yarn cache clean;
 
 WORKDIR "/usr/src/target/packages/api"
