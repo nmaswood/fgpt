@@ -70,6 +70,30 @@ resource "google_cloudbuild_trigger" "build-api" {
   filename = "cloudbuild/build-api.cloudbuild.yaml"
 }
 
+resource "google_cloudbuild_trigger" "build-api" {
+  location = var.region
+  name     = "build-ml-${var.project_slug}"
+
+  github {
+    owner = var.repo_owner
+    name  = var.repo_name
+    push {
+      branch = "^main$"
+    }
+  }
+
+  substitutions = {
+    _LOCATION     = var.region
+    _REPOSITORY   = var.artifact_repo_name
+    _PROJECT_SLUG = var.project_slug
+  }
+
+  filename = "cloudbuild/build-api.cloudbuild.yaml"
+}
+
+
+
+
 
 resource "google_sql_database" "database" {
   name     = "fgpt"
@@ -83,7 +107,7 @@ resource "google_sql_user" "database-user" {
 }
 
 resource "google_cloud_run_service" "ml_svc" {
-  name     = "${var.project_slug}-ml-svc"
+  name     = "${var.project_slug}-ml_svc"
   location = var.region
 
   template {
@@ -140,6 +164,29 @@ resource "google_cloud_run_service" "api" {
   }
 }
 
+data "google_iam_policy" "no_auth" {
+  binding {
+    role = "roles/run.invoker"
+
+    members = [
+      "allUsers",
+    ]
+  }
+}
+
+resource "google_cloud_run_service_iam_policy" "api_public_access" {
+  location    = google_cloud_run_service.api.location
+  project     = google_cloud_run_service.api.project
+  service     = google_cloud_run_service.api.name
+  policy_data = data.google_iam_policy.no_auth.policy_data
+}
+
+resource "google_cloud_run_service_iam_policy" "ml_svc_public_access" {
+  location    = google_cloud_run_service.ml_svc.location
+  project     = google_cloud_run_service.ml_svc.project
+  service     = google_cloud_run_service.ml_svc.name
+  policy_data = data.google_iam_policy.no_auth.policy_data
+}
 
 #resource "google_cloud_run_service_iam_member" "ml_svc_member" {
 #service  = google_cloud_run_service.ml_svc.name
@@ -154,3 +201,4 @@ resource "google_cloud_run_service" "api" {
 #role     = "roles/run.invoker"
 #member   = "allUsers"
 #}
+

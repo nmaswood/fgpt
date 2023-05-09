@@ -1,13 +1,27 @@
 steps:
-  - name: "gcr.io/cloud-builders/docker"
+  - name: "gcr.io/kaniko-project/executor:latest"
     args:
       [
-        "build",
-        "-t",
+        "--dockerfile=./db/Dockerfile",
+        "--context=./db",
+        "--destination=${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/db:$SHORT_SHA",
+        "--cache=true",
+        "--cache-ttl=6h",
+      ]
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "beta",
+        "run",
+        "jobs",
+        "update",
+        "db",
+        "--image",
         "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/db:${_TAG}",
-        "--file=./db/Dockerfile",
-        "./db",
+        "--region",
+        "${_LOCATION}",
+        "--wait",
       ]
 
-images:
-  - "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/db"
+options:
+  logging: CLOUD_LOGGING_ONLY

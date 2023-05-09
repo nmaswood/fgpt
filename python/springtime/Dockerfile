@@ -1,26 +1,35 @@
-FROM python:3.6.6-alpine3.7
+FROM python:3.11.3-slim AS base
 
-ARG YOUR_ENV
+FROM base AS builder
 
-ENV YOUR_ENV=${YOUR_ENV} \
-    PYTHONFAULTHANDLER=1 \
+ENV PYTHONFAULTHANDLER=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONHASHSEED=random \
     PIP_NO_CACHE_DIR=off \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     PIP_DEFAULT_TIMEOUT=100 \
-    POETRY_VERSION=1.0.0
+    POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_CREATE=false \
+    PATH="$PATH:/runtime/bin" \
+    PYTHONPATH="$PYTHONPATH:/runtime/lib/python3.11/site-packages"
+
+
 
 # System deps:
-RUN pip install "poetry==$POETRY_VERSION"
+RUN apt-get update && apt-get install -y build-essential unzip wget python-dev
+RUN pip install poetry
 
-# Copy only requirements to cache them in docker layer
-WORKDIR /code
-COPY poetry.lock pyproject.toml /code/
+WORKDIR /src
 
-# Project initialization:
-RUN poetry config virtualenvs.create false \
-    && poetry install $(test "$YOUR_ENV" == production && echo "--no-dev") --no-interaction --no-ansi
+# Generate requirements and install *all* dependencies.
+COPY pyproject.toml poetry.lock /src/
+RUN poetry export --dev --without-hashes --no-interaction --no-ansi -f requirements.txt -o requirements.txt
+RUN pip install --prefix=/runtime --force-reinstall -r requirements.txt
 
-# Creating folders, and files for a project:
-COPY . /code
+COPY . /src
+
+FROM base AS runtime
+COPY --from=builder /runtime /usr/local
+COPY . /app
+WORKDIR /app
+CMD ["poetry", "run",  "start"]
