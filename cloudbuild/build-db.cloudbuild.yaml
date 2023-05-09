@@ -15,8 +15,9 @@ steps:
         "run",
         "jobs",
         "update",
-        "db",
+        "${_PROJECT_SLUG}-db",
         "--image",
+
         "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/db:${_TAG}",
         "--region",
         "${_LOCATION}",

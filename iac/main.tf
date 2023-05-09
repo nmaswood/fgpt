@@ -47,6 +47,47 @@ resource "google_artifact_registry_repository" "project-registry" {
   format        = "DOCKER"
 }
 
+resource "google_cloud_run_v2_job" "db" {
+  name     = "${var.project_slug}-db"
+  location = "us-central1"
+
+  template {
+
+    template {
+
+
+      volumes {
+        name = "cloudsql"
+        cloud_sql_instance {
+          instances = [google_sql_database_instance.instance.connection_name]
+        }
+      }
+
+
+      containers {
+        image = "us-docker.pkg.dev/cloudrun/container/hello"
+
+        env {
+          name  = "SQL_URI"
+          value = "postgresql://${var.database_user}:${var.database_password}@/socialmedia?host=/cloudsql/${google_sql_database_instance.instance.connection_name}"
+        }
+
+        volume_mounts {
+          name       = "cloudsql"
+          mount_path = "/cloudsql"
+        }
+      }
+
+
+
+    }
+  }
+
+  lifecycle {
+
+  }
+}
+
 
 
 resource "google_cloudbuild_trigger" "build-api" {
