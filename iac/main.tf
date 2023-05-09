@@ -74,7 +74,9 @@ resource "google_cloud_run_v2_job" "db" {
 
 
       containers {
-        image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/db:latest"
+        #image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/db:latest"
+
+        image = "us-docker.pkg.dev/cloudrun/container/hello"
 
         env {
           name  = "DATABASE_URL"
@@ -117,7 +119,7 @@ resource "google_cloudbuild_trigger" "build-api" {
   included_files = ["typescript/packages/**"]
 }
 
-resource "google_cloudbuild_trigger" "build-ml" {
+resource "google_cloudbuild_trigger" "build-springtime" {
   location = var.region
   name     = "build-springtime-${var.project_slug}"
 
@@ -135,7 +137,7 @@ resource "google_cloudbuild_trigger" "build-ml" {
     _PROJECT_SLUG = var.project_slug
   }
 
-  filename       = "cloudbuild/build-ml.cloudbuild.yaml"
+  filename       = "cloudbuild/build-springtime.cloudbuild.yaml"
   included_files = ["python/springtime/**"]
 }
 
@@ -181,10 +183,7 @@ resource "google_cloud_run_v2_service" "springtime" {
 
   template {
     containers {
-
       image = "us-docker.pkg.dev/cloudrun/container/hello"
-
-
 
       env {
         name  = "OPENAI_API_KEY"
@@ -236,7 +235,8 @@ resource "google_cloud_run_v2_service" "api" {
 
 
     containers {
-      image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/api:latest"
+      #image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/api:latest"
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
 
 
 
@@ -250,10 +250,6 @@ resource "google_cloud_run_v2_service" "api" {
         value = "0.0.0.0"
       }
 
-      env {
-        name  = "PORT"
-        value = "8080"
-      }
 
       env {
         name  = "SQL_URI"

@@ -18,7 +18,7 @@ steps:
         "${_PROJECT_SLUG}-db",
         "--image",
 
-        "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/db:${_TAG}",
+        "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/db:${SHORT_SHA}",
         "--region",
         "${_LOCATION}",
         "--wait",
