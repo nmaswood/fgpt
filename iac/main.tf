@@ -70,7 +70,7 @@ resource "google_cloudbuild_trigger" "build-api" {
   filename = "cloudbuild/build-api.cloudbuild.yaml"
 }
 
-resource "google_cloudbuild_trigger" "build-api" {
+resource "google_cloudbuild_trigger" "build-ml" {
   location = var.region
   name     = "build-ml-${var.project_slug}"
 
@@ -88,11 +88,29 @@ resource "google_cloudbuild_trigger" "build-api" {
     _PROJECT_SLUG = var.project_slug
   }
 
-  filename = "cloudbuild/build-api.cloudbuild.yaml"
+  filename = "cloudbuild/build-ml.cloudbuild.yaml"
 }
 
+resource "google_cloudbuild_trigger" "build_db" {
+  location = var.region
+  name     = "build-db-${var.project_slug}"
 
+  github {
+    owner = var.repo_owner
+    name  = var.repo_name
+    push {
+      branch = "^main$"
+    }
+  }
 
+  substitutions = {
+    _LOCATION     = var.region
+    _REPOSITORY   = var.artifact_repo_name
+    _PROJECT_SLUG = var.project_slug
+  }
+
+  filename = "cloudbuild/build-db.cloudbuild.yaml"
+}
 
 
 resource "google_sql_database" "database" {
@@ -107,7 +125,7 @@ resource "google_sql_user" "database-user" {
 }
 
 resource "google_cloud_run_service" "ml_svc" {
-  name     = "${var.project_slug}-ml_svc"
+  name     = "${var.project_slug}-ml-svc"
   location = var.region
 
   template {
