@@ -4,7 +4,16 @@ terraform {
       source  = "hashicorp/google"
       version = "4.51.0"
     }
+
+    vercel = {
+      source  = "vercel/vercel"
+      version = "0.11.5"
+    }
   }
+}
+
+provider "vercel" {
+  api_token = var.vercel_api_key
 }
 
 
@@ -65,11 +74,11 @@ resource "google_cloud_run_v2_job" "db" {
 
 
       containers {
-        image = "us-docker.pkg.dev/cloudrun/container/hello"
+        image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/db:latest"
 
         env {
-          name  = "SQL_URI"
-          value = "postgresql://${var.database_user}:${var.database_password}@/socialmedia?host=/cloudsql/${google_sql_database_instance.instance.connection_name}"
+          name  = "DATABASE_URL"
+          value = "postgresql://${var.database_user}:${var.database_password}@/${var.database_name}?host=/cloudsql/${google_sql_database_instance.instance.connection_name}"
         }
 
         volume_mounts {
@@ -78,14 +87,9 @@ resource "google_cloud_run_v2_job" "db" {
         }
       }
 
-
-
     }
   }
 
-  lifecycle {
-
-  }
 }
 
 
@@ -176,9 +180,32 @@ resource "google_cloud_run_service" "ml_svc" {
   template {
     spec {
       containers {
-        image = "us-docker.pkg.dev/cloudrun/container/hello"
+        image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/ml-svc:latest"
 
+        env {
+          name  = "OPENAI_API_KEY"
+          value = var.openai_api_key
+        }
 
+        env {
+          name  = "PINECONE_API_KEY"
+          value = var.pinecone_api_key
+        }
+
+        env {
+          name  = "PINECONE_ENV"
+          value = var.pinecone_env
+        }
+
+        env {
+          name  = "PINECONE_INDEX"
+          value = var.pinecone_index
+        }
+
+        env {
+          name  = "PINECONE_NAMESPACE"
+          value = var.pinecone_namespace
+        }
       }
     }
   }
@@ -195,11 +222,8 @@ resource "google_cloud_run_service" "api" {
   template {
     spec {
       containers {
-        image = "us-docker.pkg.dev/cloudrun/container/hello"
+        image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/api:latest"
 
-        ports {
-          container_port = 5000
-        }
 
         env {
           name  = "ENV"
@@ -207,13 +231,23 @@ resource "google_cloud_run_service" "api" {
         }
 
         env {
+          name  = "HOST"
+          value = "0.0.0.0"
+        }
+
+        env {
+          name  = "PORT"
+          value = "8080"
+        }
+
+        env {
           name  = "SQL_URI"
-          value = "postgresql://${var.database_user}:${var.database_password}@/socialmedia?host=/cloudsql/${google_sql_database_instance.instance.connection_name}"
+          value = "postgresql://${var.database_user}:${var.database_password}@/?host=/cloudsql/${google_sql_database_instance.instance.connection_name}"
         }
 
         env {
           name  = "ML_SERVICE_URI"
-          value = google_cloud_run_service.ml_svc.status[0].url
+          value = "${google_cloud_run_service.ml_svc.status[0].url}:8080"
 
         }
 
@@ -251,17 +285,18 @@ resource "google_cloud_run_service_iam_policy" "ml_svc_public_access" {
   policy_data = data.google_iam_policy.no_auth.policy_data
 }
 
-#resource "google_cloud_run_service_iam_member" "ml_svc_member" {
-#service  = google_cloud_run_service.ml_svc.name
-#location = google_cloud_run_service.ml_svc.location
-#role     = "roles/run.invoker"
-#member   = "allUsers"
-#}
 
-#resource "google_cloud_run_service_iam_member" "api_member" {
-#service  = google_cloud_run_service.api.name
-#location = google_cloud_run_service.api.location
-#role     = "roles/run.invoker"
-#member   = "allUsers"
-#}
+
+resource "vercel_project" "front_end" {
+  name      = "fgpt"
+  framework = "nextjs"
+  git_repository = {
+    type = "github"
+    repo = "nmaswood/fgpt"
+  }
+
+  build_command = ""
+  dev_comand    = ""
+
+}
 

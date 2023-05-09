@@ -63,5 +63,21 @@ variable "github_uri" {
 variable "database_password" {
 }
 
+variable "vercel_api_key" {
+}
 
+variable "database_name" {
+  default = "fgpt"
+}
+
+// ML SERVICE
+variable "openai_api_key" {}
+variable "pinecone_api_key" {}
+variable "pinecone_env" {}
+variable "pinecone_index" {}
+variable "pinecone_namespace" {}
+
+// DB SERVICE
+
+// NODE SERVICES
 
