@@ -32,4 +32,6 @@ FROM base AS runtime
 COPY --from=builder /runtime /usr/local
 COPY . /app
 WORKDIR /app
-CMD ["poetry", "run",  "start"]
+ENV PORT=8080
+
+CMD uvicorn springtime.main:app --port "$PORT"

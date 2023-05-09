@@ -4,7 +4,7 @@ steps:
       [
         "--dockerfile=./python/springtime/Dockerfile",
         "--context=./python/springtime",
-        "--destination=${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/ml-svc:$SHORT_SHA",
+        "--destination=${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/springtime:$SHORT_SHA",
         "--cache=true",
         "--cache-ttl=6h",
       ]
@@ -13,9 +13,9 @@ steps:
       [
         "run",
         "deploy",
-        "${_PROJECT_SLUG}-ml-svc",
+        "${_PROJECT_SLUG}-springtime",
         "--image",
-        "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/ml-svc:$SHORT_SHA",
+        "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/springtime:$SHORT_SHA",
         "--region",
         "${_LOCATION}",
         "--platform",

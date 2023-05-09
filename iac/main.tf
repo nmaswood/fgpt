@@ -119,7 +119,7 @@ resource "google_cloudbuild_trigger" "build-api" {
 
 resource "google_cloudbuild_trigger" "build-ml" {
   location = var.region
-  name     = "build-ml-${var.project_slug}"
+  name     = "build-springtime-${var.project_slug}"
 
   github {
     owner = var.repo_owner
@@ -173,91 +173,106 @@ resource "google_sql_user" "database-user" {
   password = var.database_password
 }
 
-resource "google_cloud_run_service" "ml_svc" {
-  name     = "${var.project_slug}-ml-svc"
+resource "google_cloud_run_v2_service" "springtime" {
+  name     = "${var.project_slug}-springtime"
   location = var.region
 
+
+
   template {
-    spec {
-      containers {
-        image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/ml-svc:latest"
+    containers {
 
-        env {
-          name  = "OPENAI_API_KEY"
-          value = var.openai_api_key
-        }
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
 
-        env {
-          name  = "PINECONE_API_KEY"
-          value = var.pinecone_api_key
-        }
 
-        env {
-          name  = "PINECONE_ENV"
-          value = var.pinecone_env
-        }
 
-        env {
-          name  = "PINECONE_INDEX"
-          value = var.pinecone_index
-        }
+      env {
+        name  = "OPENAI_API_KEY"
+        value = var.openai_api_key
+      }
 
-        env {
-          name  = "PINECONE_NAMESPACE"
-          value = var.pinecone_namespace
-        }
+      env {
+        name  = "PINECONE_API_KEY"
+        value = var.pinecone_api_key
+      }
+
+      env {
+        name  = "PINECONE_ENV"
+        value = var.pinecone_env
+      }
+
+      env {
+        name  = "PINECONE_INDEX"
+        value = var.pinecone_index
+      }
+
+      env {
+        name  = "PINECONE_NAMESPACE"
+        value = var.pinecone_namespace
       }
     }
   }
 
   traffic {
-    percent         = 100
-    latest_revision = true
+    type    = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
+    percent = 100
   }
 }
 
-resource "google_cloud_run_service" "api" {
+resource "google_cloud_run_v2_service" "api" {
   name     = "${var.project_slug}-node-api"
   location = var.region
   template {
-    spec {
-      containers {
-        image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/api:latest"
+    scaling {
+      max_instance_count = 2
+    }
 
-
-        env {
-          name  = "ENV"
-          value = "production"
-        }
-
-        env {
-          name  = "HOST"
-          value = "0.0.0.0"
-        }
-
-        env {
-          name  = "PORT"
-          value = "8080"
-        }
-
-        env {
-          name  = "SQL_URI"
-          value = "postgresql://${var.database_user}:${var.database_password}@/?host=/cloudsql/${google_sql_database_instance.instance.connection_name}"
-        }
-
-        env {
-          name  = "ML_SERVICE_URI"
-          value = "${google_cloud_run_service.ml_svc.status[0].url}:8080"
-
-        }
-
+    volumes {
+      name = "cloudsql"
+      cloud_sql_instance {
+        instances = [google_sql_database_instance.instance.connection_name]
       }
     }
-    metadata {
-      annotations = {
-        "run.googleapis.com/cloudsql-instances" = google_sql_database_instance.instance.connection_name
+
+
+    containers {
+      image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/api:latest"
+
+
+
+      env {
+        name  = "ENV"
+        value = "production"
       }
+
+      env {
+        name  = "HOST"
+        value = "0.0.0.0"
+      }
+
+      env {
+        name  = "PORT"
+        value = "8080"
+      }
+
+      env {
+        name  = "SQL_URI"
+        value = "postgresql://${var.database_user}:${var.database_password}@/?host=/cloudsql/${google_sql_database_instance.instance.connection_name}"
+      }
+
+      env {
+        name  = "ML_SERVICE_URI"
+        value = "${google_cloud_run_v2_service.springtime.traffic_statuses[0].uri}:8080"
+
+      }
+      volume_mounts {
+        name       = "cloudsql"
+        mount_path = "/cloudsql"
+      }
+
     }
+
+
   }
 }
 
@@ -272,16 +287,16 @@ data "google_iam_policy" "no_auth" {
 }
 
 resource "google_cloud_run_service_iam_policy" "api_public_access" {
-  location    = google_cloud_run_service.api.location
-  project     = google_cloud_run_service.api.project
-  service     = google_cloud_run_service.api.name
+  location    = google_cloud_run_v2_service.api.location
+  project     = google_cloud_run_v2_service.api.project
+  service     = google_cloud_run_v2_service.api.name
   policy_data = data.google_iam_policy.no_auth.policy_data
 }
 
-resource "google_cloud_run_service_iam_policy" "ml_svc_public_access" {
-  location    = google_cloud_run_service.ml_svc.location
-  project     = google_cloud_run_service.ml_svc.project
-  service     = google_cloud_run_service.ml_svc.name
+resource "google_cloud_run_service_iam_policy" "springtime_public_access" {
+  location    = google_cloud_run_v2_service.springtime.location
+  project     = google_cloud_run_v2_service.springtime.project
+  service     = google_cloud_run_v2_service.springtime.name
   policy_data = data.google_iam_policy.no_auth.policy_data
 }
 
@@ -295,8 +310,10 @@ resource "vercel_project" "front_end" {
     repo = "nmaswood/fgpt"
   }
 
-  build_command = ""
-  dev_comand    = ""
+  install_command  = "make install-app"
+  build_command    = "make build-app"
+  root_directory   = "typescript"
+  output_directory = "packages/app/.next"
 
 }
 
