@@ -43,6 +43,10 @@ async function start() {
 
   app.use(cors({ origin: "*" }));
 
+  app.use("/", (_, res) => {
+    res.send("ok");
+  });
+
   app.use(
     "/api/v1/transcript",
     new TranscriptRouter(

@@ -1,7 +1,5 @@
 FROM python:3.11.3-slim AS base
 
-FROM base AS builder
-
 ENV PYTHONFAULTHANDLER=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONHASHSEED=random \
@@ -16,7 +14,7 @@ ENV PYTHONFAULTHANDLER=1 \
 
 
 # System deps:
-RUN apt-get update && apt-get install -y build-essential unzip wget python-dev
+RUN apt-get update && apt-get install -y build-essential unzip wget python-dev dumb-init
 RUN pip install poetry
 
 WORKDIR /src
@@ -27,11 +25,9 @@ RUN poetry export --dev --without-hashes --no-interaction --no-ansi -f requireme
 RUN pip install --prefix=/runtime --force-reinstall -r requirements.txt
 
 COPY . /src
-
-FROM base AS runtime
-COPY --from=builder /runtime /usr/local
-COPY . /app
-WORKDIR /app
+ENV HOST=0.0.0.0
 ENV PORT=8080
 
-CMD uvicorn springtime.main:app --port "$PORT"
+
+ENTRYPOINT ["dumb-init", "--"]
+CMD uvicorn springtime.main:app --port "$PORT" --host "$HOST"

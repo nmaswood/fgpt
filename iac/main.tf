@@ -256,7 +256,7 @@ resource "google_cloud_run_v2_service" "api" {
       env {
 
         name  = "SQL_URI"
-        value = "postgresql://${urlencode(var.database_user)}:${urlencode(var.database_password)}@/fgpt?host=/cloudsql/${urlencode(google_sql_database_instance.instance.connection_name)}"
+        value = "postgres://${urlencode(var.database_user)}:${urlencode(var.database_password)}@/fgpt?host=/cloudsql/${urlencode(google_sql_database_instance.instance.connection_name)}"
       }
 
 
@@ -273,6 +273,7 @@ resource "google_cloud_run_v2_service" "api" {
         instances = [google_sql_database_instance.instance.connection_name]
       }
     }
+
 
 
 
@@ -322,3 +323,25 @@ resource "vercel_project" "front_end" {
 
 }
 
+
+
+
+data "google_iam_role" "artifact_registry_writer" {
+  name = "roles/artifactregistry.writer"
+}
+
+
+data "google_project" "project" {}
+
+resource "google_project_service_identity" "cloud_build_sa" {
+  provider = google-beta
+
+  project = data.google_project.project.project_id
+  service = "cloudbuild.googleapis.com"
+}
+
+resource "google_project_iam_member" "hc_sa_bq_jobuser" {
+  project = data.google_project.project.project_id
+  role    = data.google_iam_role.artifact_registry_writer.name
+  member  = "serviceAccount:${google_project_service_identity.cloud_build_.email}"
+}
