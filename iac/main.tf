@@ -74,9 +74,8 @@ resource "google_cloud_run_v2_job" "db" {
 
 
       containers {
-        #image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/db:latest"
+        image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/db:latest"
 
-        image = "us-docker.pkg.dev/cloudrun/container/hello"
 
         env {
           name  = "DATABASE_URL"
@@ -183,7 +182,7 @@ resource "google_cloud_run_v2_service" "springtime" {
 
   template {
     containers {
-      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/springtime:latest"
 
       env {
         name  = "OPENAI_API_KEY"
@@ -219,7 +218,7 @@ resource "google_cloud_run_v2_service" "springtime" {
 }
 
 resource "google_cloud_run_v2_service" "api" {
-  name     = "${var.project_slug}-node-api"
+  name     = "${var.project_slug}-api"
   location = var.region
   template {
     scaling {
@@ -235,10 +234,7 @@ resource "google_cloud_run_v2_service" "api" {
 
 
     containers {
-      #image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/api:latest"
-      image = "us-docker.pkg.dev/cloudrun/container/hello"
-
-
+      image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/api:latest"
 
       env {
         name  = "ENV"
