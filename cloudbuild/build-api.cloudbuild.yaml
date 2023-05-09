@@ -11,6 +11,16 @@ steps:
   - name: "gcr.io/cloud-builders/gcloud"
     args:
       [
+        "artifacts",
+        "docker",
+        "tags",
+        "add",
+        "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/api:$SHORT_SHA",
+        "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/api:latest",
+      ]
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
         "run",
         "deploy",
         "${_PROJECT_SLUG}-api",
@@ -20,16 +30,6 @@ steps:
         "${_LOCATION}",
         "--platform",
         "managed",
-      ]
-  - name: "gcr.io/cloud-builders/gcloud"
-    args:
-      [
-        "artifacts",
-        "docker",
-        "tags",
-        "add",
-        "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/api:$SHORT_SHA",
-        "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/api:latest",
       ]
 
 options:
