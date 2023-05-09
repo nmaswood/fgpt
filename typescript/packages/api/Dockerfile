@@ -4,7 +4,6 @@ WORKDIR /usr/src/target
 
 RUN apt-get update && apt-get install -y ca-certificates
 
-COPY --from=datadog/serverless-init:beta4 /datadog-init /app/datadog-init
 
 RUN yarn set version berry && \
     yarn plugin import workspace-tools && \
@@ -22,7 +21,5 @@ RUN yarn workspaces focus @fgpt/api && \
     yarn cache clean;
 
 WORKDIR "/usr/src/target/packages/api"
-
-ENTRYPOINT ["/app/datadog-init"]
 
 CMD ["yarn", "workspace", "@fgpt/api", "run-server::prod"]

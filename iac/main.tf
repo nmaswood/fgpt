@@ -79,7 +79,7 @@ resource "google_cloud_run_v2_job" "db" {
 
         env {
           name  = "DATABASE_URL"
-          value = "postgresql://${var.database_user}:${var.database_password}@/${var.database_name}?host=/cloudsql/${google_sql_database_instance.instance.connection_name}"
+          value = "postgresql://${urlencode(var.database_user)}:${urlencode(var.database_password)}@/${urlencode(var.database_name)}fgpt?host=/cloudsql/${urlencode(google_sql_database_instance.instance.connection_name)}"
         }
 
         volume_mounts {
@@ -179,10 +179,19 @@ resource "google_cloud_run_v2_service" "springtime" {
   location = var.region
 
 
-
   template {
+
+    scaling {
+      max_instance_count = 2
+    }
     containers {
       image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/springtime:latest"
+
+      env {
+        name  = "HOST"
+        value = "0.0.0.0"
+      }
+
 
       env {
         name  = "OPENAI_API_KEY"
@@ -220,9 +229,42 @@ resource "google_cloud_run_v2_service" "springtime" {
 resource "google_cloud_run_v2_service" "api" {
   name     = "${var.project_slug}-api"
   location = var.region
+
+
   template {
+
     scaling {
       max_instance_count = 2
+    }
+
+
+    containers {
+      image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/api:latest"
+
+      env {
+        name  = "HOST"
+        value = "0.0.0.0"
+      }
+
+      env {
+        name  = "ML_SERVICE_URI"
+        value = "${google_cloud_run_v2_service.springtime.uri}:8080"
+
+      }
+
+
+      env {
+
+        name  = "SQL_URI"
+        value = "postgresql://${urlencode(var.database_user)}:${urlencode(var.database_password)}@/fgpt?host=/cloudsql/${urlencode(google_sql_database_instance.instance.connection_name)}"
+      }
+
+
+      volume_mounts {
+        name       = "cloudsql"
+        mount_path = "/cloudsql"
+      }
+
     }
 
     volumes {
@@ -233,36 +275,7 @@ resource "google_cloud_run_v2_service" "api" {
     }
 
 
-    containers {
-      image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/api:latest"
 
-      env {
-        name  = "ENV"
-        value = "production"
-      }
-
-      env {
-        name  = "HOST"
-        value = "0.0.0.0"
-      }
-
-
-      env {
-        name  = "SQL_URI"
-        value = "postgresql://${var.database_user}:${var.database_password}@/?host=/cloudsql/${google_sql_database_instance.instance.connection_name}"
-      }
-
-      env {
-        name  = "ML_SERVICE_URI"
-        value = "${google_cloud_run_v2_service.springtime.traffic_statuses[0].uri}:8080"
-
-      }
-      volume_mounts {
-        name       = "cloudsql"
-        mount_path = "/cloudsql"
-      }
-
-    }
 
 
   }
