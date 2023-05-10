@@ -22,21 +22,26 @@ steps:
     script: |
       #!/usr/bin/env bash
       echo "Hello world!"
-  - name: "bash"
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: "bash"
     env:
       - "PROJECT_ID=$PROJECT_ID"
       - "_LOCATION=$_LOCATION"
       - "_REPOSITORY=$_REPOSITORY"
       - "SHORT_SHA=$SHORT_SHA"
-    script: |
-      #!/usr/bin/env bash
-      APPS=$(gcloud run jobs list  | grep job-runner | awk '{print $2}')
-      for app in $APPS; do
-        echo $app
-        echo "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/job-runner:${SHORT_SHA}"
-        echo "${_LOCATION}"
-        gcloud beta run jobs update $app --image "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/job-runner:${SHORT_SHA}" --region "${_LOCATION}"
-      done
+    args:
+      - "-eEuo"
+      - "pipefail"
+      - "-c"
+      - |-
+        #!/usr/bin/env bash
+        APPS=$(gcloud run jobs list  | grep job-runner | awk '{print $2}')
+        for app in $APPS; do
+          echo $app
+          echo "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/job-runner:${SHORT_SHA}"
+          echo "${_LOCATION}"
+          gcloud beta run jobs update $app --image "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/job-runner:${SHORT_SHA}" --region "${_LOCATION}"
+        done
 
 options:
   logging: CLOUD_LOGGING_ONLY
