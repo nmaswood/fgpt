@@ -18,10 +18,6 @@ steps:
         "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/job-runner:$SHORT_SHA",
         "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/job-runner:latest",
       ]
-  - name: "bash"
-    script: |
-      #!/usr/bin/env bash
-      echo "Hello world!"
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: "bash"
     env:
