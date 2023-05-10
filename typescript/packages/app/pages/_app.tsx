@@ -23,6 +23,7 @@ export default function App({ Component, pageProps }: AppProps) {
           height="100%"
           position="relative"
         >
+          {/* eslint-disable-next-line*/}
           {/* @ts-ignore */}
           <Component as any {...pageProps} />
         </Box>
