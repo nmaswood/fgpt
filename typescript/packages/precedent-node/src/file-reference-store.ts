@@ -50,10 +50,11 @@ export class PsqlProcessedFileStore implements ProcessedFileStore {
     return this.pool.connect(async (cnx) => {
       await cnx.one(
         sql.unsafe`
+
 INSERT INTO processed_file (processed_file_id, content)
-VALUES (${fileReferenceId}, ${content})
+    VALUES (${fileReferenceId}, ${content})
 RETURNING
-id
+    id
 `
       );
     });

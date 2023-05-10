@@ -24,7 +24,9 @@ export class FetchAndStoreEarningCallsDataImpl
   ) {}
 
   async run(opts: RunOptions): Promise<void> {
+    LOGGER.info("inside of run", { opts });
     if (!opts.skipHrefs) {
+      LOGGER.info("fetching hrefs", { opts });
       for await (const href of this.earningsCallHrefFetcher.getLinks({
         maxPages: 500,
       })) {
@@ -33,6 +35,7 @@ export class FetchAndStoreEarningCallsDataImpl
       }
     }
 
+    LOGGER.info("about to fetch transcripts", { opts });
     for await (const { id, href } of this.transcriptStore.unprocessedHrefs()) {
       LOGGER.info(`Fetching ${href}`);
       const transcript = await this.transcriptFetcher.getTranscript(href);
