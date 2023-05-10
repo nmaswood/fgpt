@@ -25,13 +25,20 @@ export class FetchAndStoreEarningCallsDataImpl
 
   async run(opts: RunOptions): Promise<void> {
     LOGGER.info("inside of run", { opts });
+
     if (!opts.skipHrefs) {
       LOGGER.info("fetching hrefs", { opts });
-      for await (const href of this.earningsCallHrefFetcher.getLinks({
-        maxPages: 10,
-      })) {
-        LOGGER.info(`Upserting ${href.title}`);
-        await this.transcriptStore.upsertHref(href);
+
+      try {
+        for await (const href of this.earningsCallHrefFetcher.getLinks({
+          maxPages: 10,
+        })) {
+          LOGGER.info(`Upserting ${href.title}`);
+          await this.transcriptStore.upsertHref(href);
+        }
+      } catch (e) {
+        console.error(e);
+        console.warn("Skipping hrefs it errored out!");
       }
     }
 

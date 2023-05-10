@@ -33,6 +33,7 @@ ON CONFLICT (href)
   async *unprocessedHrefs(): AsyncIterable<HrefToProcess> {
     let lastId: string | undefined = undefined;
     while (true) {
+      console.info(`Fetching hrefs: ${lastId}`, { lastId });
       const rows = await this.pool.connect(async (cnx) => {
         const response = await cnx.query(
           sql.type(ZHrefToProcess)`

@@ -101,7 +101,7 @@ resource "google_cloud_run_v2_job" "db" {
 
 
 locals {
-  job_runner_jobs = ["get-earnings-call-href", "process-earnings-call-href", "load-into-vector-db"]
+  job_runner_jobs = ["get-earnings-call-href", "process-earnings-call", "load-into-vector-db"]
 }
 
 resource "google_cloud_run_v2_job" "job-runner" {
