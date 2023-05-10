@@ -23,7 +23,8 @@ export default function App({ Component, pageProps }: AppProps) {
           height="100%"
           position="relative"
         >
-          <Component {...pageProps} />
+          {/* @ts-ignore */}
+          <Component as any {...pageProps} />
         </Box>
       </ThemeProvider>
     </>
