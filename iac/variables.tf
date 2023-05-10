@@ -74,6 +74,14 @@ variable "pinecone_environment" {
   default = "test"
 }
 
+variable "vercel_domain" {
+  default = "getfgpt.com"
+}
+
+variable "vercel_team_id" {
+  default = "team_3yoDXafHgvtzEAOO2hUyZeSK"
+}
+
 // ML SERVICE
 variable "openai_api_key" {}
 variable "pinecone_api_key" {}

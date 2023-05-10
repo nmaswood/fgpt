@@ -404,12 +404,37 @@ resource "vercel_project" "front_end" {
   root_directory   = "typescript"
   output_directory = "packages/app/.next"
 
+  team_id = var.vercel_team_id
 
   environment = [{
     key    = "PUBLIC_API_ENDPOINT"
     target = ["production", "preview"]
     value  = google_cloud_run_v2_service.api.uri
   }]
-
 }
+
+resource "vercel_deployment" "git" {
+  team_id    = var.vercel_team_id
+  project_id = vercel_project.front_end.id
+  ref        = "main"
+}
+
+resource "vercel_project_domain" "domain" {
+  team_id    = var.vercel_team_id
+  project_id = vercel_project.front_end.id
+  domain     = "www.${var.vercel_domain}"
+}
+
+# A redirect of a domain name to a second domain name.
+# The status_code can optionally be controlled.
+resource "vercel_project_domain" "bare_domain" {
+  team_id    = var.vercel_team_id
+  project_id = vercel_project.front_end.id
+  domain     = var.vercel_domain
+
+  redirect             = vercel_project_domain.domain.domain
+  redirect_status_code = 308
+}
+
+
 
