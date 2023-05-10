@@ -19,6 +19,10 @@ steps:
         "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/job-runner:latest",
       ]
   - name: "bash"
+    script: |
+      #!/usr/bin/env bash
+      echo "Hello world!"
+  - name: "bash"
     env:
       - "PROJECT_ID=$PROJECT_ID"
       - "_LOCATION=$_LOCATION"
