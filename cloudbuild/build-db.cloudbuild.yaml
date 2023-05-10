@@ -18,9 +18,6 @@ steps:
         "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/db:$SHORT_SHA",
         "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/db:latest",
       ]
-  - name: "gcr.io/cloud-builders/gcloud"
-    entrypoint: "bash"
-    args: ["./update-jobs.sh"]
 
 options:
   logging: CLOUD_LOGGING_ONLY
