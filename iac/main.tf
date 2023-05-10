@@ -314,8 +314,9 @@ resource "vercel_project" "front_end" {
   output_directory = "packages/app/.next"
 
 
+  delete_on_destroy = false
   environment = [{
-    key    = "PUBLIC_API_URL"
+    key    = "PUBLIC_API_ENDPOINT"
     target = ["production", "preview"]
     value  = google_cloud_run_v2_service.api.uri
   }]
