@@ -9,8 +9,13 @@ terraform {
       source  = "vercel/vercel"
       version = "0.11.5"
     }
+
+    pinecone = {
+      source = "registry.terraform.io/biosugar0/pinecone"
+    }
   }
 }
+
 
 provider "vercel" {
   api_token = var.vercel_api_key

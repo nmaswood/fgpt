@@ -70,6 +70,10 @@ variable "database_name" {
   default = "fgpt"
 }
 
+variable "pinecone_environment" {
+  default = "test"
+}
+
 // ML SERVICE
 variable "openai_api_key" {}
 variable "pinecone_api_key" {}

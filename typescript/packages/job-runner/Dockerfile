@@ -17,7 +17,7 @@ COPY packages/job-runner packages/job-runner
 
 
 RUN yarn workspaces focus @fgpt/job-runner && \
-    yarn workspaces foreach -tvp --include @fgpt/job-runner --include @fgpt/precedent-iso @fgpt/precedent-node run build && \
+    yarn workspaces foreach -tvp --include @fgpt/job-runner --include @fgpt/precedent-iso --include @fgpt/precedent-node run build && \
     yarn cache clean;
 
 WORKDIR "/usr/src/target/packages/job-runner"
