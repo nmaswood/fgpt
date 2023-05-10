@@ -32,6 +32,7 @@ async function start(settings: Settings) {
 
   switch (settings.jobType) {
     case "get-earnings-call-href": {
+      LOGGER.info("Launching puppeteer");
       const browser = await puppeteer.launch({
         headless: true,
         ...(settings.chromiumExecutablePath
@@ -39,6 +40,7 @@ async function start(settings: Settings) {
           : {}),
         args: ["--no-sandbox", "--disable-gpu"],
       });
+      LOGGER.info("Puppeteer launched");
       const transcriptFetcher = new PuppeteerTranscriptFetcher(browser);
       const earningsCallFetcher = new PuppeteerEarningsCallHrefFetcher(browser);
 
