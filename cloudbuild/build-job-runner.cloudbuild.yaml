@@ -34,7 +34,6 @@ steps:
       - "pipefail"
       - "-c"
       - |-
-        #!/usr/bin/env bash
         for app in $(gcloud run jobs list  | grep job-runner | awk '{print $2}'); do
           echo $app
           echo "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/job-runner:${SHORT_SHA}"
