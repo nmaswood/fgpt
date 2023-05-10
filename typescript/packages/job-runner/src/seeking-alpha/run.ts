@@ -28,7 +28,7 @@ export class FetchAndStoreEarningCallsDataImpl
     if (!opts.skipHrefs) {
       LOGGER.info("fetching hrefs", { opts });
       for await (const href of this.earningsCallHrefFetcher.getLinks({
-        maxPages: 500,
+        maxPages: 10,
       })) {
         LOGGER.info(`Upserting ${href.title}`);
         await this.transcriptStore.upsertHref(href);

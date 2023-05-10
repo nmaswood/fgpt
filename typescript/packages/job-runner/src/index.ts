@@ -34,7 +34,7 @@ async function start(settings: Settings) {
     case "get-earnings-call-href": {
       LOGGER.info("Launching puppeteer");
       const browser = await puppeteer.launch({
-        headless: true,
+        headless: false,
         ...(settings.chromiumExecutablePath
           ? { executablePath: settings.chromiumExecutablePath }
           : {}),

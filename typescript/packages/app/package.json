@@ -19,6 +19,7 @@
     "clean::dist": "rm -rf tsconfig.tsbuildinfo dist"
   },
   "dependencies": {
+    "@auth0/nextjs-auth0": "^2.5.0",
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@fgpt/precedent-iso": "workspace:^",

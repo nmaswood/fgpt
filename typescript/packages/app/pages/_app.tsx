@@ -5,12 +5,13 @@ import { ThemeProvider } from "@mui/material/styles";
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import React from "react";
+import { UserProvider } from "@auth0/nextjs-auth0/client";
 
 import { THEME } from "../src/style/theme";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <>
+    <UserProvider>
       <Head>
         <title>FGPT</title>
         <meta name="description" content="Innovative care" />
@@ -28,6 +29,6 @@ export default function App({ Component, pageProps }: AppProps) {
           <Component as any {...pageProps} />
         </Box>
       </ThemeProvider>
-    </>
+    </UserProvider>
   );
 }
