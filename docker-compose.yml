@@ -30,11 +30,14 @@ services:
       - db
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/fgpt-test?sslmode=disable
-  tika:
-    image: apache/tika
-    container_name: tika_server
-    ports:
-      - "9998:9998" # Replace '9998' with the desired port number
+  foo:
+    image: test
+    depends_on:
+      - db
+    environment:
+      - SQL_URI=postgres://postgres:postgres@localhost:5432/fgpt?sslmode=disable
+      - ML_SERVICE_URI=http://0.0.0.0:8001
+      - JOB_TYPE=get-earnings-call-href
 
 volumes:
   db:

@@ -11,16 +11,22 @@ export default async function proxy(req: NextApiRequest, res: NextApiResponse) {
 
   const method = req.method ?? "GET";
   const url = `${SETTINGS.publicApiEndpoint}/api/v1/${proxy}`;
-  const response = await fetch(
-    url,
+  console.log({ method, url });
+  try {
+    const response = await fetch(
+      url,
 
-    {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      ...(req.body ? { body: JSON.stringify(req.body) } : {}),
-    }
-  );
-  res.status(response.status).json(await response.json());
+      {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        ...(req.body ? { body: JSON.stringify(req.body) } : {}),
+      }
+    );
+    res.status(response.status).json(await response.json());
+  } catch (e) {
+    console.error(e);
+    console.log("WTF happened?");
+  }
 }
