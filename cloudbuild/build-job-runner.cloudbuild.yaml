@@ -35,6 +35,10 @@ steps:
       - "-c"
       - |-
         #!/usr/bin/env bash
+        gcloud builds list > builds.txt
+        echo builds.txt
+
+
         APPS=$(gcloud run jobs list  | grep job-runner | awk '{print $2}')
         for app in $APPS; do
           echo $app
