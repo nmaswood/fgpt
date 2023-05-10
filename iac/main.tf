@@ -123,6 +123,9 @@ resource "google_cloud_run_v2_job" "job-runner" {
       }
 
 
+      # 30 min
+      timeout = "1800s"
+
       containers {
         image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/job-runner:latest"
 
