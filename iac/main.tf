@@ -79,7 +79,7 @@ resource "google_cloud_run_v2_job" "db" {
 
         env {
           name  = "DATABASE_URL"
-          value = "postgresql://${urlencode(var.database_user)}:${urlencode(var.database_password)}@/${urlencode(var.database_name)}fgpt?host=/cloudsql/${urlencode(google_sql_database_instance.instance.connection_name)}"
+          value = "postgres://${urlencode(var.database_user)}:${urlencode(var.database_password)}@/${var.database_name}?socket=${urlencode("/cloudsql/${google_sql_database_instance.instance.connection_name}")}"
         }
 
         volume_mounts {
@@ -248,15 +248,13 @@ resource "google_cloud_run_v2_service" "api" {
 
       env {
         name  = "ML_SERVICE_URI"
-        value = "${google_cloud_run_v2_service.springtime.uri}:8080"
-
+        value = google_cloud_run_v2_service.springtime.uri
       }
-
 
       env {
 
         name  = "SQL_URI"
-        value = "postgres://${urlencode(var.database_user)}:${urlencode(var.database_password)}@/fgpt?host=/cloudsql/${urlencode(google_sql_database_instance.instance.connection_name)}"
+        value = "socket://${urlencode(var.database_user)}:${urlencode(var.database_password)}@${urlencode("/cloudsql/${google_sql_database_instance.instance.connection_name}")}/fgpt"
       }
 
 
@@ -323,25 +321,3 @@ resource "vercel_project" "front_end" {
 
 }
 
-
-
-
-data "google_iam_role" "artifact_registry_writer" {
-  name = "roles/artifactregistry.writer"
-}
-
-
-data "google_project" "project" {}
-
-resource "google_project_service_identity" "cloud_build_sa" {
-  provider = google-beta
-
-  project = data.google_project.project.project_id
-  service = "cloudbuild.googleapis.com"
-}
-
-resource "google_project_iam_member" "hc_sa_bq_jobuser" {
-  project = data.google_project.project.project_id
-  role    = data.google_iam_role.artifact_registry_writer.name
-  member  = "serviceAccount:${google_project_service_identity.cloud_build_.email}"
-}
