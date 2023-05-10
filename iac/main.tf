@@ -95,6 +95,56 @@ resource "google_cloud_run_v2_job" "db" {
 
 
 
+locals {
+  job_runner_jobs = ["get-earnings-call-href", "process-earnings-call-href", "load-into-vector-db"]
+}
+
+resource "google_cloud_run_v2_job" "job-runner" {
+  for_each = toset(local.job_runner_jobs)
+
+  name     = "${var.project_slug}-job-runner-${each.key}"
+  location = "us-central1"
+
+  template {
+
+    template {
+
+
+      volumes {
+        name = "cloudsql"
+        cloud_sql_instance {
+          instances = [google_sql_database_instance.instance.connection_name]
+        }
+      }
+
+
+      containers {
+        image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/db:latest"
+
+
+        env {
+          name  = "DATABASE_URL"
+          value = "postgres://${urlencode(var.database_user)}:${urlencode(var.database_password)}@/${var.database_name}?socket=${urlencode("/cloudsql/${google_sql_database_instance.instance.connection_name}")}"
+        }
+
+        env {
+
+          name  = "JOB_TYPE"
+          value = each.key
+
+        }
+
+        volume_mounts {
+          name       = "cloudsql"
+          mount_path = "/cloudsql"
+        }
+      }
+
+    }
+  }
+
+}
+
 resource "google_cloudbuild_trigger" "build-api" {
   location = var.region
   name     = "build-api-${var.project_slug}"
@@ -115,6 +165,29 @@ resource "google_cloudbuild_trigger" "build-api" {
   }
 
   filename       = "cloudbuild/build-api.cloudbuild.yaml"
+  included_files = ["typescript/packages/**"]
+}
+
+resource "google_cloudbuild_trigger" "build-job-runner" {
+  location = var.region
+  name     = "build-job-runner-${var.project_slug}"
+
+  github {
+    owner = var.repo_owner
+    name  = var.repo_name
+    push {
+      branch = "^main$"
+    }
+  }
+
+
+  substitutions = {
+    _LOCATION     = var.region
+    _REPOSITORY   = var.artifact_repo_name
+    _PROJECT_SLUG = var.project_slug
+  }
+
+  filename       = "cloudbuild/build-job-runner.cloudbuild.yaml"
   included_files = ["typescript/packages/**"]
 }
 
@@ -314,7 +387,6 @@ resource "vercel_project" "front_end" {
   output_directory = "packages/app/.next"
 
 
-  delete_on_destroy = false
   environment = [{
     key    = "PUBLIC_API_ENDPOINT"
     target = ["production", "preview"]
