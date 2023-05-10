@@ -31,4 +31,4 @@ RUN yarn workspaces focus @fgpt/job-runner && \
 
 WORKDIR "/usr/src/target/packages/job-runner"
 
-CMD ["yarn", "workspace", "@fgpt/job-runner", "run-job-runner"]
+CMD ["sleep", "1000"]

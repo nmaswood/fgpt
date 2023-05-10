@@ -12,6 +12,7 @@ const ZSettings = z.object({
   }),
   jobType: ZJobType,
   mlServiceUri: z.string(),
+  chromiumExecutablePath: z.string().optional(),
 });
 
 export type Settings = z.infer<typeof ZSettings>;
@@ -23,4 +24,5 @@ export const SETTINGS = ZSettings.parse({
   },
   jobType: process.env["JOB_TYPE"],
   mlServiceUri: process.env["ML_SERVICE_URI"],
+  chromiumExecutablePath: process.env["CHROMIUM_EXECUTABLE_PATH"],
 });

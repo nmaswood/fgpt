@@ -34,6 +34,10 @@ async function start(settings: Settings) {
     case "get-earnings-call-href": {
       const browser = await puppeteer.launch({
         headless: true,
+        ...(settings.chromiumExecutablePath
+          ? { executablePath: settings.chromiumExecutablePath }
+          : {}),
+        args: ["--no-sandbox", "--disable-gpu"],
       });
       const transcriptFetcher = new PuppeteerTranscriptFetcher(browser);
       const earningsCallFetcher = new PuppeteerEarningsCallHrefFetcher(browser);

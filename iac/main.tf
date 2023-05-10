@@ -144,6 +144,12 @@ resource "google_cloud_run_v2_job" "job-runner" {
 
         }
 
+        env {
+          name  = "CHROMIUM_EXECUTABLE_PATH"
+          value = "/usr/bin/google-chrome"
+
+        }
+
         volume_mounts {
           name       = "cloudsql"
           mount_path = "/cloudsql"
