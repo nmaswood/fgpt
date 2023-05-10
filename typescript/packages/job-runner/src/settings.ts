@@ -11,10 +11,6 @@ const ZSettings = z.object({
     uri: z.string(),
   }),
   jobType: ZJobType,
-  seekingAlpha: z.object({
-    email: z.string(),
-    password: z.string(),
-  }),
   mlServiceUri: z.string(),
 });
 
@@ -26,9 +22,5 @@ export const SETTINGS = ZSettings.parse({
     uri: process.env["SQL_URI"] ?? "test",
   },
   jobType: process.env["JOB_TYPE"],
-  seekingAlpha: {
-    email: process.env["SEEKING_ALPHA_EMAIL"],
-    password: process.env["SEEKING_ALPHA_PASSWORD"],
-  },
   mlServiceUri: process.env["ML_SERVICE_URI"],
 });

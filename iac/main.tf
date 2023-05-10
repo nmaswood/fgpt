@@ -124,12 +124,17 @@ resource "google_cloud_run_v2_job" "job-runner" {
 
 
       containers {
-        image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/db:latest"
-
+        image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/job-runner:latest"
 
         env {
-          name  = "DATABASE_URL"
-          value = "postgres://${urlencode(var.database_user)}:${urlencode(var.database_password)}@/${var.database_name}?socket=${urlencode("/cloudsql/${google_sql_database_instance.instance.connection_name}")}"
+
+          name  = "SQL_URI"
+          value = "socket://${urlencode(var.database_user)}:${urlencode(var.database_password)}@${urlencode("/cloudsql/${google_sql_database_instance.instance.connection_name}")}/fgpt"
+        }
+
+        env {
+          name  = "ML_SERVICE_URI"
+          value = google_cloud_run_v2_service.springtime.uri
         }
 
         env {
