@@ -33,7 +33,7 @@ async function start(settings: Settings) {
   switch (settings.jobType) {
     case "get-earnings-call-href": {
       const browser = await puppeteer.launch({
-        headless: false,
+        headless: true,
       });
       const transcriptFetcher = new PuppeteerTranscriptFetcher(browser);
       const earningsCallFetcher = new PuppeteerEarningsCallHrefFetcher(browser);
