@@ -271,12 +271,6 @@ resource "google_cloud_run_v2_service" "api" {
         instances = [google_sql_database_instance.instance.connection_name]
       }
     }
-
-
-
-
-
-
   }
 }
 
@@ -318,6 +312,13 @@ resource "vercel_project" "front_end" {
   build_command    = "make build-app"
   root_directory   = "typescript"
   output_directory = "packages/app/.next"
+
+
+  environment = [{
+    key    = "PUBLIC_API_URL"
+    target = ["production", "preview"]
+    value  = google_cloud_run_v2_service.api.uri
+  }]
 
 }
 
