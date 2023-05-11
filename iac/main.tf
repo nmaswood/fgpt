@@ -358,6 +358,11 @@ resource "google_cloud_run_v2_service" "api" {
       }
 
       env {
+        name  = "SECRET"
+        value = var.auth0_secret
+      }
+
+      env {
         name  = "AUTH0_ISSUER"
         value = "https://${var.auth0_domain}/"
       }
@@ -408,8 +413,9 @@ resource "vercel_project" "front_end" {
   name      = "fgpt"
   framework = "nextjs"
   git_repository = {
-    type = "github"
-    repo = "nmaswood/fgpt"
+    type              = "github"
+    repo              = "nmaswood/fgpt"
+    production_branch = "main"
   }
 
   install_command  = "make install-app"
@@ -447,7 +453,7 @@ resource "vercel_project" "front_end" {
     {
       key    = "AUTH0_BASE_URL"
       target = ["production", "preview"]
-      value  = google_cloud_run_v2_service.api.uri
+      value  = "https://www.${var.vercel_domain}"
     },
 
   ]

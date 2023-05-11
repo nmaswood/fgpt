@@ -101,6 +101,8 @@ variable "auth0_api_identifier" {
   default = "fgpt-api"
 }
 
+variable "auth0_secret" {}
+
 // ML SERVICE
 variable "openai_api_key" {}
 variable "pinecone_api_key" {}
