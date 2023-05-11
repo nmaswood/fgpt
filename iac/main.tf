@@ -357,10 +357,7 @@ resource "google_cloud_run_v2_service" "api" {
         value = var.auth0_api_identifier
       }
 
-      env {
-        name  = "SECRET"
-        value = var.auth0_secret
-      }
+
 
       env {
         name  = "AUTH0_ISSUER"
@@ -455,7 +452,16 @@ resource "vercel_project" "front_end" {
       target = ["production", "preview"]
       value  = "https://www.${var.vercel_domain}"
     },
-
+    {
+      key    = "AUTH0_SECRET"
+      target = ["production", "preview"]
+      value  = var.auth0_secret
+    },
+    {
+      key    = "AUTH0_ISSUER_BASE_URL"
+      target = ["production", "preview"]
+      value  = "https://${var.auth0_domain}"
+    }
   ]
 }
 
@@ -493,10 +499,12 @@ resource "auth0_client" "frontend" {
   description = "Frontend app"
   app_type    = "spa"
   callbacks = [
+    "https://www.${var.vercel_domain}/api/auth/callback",
     "https://${var.vercel_domain}/api/auth/callback",
   ]
 
   allowed_logout_urls = [
+    "https://www.${var.vercel_domain}",
     "https://${var.vercel_domain}",
   ]
 
