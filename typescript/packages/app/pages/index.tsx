@@ -13,6 +13,8 @@ import { useFetchDataForTicker } from "../src/hooks/use-fetch-data-for-ticker";
 import { useAskQuestion } from "../src/hooks/use-fetch-question";
 import { useFetchTickers } from "../src/hooks/use-fetch-tickers";
 
+import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
+
 interface QuestionWithAnswer {
   question: string;
   answer: string;
@@ -34,6 +36,7 @@ const Home: React.FC = () => {
 
   return (
     <Box padding={3} gap={3}>
+      <Button href="/api/auth/logout">Logout</Button>
       <Typography align="center" variant="h3">
         💰 Finance GPT
       </Typography>
@@ -162,4 +165,4 @@ const Home: React.FC = () => {
   );
 };
 
-export default Home;
+export default withPageAuthRequired(Home);

@@ -74,12 +74,31 @@ variable "pinecone_environment" {
   default = "test"
 }
 
+// vercel
+
 variable "vercel_domain" {
   default = "getfgpt.com"
 }
 
 variable "vercel_team_id" {
   default = "team_3yoDXafHgvtzEAOO2hUyZeSK"
+}
+
+// need this to prevent a circular dependency
+variable "public_api_endpoint" {
+  default = "https://api.getfgpt.com"
+}
+
+
+
+
+// AUTH0
+variable "auth0_domain" {}
+variable "auth0_client_id" {}
+variable "auth0_client_secret" {}
+
+variable "auth0_api_identifier" {
+  default = "fgpt-api"
 }
 
 // ML SERVICE

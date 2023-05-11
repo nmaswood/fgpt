@@ -11,6 +11,7 @@
     "express": "^4.18.2",
     "express-async-errors": "^3.1.1",
     "express-jwt": "^8.4.1",
+    "jwks-rsa": "^3.0.1",
     "lodash": "^4.17.21",
     "pino": "^8.14.1",
     "pino-http": "^8.3.3",

@@ -1,17 +1,20 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { getAccessToken, withApiAuthRequired } from "@auth0/nextjs-auth0";
 
-import { SETTINGS } from "../../../src/settings";
+import { SERVER_SETTINGS } from "../../../src/settings";
 
-export default async function proxy(req: NextApiRequest, res: NextApiResponse) {
+async function proxy(req: NextApiRequest, res: NextApiResponse) {
   const proxy = (() => {
     const path = req.query.proxy ?? [];
     const asArray = Array.isArray(path) ? path : [path];
     return asArray.join("/");
   })();
 
+  const { accessToken } = await getAccessToken(req, res);
+
   const method = req.method ?? "GET";
-  const url = `${SETTINGS.publicApiEndpoint}/api/v1/${proxy}`;
-  console.log({ method, url });
+  const url = `${SERVER_SETTINGS.publicApiEndpoint}/api/v1/${proxy}`;
+  console.log({ method, url, accessToken });
   try {
     const response = await fetch(
       url,
@@ -19,6 +22,7 @@ export default async function proxy(req: NextApiRequest, res: NextApiResponse) {
       {
         method,
         headers: {
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
         ...(req.body ? { body: JSON.stringify(req.body) } : {}),
@@ -30,3 +34,5 @@ export default async function proxy(req: NextApiRequest, res: NextApiResponse) {
     console.log("WTF happened?");
   }
 }
+
+export default withApiAuthRequired(proxy);

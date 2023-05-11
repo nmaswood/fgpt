@@ -7,6 +7,11 @@ const ZSettings = z.object({
     uri: z.string(),
   }),
   mlServiceUri: z.string(),
+  auth: z.object({
+    jwksUri: z.string(),
+    audience: z.string(),
+    issuer: z.string(),
+  }),
 });
 
 export const SETTINGS = ZSettings.parse({
@@ -16,4 +21,9 @@ export const SETTINGS = ZSettings.parse({
     uri: process.env["SQL_URI"],
   },
   mlServiceUri: process.env["ML_SERVICE_URI"],
+  auth: {
+    jwksUri: `${process.env["AUTH0_ISSUER"]}.well-known/jwks.json`,
+    audience: process.env["AUTH0_AUDIENCE"],
+    issuer: process.env["AUTH0_ISSUER"],
+  },
 });

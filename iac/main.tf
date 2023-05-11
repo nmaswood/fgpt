@@ -1,5 +1,6 @@
 terraform {
   required_providers {
+
     google = {
       source  = "hashicorp/google"
       version = "4.51.0"
@@ -10,11 +11,15 @@ terraform {
       version = "0.11.5"
     }
 
-    pinecone = {
-      source = "registry.terraform.io/biosugar0/pinecone"
+
+    auth0 = {
+      source  = "auth0/auth0"
+      version = "~> 0.46.0" # Refer to docs for latest version
     }
   }
 }
+
+
 
 
 provider "vercel" {
@@ -343,9 +348,18 @@ resource "google_cloud_run_v2_service" "api" {
       }
 
       env {
-
         name  = "SQL_URI"
         value = "socket://${urlencode(var.database_user)}:${urlencode(var.database_password)}@${urlencode("/cloudsql/${google_sql_database_instance.instance.connection_name}")}/fgpt"
+      }
+
+      env {
+        name  = "AUTH0_AUDIENCE"
+        value = var.auth0_api_identifier
+      }
+
+      env {
+        name  = "AUTH0_ISSUER"
+        value = "https://${var.auth0_domain}/"
       }
 
 
@@ -390,7 +404,6 @@ resource "google_cloud_run_service_iam_policy" "springtime_public_access" {
 }
 
 
-
 resource "vercel_project" "front_end" {
   name      = "fgpt"
   framework = "nextjs"
@@ -406,11 +419,38 @@ resource "vercel_project" "front_end" {
 
   team_id = var.vercel_team_id
 
-  environment = [{
-    key    = "PUBLIC_API_ENDPOINT"
-    target = ["production", "preview"]
-    value  = google_cloud_run_v2_service.api.uri
-  }]
+  environment = [
+    {
+      key    = "AUTH0_SCOPE"
+      target = ["production", "preview"]
+      value  = "openid profile email offline_access"
+    },
+    {
+      key    = "AUTH0_AUDIENCE"
+      target = ["production", "preview"]
+      value  = var.auth0_api_identifier
+    },
+
+    {
+      key    = "AUTH0_CLIENT_ID"
+      target = ["production", "preview"]
+      value  = auth0_client.frontend.client_id
+    },
+
+    {
+      key    = "AUTH0_CLIENT_SECRET"
+      target = ["production", "preview"]
+      value  = var.auth0_api_identifier
+      value  = auth0_client.frontend.client_secret
+    },
+
+    {
+      key    = "AUTH0_BASE_URL"
+      target = ["production", "preview"]
+      value  = google_cloud_run_v2_service.api.uri
+    },
+
+  ]
 }
 
 resource "vercel_deployment" "git" {
@@ -436,5 +476,45 @@ resource "vercel_project_domain" "bare_domain" {
   redirect_status_code = 308
 }
 
+provider "auth0" {
+  domain        = var.auth0_domain
+  client_id     = var.auth0_client_id
+  client_secret = var.auth0_client_secret
+}
 
+resource "auth0_client" "frontend" {
+  name        = "FGPT Next.js"
+  description = "Frontend app"
+  app_type    = "spa"
+  callbacks = [
+    "https://${var.vercel_domain}/api/auth/callback",
+  ]
+
+  allowed_logout_urls = [
+    "https://${var.vercel_domain}",
+  ]
+
+  oidc_conformant = true
+
+  jwt_configuration {
+    alg = "RS256"
+  }
+}
+
+resource "auth0_connection" "google" {
+  name     = "google"
+  strategy = "google-oauth2"
+
+}
+
+
+resource "auth0_resource_server" "backend" {
+  name       = "fgpt-backend"
+  identifier = var.auth0_api_identifier
+
+  enforce_policies                                = true
+  allow_offline_access                            = true
+  skip_consent_for_verifiable_first_party_clients = true
+
+}
 

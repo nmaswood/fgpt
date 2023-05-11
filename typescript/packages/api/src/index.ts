@@ -4,7 +4,10 @@ dotenv.config();
 import "express-async-errors"; // eslint-disable-line
 
 import cors from "cors";
-import express from "express"; // eslint-disable-line
+import express from "express";
+import { expressjwt } from "express-jwt";
+
+import { expressJwtSecret } from "jwks-rsa";
 
 import { LOGGER } from "./logger";
 import { errorLogger } from "./middleware/error-logger";
@@ -21,6 +24,19 @@ import {
 } from "@fgpt/precedent-node";
 
 LOGGER.info("Server starting ...");
+
+const jwtCheck = expressjwt({
+  secret: expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
+    jwksUri: SETTINGS.auth.jwksUri,
+  }) as any,
+
+  issuer: SETTINGS.auth.issuer,
+  audience: SETTINGS.auth.audience,
+  algorithms: ["RS256"],
+});
 
 async function start() {
   const app = express();
@@ -45,6 +61,8 @@ async function start() {
 
   app.use(
     "/api/v1/transcript",
+    setMiddleware,
+    jwtCheck,
     new TranscriptRouter(
       transcriptStore,
       mlService,
@@ -64,3 +82,8 @@ async function start() {
 }
 
 start();
+
+async function setMiddleware(req: any, _: any, next: any): Promise<void> {
+  console.log(req.headers["authorization"]);
+  next();
+}
