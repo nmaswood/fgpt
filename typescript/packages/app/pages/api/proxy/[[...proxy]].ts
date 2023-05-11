@@ -1,5 +1,5 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import { getAccessToken, withApiAuthRequired } from "@auth0/nextjs-auth0";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 import { SERVER_SETTINGS } from "../../../src/settings";
 

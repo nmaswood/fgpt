@@ -1,3 +1,4 @@
+import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 import {
   Autocomplete,
   Box,
@@ -12,8 +13,6 @@ import * as React from "react";
 import { useFetchDataForTicker } from "../src/hooks/use-fetch-data-for-ticker";
 import { useAskQuestion } from "../src/hooks/use-fetch-question";
 import { useFetchTickers } from "../src/hooks/use-fetch-tickers";
-
-import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 
 interface QuestionWithAnswer {
   question: string;
