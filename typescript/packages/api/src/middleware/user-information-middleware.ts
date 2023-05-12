@@ -1,11 +1,11 @@
-import { User } from "@songbird/precedent-iso";
+import { IdentitySub } from "@fgpt/precedent-iso";
+import type { UserOrgService } from "@fgpt/precedent-node";
 import type { NextFunction, Response } from "express";
 import type { Request } from "express-jwt";
-
-import type { UserService } from "../services/user-service";
+import { z } from "zod";
 
 export class UserInformationMiddleware {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userOrgService: UserOrgService) {}
 
   addUser =
     () =>
@@ -20,29 +20,30 @@ export class UserInformationMiddleware {
         return;
       }
 
-      const { user, isNewUser } = await this.#getUser(sub);
+      const jwt = ZJwt.parse(req.auth);
+      const user = await this.userOrgService.upsert({
+        email: jwt.app_data.email,
+        sub: parseSub(jwt.sub),
+      });
 
-      const impersonate = req.headers["x-impersonate"];
-      if (typeof impersonate === "string") {
-        if (user.role !== "admin") {
-          throw new Error("Only admins can impersonate");
-        }
-        req.user = await this.userService.getById(impersonate);
-      } else {
-        req.user = user;
-      }
-
+      req.user = user;
       next();
     };
+}
 
-  #getUser = async (sub: string) => {
-    const fromSub = await this.userService.getBySub(sub);
-
-    const user =
-      fromSub === undefined || !fromSub.emailVerified
-        ? await this.#upsertUser(sub)
-        : fromSub;
-
-    return { user, isNewUser: fromSub === undefined };
+function parseSub(sub: string): IdentitySub {
+  if (!sub.startsWith("goog")) {
+    throw new Error("invalid state");
+  }
+  return {
+    provider: "google",
+    value: sub,
   };
 }
+
+const ZJwt = z.object({
+  sub: z.string(),
+  app_data: z.object({
+    email: z.string(),
+  }),
+});

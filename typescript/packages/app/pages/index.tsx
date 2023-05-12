@@ -13,6 +13,7 @@ import * as React from "react";
 import { useFetchDataForTicker } from "../src/hooks/use-fetch-data-for-ticker";
 import { useAskQuestion } from "../src/hooks/use-fetch-question";
 import { useFetchTickers } from "../src/hooks/use-fetch-tickers";
+import { useFetchUser } from "../src/hooks/use-fetch-user";
 
 interface QuestionWithAnswer {
   question: string;
@@ -21,6 +22,8 @@ interface QuestionWithAnswer {
 }
 
 const Home: React.FC = () => {
+  const { data: user } = useFetchUser();
+  console.log(user);
   const { data } = useFetchTickers();
   const [ticker, setTicker] = React.useState<string | undefined>(undefined);
   const { isLoading, data: resp } = useFetchDataForTicker(ticker);
@@ -36,9 +39,6 @@ const Home: React.FC = () => {
   return (
     <Box padding={3} gap={3}>
       <Button href="/api/auth/logout">Logout</Button>
-      <Typography align="center" variant="h3">
-        💰 Finance GPT
-      </Typography>
 
       <Box display="flex" paddingY={1}>
         <Autocomplete

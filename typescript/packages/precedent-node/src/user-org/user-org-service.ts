@@ -1,4 +1,4 @@
-import { User, IdentitySub } from "@fgpt/precedent-iso";
+import { IdentitySub, User } from "@fgpt/precedent-iso";
 import { DatabasePool, DatabaseTransactionConnection, sql } from "slonik";
 import { z } from "zod";
 
@@ -53,7 +53,7 @@ RETURNING
     ).id;
 
     const newUser = await trx.one(sql.type(ZUserRow)`
-INSERT INTO app_user (organization_id, email, googleSub)
+INSERT INTO app_user (organization_id, email, google_sub)
     VALUES (${organizationId}, ${email}, ${googleSub})
 RETURNING
     ${USER_FIELDS}

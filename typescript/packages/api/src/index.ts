@@ -21,7 +21,10 @@ import {
   PsqlTranscriptStore,
   MLServiceClientImpl,
   PsqlChunkPostSummaryStore,
+  PsqlUserOrgService,
 } from "@fgpt/precedent-node";
+import { UserInformationMiddleware } from "./middleware/user-information-middleware";
+import { UserOrgRouter } from "./routers/user-org-router";
 
 LOGGER.info("Server starting ...");
 
@@ -55,13 +58,22 @@ async function start() {
   const transcriptStore = new PsqlTranscriptStore(pool);
   const mlService = new MLServiceClientImpl(SETTINGS.mlServiceUri);
 
+  const userOrgService = new PsqlUserOrgService(pool);
+
+  const userMiddleware = new UserInformationMiddleware(userOrgService);
+
+  const addUser = userMiddleware.addUser();
+
   const chunkPostSummaryStore = new PsqlChunkPostSummaryStore(pool);
 
   app.use(cors({ origin: "*" }));
 
+  app.use("/api/v1/user-org", jwtCheck, addUser, new UserOrgRouter().init());
+
   app.use(
     "/api/v1/transcript",
     jwtCheck,
+    addUser,
     new TranscriptRouter(
       transcriptStore,
       mlService,

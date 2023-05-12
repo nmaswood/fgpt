@@ -13,7 +13,7 @@ async function proxy(req: NextApiRequest, res: NextApiResponse) {
   const { accessToken } = await getAccessToken(req, res);
 
   const method = req.method ?? "GET";
-  const url = `${SERVER_SETTINGS.publicApiEndpoint}/api/v1/${proxy}`;
+  const url = `${SERVER_SETTINGS.publicApiEndpoint}/${proxy}`;
   console.log({ method, url, accessToken });
   try {
     const response = await fetch(
