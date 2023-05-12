@@ -135,7 +135,6 @@ async function start(settings: Settings) {
         embedding,
       } of postSummaryStore.getLoaded()) {
         LOGGER.info(`Writing vector ${postSummaryChunkId} for ${ticker}`);
-        console.log({ ticker });
         await mlService.upsertVectors([
           {
             id: postSummaryChunkId,

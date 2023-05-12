@@ -13,8 +13,8 @@ async function proxy(req: NextApiRequest, res: NextApiResponse) {
   const { accessToken } = await getAccessToken(req, res);
 
   const method = req.method ?? "GET";
-  const url = `${SERVER_SETTINGS.publicApiEndpoint}/${proxy}`;
-  console.log({ method, url, accessToken });
+  const url = `${SERVER_SETTINGS.publicApiEndpoint}/api/${proxy}`;
+
   try {
     const response = await fetch(
       url,
@@ -31,7 +31,6 @@ async function proxy(req: NextApiRequest, res: NextApiResponse) {
     res.status(response.status).json(await response.json());
   } catch (e) {
     console.error(e);
-    console.log("WTF happened?");
   }
 }
 
