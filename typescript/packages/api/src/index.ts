@@ -15,14 +15,8 @@ import { errorResponder } from "./middleware/error-responder";
 import { invalidPathHandler } from "./middleware/invalid-path-handler";
 import { SETTINGS } from "./settings";
 import { dataBasePool } from "./sql";
-import { TranscriptRouter } from "./routers/transcript-router";
 
-import {
-  PsqlTranscriptStore,
-  MLServiceClientImpl,
-  PsqlChunkPostSummaryStore,
-  PsqlUserOrgService,
-} from "@fgpt/precedent-node";
+import { PsqlUserOrgService } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
 import { UserOrgRouter } from "./routers/user-org-router";
 
@@ -55,8 +49,6 @@ async function start() {
   );
 
   const pool = await dataBasePool(SETTINGS.sql.uri);
-  const transcriptStore = new PsqlTranscriptStore(pool);
-  const mlService = new MLServiceClientImpl(SETTINGS.mlServiceUri);
 
   const userOrgService = new PsqlUserOrgService(pool);
 
@@ -64,22 +56,9 @@ async function start() {
 
   const addUser = userMiddleware.addUser();
 
-  const chunkPostSummaryStore = new PsqlChunkPostSummaryStore(pool);
-
   app.use(cors({ origin: "*" }));
 
   app.use("/api/v1/user-org", jwtCheck, addUser, new UserOrgRouter().init());
-
-  app.use(
-    "/api/v1/transcript",
-    jwtCheck,
-    addUser,
-    new TranscriptRouter(
-      transcriptStore,
-      mlService,
-      chunkPostSummaryStore
-    ).init()
-  );
 
   app.use("/ping", (_, res) => {
     res.send("pong");
