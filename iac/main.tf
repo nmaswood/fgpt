@@ -458,6 +458,11 @@ resource "vercel_project" "front_end" {
       value  = var.auth0_secret
     },
     {
+      key    = "PUBLIC_API_ENDPOINT"
+      target = ["production", "preview"]
+      value  = var.public_api_endpoint
+    },
+    {
       key    = "AUTH0_ISSUER_BASE_URL"
       target = ["production", "preview"]
       value  = "https://${var.auth0_domain}"
@@ -510,10 +515,22 @@ resource "auth0_client" "frontend" {
 
   oidc_conformant = true
 
+
+  logo_uri = var.auth0_logo_uri
   jwt_configuration {
     alg = "RS256"
   }
 }
+
+resource "auth0_branding" "my_brand" {
+  logo_url = var.auth0_logo_uri
+
+  colors {
+    primary         = "#635dff"
+    page_background = "#635dff"
+  }
+}
+
 
 resource "auth0_connection" "google" {
   name     = "google"
@@ -532,3 +549,16 @@ resource "auth0_resource_server" "backend" {
 
 }
 
+
+resource "auth0_prompt_custom_text" "example" {
+  prompt   = "login"
+  language = "en"
+  body = jsonencode(
+    {
+      "login" : {
+        "buttonText" : "Sign into FGPT",
+        "title" : "Welcome",
+      }
+    }
+  )
+}

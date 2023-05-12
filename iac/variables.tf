@@ -89,9 +89,6 @@ variable "public_api_endpoint" {
   default = "https://api.getfgpt.com"
 }
 
-
-
-
 // AUTH0
 variable "auth0_domain" {}
 variable "auth0_client_id" {}
@@ -102,6 +99,10 @@ variable "auth0_api_identifier" {
 }
 
 variable "auth0_secret" {}
+
+variable "auth0_logo_uri" {
+  default = "https://storage.googleapis.com/nasr-public/fgpt-logo.svg"
+}
 
 // ML SERVICE
 variable "openai_api_key" {}
