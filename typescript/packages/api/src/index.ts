@@ -16,9 +16,10 @@ import { invalidPathHandler } from "./middleware/invalid-path-handler";
 import { SETTINGS } from "./settings";
 import { dataBasePool } from "./sql";
 
-import { PsqlUserOrgService } from "@fgpt/precedent-node";
+import { PSqlProjectStore, PsqlUserOrgService } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
 import { UserOrgRouter } from "./routers/user-org-router";
+import { ProjectRouter } from "./routers/project-router";
 
 LOGGER.info("Server starting ...");
 
@@ -55,10 +56,17 @@ async function start() {
   const userMiddleware = new UserInformationMiddleware(userOrgService);
 
   const addUser = userMiddleware.addUser();
+  const projectStore = new PSqlProjectStore();
 
   app.use(cors({ origin: "*" }));
 
   app.use("/api/v1/user-org", jwtCheck, addUser, new UserOrgRouter().init());
+  app.use(
+    "/api/v1/projects",
+    jwtCheck,
+    addUser,
+    new ProjectRouter(projectStore).init()
+  );
 
   app.use("/ping", (_, res) => {
     res.send("pong");
