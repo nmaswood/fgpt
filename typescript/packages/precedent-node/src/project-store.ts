@@ -1,23 +1,17 @@
-import { Subject } from "@fgpt/precedent-iso";
-import { User } from "@fgpt/precedent-iso/src/subject";
-
-export interface Project {
-  id: string;
-  name: string;
-}
+import { Project } from "@fgpt/precedent-iso";
 
 export interface CreateProjectArgs {
   name: string;
 }
 
 export interface ProjectStore {
-  list: (subject: Subject) => Promise<Project[]>;
+  list: (userId: string) => Promise<Project[]>;
   create: (args: CreateProjectArgs) => Promise<Project>;
 }
 
 export class PSqlProjectStore implements ProjectStore {
-  async list(_: User): Promise<Project[]> {
-    throw new Error("foo");
+  async list(_: string): Promise<Project[]> {
+    return [];
   }
 
   async create(_: CreateProjectArgs): Promise<Project> {
