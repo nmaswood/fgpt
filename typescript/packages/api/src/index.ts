@@ -61,7 +61,6 @@ async function start() {
 
   app.use(
     "/api/v1/transcript",
-    setMiddleware,
     jwtCheck,
     new TranscriptRouter(
       transcriptStore,
@@ -82,8 +81,3 @@ async function start() {
 }
 
 start();
-
-async function setMiddleware(req: any, _: any, next: any): Promise<void> {
-  console.log(req.headers["authorization"]);
-  next();
-}

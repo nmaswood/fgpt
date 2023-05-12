@@ -30,14 +30,6 @@ services:
       - db
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/fgpt-test?sslmode=disable
-  foo:
-    image: test
-    depends_on:
-      - db
-    environment:
-      - SQL_URI=postgres://postgres:postgres@localhost:5432/fgpt?sslmode=disable
-      - ML_SERVICE_URI=http://0.0.0.0:8001
-      - JOB_TYPE=get-earnings-call-href
 
 volumes:
   db:
