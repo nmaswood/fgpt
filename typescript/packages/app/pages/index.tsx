@@ -34,10 +34,10 @@ const Home: React.FC = () => {
 
   React.useEffect(() => {
     const [project] = projects ?? [];
-    if (project) {
+    if (project && !selectedProjectId) {
       setSelectedProjectId(project.id);
     }
-  }, [projects]);
+  }, [projects, selectedProjectId]);
 
   return (
     <Box gap={3} padding={1}>
