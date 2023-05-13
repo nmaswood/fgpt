@@ -32,6 +32,13 @@ const Home: React.FC = () => {
 
   const [projectName, setProjectName] = React.useState("");
 
+  React.useEffect(() => {
+    const [project] = projects ?? [];
+    if (project) {
+      setSelectedProjectId(project.id);
+    }
+  }, [projects]);
+
   return (
     <Box gap={3} padding={1}>
       <AppBar
@@ -45,15 +52,7 @@ const Home: React.FC = () => {
           justifyContent: "space-between",
         }}
       >
-        <Box>
-          <Image
-            priority
-            src="/fgpt-logo.svg"
-            alt="me"
-            width="40"
-            height="40"
-          />
-        </Box>
+        <Image priority src="/fgpt-logo.svg" alt="me" width="40" height="40" />
         <Box display="flex" gap={2} alignItems="center">
           {user && <Typography>{user.email}</Typography>}
           <Button variant="outlined" href="/api/auth/logout" size="small">
@@ -62,7 +61,7 @@ const Home: React.FC = () => {
         </Box>
       </AppBar>
 
-      <Box display="flex" flexDirection="column" width="300px" paddingTop={1}>
+      <Box display="flex" flexDirection="column" width="250px" marginTop={1}>
         <CreateProject
           name={projectName}
           setName={setProjectName}
@@ -120,9 +119,10 @@ const CreateProject: React.FC<{
   };
 
   return (
-    <Box display="flex" flexDirection="column" gap={1} width="300px">
+    <Box display="flex" flexDirection="column" gap={1} width="250px">
       <TextField
         placeholder="New project name"
+        size="small"
         value={name}
         onChange={(e) => setName(e.target.value)}
         onKeyDown={(e) => {
@@ -136,6 +136,7 @@ const CreateProject: React.FC<{
         variant="outlined"
         disabled={disabled || isMutating}
         onClick={onCreate}
+        size="small"
       >
         Create project
       </Button>
