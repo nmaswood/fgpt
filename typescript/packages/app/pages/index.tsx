@@ -1,6 +1,19 @@
 import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 import { assertNever, Project } from "@fgpt/precedent-iso";
-import { Alert, Box, Button, Snackbar, TextField } from "@mui/material";
+import {
+  Alert,
+  AppBar,
+  Box,
+  Button,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Snackbar,
+  TextField,
+  Typography,
+} from "@mui/material";
+import Image from "next/image";
 import * as React from "react";
 
 import { useCreateProject } from "../src/hooks/use-create-project";
@@ -11,23 +24,69 @@ const Home: React.FC = () => {
   const { data: user, isLoading: userLoading } = useFetchUser();
   const { data: projects, isLoading: projectLoading } = useFetchProjects();
 
+  const [selectedProjectId, setSelectedProjectId] = React.useState<
+    string | undefined
+  >(undefined);
+
   const loading = userLoading || projectLoading;
 
   const [projectName, setProjectName] = React.useState("");
 
   return (
-    <Box padding={3} gap={3}>
-      <Button variant="outlined" href="/api/auth/logout">
-        Logout
-      </Button>
-      {user && <pre>{JSON.stringify({ user }, null, 2)}</pre>}
-      {projects && <pre>{JSON.stringify({ projects }, null, 2)}</pre>}
-      <CreateProject
-        name={projectName}
-        setName={setProjectName}
-        projects={projects ?? []}
-        disabled={loading}
-      />
+    <Box gap={3} padding={1}>
+      <AppBar
+        position="static"
+        sx={{
+          background: "white",
+          display: "flex",
+          flexDirection: "row",
+          paddingY: 1,
+          paddingX: 2,
+          justifyContent: "space-between",
+        }}
+      >
+        <Box>
+          <Image
+            priority
+            src="/fgpt-logo.svg"
+            alt="me"
+            width="40"
+            height="40"
+          />
+        </Box>
+        <Box display="flex" gap={2} alignItems="center">
+          {user && <Typography>{user.email}</Typography>}
+          <Button variant="outlined" href="/api/auth/logout" size="small">
+            Logout
+          </Button>
+        </Box>
+      </AppBar>
+
+      <Box display="flex" flexDirection="column" width="300px" paddingTop={1}>
+        <CreateProject
+          name={projectName}
+          setName={setProjectName}
+          projects={projects ?? []}
+          disabled={loading}
+        />
+        {projects && projects.length > 0 && (
+          <List>
+            {projects.map((project) => {
+              return (
+                <ListItemButton
+                  key={project.id}
+                  selected={project.id === selectedProjectId}
+                  onClick={() => setSelectedProjectId(project.id)}
+                >
+                  <ListItem disablePadding>
+                    <ListItemText primary={project.name} />
+                  </ListItem>
+                </ListItemButton>
+              );
+            })}
+          </List>
+        )}
+      </Box>
     </Box>
   );
 };
