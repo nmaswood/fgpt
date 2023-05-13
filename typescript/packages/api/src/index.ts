@@ -56,11 +56,12 @@ async function start() {
   const userMiddleware = new UserInformationMiddleware(userOrgService);
 
   const addUser = userMiddleware.addUser();
-  const projectStore = new PSqlProjectStore();
+  const projectStore = new PSqlProjectStore(pool);
 
   app.use(cors({ origin: "*" }));
 
   app.use("/api/v1/user-org", jwtCheck, addUser, new UserOrgRouter().init());
+
   app.use(
     "/api/v1/projects",
     jwtCheck,

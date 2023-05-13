@@ -1,5 +1,6 @@
 import { ProjectStore } from "@fgpt/precedent-node";
 import express from "express";
+import { z } from "zod";
 
 export class ProjectRouter {
   constructor(private readonly projectStore: ProjectStore) {}
@@ -7,9 +8,7 @@ export class ProjectRouter {
     const router = express.Router();
 
     router.get("/list", async (req: express.Request, res: express.Response) => {
-      const user = req.user;
-
-      const projects = await this.projectStore.list(user.id);
+      const projects = await this.projectStore.list(req.user.organizationId);
       res.json({ projects });
     });
 
@@ -17,10 +16,21 @@ export class ProjectRouter {
       "/create",
       async (req: express.Request, res: express.Response) => {
         const user = req.user;
-        res.json({ user });
+        const args = ZCreateProjectArgs.parse(req.body);
+        const project = await this.projectStore.create({
+          name: args.name,
+          organizationId: user.organizationId,
+          creatorUserId: user.id,
+        });
+
+        res.json({ project });
       }
     );
 
     return router;
   }
 }
+
+const ZCreateProjectArgs = z.object({
+  name: z.string(),
+});
