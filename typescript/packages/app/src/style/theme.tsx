@@ -1,11 +1,7 @@
 import { createTheme } from "@mui/material/styles";
 import { Castoro, IBM_Plex_Sans } from "next/font/google";
 
-import {
-  SONG_BIRD_DISABLED_GREY,
-  SONG_BIRD_GREEN,
-  SONG_BIRD_GREY,
-} from "./colors";
+import { FGPT_PURPLE, SONG_BIRD_DISABLED_GREY, SONG_BIRD_GREY } from "./colors";
 
 const castoro = Castoro({
   subsets: ["latin"],
@@ -50,7 +46,7 @@ export const THEME = createTheme({
   },
   palette: {
     primary: {
-      main: SONG_BIRD_GREEN,
+      main: FGPT_PURPLE,
     },
     action: {
       disabledBackground: SONG_BIRD_DISABLED_GREY,

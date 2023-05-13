@@ -17,7 +17,9 @@ const Home: React.FC = () => {
 
   return (
     <Box padding={3} gap={3}>
-      <Button href="/api/auth/logout">Logout</Button>
+      <Button variant="outlined" href="/api/auth/logout">
+        Logout
+      </Button>
       {user && <pre>{JSON.stringify({ user }, null, 2)}</pre>}
       {projects && <pre>{JSON.stringify({ projects }, null, 2)}</pre>}
       <CreateProject
@@ -64,6 +66,12 @@ const CreateProject: React.FC<{
         placeholder="New project name"
         value={name}
         onChange={(e) => setName(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            onCreate();
+            e.preventDefault();
+          }
+        }}
       />
       <Button
         variant="outlined"
@@ -79,6 +87,7 @@ const CreateProject: React.FC<{
           autoHideDuration={5_000}
           onClose={() => setError(undefined)}
           message={errorDisplayName(error)}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
           <Alert severity="error" sx={{ width: "100%" }}>
             {errorDisplayName(error)}
