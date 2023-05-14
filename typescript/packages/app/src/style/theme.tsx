@@ -1,9 +1,9 @@
 import { createTheme } from "@mui/material/styles";
-import { Castoro, IBM_Plex_Sans } from "next/font/google";
+import { IBM_Plex_Sans, Noto_Sans } from "next/font/google";
 
 import { FGPT_PURPLE, SONG_BIRD_DISABLED_GREY, SONG_BIRD_GREY } from "./colors";
 
-const castoro = Castoro({
+const notoSans = Noto_Sans({
   subsets: ["latin"],
   weight: "400",
 });
@@ -14,7 +14,7 @@ const ibmPlex = IBM_Plex_Sans({
   preload: true,
 });
 
-const HEADER_FONT = castoro.style.fontFamily;
+const HEADER_FONT = notoSans.style.fontFamily;
 
 export const NON_HEADER_FONT = ibmPlex.style.fontFamily;
 

@@ -9,6 +9,7 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
+  Paper,
   Snackbar,
   TextField,
   Typography,
@@ -39,8 +40,19 @@ const Home: React.FC = () => {
     }
   }, [projects, selectedProjectId]);
 
+  const selectedProject = (projects ?? []).find(
+    (p) => p.id === selectedProjectId
+  );
+
   return (
-    <Box gap={3} padding={1}>
+    <Box
+      display="flex"
+      gap={1}
+      padding={2}
+      flexDirection="column"
+      height="100%"
+      width="100%"
+    >
       <AppBar
         position="static"
         sx={{
@@ -60,31 +72,64 @@ const Home: React.FC = () => {
           </Button>
         </Box>
       </AppBar>
+      <Box display="flex" width="100%" height="100%" gap={1}>
+        <Paper
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: "275px",
+            height: "100%",
+            padding: 2,
+          }}
+        >
+          <CreateProject
+            name={projectName}
+            setName={setProjectName}
+            projects={projects ?? []}
+            disabled={loading}
+          />
+          {projects && projects.length > 0 && (
+            <List sx={{ height: "100%" }}>
+              {projects.map((project) => {
+                return (
+                  <ListItemButton
+                    key={project.id}
+                    selected={project.id === selectedProjectId}
+                    onClick={() => setSelectedProjectId(project.id)}
+                  >
+                    <ListItem disablePadding>
+                      <ListItemText primary={project.name} />
+                    </ListItem>
+                  </ListItemButton>
+                );
+              })}
+            </List>
+          )}
+        </Paper>
 
-      <Box display="flex" flexDirection="column" width="250px" marginTop={1}>
-        <CreateProject
-          name={projectName}
-          setName={setProjectName}
-          projects={projects ?? []}
-          disabled={loading}
-        />
-        {projects && projects.length > 0 && (
-          <List>
-            {projects.map((project) => {
-              return (
-                <ListItemButton
-                  key={project.id}
-                  selected={project.id === selectedProjectId}
-                  onClick={() => setSelectedProjectId(project.id)}
-                >
-                  <ListItem disablePadding>
-                    <ListItemText primary={project.name} />
-                  </ListItem>
-                </ListItemButton>
-              );
-            })}
-          </List>
-        )}
+        <Paper sx={{ display: "flex", width: "100%" }}>
+          {projects !== undefined && projects.length === 0 && (
+            <Box
+              display="flex"
+              width="100%"
+              height="100%"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <Box>
+                <Typography variant="h4" color="primary">
+                  🚀 Create a new project
+                </Typography>
+              </Box>
+            </Box>
+          )}
+
+          {selectedProject !== undefined && (
+            <Box display="flex" padding={3}>
+              <Typography variant="h6">{selectedProject.name}</Typography>
+            </Box>
+          )}
+        </Paper>
       </Box>
     </Box>
   );
@@ -107,13 +152,14 @@ const CreateProject: React.FC<{
   );
 
   const onCreate = async () => {
-    const inputError = validate(projectNames)(name);
+    const trimmed = name.trim();
+    const inputError = validate(projectNames)(trimmed);
     if (inputError) {
       setError(inputError);
       return;
     }
 
-    await trigger({ name });
+    await trigger({ name: trimmed });
     setName("");
     setError(undefined);
   };
@@ -133,8 +179,8 @@ const CreateProject: React.FC<{
         }}
       />
       <Button
-        variant="outlined"
-        disabled={disabled || isMutating}
+        variant="contained"
+        disabled={disabled || isMutating || name.length === 0}
         onClick={onCreate}
         size="small"
       >
