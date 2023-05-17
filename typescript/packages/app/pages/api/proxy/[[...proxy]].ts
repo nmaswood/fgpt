@@ -32,8 +32,9 @@ async function proxy(req: NextApiRequest, res: NextApiResponse) {
       }
     );
     res.status(response.status).json(await response.json());
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({ error });
   }
 }
 

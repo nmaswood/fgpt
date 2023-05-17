@@ -91,7 +91,7 @@ async function start() {
   );
 
   app.use("/ping", (_, res) => {
-    res.send("pong");
+    res.json({ ping: "pong" });
   });
 
   app.use(errorLogger);
