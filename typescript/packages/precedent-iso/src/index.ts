@@ -10,3 +10,4 @@ export * from "./models/transcript";
 export { IdentitySub, User } from "./models/user";
 export * from "./subject";
 export * from "./text-chunker/text-chunker";
+export * from "./models/file";

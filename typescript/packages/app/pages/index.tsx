@@ -17,6 +17,7 @@ import {
 import Image from "next/image";
 import * as React from "react";
 
+import { SelectedProject } from "../src/components/selected-project";
 import { useCreateProject } from "../src/hooks/use-create-project";
 import { useFetchProjects } from "../src/hooks/use-fetch-projects";
 import { useFetchUser } from "../src/hooks/use-fetch-user";
@@ -125,9 +126,7 @@ const Home: React.FC = () => {
           )}
 
           {selectedProject !== undefined && (
-            <Box display="flex" padding={3}>
-              <Typography variant="h6">{selectedProject.name}</Typography>
-            </Box>
+            <SelectedProject project={selectedProject} />
           )}
         </Paper>
       </Box>

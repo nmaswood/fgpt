@@ -9,3 +9,4 @@ export * from "./project-store";
 export * from "./transcript/transcript-store";
 export * from "./transcript/transcripts-for-processing";
 export * from "./user-org/user-org-service";
+export * from "./file-reference-store";

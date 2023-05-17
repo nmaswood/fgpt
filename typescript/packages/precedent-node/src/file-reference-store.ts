@@ -1,12 +1,6 @@
 import { DatabasePool, sql } from "slonik";
 import { z } from "zod";
-
-export interface FileReference {
-  id: string;
-  fileName: string;
-  projectId: string;
-  contentType: string;
-}
+import { FileReference } from "@fgpt/precedent-iso";
 
 export interface InsertFileReference {
   fileName: string;
@@ -29,8 +23,13 @@ export class PsqlFileReferenceStore implements FileReferenceStore {
     return this.pool.connect(async (cnx) => {
       const { rows } = await cnx.query(
         sql.type(ZFileReferenceRow)`
-        SELECT ${FIELDS} FROM file_reference WHERE project_id = ${projectId}
-        `
+SELECT
+    ${FIELDS}
+FROM
+    file_reference
+WHERE
+    project_id = ${projectId}
+`
       );
       return Array.from(rows);
     });
@@ -49,10 +48,10 @@ export class PsqlFileReferenceStore implements FileReferenceStore {
       const resp = await cnx.query(
         sql.type(ZFileReferenceRow)`
 INSERT INTO file_reference (file_name, bucket_name, content_type, project_id)
-VALUES 
+    VALUES
         ${sql.join(values, sql.fragment`, `)}
-RETURNING
-   ${FIELDS}
+    RETURNING
+        ${FIELDS}
 `
       );
 
