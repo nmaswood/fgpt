@@ -1,5 +1,5 @@
 import { sql } from "slonik";
-import { afterAll, afterEach, beforeEach, expect, test } from "vitest";
+import { afterEach, beforeEach, expect, test } from "vitest";
 
 import { dataBasePool } from "../data-base-pool";
 import {

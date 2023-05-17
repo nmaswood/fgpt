@@ -15,16 +15,21 @@ async function proxy(req: NextApiRequest, res: NextApiResponse) {
   const method = req.method ?? "GET";
   const url = `${SERVER_SETTINGS.publicApiEndpoint}/api/${proxy}`;
 
+  const headers = {
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+    ...req.headers,
+  } as any;
+
+  delete headers["transfer-encoding"];
+
   try {
     const response = await fetch(
       url,
 
       {
         method,
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
+        headers,
         ...(req.body ? { body: JSON.stringify(req.body) } : {}),
       }
     );
@@ -35,3 +40,11 @@ async function proxy(req: NextApiRequest, res: NextApiResponse) {
 }
 
 export default withApiAuthRequired(proxy);
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: "50mb",
+    },
+  },
+};

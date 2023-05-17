@@ -1,6 +1,6 @@
+import { FileReference } from "@fgpt/precedent-iso";
 import { DatabasePool, sql } from "slonik";
 import { z } from "zod";
-import { FileReference } from "@fgpt/precedent-iso";
 
 export interface InsertFileReference {
   fileName: string;

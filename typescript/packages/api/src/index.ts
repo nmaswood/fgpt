@@ -16,10 +16,15 @@ import { invalidPathHandler } from "./middleware/invalid-path-handler";
 import { SETTINGS } from "./settings";
 import { dataBasePool } from "./sql";
 
-import { PSqlProjectStore, PsqlUserOrgService } from "@fgpt/precedent-node";
+import {
+  PsqlFileReferenceStore,
+  PSqlProjectStore,
+  PsqlUserOrgService,
+} from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
 import { UserOrgRouter } from "./routers/user-org-router";
 import { ProjectRouter } from "./routers/project-router";
+import { FileRouter } from "./routers/file-router";
 
 LOGGER.info("Server starting ...");
 
@@ -42,6 +47,7 @@ async function start() {
 
   app.use(
     express.json({
+      limit: "50mb",
       verify: function (req, _, buf) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (req as any).rawBody = buf;
@@ -58,6 +64,8 @@ async function start() {
   const addUser = userMiddleware.addUser();
   const projectStore = new PSqlProjectStore(pool);
 
+  const fileReferenceStore = new PsqlFileReferenceStore(pool);
+
   app.use(cors({ origin: "*" }));
 
   app.use("/api/v1/user-org", jwtCheck, addUser, new UserOrgRouter().init());
@@ -67,6 +75,13 @@ async function start() {
     jwtCheck,
     addUser,
     new ProjectRouter(projectStore).init()
+  );
+
+  app.use(
+    "/api/v1/files",
+    jwtCheck,
+    addUser,
+    new FileRouter(fileReferenceStore).init()
   );
 
   app.use("/ping", (_, res) => {

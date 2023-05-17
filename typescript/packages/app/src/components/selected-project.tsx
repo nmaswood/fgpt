@@ -6,10 +6,13 @@ import { Project } from "@fgpt/precedent-iso";
 import { Box, Typography } from "@mui/material";
 import Uppy from "@uppy/core";
 import { Dashboard } from "@uppy/react";
+import XHRUpload from "@uppy/xhr-upload";
 
 import { useFetchFiles } from "../hooks/use-fetch-files";
 
-const uppy = new Uppy();
+const uppy = new Uppy().use(XHRUpload, {
+  endpoint: "/api/proxy/v1/files/upload",
+});
 
 export const SelectedProject: React.FC<{ project: Project }> = ({
   project,
@@ -25,7 +28,7 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
       <Box>
         {/* eslint-disable-next-line*/}
         {/* @ts-ignore */}
-        <Dashboard uppy={uppy} />
+        <Dashboard uppy={uppy} proudlyDisplayPoweredByUppy={false} />
       </Box>
     </Box>
   );

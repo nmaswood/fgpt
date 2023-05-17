@@ -6,13 +6,21 @@ export class FileRouter {
   init() {
     const router = express.Router();
 
-    router.get("/list", async (req: express.Request, res: express.Response) => {
-      // TODO Permissions here
-      const files = await this.fileReferenceStore.list(req.user.organizationId);
-      res.json({ files });
-    });
+    router.get(
+      "/list/:projectId",
+      async (req: express.Request, res: express.Response) => {
+        const projectId = req.params.projectId;
+        if (typeof projectId !== "string") {
+          throw new Error("invalid request");
+        }
+
+        const files = await this.fileReferenceStore.list(projectId);
+        res.json({ files });
+      }
+    );
 
     router.post("/upload", async (_: express.Request, __: express.Response) => {
+      console.log("FUCK");
       throw new Error("Not implemented");
     });
 
