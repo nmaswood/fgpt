@@ -6,20 +6,17 @@ import { SERVER_SETTINGS } from "../../src/settings";
 async function proxy(req: NextApiRequest, res: NextApiResponse) {
   const { accessToken } = await getAccessToken(req, res);
 
-  const headers = {
-    Authorization: `Bearer ${accessToken}`,
-    ...req.headers,
-  } as any;
-
-  delete headers["transfer-encoding"];
-
+  const contentType = req.headers["content-type"];
   try {
     const response = await fetch(
       `${SERVER_SETTINGS.publicApiEndpoint}/api/v1/files/upload`,
 
       {
         method: "POST",
-        headers,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          ...(contentType && { "content-type": contentType }),
+        },
         body: req.body,
       }
     );

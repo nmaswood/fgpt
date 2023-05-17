@@ -19,7 +19,13 @@ import React from "react";
 
 import { useFetchFiles } from "../hooks/use-fetch-files";
 
-const uppy = new Uppy().use(XHRUpload, {
+const uppy = new Uppy({
+  restrictions: {
+    allowedFileTypes: [".pdf"],
+    minFileSize: 1,
+    maxFileSize: 50_000_000,
+  },
+}).use(XHRUpload, {
   endpoint: "api/upload",
 });
 

@@ -9,7 +9,14 @@ export class GoogleCloudStorageService implements BlobStorageService {
   #storage: Storage;
 
   constructor() {
-    this.#storage = new Storage();
+    this.#storage = new Storage({
+      retryOptions: {
+        autoRetry: true,
+        maxRetries: 4,
+        retryDelayMultiplier: 3,
+        totalTimeout: 100,
+      },
+    });
   }
 
   async upload(
