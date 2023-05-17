@@ -5,13 +5,12 @@ import "@uppy/dashboard/dist/style.min.css";
 import { Project } from "@fgpt/precedent-iso";
 import {
   Box,
-  Typography,
-  Tabs,
-  Tab,
   List,
   ListItem,
   ListItemText,
-  ListItemIcon,
+  Tab,
+  Tabs,
+  Typography,
 } from "@mui/material";
 import Uppy from "@uppy/core";
 import { Dashboard } from "@uppy/react";
