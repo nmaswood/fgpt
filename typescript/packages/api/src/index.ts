@@ -17,6 +17,7 @@ import { SETTINGS } from "./settings";
 import { dataBasePool } from "./sql";
 
 import {
+  GoogleCloudStorageService,
   PsqlFileReferenceStore,
   PSqlProjectStore,
   PsqlUserOrgService,
@@ -65,6 +66,7 @@ async function start() {
   const projectStore = new PSqlProjectStore(pool);
 
   const fileReferenceStore = new PsqlFileReferenceStore(pool);
+  const blobStorageService = new GoogleCloudStorageService();
 
   app.use(cors({ origin: "*" }));
 
@@ -81,7 +83,11 @@ async function start() {
     "/api/v1/files",
     jwtCheck,
     addUser,
-    new FileRouter(fileReferenceStore).init()
+    new FileRouter(
+      fileReferenceStore,
+      blobStorageService,
+      SETTINGS.assetBucket
+    ).init()
   );
 
   app.use("/ping", (_, res) => {

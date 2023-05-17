@@ -7,17 +7,26 @@ import { Box, Typography } from "@mui/material";
 import Uppy from "@uppy/core";
 import { Dashboard } from "@uppy/react";
 import XHRUpload from "@uppy/xhr-upload";
+import React from "react";
 
 import { useFetchFiles } from "../hooks/use-fetch-files";
 
 const uppy = new Uppy().use(XHRUpload, {
-  endpoint: "/api/proxy/v1/files/upload",
+  endpoint: "api/upload",
 });
 
 export const SelectedProject: React.FC<{ project: Project }> = ({
   project,
 }) => {
   const { data: files } = useFetchFiles(project.id);
+
+  React.useEffect(() => {
+    uppy.on("file-added", (file) => {
+      uppy.setFileMeta(file.id, {
+        projectId: project.id,
+      });
+    });
+  }, [project.id]);
 
   return (
     <Box display="flex" padding={3} flexDirection="column">

@@ -12,6 +12,7 @@ const ZSettings = z.object({
     audience: z.string(),
     issuer: z.string(),
   }),
+  assetBucket: z.string(),
 });
 
 export const SETTINGS = ZSettings.parse({
@@ -26,4 +27,6 @@ export const SETTINGS = ZSettings.parse({
     audience: process.env["AUTH0_AUDIENCE"],
     issuer: process.env["AUTH0_ISSUER"],
   },
+
+  assetBucket: process.env["ASSET_BUCKET"],
 });

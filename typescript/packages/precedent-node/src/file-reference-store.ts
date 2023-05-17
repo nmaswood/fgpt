@@ -6,6 +6,7 @@ export interface InsertFileReference {
   fileName: string;
   projectId: string;
   bucketName: string;
+  path: string;
   contentType: string;
 }
 
@@ -14,7 +15,7 @@ export interface FileReferenceStore {
   insertMany(args: InsertFileReference[]): Promise<FileReference[]>;
 }
 
-const FIELDS = sql.fragment` id, file_name, project_id, content_type`;
+const FIELDS = sql.fragment` id, file_name, project_id, content_type, path`;
 
 export class PsqlFileReferenceStore implements FileReferenceStore {
   constructor(private readonly pool: DatabasePool) {}
@@ -40,14 +41,14 @@ WHERE
       return [];
     }
     const values = args.map(
-      ({ fileName, bucketName, contentType, projectId }) =>
-        sql.fragment`(${fileName}, ${bucketName}, ${contentType}, ${projectId})`
+      ({ fileName, bucketName, contentType, projectId, path }) =>
+        sql.fragment`(${fileName}, ${bucketName}, ${contentType}, ${projectId}, ${path})`
     );
 
     return this.pool.connect(async (cnx) => {
       const resp = await cnx.query(
         sql.type(ZFileReferenceRow)`
-INSERT INTO file_reference (file_name, bucket_name, content_type, project_id)
+INSERT INTO file_reference (file_name, bucket_name, content_type, project_id, path)
     VALUES
         ${sql.join(values, sql.fragment`, `)}
     RETURNING
@@ -66,10 +67,12 @@ const ZFileReferenceRow = z
     file_name: z.string(),
     project_id: z.string(),
     content_type: z.string(),
+    path: z.string(),
   })
   .transform((row) => ({
     id: row.id,
     fileName: row.file_name,
     projectId: row.project_id,
     contentType: row.content_type,
+    path: row.path,
   }));

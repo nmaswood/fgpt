@@ -58,6 +58,11 @@ resource "google_sql_database_instance" "instance" {
 }
 
 
+resource "google_storage_bucket" "asset_store" {
+  name     = "fgpt-asset-store"
+  location = "US"
+}
+
 
 resource "google_artifact_registry_repository" "project-registry" {
   location      = var.region
@@ -65,6 +70,8 @@ resource "google_artifact_registry_repository" "project-registry" {
   description   = "assets for the ${var.project_slug} project"
   format        = "DOCKER"
 }
+
+
 
 resource "google_cloud_run_v2_job" "db" {
   name     = "${var.project_slug}-db"
@@ -107,6 +114,8 @@ resource "google_cloud_run_v2_job" "db" {
 
 locals {
   job_runner_jobs = ["get-earnings-call-href", "process-earnings-call", "load-into-vector-db"]
+
+  asset_bucket = "gs://${google_storage_bucket.asset_store.name}"
 }
 
 resource "google_cloud_run_v2_job" "job-runner" {
@@ -358,10 +367,14 @@ resource "google_cloud_run_v2_service" "api" {
       }
 
 
-
       env {
         name  = "AUTH0_ISSUER"
         value = "https://${var.auth0_domain}/"
+      }
+
+      env {
+        name  = "ASSET_BUCKET"
+        value = local.asset_bucket
       }
 
 
