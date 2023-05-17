@@ -15,19 +15,16 @@ async function proxy(req: NextApiRequest, res: NextApiResponse) {
   const method = req.method ?? "GET";
   const url = `${SERVER_SETTINGS.publicApiEndpoint}/api/${proxy}`;
 
-  const headers = {
-    Authorization: `Bearer ${accessToken}`,
-    "Content-Type": "application/json",
-    ...req.headers,
-  } as any;
-
   try {
     const response = await fetch(
       url,
 
       {
         method,
-        headers,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
         ...(req.body ? { body: JSON.stringify(req.body) } : {}),
       }
     );
