@@ -1,62 +1,76 @@
 import { DatabasePool, sql } from "slonik";
+import { z } from "zod";
+
+export interface FileReference {
+  id: string;
+  fileName: string;
+  projectId: string;
+  contentType: string;
+}
 
 export interface InsertFileReference {
   fileName: string;
+  projectId: string;
   bucketName: string;
   contentType: string;
 }
 
 export interface FileReferenceStore {
-  insert(args: InsertFileReference): Promise<void>;
+  list(projectId: string): Promise<FileReference[]>;
+  insertMany(args: InsertFileReference[]): Promise<FileReference[]>;
 }
+
+const FIELDS = sql.fragment` id, file_name, project_id, content_type`;
 
 export class PsqlFileReferenceStore implements FileReferenceStore {
   constructor(private readonly pool: DatabasePool) {}
 
-  insert({
-    fileName,
-    bucketName,
-    contentType,
-  }: InsertFileReference): Promise<void> {
+  async list(projectId: string): Promise<FileReference[]> {
     return this.pool.connect(async (cnx) => {
-      await cnx.one(
-        sql.unsafe`
-INSERT INTO file_reference (file_name, bucket_name, content_type)
-    VALUES (${fileName}, ${bucketName}, ${contentType})
+      const { rows } = await cnx.query(
+        sql.type(ZFileReferenceRow)`
+        SELECT ${FIELDS} FROM file_reference WHERE project_id = ${projectId}
+        `
+      );
+      return Array.from(rows);
+    });
+  }
+
+  async insertMany(args: InsertFileReference[]): Promise<FileReference[]> {
+    if (args.length === 0) {
+      return [];
+    }
+    const values = args.map(
+      ({ fileName, bucketName, contentType, projectId }) =>
+        sql.fragment`(${fileName}, ${bucketName}, ${contentType}, ${projectId})`
+    );
+
+    return this.pool.connect(async (cnx) => {
+      const resp = await cnx.query(
+        sql.type(ZFileReferenceRow)`
+INSERT INTO file_reference (file_name, bucket_name, content_type, project_id)
+VALUES 
+        ${sql.join(values, sql.fragment`, `)}
 RETURNING
-    id
+   ${FIELDS}
 `
       );
+
+      return Array.from(resp.rows);
     });
   }
 }
 
-export interface InsertProcessedFile {
-  fileReferenceId: string;
-  content: string;
-}
-
-export interface ProcessedFileStore {
-  insert(args: InsertProcessedFile): Promise<void>;
-}
-
-export class PsqlProcessedFileStore implements ProcessedFileStore {
-  constructor(private readonly pool: DatabasePool) {}
-
-  async insert({
-    fileReferenceId,
-    content,
-  }: InsertProcessedFile): Promise<void> {
-    return this.pool.connect(async (cnx) => {
-      await cnx.one(
-        sql.unsafe`
-
-INSERT INTO processed_file (processed_file_id, content)
-    VALUES (${fileReferenceId}, ${content})
-RETURNING
-    id
-`
-      );
-    });
-  }
-}
+const ZFileReferenceRow = z
+  .object({
+    id: z.string(),
+    file_name: z.string(),
+    project_id: z.string(),
+    content_type: z.string(),
+  })
+  .transform((row) => ({
+    id: row.id,
+    fileName: row.file_name,
+    projectId: row.project_id,
+    contentType: row.content_type,
+  }));
