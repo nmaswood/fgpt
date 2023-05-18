@@ -1,5 +1,6 @@
 import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
-import { Box, Typography } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import { Box, Button } from "@mui/material";
 import * as React from "react";
 
 import { SelectedProject } from "../src/components/selected-project";
@@ -20,6 +21,8 @@ const Home: React.FC = () => {
     }
   }, [projects, selectedProjectId]);
 
+  const [projectModalOpen, setProjectModalOpen] = React.useState(false);
+
   const selectedProjectIdx = projects.findIndex(
     (p) => p.id === selectedProjectId
   );
@@ -35,6 +38,8 @@ const Home: React.FC = () => {
           selectedProjectId={selectedProjectId}
           setSelectedProjectId={setSelectedProjectId}
           selectedProjectIdx={selectedProjectIdx}
+          projectModalOpen={projectModalOpen}
+          setProjectModalOpen={setProjectModalOpen}
         />
       </Box>
 
@@ -48,9 +53,18 @@ const Home: React.FC = () => {
             alignItems="center"
           >
             <Box>
-              <Typography variant="h4" color="primary">
-                🚀 Create a new project
-              </Typography>
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  setProjectModalOpen(true);
+                }}
+                size="large"
+                startIcon={<AddIcon />}
+                sx={{ width: "100%" }}
+                color="primary"
+              >
+                Create project to begin
+              </Button>
             </Box>
           </Box>
         )}

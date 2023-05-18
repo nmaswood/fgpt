@@ -1,24 +1,22 @@
 import { createTheme } from "@mui/material/styles";
-import { IBM_Plex_Sans, Noto_Sans } from "next/font/google";
 
-import { FGPT_PURPLE } from "./colors";
+import { FGPT_BLUE, FGPT_PINK } from "./colors";
 
-const notoSans = Noto_Sans({
-  subsets: ["latin"],
-  weight: "400",
-});
+const HEADER_FONT = `Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif;`;
 
-const ibmPlex = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700"],
-  preload: true,
-});
-
-const HEADER_FONT = notoSans.style.fontFamily;
-
-export const NON_HEADER_FONT = ibmPlex.style.fontFamily;
+export const NON_HEADER_FONT = `Bahnschrift, 'DIN Alternate', 'Franklin Gothic Medium', 'Nimbus Sans Narrow', sans-serif-condensed, sans-serif;`;
 
 export const THEME = createTheme({
+  components: {
+    MuiListItemIcon: {
+      styleOverrides: {
+        root: {
+          minWidth: 35,
+        },
+      },
+    },
+  },
+
   typography: {
     h1: { fontFamily: HEADER_FONT },
     h2: { fontFamily: HEADER_FONT },
@@ -46,7 +44,14 @@ export const THEME = createTheme({
   palette: {
     mode: "dark",
     primary: {
-      main: FGPT_PURPLE,
+      main: FGPT_PINK,
+    },
+    secondary: {
+      main: FGPT_BLUE,
+    },
+
+    background: {
+      default: "#121212",
     },
   },
 });

@@ -3,14 +3,25 @@ import "@uppy/core/dist/style.min.css";
 import "@uppy/dashboard/dist/style.min.css";
 
 import { Project } from "@fgpt/precedent-iso";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import CollectionsIcon from "@mui/icons-material/Collections";
+import DeleteIcon from "@mui/icons-material/Delete";
+import ModeEditIcon from "@mui/icons-material/ModeEdit";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import SettingsIcon from "@mui/icons-material/Settings";
 import {
   Box,
+  Button,
+  Divider,
   List,
   ListItem,
+  ListItemIcon,
   ListItemText,
+  Menu,
+  MenuItem,
+  MenuList,
   Tab,
   Tabs,
-  Typography,
 } from "@mui/material";
 import Uppy from "@uppy/core";
 import { Dashboard } from "@uppy/react";
@@ -19,19 +30,27 @@ import React from "react";
 
 import { useFetchFiles } from "../hooks/use-fetch-files";
 
-const uppy = new Uppy({
-  restrictions: {
-    allowedFileTypes: [".pdf"],
-    minFileSize: 1,
-    maxFileSize: 50_000_000,
-  },
-}).use(XHRUpload, {
-  endpoint: "api/upload",
-});
-
 export const SelectedProject: React.FC<{ project: Project }> = ({
   project,
 }) => {
+  const uppy = React.useMemo(
+    () =>
+      new Uppy({
+        restrictions: {
+          allowedFileTypes: [".pdf"],
+          minFileSize: 1,
+          maxFileSize: 50_000_000,
+        },
+      }).use(XHRUpload, {
+        endpoint: "api/upload",
+      }),
+    []
+  );
+
+  React.useEffect(() => {
+    return () => uppy.resetProgress();
+  }, [uppy]);
+
   const { data: files, mutate } = useFetchFiles(project.id);
 
   const [value, setValue] = React.useState(0);
@@ -41,67 +60,154 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
   };
 
   React.useEffect(() => {
+    uppy.cancelAll();
+
     uppy.on("file-added", (file) => {
       uppy.setFileMeta(file.id, {
         projectId: project.id,
       });
     });
-  }, [project.id]);
+  }, [uppy, project.id]);
 
   React.useEffect(() => {
     uppy.on("complete", () => {
       mutate();
     });
-  }, [mutate]);
+  }, [uppy, mutate]);
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
-    <Box
-      display="flex"
-      padding={3}
-      flexDirection="column"
-      height="100%"
-      width="100%"
-    >
-      <Typography color="white" variant="h6">
-        {project.name}
-      </Typography>
-
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-        <Tabs value={value} onChange={handleChange}>
-          <Tab label="Upload files" />
-          <Tab label="Explore files" />
-        </Tabs>
-      </Box>
-
+    <Box display="flex" flexDirection="column" height="100%" width="100%">
       <Box
         display="flex"
-        height="100%"
-        width="100%"
-        justifyContent="center"
-        alignItems="center"
+        paddingX={2}
+        paddingTop={1}
+        marginBottom={1 / 2}
+        justifyContent="space-between"
       >
-        {value === 0 && (
-          <Box>
-            {/* eslint-disable-next-line*/}
-            {/* @ts-ignore */}
-            <Dashboard
-              uppy={uppy}
-              proudlyDisplayPoweredByUppy={false}
-              theme="dark"
-            />
-          </Box>
-        )}
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          textColor="secondary"
+          indicatorColor="secondary"
+        >
+          <Tab
+            icon={<CloudUploadIcon />}
+            label="Upload project files"
+            iconPosition="start"
+          />
+          <Tab
+            icon={<CollectionsIcon />}
+            iconPosition="start"
+            label="Explore project files"
+          />
+        </Tabs>
+        <Box display="flex" alignItems="center">
+          <Button
+            startIcon={<SettingsIcon />}
+            onClick={handleClick}
+            variant="outlined"
+            sx={{ height: "40px" }}
+          >
+            Project settings
+          </Button>
 
-        {value === 1 && (
-          <List>
-            {files.map((file) => (
-              <ListItem key={file.id}>
-                <ListItemText primary={file.fileName} />
-              </ListItem>
-            ))}
-          </List>
-        )}
+          <Menu
+            id="basic-menu"
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "center",
+            }}
+          >
+            <MenuList dense disablePadding>
+              <MenuItem>
+                <ListItemIcon>
+                  <DeleteIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Delete project</ListItemText>
+              </MenuItem>
+              <MenuItem>
+                <ListItemIcon>
+                  <ModeEditIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Edit project name</ListItemText>
+              </MenuItem>
+            </MenuList>
+          </Menu>
+        </Box>
       </Box>
+
+      <Divider />
+      {value === 0 && (
+        <Box
+          display="flex"
+          height="100%"
+          width="100%"
+          justifyContent="center"
+          alignItems="center"
+        >
+          {/* eslint-disable-next-line*/}
+          {/* @ts-ignore */}
+          <Dashboard
+            uppy={uppy}
+            proudlyDisplayPoweredByUppy={false}
+            theme="dark"
+          />
+        </Box>
+      )}
+
+      {value === 1 && (
+        <Box display="flex" height="100%" width="100%" paddingLeft={1}>
+          {files.length === 0 && (
+            <Box display="flex" alignItems="center">
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  setValue(0);
+                }}
+                size="large"
+                startIcon={<CloudUploadIcon />}
+                sx={{ width: "100%" }}
+                color="secondary"
+              >
+                Upload files to begin
+              </Button>
+            </Box>
+          )}
+
+          {files.length > 0 && (
+            <List
+              sx={{
+                height: "100%",
+              }}
+            >
+              {files.map((file) => (
+                <ListItem key={file.id}>
+                  <ListItemIcon>
+                    <PictureAsPdfIcon color="secondary" />
+                  </ListItemIcon>
+
+                  <ListItemText
+                    primaryTypographyProps={{ color: "white" }}
+                    primary={file.fileName}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </Box>
+      )}
     </Box>
   );
 };

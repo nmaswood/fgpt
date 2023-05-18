@@ -1,6 +1,7 @@
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { assertNever, Project } from "@fgpt/precedent-iso";
 import AddIcon from "@mui/icons-material/Add";
+import FolderIcon from "@mui/icons-material/Folder";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PermIdentityIcon from "@mui/icons-material/PermIdentity";
 import { LoadingButton } from "@mui/lab";
@@ -26,7 +27,6 @@ import {
   MenuList,
   Snackbar,
   TextField,
-  Typography,
 } from "@mui/material";
 import React from "react";
 
@@ -37,11 +37,15 @@ export const Sidebar: React.FC<{
   selectedProjectId: string | undefined;
   setSelectedProjectId: (projectId: string) => void;
   selectedProjectIdx: number;
+  projectModalOpen: boolean;
+  setProjectModalOpen: (v: boolean) => void;
 }> = ({
   projects,
   selectedProjectId,
   setSelectedProjectId,
   selectedProjectIdx,
+  projectModalOpen,
+  setProjectModalOpen,
 }) => {
   return (
     <Drawer
@@ -56,13 +60,11 @@ export const Sidebar: React.FC<{
       variant="permanent"
       anchor="left"
     >
-      <Box display="flex" padding={2}>
-        <Logo />
-      </Box>
-      <Divider />
       <CreateProject
         projects={projects ?? []}
         setSelectedProjectId={setSelectedProjectId}
+        projectModalOpen={projectModalOpen}
+        setProjectModalOpen={setProjectModalOpen}
       />
       <Divider />
       <Box
@@ -75,6 +77,7 @@ export const Sidebar: React.FC<{
       >
         {projects && projects.length > 0 && (
           <List
+            disablePadding
             sx={{ height: "100%" }}
             onKeyDown={(e) => {
               switch (e.key) {
@@ -106,6 +109,10 @@ export const Sidebar: React.FC<{
                   selected={project.id === selectedProjectId}
                   onClick={() => setSelectedProjectId(project.id)}
                 >
+                  <ListItemIcon>
+                    <FolderIcon color="primary" />
+                  </ListItemIcon>
+
                   <ListItem disablePadding>
                     <ListItemText primary={project.name} />
                   </ListItem>
@@ -126,10 +133,15 @@ const NAME_MAX_LENGTH = 255;
 const CreateProject: React.FC<{
   projects: Project[];
   setSelectedProjectId: (projectId: string) => void;
-}> = ({ projects, setSelectedProjectId }) => {
+  projectModalOpen: boolean;
+  setProjectModalOpen: (v: boolean) => void;
+}> = ({
+  projects,
+  setSelectedProjectId,
+  projectModalOpen,
+  setProjectModalOpen,
+}) => {
   const { trigger, isMutating } = useCreateProject();
-
-  const [projectModalOpen, setProjectModalOpen] = React.useState(false);
 
   const projectNames = React.useMemo(
     () => new Set(projects.map((p) => p.name)),
@@ -151,10 +163,10 @@ const CreateProject: React.FC<{
           onClick={() => {
             setProjectModalOpen(true);
           }}
-          size="small"
+          size="medium"
           startIcon={<AddIcon />}
           sx={{ width: "100%" }}
-          color="secondary"
+          color="primary"
         >
           Create project
         </LoadingButton>
@@ -230,21 +242,6 @@ declare module "@mui/material/styles" {
   }
 }
 
-const Logo = () => {
-  return (
-    <Box display="flex" width="100%" justifyContent="center">
-      <Typography
-        color="secondary"
-        align="center"
-        fontSize={40}
-        fontFamily="avenir"
-      >
-        fgpt
-      </Typography>
-    </Box>
-  );
-};
-
 const DisplayUser = () => {
   const { user } = useUser();
 
@@ -283,7 +280,7 @@ const DisplayUser = () => {
                 />
               )}
             </ListItemIcon>
-            <ListItemText primaryTypographyProps={{ color: "secondary" }}>
+            <ListItemText primaryTypographyProps={{ color: "primary" }}>
               {user.name ?? user.email}
             </ListItemText>
           </MenuItem>
@@ -369,6 +366,7 @@ export const FormDialog: React.FC<{
           id="name"
           label="Project name"
           type="text"
+          color="secondary"
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => {
@@ -384,10 +382,15 @@ export const FormDialog: React.FC<{
         />
       </DialogContent>
       <DialogActions>
-        <Button disabled={loading} onClick={onClose}>
+        <Button disabled={loading} onClick={onClose} color="secondary">
           Cancel
         </Button>
-        <LoadingButton loading={loading} onClick={onSubmit} variant="contained">
+        <LoadingButton
+          loading={loading}
+          onClick={onSubmit}
+          variant="contained"
+          color="secondary"
+        >
           Create project
         </LoadingButton>
       </DialogActions>
