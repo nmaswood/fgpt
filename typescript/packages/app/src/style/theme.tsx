@@ -1,7 +1,7 @@
 import { createTheme } from "@mui/material/styles";
 import { IBM_Plex_Sans, Noto_Sans } from "next/font/google";
 
-import { FGPT_PURPLE, SONG_BIRD_DISABLED_GREY, SONG_BIRD_GREY } from "./colors";
+import { FGPT_PURPLE } from "./colors";
 
 const notoSans = Noto_Sans({
   subsets: ["latin"],
@@ -28,29 +28,52 @@ export const THEME = createTheme({
     h6: { fontFamily: HEADER_FONT },
     subtitle1: {
       fontFamily: NON_HEADER_FONT,
-      color: SONG_BIRD_GREY,
     },
     body1: {
       fontFamily: NON_HEADER_FONT,
-
-      color: SONG_BIRD_GREY,
     },
     body2: {
       fontFamily: NON_HEADER_FONT,
-
-      color: SONG_BIRD_GREY,
     },
-    button: { fontFamily: NON_HEADER_FONT, color: SONG_BIRD_GREY },
-    caption: { fontFamily: NON_HEADER_FONT, color: SONG_BIRD_GREY },
-    overline: { fontFamily: NON_HEADER_FONT, color: SONG_BIRD_GREY },
+    button: {
+      fontFamily: NON_HEADER_FONT,
+
+      textTransform: "none",
+    },
+    caption: { fontFamily: NON_HEADER_FONT },
+    overline: { fontFamily: NON_HEADER_FONT },
   },
   palette: {
+    mode: "dark",
     primary: {
       main: FGPT_PURPLE,
     },
-    action: {
-      disabledBackground: SONG_BIRD_DISABLED_GREY,
-      disabled: "white",
-    },
   },
 });
+
+declare module "@mui/material/styles" {
+  interface Theme {
+    status: {
+      danger: string;
+    };
+    palette: {
+      primary: {
+        main: string;
+      };
+    };
+  }
+}
+
+declare module "@mui/material/styles" {
+  interface Theme {
+    status: {
+      danger: string;
+    };
+  }
+  // allow configuration using `createTheme`
+  interface ThemeOptions {
+    status?: {
+      danger?: string;
+    };
+  }
+}

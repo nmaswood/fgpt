@@ -32,7 +32,7 @@ const uppy = new Uppy({
 export const SelectedProject: React.FC<{ project: Project }> = ({
   project,
 }) => {
-  const { data: files } = useFetchFiles(project.id);
+  const { data: files, mutate } = useFetchFiles(project.id);
 
   const [value, setValue] = React.useState(0);
 
@@ -48,14 +48,28 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
     });
   }, [project.id]);
 
+  React.useEffect(() => {
+    uppy.on("complete", () => {
+      mutate();
+    });
+  }, [mutate]);
+
   return (
-    <Box display="flex" padding={3} flexDirection="column">
-      <Typography variant="h6">{project.name}</Typography>
+    <Box
+      display="flex"
+      padding={3}
+      flexDirection="column"
+      height="100%"
+      width="100%"
+    >
+      <Typography color="white" variant="h6">
+        {project.name}
+      </Typography>
 
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs value={value} onChange={handleChange}>
-          <Tab label="Explore files" />
           <Tab label="Upload files" />
+          <Tab label="Explore files" />
         </Tabs>
       </Box>
 
@@ -67,6 +81,18 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
         alignItems="center"
       >
         {value === 0 && (
+          <Box>
+            {/* eslint-disable-next-line*/}
+            {/* @ts-ignore */}
+            <Dashboard
+              uppy={uppy}
+              proudlyDisplayPoweredByUppy={false}
+              theme="dark"
+            />
+          </Box>
+        )}
+
+        {value === 1 && (
           <List>
             {files.map((file) => (
               <ListItem key={file.id}>
@@ -74,13 +100,6 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
               </ListItem>
             ))}
           </List>
-        )}
-        {value === 1 && (
-          <Box>
-            {/* eslint-disable-next-line*/}
-            {/* @ts-ignore */}
-            <Dashboard uppy={uppy} proudlyDisplayPoweredByUppy={false} />
-          </Box>
         )}
       </Box>
     </Box>
