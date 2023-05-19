@@ -7,6 +7,7 @@ export * from "./models/file";
 export * from "./models/organization";
 export * from "./models/project";
 export * from "./models/sql-helpers";
+export * from "./models/task";
 export * from "./models/transcript";
 export { IdentitySub, User } from "./models/user";
 export * from "./subject";
