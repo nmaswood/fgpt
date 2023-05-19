@@ -1,6 +1,6 @@
 import { createTheme } from "@mui/material/styles";
 
-import { FGPT_BLUE, FGPT_PINK } from "./colors";
+import { FGPT_BLUE, FGPT_RED } from "./colors";
 
 const HEADER_FONT = `Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif;`;
 
@@ -44,10 +44,10 @@ export const THEME = createTheme({
   palette: {
     mode: "dark",
     primary: {
-      main: FGPT_PINK,
+      main: FGPT_BLUE,
     },
     secondary: {
-      main: FGPT_BLUE,
+      main: FGPT_RED,
     },
 
     background: {

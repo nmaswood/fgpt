@@ -32,16 +32,14 @@ const Home: React.FC = () => {
 
   return (
     <Box display="flex" height="100%" width="100%">
-      <Box display="flex" width="275px" height="100%" flexDirection="column">
-        <Sidebar
-          projects={projects}
-          selectedProjectId={selectedProjectId}
-          setSelectedProjectId={setSelectedProjectId}
-          selectedProjectIdx={selectedProjectIdx}
-          projectModalOpen={projectModalOpen}
-          setProjectModalOpen={setProjectModalOpen}
-        />
-      </Box>
+      <Sidebar
+        projects={projects}
+        selectedProjectId={selectedProjectId}
+        setSelectedProjectId={setSelectedProjectId}
+        selectedProjectIdx={selectedProjectIdx}
+        projectModalOpen={projectModalOpen}
+        setProjectModalOpen={setProjectModalOpen}
+      />
 
       <Box display="flex" width="100%" height="100%" bgcolor="background.paper">
         {projects !== undefined && projects.length === 0 && (
@@ -52,20 +50,18 @@ const Home: React.FC = () => {
             justifyContent="center"
             alignItems="center"
           >
-            <Box>
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  setProjectModalOpen(true);
-                }}
-                size="large"
-                startIcon={<AddIcon />}
-                sx={{ width: "100%" }}
-                color="primary"
-              >
-                Create project to begin
-              </Button>
-            </Box>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setProjectModalOpen(true);
+              }}
+              size="large"
+              startIcon={<AddIcon />}
+              sx={{ width: "fit-content" }}
+              color="primary"
+            >
+              Create project to begin
+            </Button>
           </Box>
         )}
 

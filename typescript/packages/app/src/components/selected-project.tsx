@@ -12,7 +12,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import {
   Box,
   Button,
-  Divider,
+  IconButton,
   List,
   ListItem,
   ListItemIcon,
@@ -23,6 +23,7 @@ import {
   Tab,
   Tabs,
 } from "@mui/material";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import Uppy from "@uppy/core";
 import { Dashboard } from "@uppy/react";
 import XHRUpload from "@uppy/xhr-upload";
@@ -84,6 +85,8 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
     setAnchorEl(null);
   };
 
+  const isLargeScreen = useMediaQuery("(min-width:600px)");
+
   return (
     <Box display="flex" flexDirection="column" height="100%" width="100%">
       <Box
@@ -101,24 +104,30 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
         >
           <Tab
             icon={<CloudUploadIcon />}
-            label="Upload project files"
+            label={isLargeScreen ? "Upload project files" : undefined}
             iconPosition="start"
           />
           <Tab
             icon={<CollectionsIcon />}
             iconPosition="start"
-            label="Explore project files"
+            label={isLargeScreen ? "Explore project files" : undefined}
           />
         </Tabs>
         <Box display="flex" alignItems="center">
-          <Button
-            startIcon={<SettingsIcon />}
-            onClick={handleClick}
-            variant="outlined"
-            sx={{ height: "40px" }}
-          >
-            Project settings
-          </Button>
+          {isLargeScreen ? (
+            <Button
+              startIcon={<SettingsIcon />}
+              onClick={handleClick}
+              variant="outlined"
+              sx={{ height: "40px" }}
+            >
+              Project settings
+            </Button>
+          ) : (
+            <IconButton onClick={handleClick} color="primary">
+              <SettingsIcon />
+            </IconButton>
+          )}
 
           <Menu
             id="basic-menu"
@@ -148,7 +157,6 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
         </Box>
       </Box>
 
-      <Divider />
       {value === 0 && (
         <Box
           display="flex"
@@ -168,24 +176,29 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
       )}
 
       {value === 1 && (
-        <Box display="flex" height="100%" width="100%" paddingLeft={1}>
+        <>
           {files.length === 0 && (
-            <Box display="flex" alignItems="center">
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              width="100%"
+              height="100%"
+            >
               <Button
                 variant="outlined"
                 onClick={() => {
                   setValue(0);
                 }}
+                color="secondary"
                 size="large"
                 startIcon={<CloudUploadIcon />}
-                sx={{ width: "100%" }}
-                color="secondary"
+                sx={{ width: "fit-content" }}
               >
                 Upload files to begin
               </Button>
             </Box>
           )}
-
           {files.length > 0 && (
             <List
               sx={{
@@ -206,7 +219,7 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
               ))}
             </List>
           )}
-        </Box>
+        </>
       )}
     </Box>
   );

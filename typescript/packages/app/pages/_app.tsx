@@ -13,9 +13,10 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <UserProvider>
       <Head>
-        <title>FGPT</title>
-        <meta name="description" content="Innovative care" />
+        <title>FGPT | AI Powered Finance</title>
+        <meta name="description" content="AI Powered Finance" />
         <link rel="icon" href="/favicon.svg" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
       <ThemeProvider theme={THEME}>
         <Box

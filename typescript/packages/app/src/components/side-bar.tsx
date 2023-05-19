@@ -32,6 +32,9 @@ import React from "react";
 
 import { useCreateProject } from "../hooks/use-create-project";
 
+const SIDE_BAR_PIXELS = 220;
+const SIDE_BAR_WIDTH = `${SIDE_BAR_PIXELS}px`;
+
 export const Sidebar: React.FC<{
   projects: Project[];
   selectedProjectId: string | undefined;
@@ -50,10 +53,10 @@ export const Sidebar: React.FC<{
   return (
     <Drawer
       sx={{
-        width: "240px",
+        width: SIDE_BAR_WIDTH,
         flexShrink: 0,
         "& .MuiDrawer-paper": {
-          width: "240px",
+          width: SIDE_BAR_WIDTH,
           boxSizing: "border-box",
         },
       }}
@@ -67,14 +70,7 @@ export const Sidebar: React.FC<{
         setProjectModalOpen={setProjectModalOpen}
       />
       <Divider />
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        flexDirection="column"
-        height="100%"
-        maxHeight="100%"
-        overflow="auto"
-      >
+      <Box display="flex" height="100%" maxHeight="100%" overflow="auto">
         {projects && projects.length > 0 && (
           <List
             disablePadding
@@ -122,7 +118,7 @@ export const Sidebar: React.FC<{
           </List>
         )}
       </Box>
-      <Divider />
+
       <DisplayUser />
     </Drawer>
   );
@@ -149,7 +145,7 @@ const CreateProject: React.FC<{
   );
 
   return (
-    <Box display="flex" flexDirection="column" gap={1} width="250px">
+    <Box display="flex" flexDirection="column" gap={1} width="100%">
       <Box
         display="flex"
         paddingY={2}
@@ -215,32 +211,6 @@ function errorDisplayName(error: InputError) {
 }
 
 type InputError = "too_long" | "too_short" | "already_exists";
-declare module "@mui/material/styles" {
-  interface Theme {
-    status: {
-      danger: string;
-    };
-    palette: {
-      primary: {
-        main: string;
-      };
-    };
-  }
-}
-
-declare module "@mui/material/styles" {
-  interface Theme {
-    status: {
-      danger: string;
-    };
-  }
-  // allow configuration using `createTheme`
-  interface ThemeOptions {
-    status?: {
-      danger?: string;
-    };
-  }
-}
 
 const DisplayUser = () => {
   const { user } = useUser();
@@ -248,9 +218,7 @@ const DisplayUser = () => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const handleClose = () => setAnchorEl(null);
 
   return (
     <Box
@@ -299,7 +267,7 @@ const DisplayUser = () => {
             }}
             PaperProps={{
               sx: {
-                width: "200px",
+                width: `${SIDE_BAR_PIXELS - 32}px`,
               },
             }}
           >
@@ -366,7 +334,7 @@ export const FormDialog: React.FC<{
           id="name"
           label="Project name"
           type="text"
-          color="secondary"
+          color="primary"
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => {
@@ -382,14 +350,14 @@ export const FormDialog: React.FC<{
         />
       </DialogContent>
       <DialogActions>
-        <Button disabled={loading} onClick={onClose} color="secondary">
+        <Button disabled={loading} onClick={onClose} color="primary">
           Cancel
         </Button>
         <LoadingButton
           loading={loading}
           onClick={onSubmit}
           variant="contained"
-          color="secondary"
+          color="primary"
         >
           Create project
         </LoadingButton>
