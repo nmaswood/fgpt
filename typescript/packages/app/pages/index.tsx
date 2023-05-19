@@ -8,7 +8,7 @@ import { Sidebar } from "../src/components/side-bar";
 import { useFetchProjects } from "../src/hooks/use-fetch-projects";
 
 const Home: React.FC = () => {
-  const { data: projects } = useFetchProjects();
+  const { data: projects, isLoading: projectsLoading } = useFetchProjects();
 
   const [selectedProjectId, setSelectedProjectId] = React.useState<
     string | undefined
@@ -42,28 +42,30 @@ const Home: React.FC = () => {
       />
 
       <Box display="flex" width="100%" height="100%" bgcolor="background.paper">
-        {projects !== undefined && projects.length === 0 && (
-          <Box
-            display="flex"
-            width="100%"
-            height="100%"
-            justifyContent="center"
-            alignItems="center"
-          >
-            <Button
-              variant="outlined"
-              onClick={() => {
-                setProjectModalOpen(true);
-              }}
-              size="large"
-              startIcon={<AddIcon />}
-              sx={{ width: "fit-content" }}
-              color="primary"
+        {!projectsLoading &&
+          projects !== undefined &&
+          projects.length === 0 && (
+            <Box
+              display="flex"
+              width="100%"
+              height="100%"
+              justifyContent="center"
+              alignItems="center"
             >
-              Create project to begin
-            </Button>
-          </Box>
-        )}
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  setProjectModalOpen(true);
+                }}
+                size="large"
+                startIcon={<AddIcon />}
+                sx={{ width: "fit-content" }}
+                color="primary"
+              >
+                Create project to begin
+              </Button>
+            </Box>
+          )}
 
         {selectedProject !== undefined && (
           <SelectedProject project={selectedProject} />

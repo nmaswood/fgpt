@@ -52,7 +52,11 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
     return () => uppy.resetProgress();
   }, [uppy]);
 
-  const { data: files, mutate } = useFetchFiles(project.id);
+  const {
+    data: files,
+    mutate,
+    isLoading: filesLoading,
+  } = useFetchFiles(project.id);
 
   const [value, setValue] = React.useState(0);
 
@@ -177,7 +181,7 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
 
       {value === 1 && (
         <>
-          {files.length === 0 && (
+          {!filesLoading && files.length === 0 && (
             <Box
               display="flex"
               alignItems="center"
