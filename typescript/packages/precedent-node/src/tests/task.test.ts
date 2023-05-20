@@ -51,6 +51,9 @@ test("insertMany", async () => {
       organizationId: user.organizationId,
       projectId: project.id,
       config: {
+        version: "1",
+        organizationId: user.organizationId,
+        projectId: project.id,
         type: "text-extraction",
         fileId: "123",
       },
@@ -69,6 +72,9 @@ test("setAsPending", async () => {
       organizationId: user.organizationId,
       projectId: project.id,
       config: {
+        version: "1",
+        organizationId: user.organizationId,
+        projectId: project.id,
         type: "text-extraction",
         fileId: "123",
       },
@@ -77,6 +83,9 @@ test("setAsPending", async () => {
       organizationId: user.organizationId,
       projectId: project.id,
       config: {
+        version: "1",
+        organizationId: user.organizationId,
+        projectId: project.id,
         type: "text-extraction",
         fileId: "123",
       },
@@ -95,6 +104,9 @@ test("setAsPending", async () => {
       organizationId: user.organizationId,
       projectId: project.id,
       config: {
+        version: "1",
+        organizationId: user.organizationId,
+        projectId: project.id,
         type: "text-extraction",
         fileId: "123",
       },

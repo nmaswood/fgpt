@@ -43,7 +43,7 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
           maxFileSize: 50_000_000,
         },
       }).use(XHRUpload, {
-        endpoint: "api/upload",
+        endpoint: "/api/upload",
       }),
     []
   );

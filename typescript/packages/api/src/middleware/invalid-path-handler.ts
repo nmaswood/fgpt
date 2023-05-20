@@ -1,9 +1,10 @@
 import type express from "express";
 
 export const invalidPathHandler = (
-  _: express.Request,
+  req: express.Request,
   res: express.Response
 ) => {
   res.status(404);
-  res.send("invalid path");
+  console.warn(`invalid path: ${req.path}`);
+  res.send(`invalid path: ${req.path}`);
 };

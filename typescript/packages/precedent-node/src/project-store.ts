@@ -10,6 +10,8 @@ export interface CreateProjectArgs {
 }
 
 export interface ProjectStore {
+  get: (projectId: string) => Promise<Project>;
+  getMany: (projectIds: string[]) => Promise<Project[]>;
   list: (organizationId: string) => Promise<Project[]>;
   create: (args: CreateProjectArgs) => Promise<Project>;
 }
@@ -28,6 +30,31 @@ FROM
     project
 WHERE
     organization_id = ${organizationId}
+`
+      );
+
+      return Array.from(values.rows);
+    });
+  }
+
+  async get(projectId: string): Promise<Project> {
+    const [project] = await this.getMany([projectId]);
+    if (!project) {
+      throw new Error("project not found");
+    }
+    return project;
+  }
+
+  async getMany(projectIds: string[]): Promise<Project[]> {
+    return this.pool.connect(async (cnx) => {
+      const values = await cnx.query(
+        sql.type(ZProjectRow)`
+SELECT
+    ${PROJECT_FIELDS}
+FROM
+    project
+WHERE
+    id IN ${sql.join(projectIds, sql.fragment`, `)}
 `
       );
 

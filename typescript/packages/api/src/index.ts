@@ -20,6 +20,7 @@ import {
   GoogleCloudStorageService,
   PsqlFileReferenceStore,
   PSqlProjectStore,
+  PSqlTaskService,
   PsqlUserOrgService,
 } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
@@ -68,6 +69,8 @@ async function start() {
   const fileReferenceStore = new PsqlFileReferenceStore(pool);
   const blobStorageService = new GoogleCloudStorageService();
 
+  const taskService = new PSqlTaskService(pool);
+
   app.use(cors({ origin: "*" }));
 
   app.use("/api/v1/user-org", jwtCheck, addUser, new UserOrgRouter().init());
@@ -86,7 +89,8 @@ async function start() {
     new FileRouter(
       fileReferenceStore,
       blobStorageService,
-      SETTINGS.assetBucket
+      SETTINGS.assetBucket,
+      taskService
     ).init()
   );
 

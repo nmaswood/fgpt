@@ -34,6 +34,7 @@
     "@uppy/react": "^3.1.2",
     "@uppy/xhr-upload": "^3.2.0",
     "next": "^13.4.3",
+    "next-http-proxy-middleware": "^1.2.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "swr": "^2.1.5",

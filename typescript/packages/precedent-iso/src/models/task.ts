@@ -1,10 +1,6 @@
 import { z } from "zod";
 
-export const ZTaskType = z.enum([
-  "text-extraction",
-  "text-chunking",
-  "embedding-generation",
-]);
+export const ZTaskType = z.enum(["text-extraction"]);
 
 export const ZTaskStatus = z.enum([
   "queued",
@@ -15,6 +11,9 @@ export const ZTaskStatus = z.enum([
 
 export const TextExtractionConfig = z.object({
   type: z.literal("text-extraction"),
+  version: z.literal("1"),
+  organizationId: z.string(),
+  projectId: z.string(),
   fileId: z.string(),
 });
 

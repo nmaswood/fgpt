@@ -1,8 +1,13 @@
 export { dataBasePool } from "./data-base-pool";
 export * from "./file-reference-store";
+export * from "./jobs/job-executor";
+export * from "./logger";
 export * from "./ml/ml-service";
 export * from "./object-store/object-store";
+export * from "./processed-file-store";
 export * from "./project-store";
 export * from "./project-store";
+export * from "./sha-hash";
 export * from "./task-service";
+export * from "./text-extractor";
 export * from "./user-org/user-org-service";

@@ -56,12 +56,13 @@ afterEach(async () => {
   );
 });
 
-test("raw-chunk-store", async () => {
+test("insertMany", async () => {
   const { project, fileReferenceStore } = await setup();
 
   const refs: InsertFileReference[] = [
     {
       fileName: "test-file-name.pdf",
+      organizationId: project.organizationId,
       projectId: project.id,
       bucketName: "test-bucket",
       contentType: "application/pdf",
@@ -75,6 +76,30 @@ test("raw-chunk-store", async () => {
   expect(res.id).toBeDefined();
 
   const fromList = await fileReferenceStore.list(project.id);
+  expect(fromList.length).toBe(1);
+  const [fromListRes] = fromList;
+  expect(fromListRes.fileName).toBe("test-file-name.pdf");
+  expect(fromListRes.projectId).toBe(project.id);
+  expect(fromListRes.contentType).toBe("application/pdf");
+  expect(fromListRes.id).toBeDefined();
+});
+
+test("getMany", async () => {
+  const { project, fileReferenceStore } = await setup();
+
+  const refs: InsertFileReference[] = [
+    {
+      fileName: "test-file-name.pdf",
+      organizationId: project.organizationId,
+      projectId: project.id,
+      bucketName: "test-bucket",
+      contentType: "application/pdf",
+      path: "my-path/foo",
+    },
+  ];
+  const [res] = await fileReferenceStore.insertMany(refs);
+
+  const fromList = await fileReferenceStore.getMany([res.id]);
   expect(fromList.length).toBe(1);
   const [fromListRes] = fromList;
   expect(fromListRes.fileName).toBe("test-file-name.pdf");

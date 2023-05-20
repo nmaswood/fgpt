@@ -20,8 +20,6 @@ terraform {
 }
 
 
-
-
 provider "vercel" {
   api_token = var.vercel_api_key
 }
@@ -113,15 +111,13 @@ resource "google_cloud_run_v2_job" "db" {
 
 
 locals {
-  job_runner_jobs = ["get-earnings-call-href", "process-earnings-call", "load-into-vector-db"]
 
   asset_bucket = "gs://${google_storage_bucket.asset_store.name}"
 }
 
 resource "google_cloud_run_v2_job" "job-runner" {
-  for_each = toset(local.job_runner_jobs)
 
-  name     = "${var.project_slug}-job-runner-${each.key}"
+  name     = "${var.project_slug}-job-runner"
   location = "us-central1"
 
   template {
@@ -153,17 +149,10 @@ resource "google_cloud_run_v2_job" "job-runner" {
           value = google_cloud_run_v2_service.springtime.uri
         }
 
-        env {
-
-          name  = "JOB_TYPE"
-          value = each.key
-
-        }
 
         env {
-          name  = "CHROMIUM_EXECUTABLE_PATH"
-          value = "/usr/bin/google-chrome"
-
+          name  = "ASSET_BUCKET"
+          value = local.asset_bucket
         }
 
         volume_mounts {

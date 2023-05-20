@@ -2,6 +2,8 @@ import {
   BlobStorageService,
   FileReferenceStore,
   InsertFileReference,
+  ShaHash,
+  TaskService,
 } from "@fgpt/precedent-node";
 import crypto from "crypto";
 import express from "express";
@@ -16,7 +18,8 @@ export class FileRouter {
   constructor(
     private readonly fileReferenceStore: FileReferenceStore,
     private readonly blobStorageService: BlobStorageService,
-    private readonly bucket: string
+    private readonly bucket: string,
+    private readonly taskService: TaskService
   ) {}
   init() {
     const router = express.Router();
@@ -41,26 +44,51 @@ export class FileRouter {
       async (req: express.Request, res: express.Response) => {
         const body = ZFileBody.parse(req.body);
         const file = getFile(req);
-
         const buffer = await F.readFile(file.path);
 
+        const organizationId = req.user.organizationId;
+        const projectId = body.projectId;
+
+        const extension = path.extname(file.originalname);
+
         const filePath = path.join(
-          req.user.organizationId,
-          body.projectId,
-          crypto.randomBytes(16).toString("hex")
+          "user-uploads",
+          organizationId,
+          projectId,
+          `${crypto.randomBytes(16).toString("hex")}${extension}`
         );
 
         await this.blobStorageService.upload(this.bucket, filePath, buffer);
 
         const ref: InsertFileReference = {
-          projectId: body.projectId,
+          projectId,
+          organizationId,
           fileName: file.originalname,
           contentType: file.mimetype,
           bucketName: this.bucket,
           path: filePath,
+          sha256: ShaHash.forData(buffer),
         };
 
-        await this.fileReferenceStore.insertMany([ref]);
+        const [fileRef] = await this.fileReferenceStore.insertMany([ref]);
+
+        if (fileRef === undefined) {
+          throw new Error("failed to insert file reference");
+        }
+
+        await this.taskService.insertMany([
+          {
+            organizationId,
+            projectId,
+            config: {
+              version: "1",
+              organizationId: req.user.organizationId,
+              projectId: req.body.projectId,
+              type: "text-extraction",
+              fileId: fileRef.id,
+            },
+          },
+        ]);
 
         res.json({ ok: true });
       }
@@ -73,6 +101,7 @@ export class FileRouter {
 const ZFileBody = z.object({
   projectId: z.string(),
 });
+ZFileBody;
 
 const ZFile = z.object({
   fieldname: z.string(),

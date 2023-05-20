@@ -36,6 +36,7 @@ export interface SetAsCompleted {
 export interface TaskService {
   insertMany(configs: CreateTask[]): Promise<Task[]>;
   setAsPending(config: SetAsPendingConfig): Promise<Task[]>;
+  setAsCompleted(config: SetAsCompleted[]): Promise<Task[]>;
 }
 
 const FIELDS = sql.fragment`task.id, task.organization_id, task.project_id, task.task_type, task.status, task.config`;
