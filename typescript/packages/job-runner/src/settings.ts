@@ -1,10 +1,6 @@
 import { z } from "zod";
 
-const ZJobType = z.enum([
-  "get-earnings-call-href",
-  "process-earnings-call",
-  "load-into-vector-db",
-]);
+const ZJobType = z.enum(["test"]);
 
 const ZSettings = z.object({
   sql: z.object({
@@ -12,7 +8,6 @@ const ZSettings = z.object({
   }),
   jobType: ZJobType,
   mlServiceUri: z.string(),
-  chromiumExecutablePath: z.string().optional(),
 });
 
 export type Settings = z.infer<typeof ZSettings>;
@@ -22,7 +17,6 @@ export const SETTINGS = ZSettings.parse({
   sql: {
     uri: process.env["SQL_URI"] ?? "test",
   },
-  jobType: process.env["JOB_TYPE"],
+  jobType: process.env["JOB_TYPE"] ?? "test",
   mlServiceUri: process.env["ML_SERVICE_URI"],
-  chromiumExecutablePath: process.env["CHROMIUM_EXECUTABLE_PATH"],
 });
