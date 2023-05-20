@@ -6,7 +6,7 @@ CREATE TABLE
     project_id UUID REFERENCES project (id),
     task_type text CHECK (char_length(task_type) <= 1024) NOT NULL,
     status text CHECK (char_length(status) <= 1024) NOT NULL,
-    status_changed_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW () NOT NULL,
+    status_updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW () NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW () NOT NULL,
     finished_at TIMESTAMP WITHOUT TIME ZONE,
     config jsonb,

@@ -65,6 +65,7 @@ test("raw-chunk-store", async () => {
       projectId: project.id,
       bucketName: "test-bucket",
       contentType: "application/pdf",
+      path: "my-path/foo",
     },
   ];
   const [res] = await fileReferenceStore.insertMany(refs);
