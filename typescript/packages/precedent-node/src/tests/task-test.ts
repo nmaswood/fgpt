@@ -2,10 +2,10 @@ import { sql } from "slonik";
 import { beforeEach, expect, test } from "vitest";
 
 import { dataBasePool } from "../data-base-pool";
-import { TEST_SETTINGS } from "../test-settings";
-import { PsqlUserOrgService } from "../user-org/user-org-service";
 import { PSqlProjectStore } from "../project-store";
 import { PSqlTaskService } from "../task-service";
+import { TEST_SETTINGS } from "../test-settings";
+import { PsqlUserOrgService } from "../user-org/user-org-service";
 
 async function setup() {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);

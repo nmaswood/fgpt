@@ -26,7 +26,6 @@
     "@mui/icons-material": "^5.11.16",
     "@mui/lab": "^5.0.0-alpha.130",
     "@mui/material": "^5.13.1",
-    "@types/mime-types": "^2.1.1",
     "@uppy/core": "^3.2.0",
     "@uppy/dashboard": "^3.4.0",
     "@uppy/drag-drop": "^3.0.2",
@@ -34,29 +33,28 @@
     "@uppy/progress-bar": "^3.0.2",
     "@uppy/react": "^3.1.2",
     "@uppy/xhr-upload": "^3.2.0",
-    "mime-types": "^2.1.35",
-    "next": "^13.4.2",
+    "next": "^13.4.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "swr": "^2.1.5",
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@next/eslint-plugin-next": "^13.4.2",
+    "@next/eslint-plugin-next": "^13.4.3",
     "@types/eslint": "^8.37.0",
-    "@types/node": "^20.1.7",
+    "@types/node": "^20.2.1",
     "@types/prettier": "^2.7.2",
     "@types/react": "^18.2.6",
     "@types/react-dom": "^18.2.4",
     "@typescript-eslint/eslint-plugin": "^5.59.6",
     "@typescript-eslint/parser": "^5.59.6",
     "concurrently": "^8.0.1",
-    "eslint": "^8.40.0",
+    "eslint": "^8.41.0",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "prettier": "^2.8.8",
     "typescript": "^5.0.4",
-    "vitest": "^0.31.0"
+    "vitest": "^0.31.1"
   }
 }

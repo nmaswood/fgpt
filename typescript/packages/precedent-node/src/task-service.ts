@@ -1,8 +1,8 @@
 import {
-  ZTaskConfig,
-  TaskStatus,
-  ZTaskStatus,
   TaskConfig,
+  TaskStatus,
+  ZTaskConfig,
+  ZTaskStatus,
 } from "@fgpt/precedent-iso";
 import { ZTaskType } from "@fgpt/precedent-iso";
 import { DatabasePool, sql } from "slonik";
