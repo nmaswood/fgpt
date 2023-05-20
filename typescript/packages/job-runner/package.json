@@ -6,12 +6,8 @@
     "@fgpt/precedent-iso": "workspace:^",
     "@fgpt/precedent-node": "workspace:^",
     "axios": "^1.4.0",
-    "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "pino": "^8.14.1",
-    "puppeteer": "^20.2.1",
-    "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "slonik": "^33.3.1",
     "typescript": "^5.0.4",
     "zod": "^3.21.4"
