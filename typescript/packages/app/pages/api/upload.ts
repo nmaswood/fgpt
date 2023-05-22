@@ -13,7 +13,6 @@ export const config = {
 async function proxy(req: NextApiRequest, res: NextApiResponse) {
   const { accessToken } = await getAccessToken(req, res);
   const target = `${SERVER_SETTINGS.publicApiEndpoint}/api/v1/files/upload`;
-  console.log({ req });
 
   httpProxyMiddleware(req, res, {
     target,

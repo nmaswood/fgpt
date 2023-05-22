@@ -5,9 +5,11 @@ import {
   CloudVisionTextExtractor,
   dataBasePool,
   JobExecutorImpl,
+  MLServiceClientImpl,
   PsqlFileReferenceStore,
   PsqlProcessedFileStore,
   PSqlTaskService,
+  PsqlTextChunkStore,
 } from "@fgpt/precedent-node";
 
 import { LOGGER } from "./logger";
@@ -27,10 +29,16 @@ async function start(settings: Settings) {
 
   const processedFileStore = new PsqlProcessedFileStore(pool);
 
+  const textChunkStore = new PsqlTextChunkStore(pool);
+
+  const mlServiceClient = new MLServiceClientImpl(settings.mlServiceUri);
+
   const executor = new JobExecutorImpl(
     textExtractor,
     taskService,
-    processedFileStore
+    processedFileStore,
+    textChunkStore,
+    mlServiceClient
   );
 
   LOGGER.info("Running executor...");

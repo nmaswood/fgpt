@@ -76,19 +76,17 @@ export class FileRouter {
           throw new Error("failed to insert file reference");
         }
 
-        await this.taskService.insertMany([
-          {
-            organizationId,
-            projectId,
-            config: {
-              version: "1",
-              organizationId: req.user.organizationId,
-              projectId: req.body.projectId,
-              type: "text-extraction",
-              fileId: fileRef.id,
-            },
+        await this.taskService.insert({
+          organizationId,
+          projectId,
+          config: {
+            version: "1",
+            organizationId: req.user.organizationId,
+            projectId: req.body.projectId,
+            type: "text-extraction",
+            fileId: fileRef.id,
           },
-        ]);
+        });
 
         res.json({ ok: true });
       }

@@ -112,7 +112,7 @@ resource "google_cloud_run_v2_job" "db" {
 
 locals {
 
-  asset_bucket = "gs://${google_storage_bucket.asset_store.name}"
+  asset_bucket = google_storage_bucket.asset_store.name
 }
 
 resource "google_cloud_run_v2_job" "job_runner" {

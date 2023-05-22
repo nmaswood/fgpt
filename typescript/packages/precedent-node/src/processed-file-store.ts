@@ -17,6 +17,7 @@ export interface UpsertProcessedFile {
 }
 
 export interface ProcessedFileStore {
+  upsert(args: UpsertProcessedFile): Promise<ProcessedFile>;
   upsertMany(args: UpsertProcessedFile[]): Promise<ProcessedFile[]>;
   getText(id: string): Promise<string>;
 }
@@ -41,6 +42,14 @@ WHERE
     id = ${id}
 `
     );
+  }
+
+  async upsert(args: UpsertProcessedFile): Promise<ProcessedFile> {
+    const [res] = await this.upsertMany([args]);
+    if (res === undefined) {
+      throw new Error("Upsert failed");
+    }
+    return res;
   }
 
   async upsertMany(args: UpsertProcessedFile[]): Promise<ProcessedFile[]> {

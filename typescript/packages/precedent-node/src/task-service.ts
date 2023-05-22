@@ -34,6 +34,7 @@ export interface SetAsCompleted {
 }
 
 export interface TaskService {
+  insert(config: CreateTask): Promise<Task>;
   insertMany(configs: CreateTask[]): Promise<Task[]>;
   setAsPending(config: SetAsPendingConfig): Promise<Task[]>;
   setAsCompleted(config: SetAsCompleted[]): Promise<Task[]>;
@@ -42,6 +43,14 @@ export interface TaskService {
 const FIELDS = sql.fragment`task.id, task.organization_id, task.project_id, task.task_type, task.status, task.config`;
 export class PSqlTaskService implements TaskService {
   constructor(private readonly pool: DatabasePool) {}
+
+  async insert(config: CreateTask): Promise<Task> {
+    const [task] = await this.insertMany([config]);
+    if (task === undefined) {
+      throw new Error("failed to make task");
+    }
+    return task;
+  }
 
   async setAsCompleted(config: SetAsCompleted[]): Promise<Task[]> {
     if (config.length === 0) {

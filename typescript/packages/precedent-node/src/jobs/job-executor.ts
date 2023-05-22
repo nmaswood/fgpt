@@ -1,10 +1,12 @@
-import { assertNever } from "@fgpt/precedent-iso";
+import { assertNever, GreedyTextChunker } from "@fgpt/precedent-iso";
 
 import { LOGGER } from "../logger";
 import { ProcessedFileStore } from "../processed-file-store";
 import { ShaHash } from "../sha-hash";
 import { Task, TaskService } from "../task-service";
+import { TextChunkStore } from "../text-chunk-store";
 import { TextExtractor } from "../text-extractor";
+import { MLServiceClient } from "../ml/ml-service";
 
 export interface RunOptions {
   limit: number;
@@ -18,7 +20,9 @@ export class JobExecutorImpl implements JobExecutor {
   constructor(
     private readonly textExtractor: TextExtractor,
     private readonly taskService: TaskService,
-    private readonly processedFileStore: ProcessedFileStore
+    private readonly processedFileStore: ProcessedFileStore,
+    private readonly textChunkStore: TextChunkStore,
+    private readonly mlService: MLServiceClient
   ) {}
 
   async run(options: RunOptions): Promise<void> {
@@ -61,23 +65,91 @@ export class JobExecutorImpl implements JobExecutor {
     }
   }
 
-  async #executeTask(task: Task) {
-    switch (task.config.type) {
+  async #executeTask({ config }: Task) {
+    switch (config.type) {
       case "text-extraction": {
-        const { text } = await this.textExtractor.extract(task.config.fileId);
-        await this.processedFileStore.upsertMany([
-          {
-            organizationId: task.config.organizationId,
-            projectId: task.config.projectId,
-            fileReferenceId: task.config.fileId,
-            text,
-            hash: ShaHash.forData(text),
+        const { text } = await this.textExtractor.extract(config.fileId);
+        const processedFile = await this.processedFileStore.upsert({
+          organizationId: config.organizationId,
+          projectId: config.projectId,
+          fileReferenceId: config.fileId,
+          text,
+          hash: ShaHash.forData(text),
+        });
+
+        await this.taskService.insert({
+          organizationId: config.organizationId,
+          projectId: config.projectId,
+          config: {
+            type: "text-chunk",
+            version: "1",
+            organizationId: config.organizationId,
+            projectId: config.projectId,
+            fileId: config.fileId,
+            processedFileId: processedFile.id,
           },
-        ]);
+        });
+
+        break;
+      }
+      case "text-chunk": {
+        const text = await this.processedFileStore.getText(
+          config.processedFileId
+        );
+        const chunker = new GreedyTextChunker();
+        const chunks = chunker.chunk({
+          tokenChunkLimit: 500,
+          text,
+        });
+
+        await this.textChunkStore.upsertMany(
+          chunks.map((chunkText, chunkOrder) => ({
+            version: "1",
+            organizationId: config.organizationId,
+            projectId: config.projectId,
+            fileReferenceId: config.fileId,
+            processedFileId: config.processedFileId,
+            chunkOrder,
+            chunkText,
+            hash: ShaHash.forData(chunkText),
+          }))
+        );
+
+        await this.taskService.insert({
+          organizationId: config.organizationId,
+          projectId: config.projectId,
+          config: {
+            type: "gen-embeddings",
+            version: "1",
+            organizationId: config.organizationId,
+            projectId: config.projectId,
+            fileId: config.fileId,
+            processedFileId: config.processedFileId,
+          },
+        });
+
+        break;
+      }
+
+      case "gen-embeddings": {
+        const chunks = await this.textChunkStore.listWithNoEmbeddings(
+          config.processedFileId
+        );
+
+        const embeddings = await this.mlService.getEmbeddings({
+          documents: chunks.map((chunk) => chunk.chunkText),
+        });
+
+        const withEmbeddings = chunks.map((chunk, i) => ({
+          chunkId: chunk.id,
+          embedding: embeddings.response[i]!,
+        }));
+
+        await this.textChunkStore.setManyEmbeddings(withEmbeddings);
         break;
       }
       default:
-        assertNever(task.config.type);
+        assertNever(config);
     }
   }
 }
