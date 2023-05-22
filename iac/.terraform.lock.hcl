@@ -23,28 +23,6 @@ provider "registry.terraform.io/auth0/auth0" {
   ]
 }
 
-provider "registry.terraform.io/biosugar0/pinecone" {
-  version = "0.0.2"
-  hashes = [
-    "h1:NMvUJsQBmFTbgiOxuptL9Qx2Yrbr8kcJVWU5EEmj/lY=",
-    "zh:152ed7c828d1fe04828fef1420839d83ae048545827bd85b00f40a2fc19306ad",
-    "zh:2d868847c929423ec9bd934845f46cd959581bfdf939192fb8b3418211a5bb17",
-    "zh:6c6ffb3a3f1565fbdbc51168dba77c93c959fd49264517db31f32d7082333613",
-    "zh:81cc37003b9c01a5ea350810429d938d7b8f90a0f3d598c478be3fbb25590a77",
-    "zh:8609fa1ea44bfe4be9c429ea30fc2aca93c83a6de86bfc4836feb89629e8f7f7",
-    "zh:890df766e9b839623b1f0437355032a3c006226a6c200cd911e15ee1a9014e9f",
-    "zh:94dce96cbbdf74c1084aba5e38a7bee902786cb1f57823410fb4cc78b465df76",
-    "zh:a9bec99022439b98ea80f8ba66a9e10774140ce014a497756dd84998fe22f62a",
-    "zh:b46ef662c4a0b6020ea13014cd3e2ba9540d87a53dc536832489d5e867bddc68",
-    "zh:b7e576fd05653889603e5e3ee922a357400bd8c1d8c6e3d45d78a3b3e1ce2cdc",
-    "zh:be6c1b0e263865cbc574ba064c988b7ea1dc5963452b5f3d8425822b0beee00a",
-    "zh:c2392b1ad8b34611bde634eab9f8d281e670fac3e13cba5a7af3518a25fad86c",
-    "zh:db27f82890f05ef7d739dd2ecc3ea3dc5557f397a91fb9789cc3cb2c705a3823",
-    "zh:e1b31e356a7db727d66ac0208b86073ed5fd600871c605a60461d034474c6d24",
-    "zh:f72a0a00e9397f37940893e36af560721850de409b30c0982758ee8a8df39b37",
-  ]
-}
-
 provider "registry.terraform.io/hashicorp/google" {
   version     = "4.51.0"
   constraints = "4.51.0"

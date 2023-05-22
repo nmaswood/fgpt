@@ -115,7 +115,7 @@ locals {
   asset_bucket = "gs://${google_storage_bucket.asset_store.name}"
 }
 
-resource "google_cloud_run_v2_job" "job-runner" {
+resource "google_cloud_run_v2_job" "job_runner" {
 
   name     = "${var.project_slug}-job-runner"
   location = "us-central1"
@@ -163,8 +163,71 @@ resource "google_cloud_run_v2_job" "job-runner" {
 
     }
   }
-
 }
+
+# Cloud Run Invoker Service Account
+resource "google_service_account" "cloud_run_invoker_sa" {
+  account_id   = "cloud-run-invoker"
+  display_name = "Cloud Run Invoker"
+  project      = var.project
+}
+
+# Project IAM binding
+resource "google_project_iam_binding" "run_invoker_binding" {
+  project = var.project
+  role    = "roles/run.invoker"
+  members = ["serviceAccount:${google_service_account.cloud_run_invoker_sa.email}"]
+}
+
+resource "google_project_iam_binding" "token_creator_binding" {
+  project = var.project
+  role    = "roles/iam.serviceAccountTokenCreator"
+  members = ["serviceAccount:${google_service_account.cloud_run_invoker_sa.email}"]
+}
+
+
+resource "google_cloud_run_v2_job_iam_binding" "binding" {
+  project    = var.project
+  location   = google_cloud_run_v2_job.job_runner.location
+  name       = google_cloud_run_v2_job.job_runner.name
+  role       = "roles/viewer"
+  members    = ["serviceAccount:${google_service_account.cloud_run_invoker_sa.email}"]
+  depends_on = [resource.google_cloud_run_v2_job.job_runner]
+}
+
+
+resource "google_cloud_scheduler_job" "job" {
+  name             = "schedule-job"
+  description      = "test http job"
+  schedule         = "*/10 * * * *"
+  attempt_deadline = "320s"
+  region           = var.region
+  project          = var.project
+
+  retry_config {
+    retry_count = 3
+  }
+
+  http_target {
+    http_method = "POST"
+    uri         = "https://${google_cloud_run_v2_job.job_runner.location}-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/${392400263239}/jobs/${google_cloud_run_v2_job.job_runner.name}:run"
+
+    oauth_token {
+      service_account_email = google_service_account.cloud_run_invoker_sa.email
+    }
+
+  }
+
+
+  depends_on = [
+    google_project_service.enable_services,
+    resource.google_cloud_run_v2_job.job_runner,
+    resource.google_cloud_run_v2_job_iam_binding.binding
+
+  ]
+}
+
+
 
 resource "google_cloudbuild_trigger" "build-api" {
   location = var.region
