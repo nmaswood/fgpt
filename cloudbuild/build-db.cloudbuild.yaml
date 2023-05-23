@@ -18,6 +18,20 @@ steps:
         "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/db:$SHORT_SHA",
         "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/db:latest",
       ]
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "beta",
+        "run",
+        "jobs",
+        "update",
+        "db",
+        "--image",
+        "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/db:$SHORT_SHA",
+        "--region",
+        "${_LOCATION}",
+        "--wait",
+      ]
 
 options:
   logging: CLOUD_LOGGING_ONLY
