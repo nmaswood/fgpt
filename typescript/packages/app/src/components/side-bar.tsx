@@ -104,6 +104,9 @@ export const Sidebar: React.FC<{
                   key={project.id}
                   selected={project.id === selectedProjectId}
                   onClick={() => setSelectedProjectId(project.id)}
+                  sx={{
+                    width: SIDE_BAR_WIDTH,
+                  }}
                 >
                   <ListItemIcon>
                     <FolderIcon color="primary" />

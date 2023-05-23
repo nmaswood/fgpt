@@ -3,6 +3,8 @@ import "@uppy/core/dist/style.min.css";
 import "@uppy/dashboard/dist/style.min.css";
 
 import { Project } from "@fgpt/precedent-iso";
+import { MAX_FILE_SIZE_BYTES } from "@fgpt/precedent-iso";
+import BoltIcon from "@mui/icons-material/Bolt";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CollectionsIcon from "@mui/icons-material/Collections";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -29,7 +31,6 @@ import { Dashboard } from "@uppy/react";
 import XHRUpload from "@uppy/xhr-upload";
 import React from "react";
 
-import { MAX_FILE_SIZE_BYTES } from "@fgpt/precedent-iso";
 import { useFetchFiles } from "../hooks/use-fetch-files";
 
 export const SelectedProject: React.FC<{ project: Project }> = ({
@@ -117,6 +118,11 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
             iconPosition="start"
             label={isLargeScreen ? "Explore project files" : undefined}
           />
+          <Tab
+            icon={<BoltIcon />}
+            iconPosition="start"
+            label={isLargeScreen ? "Chat" : undefined}
+          />
         </Tabs>
         <Box display="flex" alignItems="center">
           {isLargeScreen ? (
@@ -145,13 +151,13 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
             }}
           >
             <MenuList dense disablePadding>
-              <MenuItem>
+              <MenuItem onClick={handleClose}>
                 <ListItemIcon>
-                  <DeleteIcon fontSize="small" />
+                  <DeleteIcon fontSize="small" color="secondary" />
                 </ListItemIcon>
                 <ListItemText>Delete project</ListItemText>
               </MenuItem>
-              <MenuItem>
+              <MenuItem onClick={handleClose}>
                 <ListItemIcon>
                   <ModeEditIcon fontSize="small" />
                 </ListItemIcon>
@@ -223,6 +229,33 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
                 </ListItem>
               ))}
             </List>
+          )}
+        </>
+      )}
+
+      {value === 2 && (
+        <>
+          {!filesLoading && files.length === 0 && (
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              width="100%"
+              height="100%"
+            >
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  setValue(0);
+                }}
+                color="secondary"
+                size="large"
+                startIcon={<CloudUploadIcon />}
+                sx={{ width: "fit-content" }}
+              >
+                Upload files to begin
+              </Button>
+            </Box>
           )}
         </>
       )}
