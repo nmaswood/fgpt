@@ -29,6 +29,7 @@ import { Dashboard } from "@uppy/react";
 import XHRUpload from "@uppy/xhr-upload";
 import React from "react";
 
+import { MAX_FILE_SIZE_BYTES } from "@fgpt/precedent-iso";
 import { useFetchFiles } from "../hooks/use-fetch-files";
 
 export const SelectedProject: React.FC<{ project: Project }> = ({
@@ -40,7 +41,7 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
         restrictions: {
           allowedFileTypes: [".pdf"],
           minFileSize: 1,
-          maxFileSize: 50_000_000,
+          maxFileSize: MAX_FILE_SIZE_BYTES,
         },
       }).use(XHRUpload, {
         endpoint: "/api/upload",

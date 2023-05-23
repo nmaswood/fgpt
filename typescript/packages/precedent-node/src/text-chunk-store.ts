@@ -22,6 +22,12 @@ export interface UpsertTextChunk {
   hash: string;
 }
 
+export interface EmbeddingResult {
+  chunkId: string;
+  embedding: number[];
+  embeddingSize: number;
+}
+
 export interface SetManyEmbeddings {
   chunkId: string;
   embedding: number[];
@@ -29,12 +35,49 @@ export interface SetManyEmbeddings {
 export interface TextChunkStore {
   upsertMany(args: UpsertTextChunk[]): Promise<TextChunk[]>;
   setManyEmbeddings(args: SetManyEmbeddings[]): Promise<TextChunk[]>;
+
+  getEmbedding(ids: string): Promise<EmbeddingResult>;
+  getEmbeddings(ids: string[]): Promise<EmbeddingResult[]>;
   listWithNoEmbeddings(processedFileId: string): Promise<TextChunk[]>;
 }
 
 const FIELDS = sql.fragment`text_chunk.id, organization_id, project_id, file_reference_id, processed_file_id, chunk_order, chunk_text, text_chunk.embedding IS NOT NULL AS has_embedding`;
 export class PsqlTextChunkStore implements TextChunkStore {
   constructor(private readonly pool: DatabasePool) {}
+
+  async getEmbedding(id: string): Promise<EmbeddingResult> {
+    const [embeddings] = await this.getEmbeddings([id]);
+    if (!embeddings) {
+      throw new Error("not found");
+    }
+    return embeddings;
+  }
+
+  async getEmbeddings(ids: string[]): Promise<EmbeddingResult[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+    return this.pool.connect(async (cnx) => this.#getEmbeddings(cnx, ids));
+  }
+
+  async #getEmbeddings(
+    cnx: DatabasePoolConnection,
+    ids: string[]
+  ): Promise<EmbeddingResult[]> {
+    const resp = await cnx.query(
+      sql.type(ZEmbeddingRow)`
+SELECT
+    id,
+    embedding,
+    embedding_size
+FROM
+    text_chunk
+WHERE
+    id IN (${sql.join(ids, sql.fragment`, `)})
+`
+    );
+    return Array.from(resp.rows);
+  }
 
   async setManyEmbeddings(args: SetManyEmbeddings[]): Promise<TextChunk[]> {
     if (args.length === 0) {
@@ -166,4 +209,16 @@ const ZTextChunkRow = z
     chunkOrder: row.chunk_order,
     chunkText: row.chunk_text,
     hasEmbedding: row.has_embedding,
+  }));
+
+const ZEmbeddingRow = z
+  .object({
+    id: z.string(),
+    embedding: z.string(),
+    embedding_size: z.number(),
+  })
+  .transform((row) => ({
+    chunkId: row.id,
+    embedding: JSON.parse(row.embedding),
+    embeddingSize: row.embedding_size,
   }));

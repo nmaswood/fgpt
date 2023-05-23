@@ -4,6 +4,7 @@ export const ZTaskType = z.enum([
   "text-extraction",
   "text-chunk",
   "gen-embeddings",
+  "upsert-embeddings",
 ]);
 
 export const ZTaskStatus = z.enum([
@@ -39,10 +40,21 @@ export const GenEmbeddingsConfig = z.object({
   processedFileId: z.string(),
 });
 
+export const UpsertEmbeddingsConfig = z.object({
+  type: z.literal("upsert-embeddings"),
+  version: z.literal("1"),
+  organizationId: z.string(),
+  projectId: z.string(),
+  fileId: z.string(),
+  processedFileId: z.string(),
+  chunkIds: z.string().array(),
+});
+
 export const ZTaskConfig = z.discriminatedUnion("type", [
   TextExtractionConfig,
   TextChunkConfig,
   GenEmbeddingsConfig,
+  UpsertEmbeddingsConfig,
 ]);
 
 export type TaskType = z.infer<typeof ZTaskType>;

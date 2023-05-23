@@ -151,3 +151,30 @@ test("setManyEmbeddings", async () => {
 
   expect(res2.hasEmbedding).toEqual(true);
 });
+
+test("getEmbedding", async () => {
+  const { processedFile, chunkStore } = await setup();
+
+  const [res] = await chunkStore.upsertMany([
+    {
+      organizationId: processedFile.organizationId,
+      projectId: processedFile.projectId,
+      fileReferenceId: processedFile.fileReferenceId,
+      processedFileId: processedFile.id,
+      chunkOrder: 0,
+      chunkText: "hi",
+      hash: ShaHash.forData("hi"),
+    },
+  ]);
+
+  await chunkStore.setManyEmbeddings([
+    {
+      chunkId: res.id,
+      embedding: [1, 2, 3],
+    },
+  ]);
+
+  const embedding = await chunkStore.getEmbedding(res.id);
+
+  expect(embedding.embedding).toEqual([1, 2, 3]);
+});

@@ -1,12 +1,13 @@
 import { assertNever, GreedyTextChunker } from "@fgpt/precedent-iso";
+import keyBy from "lodash/keyBy";
 
 import { LOGGER } from "../logger";
+import { MLServiceClient } from "../ml/ml-service";
 import { ProcessedFileStore } from "../processed-file-store";
 import { ShaHash } from "../sha-hash";
 import { Task, TaskService } from "../task-service";
 import { TextChunkStore } from "../text-chunk-store";
 import { TextExtractor } from "../text-extractor";
-import { MLServiceClient } from "../ml/ml-service";
 
 export interface RunOptions {
   limit: number;
@@ -135,6 +136,10 @@ export class JobExecutorImpl implements JobExecutor {
         const chunks = await this.textChunkStore.listWithNoEmbeddings(
           config.processedFileId
         );
+        if (chunks.length === 0) {
+          LOGGER.warn("No chunk ids with embeddings present, skipping");
+          return;
+        }
 
         const embeddings = await this.mlService.getEmbeddings({
           documents: chunks.map((chunk) => chunk.chunkText),
@@ -145,7 +150,42 @@ export class JobExecutorImpl implements JobExecutor {
           embedding: embeddings.response[i]!,
         }));
 
-        await this.textChunkStore.setManyEmbeddings(withEmbeddings);
+        const chunksWritten = await this.textChunkStore.setManyEmbeddings(
+          withEmbeddings
+        );
+
+        await this.taskService.insert({
+          organizationId: config.organizationId,
+          projectId: config.projectId,
+          config: {
+            type: "upsert-embeddings",
+            version: "1",
+            organizationId: config.organizationId,
+            projectId: config.projectId,
+            fileId: config.fileId,
+            processedFileId: config.processedFileId,
+            chunkIds: chunksWritten.map((chunk) => chunk.id),
+          },
+        });
+        break;
+      }
+      case "upsert-embeddings": {
+        const embeddings = await this.textChunkStore.getEmbeddings(
+          config.chunkIds
+        );
+        const byChunkId = keyBy(embeddings, (e) => e.chunkId);
+        await this.mlService.upsertVectors(
+          config.chunkIds.map((id) => ({
+            id,
+            vector: byChunkId[id]!.embedding,
+            metadata: {
+              organizationId: config.organizationId,
+              projectId: config.projectId,
+              fileId: config.fileId,
+              processedFileId: config.processedFileId,
+            },
+          }))
+        );
         break;
       }
       default:
