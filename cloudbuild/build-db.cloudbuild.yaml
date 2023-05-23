@@ -25,7 +25,7 @@ steps:
         "run",
         "jobs",
         "update",
-        "db",
+        "fgpt-db",
         "--image",
         "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/db:$SHORT_SHA",
         "--region",
