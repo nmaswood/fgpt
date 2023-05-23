@@ -12,7 +12,7 @@ CREATE TABLE
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW () NOT NULL,
     embedding jsonb,
     embedding_size int CHECK (embedding_size > 0),
-    chunk_strategy text CHECK (char_length(chunk_strategy) > 0) NOT NULL,
+    chunk_strategy text CHECK (char_length(chunk_strategy) > 0) NOT NULL
   );
 
 CREATE UNIQUE INDEX IF NOT EXISTS "text_chunk_uniq" ON "text_chunk" (
