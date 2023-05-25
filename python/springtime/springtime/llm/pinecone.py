@@ -1,5 +1,7 @@
+from os import name
 from re import S
 import random
+from sre_compile import IN
 import pinecone
 
 from pydantic import BaseModel
@@ -21,6 +23,7 @@ class UpsertVector(BaseModel):
 
 def upsert_vectors(upsert_vectors: list[UpsertVector]):
     index = get_pinecone_index()
+
     index.upsert(
         vectors=[
             (upsert_vector.id, upsert_vector.vector, upsert_vector.metadata) for upsert_vector in upsert_vectors
@@ -48,24 +51,8 @@ def get_pinecone_index():
     global INDEX
     if INDEX is None:
         INDEX = pinecone.Index(index_name=SETTINGS.pinecone_index)
+    resp = INDEX.delete(delete_all=True, namespace='production')
+    print("hello world")
+    print(resp)
     return INDEX
 
-
-def generate_fake_vector(size: int):
-    return [random.random() for _ in range(size)]
-
-
-def play_pinecone():
-    # index = get_pinecone_index()
-
-    # upsert_response = index.upsert(
-    # vectors=[
-    # ("vec1", generate_fake_vector(1536), {"genre": "drama"}),
-    # ("vec2", generate_fake_vector(1536), {"genre": "action"}),
-    # ],
-    # namespace=SETTINGS.pinecone_namespace
-    # )
-
-    fake = generate_fake_vector(1536)
-    get_similar(fake, {})
-    # print(upsert_response)

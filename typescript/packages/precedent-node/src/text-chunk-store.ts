@@ -73,6 +73,8 @@ export interface TextChunkStore {
     args: UpsertTextChunkGroup[]
   ): Promise<TextChunkGroup[]>;
 
+  getTextChunks(ids: string[]): Promise<TextChunk[]>;
+
   upsertTextChunk(
     common: UpsertTextChunkCommon,
     args: UpsertTextChunk
@@ -280,6 +282,18 @@ ORDER BY
       );
       return Array.from(resp.rows);
     });
+  }
+
+  async getTextChunks(ids: string[]): Promise<TextChunk[]> {
+    const res = await this.pool.query(
+      sql.type(ZTextChunkRow)`
+      SELECT ${TEXT_CHUNK_FIELDS}
+      FROM text_chunk
+      WHERE id IN (${sql.join(ids, sql.fragment`, `)})
+      `
+    );
+
+    return Array.from(res.rows);
   }
 
   async upsertTextChunk(

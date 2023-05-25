@@ -18,9 +18,11 @@ import { dataBasePool } from "./sql";
 
 import {
   GoogleCloudStorageService,
+  MLServiceClientImpl,
   PsqlFileReferenceStore,
   PSqlProjectStore,
   PSqlTaskService,
+  PsqlTextChunkStore,
   PsqlUserOrgService,
 } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
@@ -72,6 +74,10 @@ async function start() {
 
   const taskService = new PSqlTaskService(pool);
 
+  const textChunkStore = new PsqlTextChunkStore(pool);
+
+  const mlService = new MLServiceClientImpl(SETTINGS.mlServiceUri);
+
   app.use(cors({ origin: "*" }));
 
   app.use("/api/v1/user-org", jwtCheck, addUser, new UserOrgRouter().init());
@@ -95,7 +101,12 @@ async function start() {
     ).init()
   );
 
-  app.use("/api/v1/chat", jwtCheck, addUser, new ChatRouter().init());
+  app.use(
+    "/api/v1/chat",
+    jwtCheck,
+    addUser,
+    new ChatRouter(mlService, textChunkStore).init()
+  );
 
   app.use("/ping", (_, res) => {
     res.json({ ping: "pong" });

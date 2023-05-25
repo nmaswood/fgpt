@@ -1,30 +1,41 @@
+import { MLServiceClient, TextChunkStore } from "@fgpt/precedent-node";
 import express from "express";
 import { z } from "zod";
 
 export class ChatRouter {
+  constructor(
+    private readonly mlClient: MLServiceClient,
+    private readonly textChunkStore: TextChunkStore
+  ) {}
   init() {
     const router = express.Router();
 
     router.post(
       "/chat",
       async (req: express.Request, res: express.Response) => {
-        const user = req.user;
         const args = ZChatArguments.parse(req.body);
-        console.log({ user, args });
+
+        const vector = await this.mlClient.getEmbedding(args.question);
+
+        const similarDocuments = await this.mlClient.getKSimilar({
+          vector,
+          metadata: { projectId: args.projectId },
+        });
+
+        const chunks = await this.textChunkStore.getTextChunks(
+          similarDocuments
+        );
+
+        const justText = chunks.map((chunk) => chunk.chunkText);
+
+        const answer = await this.mlClient.askQuestion({
+          context: justText.join("\n"),
+          question: args.question,
+        });
 
         const chatResponse: ChatResponse = {
-          answer: "dummy answer",
-          context: [
-            "dummy context",
-            "dummy context",
-            "dummy context",
-            "dummy context",
-            "dummy context",
-            "dummy context",
-            "dummy context",
-            "dummy context",
-            "dummy context",
-          ],
+          answer: answer,
+          context: justText,
         };
 
         res.json(chatResponse);

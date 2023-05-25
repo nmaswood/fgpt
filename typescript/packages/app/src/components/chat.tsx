@@ -52,7 +52,7 @@ export const Chat: React.FC<{ projectId: string }> = ({ projectId }) => {
   const [input, setInput] = React.useState("");
   const [qs, setQs] = React.useState<QuestionWithAnswer[]>([]);
 
-  const { isMutating, data, trigger } = useAskQuestion();
+  const { isMutating, trigger } = useAskQuestion();
 
   const trimmed = input.trim();
 
@@ -100,7 +100,6 @@ export const Chat: React.FC<{ projectId: string }> = ({ projectId }) => {
     setQs(copy);
     setInput("");
   };
-  console.log({ qs });
 
   return (
     <Box
@@ -220,7 +219,7 @@ const RenderQ: React.FC<{ q: QuestionWithAnswer }> = ({ q }) => {
           display: "flex",
         }}
       >
-        <Box display="flex" width="56" height="40" marginRight={2}>
+        <Box ref={ref} display="flex" width="56" height="40" marginRight={2}>
           <ResponseAvatar state={q.state.type} />
         </Box>
 
@@ -253,8 +252,8 @@ const ResponseAvatar: React.FC<{ state: "loading" | "error" | "data" }> = ({
       );
     case "data":
       return (
-        <Avatar variant="rounded" color="secondary">
-          <InsertCommentIcon color="secondary" />
+        <Avatar variant="rounded" color="primary">
+          <InsertCommentIcon color="primary" />
         </Avatar>
       );
     default:
@@ -291,7 +290,7 @@ const ResponseContent: React.FC<{ val: QuestionWithAnswer["state"] }> = ({
             height="100%"
             alignItems="center"
           >
-            <Typography color="secondary">{val.answer}</Typography>
+            <Typography color="white">{val.answer}</Typography>
             {val.context.length > 0 && (
               <IconButton
                 onClick={() => setOpen((prev) => !prev)}

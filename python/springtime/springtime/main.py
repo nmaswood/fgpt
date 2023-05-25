@@ -102,4 +102,6 @@ print("HOST", SETTINGS.host)
 # todo disable reload in prod
 def start():
     uvicorn.run("springtime.main:app", host=SETTINGS.host,
-                port=SETTINGS.port)
+                port=SETTINGS.port,
+                reload=True,
+                )
