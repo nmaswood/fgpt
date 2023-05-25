@@ -27,6 +27,7 @@ import { UserInformationMiddleware } from "./middleware/user-information-middlew
 import { UserOrgRouter } from "./routers/user-org-router";
 import { ProjectRouter } from "./routers/project-router";
 import { FileRouter } from "./routers/file-router";
+import { ChatRouter } from "./routers/chat-router";
 
 LOGGER.info("Server starting ...");
 
@@ -93,6 +94,8 @@ async function start() {
       taskService
     ).init()
   );
+
+  app.use("/api/v1/chat", jwtCheck, addUser, new ChatRouter().init());
 
   app.use("/ping", (_, res) => {
     res.json({ ping: "pong" });
