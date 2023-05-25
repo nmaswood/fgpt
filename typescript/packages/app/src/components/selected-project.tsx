@@ -2,27 +2,21 @@
 import "@uppy/core/dist/style.min.css";
 import "@uppy/dashboard/dist/style.min.css";
 
-import { useUser } from "@auth0/nextjs-auth0/client";
 import { Project } from "@fgpt/precedent-iso";
 import { MAX_FILE_SIZE_BYTES } from "@fgpt/precedent-iso";
 import BoltIcon from "@mui/icons-material/Bolt";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CollectionsIcon from "@mui/icons-material/Collections";
 import DeleteIcon from "@mui/icons-material/Delete";
-import InsertCommentIcon from "@mui/icons-material/InsertComment";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import SendIcon from "@mui/icons-material/Send";
 import SettingsIcon from "@mui/icons-material/Settings";
 import {
-  Avatar,
   Box,
   Button,
   IconButton,
-  InputAdornment,
   List,
   ListItem,
-  ListItemAvatar,
   ListItemIcon,
   ListItemText,
   Menu,
@@ -30,13 +24,14 @@ import {
   MenuList,
   Tab,
   Tabs,
-  TextField,
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Uppy from "@uppy/core";
 import { Dashboard } from "@uppy/react";
 import XHRUpload from "@uppy/xhr-upload";
+
 import React from "react";
+import { Chat } from "./chat";
 
 import { useFetchFiles } from "../hooks/use-fetch-files";
 
@@ -267,7 +262,7 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
 
           {!filesLoading && files.length > 0 && (
             <Box display="flex" width="100%" height="100%">
-              <Chat />
+              <Chat projectId={project.id} />
             </Box>
           )}
         </>
@@ -275,172 +270,3 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
     </Box>
   );
 };
-
-interface QuestionWithAnswer {
-  question: string;
-  answer: string;
-}
-
-const Chat = () => {
-  const [input, setInput] = React.useState("");
-  const [qs, setQs] = React.useState<QuestionWithAnswer[]>([]);
-
-  const trimmed = input.trim();
-
-  const submit = () => {
-    const trimmed = input.trim();
-    if (!trimmed.length) {
-      return;
-    }
-
-    setQs((prev) => [...prev, { question: trimmed, answer: mockResponse() }]);
-    setInput("");
-  };
-  return (
-    <Box
-      display="flex"
-      width="100%"
-      height="100%"
-      flexDirection="column"
-      gap={15}
-    >
-      <Box
-        display="flex"
-        width="100%"
-        height="100%"
-        maxHeight="100%"
-        overflow="auto"
-      >
-        {qs.length > 0 && (
-          <List sx={{ width: "100%" }}>
-            {qs.map((q, index) => (
-              <RenderQ key={index} q={q} />
-            ))}
-          </List>
-        )}
-      </Box>
-      <Box
-        display="flex"
-        width="100%"
-        height="160px"
-        paddingX={20}
-        position="sticky"
-        bottom={0}
-      >
-        <TextField
-          placeholder="Send a message..."
-          fullWidth
-          value={input}
-          onChange={(e) => {
-            setInput(e.target.value);
-          }}
-          onKeyPress={(ev) => {
-            if (ev.key === "Enter") {
-              submit();
-              ev.preventDefault();
-            }
-          }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton disabled={trimmed.length === 0} onClick={submit}>
-                  <SendIcon
-                    sx={{
-                      transform: "rotate(-45deg) scale(0.8)",
-                      paddingBottom: 1,
-                    }}
-                  />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-        ;
-      </Box>
-    </Box>
-  );
-};
-
-const RenderQ: React.FC<{ q: QuestionWithAnswer }> = ({ q }) => {
-  const { user } = useUser();
-  const picture = user?.picture;
-
-  const ref = React.useRef<HTMLDivElement>(null);
-  const current = ref.current;
-
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  React.useEffect(() => {
-    if (!current || !mounted) {
-      return;
-    }
-
-    current.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-      inline: "end",
-    });
-  }, [current, mounted]);
-  return (
-    <>
-      <ListItem
-        sx={{
-          paddingY: 3,
-          paddingX: 20,
-          //background: (theme) => {
-          //// TODO
-          //return "#444654";
-          //},
-        }}
-      >
-        {picture && (
-          <ListItemAvatar>
-            <Avatar src={picture} variant="rounded" />
-          </ListItemAvatar>
-        )}
-        <ListItemText
-          primary={q.question}
-          primaryTypographyProps={{ color: "white" }}
-        />
-      </ListItem>
-      <ListItem
-        sx={{
-          paddingY: 3,
-          paddingX: 20,
-          background: "#343541",
-        }}
-      >
-        <Avatar
-          variant="rounded"
-          color="secondary"
-          sx={{
-            marginRight: 2,
-          }}
-        >
-          <InsertCommentIcon color="primary" />
-        </Avatar>
-        <ListItemText
-          ref={ref}
-          primary={q.answer}
-          primaryTypographyProps={{ color: "white" }}
-        />
-      </ListItem>
-    </>
-  );
-};
-const RANDOM_RESPONSE = [
-  "I'm afraid I can't answer that question",
-  "No way I'm responding to that",
-  "Buzz off",
-  "Make like a tree and leaf me alone",
-  "No way, Jose",
-  "Just stop",
-];
-
-function mockResponse() {
-  return RANDOM_RESPONSE[Math.floor(Math.random() * RANDOM_RESPONSE.length)]!;
-}

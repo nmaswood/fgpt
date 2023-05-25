@@ -12,12 +12,32 @@ export class ChatRouter {
         const args = ZChatArguments.parse(req.body);
         console.log({ user, args });
 
-        res.json({ status: "ok" });
+        const chatResponse: ChatResponse = {
+          answer: "dummy answer",
+          context: [
+            "dummy context",
+            "dummy context",
+            "dummy context",
+            "dummy context",
+            "dummy context",
+            "dummy context",
+            "dummy context",
+            "dummy context",
+            "dummy context",
+          ],
+        };
+
+        res.json(chatResponse);
       }
     );
 
     return router;
   }
+}
+
+interface ChatResponse {
+  answer: string;
+  context: string[];
 }
 
 const ZChatArguments = z.object({

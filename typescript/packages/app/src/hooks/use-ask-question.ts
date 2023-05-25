@@ -1,8 +1,13 @@
 import useSWRMutation from "swr/mutation";
 
+interface Result {
+  answer: string;
+  context: string[];
+}
+
 export const useAskQuestion = () => {
   const res = useSWRMutation<
-    any,
+    Result,
     unknown,
     "/api/proxy/v1/chat/chat",
     { projectId: string; question: string }
