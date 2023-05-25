@@ -37,6 +37,15 @@ export class ChatRouter {
           answer: answer,
           context: justText,
         };
+        console.log(
+          {
+            projectId: args.projectId,
+            question: args.question,
+            answer: answer,
+            vector,
+          },
+          "Chat Response"
+        );
 
         res.json(chatResponse);
       }
