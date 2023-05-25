@@ -1,13 +1,15 @@
 import { useUser } from "@auth0/nextjs-auth0/client";
-
-import InsertCommentIcon from "@mui/icons-material/InsertComment";
-
-import SendIcon from "@mui/icons-material/Send";
+import { assertNever } from "@fgpt/precedent-iso";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ErrorIcon from "@mui/icons-material/Error";
+import InsertCommentIcon from "@mui/icons-material/InsertComment";
+import SendIcon from "@mui/icons-material/Send";
 import {
   Avatar,
   Box,
   Button,
+  CircularProgress,
+  Collapse,
   IconButton,
   InputAdornment,
   List,
@@ -21,15 +23,11 @@ import {
   Tab,
   Tabs,
   TextField,
-  CircularProgress,
   Typography,
-  Collapse,
 } from "@mui/material";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-
 import React from "react";
+
 import { useAskQuestion } from "../hooks/use-ask-question";
-import { assertNever } from "@fgpt/precedent-iso";
 
 interface QuestionWithAnswer {
   question: string;

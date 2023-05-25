@@ -29,11 +29,10 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import Uppy from "@uppy/core";
 import { Dashboard } from "@uppy/react";
 import XHRUpload from "@uppy/xhr-upload";
-
 import React from "react";
-import { Chat } from "./chat";
 
 import { useFetchFiles } from "../hooks/use-fetch-files";
+import { Chat } from "./chat";
 
 export const SelectedProject: React.FC<{ project: Project }> = ({
   project,

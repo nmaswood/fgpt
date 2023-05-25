@@ -287,10 +287,14 @@ ORDER BY
   async getTextChunks(ids: string[]): Promise<TextChunk[]> {
     const res = await this.pool.query(
       sql.type(ZTextChunkRow)`
-      SELECT ${TEXT_CHUNK_FIELDS}
-      FROM text_chunk
-      WHERE id IN (${sql.join(ids, sql.fragment`, `)})
-      `
+
+SELECT
+    ${TEXT_CHUNK_FIELDS}
+FROM
+    text_chunk
+WHERE
+    id IN (${sql.join(ids, sql.fragment`, `)})
+`
     );
 
     return Array.from(res.rows);

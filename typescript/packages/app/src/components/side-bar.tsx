@@ -3,7 +3,6 @@ import { assertNever, Project } from "@fgpt/precedent-iso";
 import AddIcon from "@mui/icons-material/Add";
 import FolderIcon from "@mui/icons-material/Folder";
 import LogoutIcon from "@mui/icons-material/Logout";
-import PermIdentityIcon from "@mui/icons-material/PermIdentity";
 import { LoadingButton } from "@mui/lab";
 import {
   Alert,
@@ -275,12 +274,6 @@ const DisplayUser = () => {
             }}
           >
             <MenuList dense disablePadding>
-              <MenuItem>
-                <ListItemIcon>
-                  <PermIdentityIcon />
-                </ListItemIcon>
-                <ListItemText primary="Profile" />
-              </MenuItem>
               <Divider />
               <MenuItem component={Link} href="/api/auth/logout">
                 <ListItemIcon>
