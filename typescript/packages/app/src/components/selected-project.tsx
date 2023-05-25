@@ -11,9 +11,13 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import SettingsIcon from "@mui/icons-material/Settings";
+import { LoadingButton } from "@mui/lab";
 import {
   Box,
   Button,
+  Dialog,
+  DialogActions,
+  DialogTitle,
   IconButton,
   List,
   ListItem,
@@ -37,6 +41,12 @@ import { Chat } from "./chat";
 export const SelectedProject: React.FC<{ project: Project }> = ({
   project,
 }) => {
+  const [modal, setModal] = React.useState<"delete" | "edit" | undefined>(
+    undefined
+  );
+
+  const closeModal = () => setModal(undefined);
+
   const uppy = React.useMemo(
     () =>
       new Uppy({
@@ -95,177 +105,247 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
   const isLargeScreen = useMediaQuery("(min-width:600px)");
 
   return (
-    <Box display="flex" flexDirection="column" height="100%" width="100%">
-      <Box
-        display="flex"
-        paddingX={2}
-        paddingTop={1}
-        marginBottom={1 / 2}
-        justifyContent="space-between"
-      >
-        <Tabs
-          value={value}
-          onChange={handleChange}
-          textColor="secondary"
-          indicatorColor="secondary"
-        >
-          <Tab
-            icon={<CloudUploadIcon />}
-            label={isLargeScreen ? "Upload project files" : undefined}
-            iconPosition="start"
-          />
-          <Tab
-            icon={<CollectionsIcon />}
-            iconPosition="start"
-            label={isLargeScreen ? "Explore project files" : undefined}
-          />
-          <Tab
-            icon={<BoltIcon />}
-            iconPosition="start"
-            label={isLargeScreen ? "Chat" : undefined}
-          />
-        </Tabs>
-        <Box display="flex" alignItems="center">
-          {isLargeScreen ? (
-            <Button
-              startIcon={<SettingsIcon />}
-              onClick={handleClick}
-              variant="outlined"
-              sx={{ height: "40px" }}
-            >
-              Project settings
-            </Button>
-          ) : (
-            <IconButton onClick={handleClick} color="primary">
-              <SettingsIcon />
-            </IconButton>
-          )}
-
-          <Menu
-            id="basic-menu"
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "center",
-            }}
-          >
-            <MenuList dense disablePadding>
-              <MenuItem onClick={handleClose}>
-                <ListItemIcon>
-                  <DeleteIcon fontSize="small" color="secondary" />
-                </ListItemIcon>
-                <ListItemText>Delete project</ListItemText>
-              </MenuItem>
-              <MenuItem onClick={handleClose}>
-                <ListItemIcon>
-                  <ModeEditIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText>Edit project name</ListItemText>
-              </MenuItem>
-            </MenuList>
-          </Menu>
-        </Box>
-      </Box>
-
-      {value === 0 && (
+    <>
+      <Box display="flex" flexDirection="column" height="100%" width="100%">
         <Box
           display="flex"
-          height="100%"
-          width="100%"
-          justifyContent="center"
-          alignItems="center"
+          paddingX={2}
+          paddingTop={1}
+          marginBottom={1 / 2}
+          justifyContent="space-between"
         >
-          {/* eslint-disable-next-line*/}
-          {/* @ts-ignore */}
-          <Dashboard
-            uppy={uppy}
-            proudlyDisplayPoweredByUppy={false}
-            theme="dark"
-          />
-        </Box>
-      )}
-
-      {value === 1 && (
-        <>
-          {!filesLoading && files.length === 0 && (
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              width="100%"
-              height="100%"
-            >
+          <Tabs
+            value={value}
+            onChange={handleChange}
+            textColor="secondary"
+            indicatorColor="secondary"
+          >
+            <Tab
+              icon={<CloudUploadIcon />}
+              label={isLargeScreen ? "Upload project files" : undefined}
+              iconPosition="start"
+            />
+            <Tab
+              icon={<CollectionsIcon />}
+              iconPosition="start"
+              label={isLargeScreen ? "Explore project files" : undefined}
+            />
+            <Tab
+              icon={<BoltIcon />}
+              iconPosition="start"
+              label={isLargeScreen ? "Chat" : undefined}
+            />
+          </Tabs>
+          <Box display="flex" alignItems="center">
+            {isLargeScreen ? (
               <Button
+                startIcon={<SettingsIcon />}
+                onClick={handleClick}
                 variant="outlined"
-                onClick={() => {
-                  setValue(0);
-                }}
-                color="secondary"
-                size="large"
-                startIcon={<CloudUploadIcon />}
-                sx={{ width: "fit-content" }}
+                sx={{ height: "40px" }}
               >
-                Upload files to begin
+                Project settings
               </Button>
-            </Box>
-          )}
-          {files.length > 0 && (
-            <List
-              sx={{
-                height: "100%",
+            ) : (
+              <IconButton onClick={handleClick} color="primary">
+                <SettingsIcon />
+              </IconButton>
+            )}
+
+            <Menu
+              id="basic-menu"
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "center",
               }}
             >
-              {files.map((file) => (
-                <ListItem key={file.id}>
+              <MenuList dense disablePadding>
+                <MenuItem
+                  onClick={() => {
+                    setModal("delete");
+                    handleClose();
+                  }}
+                >
                   <ListItemIcon>
-                    <PictureAsPdfIcon color="secondary" />
+                    <DeleteIcon fontSize="small" color="secondary" />
                   </ListItemIcon>
+                  <ListItemText>Delete project</ListItemText>
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setModal("edit");
+                    handleClose();
+                  }}
+                >
+                  <ListItemIcon>
+                    <ModeEditIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Edit project name</ListItemText>
+                </MenuItem>
+              </MenuList>
+            </Menu>
+          </Box>
+        </Box>
 
-                  <ListItemText
-                    primaryTypographyProps={{ color: "white" }}
-                    primary={file.fileName}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          )}
-        </>
-      )}
+        {value === 0 && (
+          <Box
+            display="flex"
+            height="100%"
+            width="100%"
+            justifyContent="center"
+            alignItems="center"
+          >
+            {/* eslint-disable-next-line*/}
+            {/* @ts-ignore */}
+            <Dashboard
+              uppy={uppy}
+              proudlyDisplayPoweredByUppy={false}
+              theme="dark"
+            />
+          </Box>
+        )}
 
-      {value === 2 && (
-        <>
-          {!filesLoading && files.length === 0 && (
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              width="100%"
-              height="100%"
-            >
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  setValue(0);
-                }}
-                color="secondary"
-                size="large"
-                startIcon={<CloudUploadIcon />}
-                sx={{ width: "fit-content" }}
+        {value === 1 && (
+          <>
+            {!filesLoading && files.length === 0 && (
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                width="100%"
+                height="100%"
               >
-                Upload files to begin
-              </Button>
-            </Box>
-          )}
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    setValue(0);
+                  }}
+                  color="secondary"
+                  size="large"
+                  startIcon={<CloudUploadIcon />}
+                  sx={{ width: "fit-content" }}
+                >
+                  Upload files to begin
+                </Button>
+              </Box>
+            )}
+            {files.length > 0 && (
+              <List
+                sx={{
+                  height: "100%",
+                }}
+              >
+                {files.map((file) => (
+                  <ListItem key={file.id}>
+                    <ListItemIcon>
+                      <PictureAsPdfIcon color="secondary" />
+                    </ListItemIcon>
 
-          {!filesLoading && files.length > 0 && (
-            <Box display="flex" width="100%" height="100%">
-              <Chat projectId={project.id} />
-            </Box>
-          )}
-        </>
-      )}
-    </Box>
+                    <ListItemText
+                      primaryTypographyProps={{ color: "white" }}
+                      primary={file.fileName}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            )}
+          </>
+        )}
+
+        {value === 2 && (
+          <>
+            {!filesLoading && files.length === 0 && (
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                width="100%"
+                height="100%"
+              >
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    setValue(0);
+                  }}
+                  color="secondary"
+                  size="large"
+                  startIcon={<CloudUploadIcon />}
+                  sx={{ width: "fit-content" }}
+                >
+                  Upload files to begin
+                </Button>
+              </Box>
+            )}
+
+            {!filesLoading && files.length > 0 && (
+              <Box display="flex" width="100%" height="100%">
+                <Chat projectId={project.id} />
+              </Box>
+            )}
+          </>
+        )}
+      </Box>
+      {modal === "delete" && <DeleteProjectModal closeModal={closeModal} />}
+      {modal === "edit" && <EditProjectModal closeModal={closeModal} />}
+    </>
+  );
+};
+
+const DeleteProjectModal: React.FC<{
+  closeModal: () => void;
+}> = ({ closeModal }) => {
+  return (
+    <Dialog
+      open
+      onClose={closeModal}
+      keepMounted
+      PaperProps={{
+        sx: {
+          width: "100%",
+          maxWidth: "350px !important",
+        },
+      }}
+    >
+      <DialogTitle>Delete project| TODO</DialogTitle>
+      <DialogActions>
+        <Button onClick={closeModal} color="primary">
+          Cancel
+        </Button>
+        <LoadingButton variant="contained" color="secondary">
+          Delete project
+        </LoadingButton>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+const EditProjectModal: React.FC<{
+  closeModal: () => void;
+}> = ({ closeModal }) => {
+  return (
+    <Dialog
+      open
+      onClose={closeModal}
+      keepMounted
+      PaperProps={{
+        sx: {
+          width: "100%",
+          maxWidth: "350px !important",
+        },
+      }}
+    >
+      <DialogTitle>Edit project| TODO</DialogTitle>
+      <DialogActions>
+        <Button onClick={closeModal} color="primary">
+          Cancel
+        </Button>
+        <LoadingButton variant="contained" color="secondary">
+          Change a thing
+        </LoadingButton>
+      </DialogActions>
+    </Dialog>
   );
 };
