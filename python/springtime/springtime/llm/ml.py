@@ -38,7 +38,6 @@ def ask_question(context: str, question: str):
         template="Given the following context: {context} answer the following question."
     )
     formatted_message = prompt.format(context=context[:3500])
-    print("context", context)
 
     messages = [
         SystemMessage(

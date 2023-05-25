@@ -23,6 +23,8 @@ class UpsertVector(BaseModel):
 
 def upsert_vectors(upsert_vectors: list[UpsertVector]):
     index = get_pinecone_index()
+    ids = sorted(upsert_vector.id for upsert_vector in upsert_vectors)
+    print("Upserting vectors with ids", ids)
 
     index.upsert(
         vectors=[
@@ -38,10 +40,13 @@ def get_similar(vector: list[float], metadata: dict[str, str]) -> list[str]:
     result = index.query(
         vector=vector,
         top_k=15,
-        include_values=True,
+        include_values=False,
+        include_metadata=True,
         filter=metadata,
         namespace=SETTINGS.pinecone_namespace
     )
+    print("Metadata query is", metadata)
+    print ("Result is", result)
     matches = result['matches']
 
     return [match['id'] for match in matches]
@@ -52,7 +57,5 @@ def get_pinecone_index():
     if INDEX is None:
         INDEX = pinecone.Index(index_name=SETTINGS.pinecone_index)
     resp = INDEX.delete(delete_all=True, namespace='production')
-    print("hello world")
-    print(resp)
     return INDEX
 

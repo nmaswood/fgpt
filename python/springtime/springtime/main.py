@@ -96,7 +96,6 @@ async def similar_vectors_route(req: SimilarVectorRequest):
     return {"ids": ids}
 
 
-print("HOST", SETTINGS.host)
 
 
 # todo disable reload in prod
