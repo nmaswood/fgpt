@@ -24,5 +24,13 @@ CREATE UNIQUE INDEX IF NOT EXISTS "text_chunk_uniq" ON "text_chunk" (
   "chunk_text_sha256"
 );
 
+ALTER TABLE text_chunk
+DROP COLUMN IF EXISTS chunk_strategy,
+DROP COLUMN IF EXISTS embedding_size;
+
 -- migrate:down
 DROP TABLE IF EXISTS text_chunk;
+
+ALTER TABLE text_chunk
+ADD COLUMN IF NOT EXISTS chunk_strategy text CHECK (char_length(chunk_strategy) > 0) NOT NULL,
+ADD COLUMN IF NOT EXISTS embedding_size int CHECK (embedding_size > 0);

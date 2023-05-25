@@ -1,5 +1,16 @@
-import { DatabasePool, DatabasePoolConnection, sql } from "slonik";
+import {
+  DatabasePool,
+  DatabasePoolConnection,
+  DatabaseTransactionConnection,
+  sql,
+} from "slonik";
 import { z } from "zod";
+
+const CHUNK_STRATEGY = "greedy_v0" as const;
+const EMBEDDING_INFO = {
+  type: "ada-002",
+  size: 1536,
+} as const;
 
 export interface TextChunk {
   id: string;
@@ -7,25 +18,48 @@ export interface TextChunk {
   projectId: string;
   fileReferenceId: string;
   processedFileId: string;
+  textChunkGroupId: string;
   chunkOrder: number;
   chunkText: string;
   hasEmbedding: boolean;
 }
 
-export interface UpsertTextChunk {
+export interface UpsertTextChunkCommon {
   organizationId: string;
   projectId: string;
   fileReferenceId: string;
   processedFileId: string;
+  textChunkGroupId: string;
+}
+
+export interface UpsertTextChunk {
   chunkOrder: number;
   chunkText: string;
   hash: string;
 }
 
+export interface UpsertTextChunkGroup {
+  organizationId: string;
+  projectId: string;
+  fileReferenceId: string;
+  processedFileId: string;
+  numChunks: number;
+}
+
+export interface TextChunkGroup {
+  id: string;
+  organizationId: string;
+  projectId: string;
+  fileReferenceId: string;
+  processedFileId: string;
+  numChunks: number;
+  fullyChunked: boolean;
+  fullyEmbedded: boolean;
+}
+
 export interface EmbeddingResult {
   chunkId: string;
   embedding: number[];
-  embeddingSize: number;
 }
 
 export interface SetManyEmbeddings {
@@ -33,17 +67,111 @@ export interface SetManyEmbeddings {
   embedding: number[];
 }
 export interface TextChunkStore {
-  upsertMany(args: UpsertTextChunk[]): Promise<TextChunk[]>;
-  setManyEmbeddings(args: SetManyEmbeddings[]): Promise<TextChunk[]>;
+  getTextChunkGroup(id: string): Promise<TextChunkGroup>;
+  upsertTextChunkGroup(args: UpsertTextChunkGroup): Promise<TextChunkGroup>;
+  upsertManyTextChunkGroups(
+    args: UpsertTextChunkGroup[]
+  ): Promise<TextChunkGroup[]>;
+
+  upsertTextChunk(
+    common: UpsertTextChunkCommon,
+    args: UpsertTextChunk
+  ): Promise<TextChunk>;
+
+  upsertManyTextChunks(
+    common: UpsertTextChunkCommon,
+    args: UpsertTextChunk[]
+  ): Promise<TextChunk[]>;
+
+  setManyEmbeddings(
+    textChunkGroupId: string,
+    args: SetManyEmbeddings[]
+  ): Promise<TextChunk[]>;
 
   getEmbedding(ids: string): Promise<EmbeddingResult>;
   getEmbeddings(ids: string[]): Promise<EmbeddingResult[]>;
   listWithNoEmbeddings(processedFileId: string): Promise<TextChunk[]>;
 }
 
-const FIELDS = sql.fragment`text_chunk.id, organization_id, project_id, file_reference_id, processed_file_id, chunk_order, chunk_text, text_chunk.embedding IS NOT NULL AS has_embedding`;
+const TEXT_CHUNK_FIELDS = sql.fragment`text_chunk.id, organization_id, project_id, file_reference_id, processed_file_id, chunk_order, chunk_text, text_chunk.embedding IS NOT NULL AS has_embedding, text_chunk_group_id`;
+
+const TEXT_CHUNK_GROUP_FIELDS = sql.fragment`text_chunk_group.id, organization_id, project_id, file_reference_id, processed_file_id, num_chunks,  fully_chunked, fully_embedded`;
+
 export class PsqlTextChunkStore implements TextChunkStore {
   constructor(private readonly pool: DatabasePool) {}
+
+  async getTextChunkGroup(id: string): Promise<TextChunkGroup> {
+    return this.pool.connect(async (cnx) => {
+      return cnx.one(sql.type(ZTextChunkGroupRow)`
+SELECT
+    ${TEXT_CHUNK_GROUP_FIELDS}
+FROM
+    text_chunk_group
+WHERE
+    id = ${id}
+`);
+    });
+  }
+  async upsertTextChunkGroup(
+    args: UpsertTextChunkGroup
+  ): Promise<TextChunkGroup> {
+    const [res] = await this.upsertManyTextChunkGroups([args]);
+    if (!res) {
+      throw new Error("upsert failed");
+    }
+    return res;
+  }
+
+  async upsertManyTextChunkGroups(
+    args: UpsertTextChunkGroup[]
+  ): Promise<TextChunkGroup[]> {
+    if (args.length === 0) {
+      return [];
+    }
+    return this.pool.connect(async (cnx) =>
+      cnx.transaction((trx) => this.#upsertManyTextChunkGroups(trx, args))
+    );
+  }
+
+  async #upsertManyTextChunkGroups(
+    trx: DatabaseTransactionConnection,
+    args: UpsertTextChunkGroup[]
+  ): Promise<TextChunkGroup[]> {
+    const values = args.map(
+      ({
+        organizationId,
+        projectId,
+        fileReferenceId,
+        processedFileId,
+        numChunks,
+      }) =>
+        sql.fragment`
+(${organizationId},
+    ${projectId},
+    ${fileReferenceId},
+    ${processedFileId},
+    ${numChunks},
+    ${CHUNK_STRATEGY},
+    ${EMBEDDING_INFO.type},
+    ${EMBEDDING_INFO.size})
+`
+    );
+    // fix this later
+    const { rows } = await trx.query(
+      sql.type(ZTextChunkGroupRow)`
+INSERT INTO text_chunk_group (organization_id, project_id, file_reference_id, processed_file_id, num_chunks, chunk_strategy, embedding_strategy, embedding_size)
+    VALUES
+        ${sql.join(values, sql.fragment`, `)}
+    ON CONFLICT (organization_id, project_id, file_reference_id, processed_file_id, chunk_strategy, embedding_strategy)
+        DO UPDATE set
+            num_chunks = EXCLUDED.num_chunks
+        RETURNING
+            ${TEXT_CHUNK_GROUP_FIELDS}
+`
+    );
+
+    return Array.from(rows);
+  }
 
   async getEmbedding(id: string): Promise<EmbeddingResult> {
     const [embeddings] = await this.getEmbeddings([id]);
@@ -68,8 +196,7 @@ export class PsqlTextChunkStore implements TextChunkStore {
       sql.type(ZEmbeddingRow)`
 SELECT
     id,
-    embedding,
-    embedding_size
+    embedding
 FROM
     text_chunk
 WHERE
@@ -79,56 +206,73 @@ WHERE
     return Array.from(resp.rows);
   }
 
-  async setManyEmbeddings(args: SetManyEmbeddings[]): Promise<TextChunk[]> {
+  async setManyEmbeddings(
+    textChunkGroupId: string,
+    args: SetManyEmbeddings[]
+  ): Promise<TextChunk[]> {
     if (args.length === 0) {
       return [];
     }
 
-    return this.pool.connect(async (cnx) => this.#setManyEmbeddings(cnx, args));
+    return this.pool.connect(async (cnx) =>
+      cnx.transaction((trx) =>
+        this.#setManyEmbeddings(trx, textChunkGroupId, args)
+      )
+    );
   }
 
   async #setManyEmbeddings(
-    cnx: DatabasePoolConnection,
+    trx: DatabaseTransactionConnection,
+    textChunkGroupId: string,
     args: SetManyEmbeddings[]
   ): Promise<TextChunk[]> {
-    const rows = args.map(({ chunkId, embedding }) => {
-      return sql.fragment`
+    const rows = args.map(
+      ({ chunkId, embedding }) =>
+        sql.fragment`
 (${chunkId}::uuid,
-    ${sql.jsonb(JSON.stringify(embedding))},
-    ${embedding.length}::int)
-`;
-    });
-    const resp = await cnx.query(
+    ${sql.jsonb(JSON.stringify(embedding))})
+`
+    );
+    const resp = await trx.query(
       sql.type(ZTextChunkRow)`
 UPDATE
     text_chunk
 SET
-    embedding = c.embedding,
-    embedding_size = c.embedding_size
+    embedding = c.embedding
 FROM (
-    VALUES ${sql.join(
-      rows,
-      sql.fragment`, `
-    )}) c (id, embedding, embedding_size)
+    VALUES ${sql.join(rows, sql.fragment`, `)}) c (id, embedding)
 WHERE
     text_chunk.id = c.id
 RETURNING
-    ${FIELDS}
+    ${TEXT_CHUNK_FIELDS}
 `
     );
-    return Array.from(resp.rows);
+
+    const toReturn = Array.from(resp.rows);
+    const maxOrder = Math.max(...toReturn.map((chunk) => chunk.chunkOrder));
+
+    await trx.query(sql.unsafe`
+UPDATE
+    text_chunk_group
+SET
+    max_chunk_embedding_order_seen = GREATEST (${maxOrder}::int, max_chunk_embedding_order_seen::int),
+    fully_embedded = GREATEST (${maxOrder}::int, max_chunk_embedding_order_seen::int) = num_chunks - 1
+WHERE
+    text_chunk_group.id = ${textChunkGroupId}
+`);
+    return toReturn;
   }
 
-  async listWithNoEmbeddings(processedFileId: string): Promise<TextChunk[]> {
+  async listWithNoEmbeddings(textGroupId: string): Promise<TextChunk[]> {
     return this.pool.connect(async (cnx) => {
       const resp = await cnx.query(
         sql.type(ZTextChunkRow)`
 SELECT
-    ${FIELDS}
+    ${TEXT_CHUNK_FIELDS}
 FROM
     text_chunk
 WHERE
-    processed_file_id = ${processedFileId}
+    text_chunk_group_id = ${textGroupId}
     AND embedding IS NULL
 ORDER BY
     chunk_order ASC
@@ -138,56 +282,99 @@ ORDER BY
     });
   }
 
-  async upsertMany(args: UpsertTextChunk[]): Promise<TextChunk[]> {
+  async upsertTextChunk(
+    common: UpsertTextChunkCommon,
+    args: UpsertTextChunk
+  ): Promise<TextChunk> {
+    const [res] = await this.upsertManyTextChunks(common, [args]);
+    if (res === undefined) {
+      throw new Error("failed to upsert text chunk");
+    }
+    return res;
+  }
+
+  async upsertManyTextChunks(
+    common: UpsertTextChunkCommon,
+    args: UpsertTextChunk[]
+  ): Promise<TextChunk[]> {
     if (args.length === 0) {
       return [];
     }
 
-    return this.pool.connect(async (cnx) => this.#upsertMany(cnx, args));
+    return this.pool.connect((cnx) =>
+      cnx.transaction((trx) => this.#upsertMany(trx, common, args))
+    );
   }
 
   async #upsertMany(
-    cnx: DatabasePoolConnection,
+    trx: DatabaseTransactionConnection,
+    common: UpsertTextChunkCommon,
     args: UpsertTextChunk[]
   ): Promise<TextChunk[]> {
     const values = args.map(
-      ({
-        organizationId,
-        projectId,
-        fileReferenceId,
-        processedFileId,
-        chunkOrder,
-        chunkText,
-        hash,
-      }) =>
+      ({ chunkOrder, chunkText, hash }) =>
         sql.fragment`
-(${organizationId},
-    ${projectId},
-    ${fileReferenceId},
-    ${processedFileId},
+(${common.organizationId},
+    ${common.projectId},
+    ${common.fileReferenceId},
+    ${common.processedFileId},
+    ${common.textChunkGroupId},
     ${chunkOrder},
     ${chunkText},
-    ${hash},
-    'greedy_v0')
-`
-    );
-    // fix this later
-    const { rows } = await cnx.query(
-      sql.type(ZTextChunkRow)`
-INSERT INTO text_chunk (organization_id, project_id, file_reference_id, processed_file_id, chunk_order, chunk_text, chunk_text_sha256, chunk_strategy)
-    VALUES
-        ${sql.join(values, sql.fragment`, `)}
-    ON CONFLICT (organization_id, project_id, file_reference_id, processed_file_id, chunk_order, chunk_text_sha256)
-        DO UPDATE SET
-            chunk_text_sha256 = EXCLUDED.chunk_text_sha256
-        RETURNING
-            ${FIELDS}
+    ${hash})
 `
     );
 
-    return Array.from(rows);
+    const { rows } = await trx.query(
+      sql.type(ZTextChunkRow)`
+INSERT INTO text_chunk (organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, chunk_order, chunk_text, chunk_text_sha256)
+    VALUES
+        ${sql.join(values, sql.fragment`, `)}
+    ON CONFLICT (organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, chunk_order)
+        DO UPDATE set
+            chunk_order = EXCLUDED.chunk_order
+        RETURNING
+            ${TEXT_CHUNK_FIELDS}
+`
+    );
+    const maxOrder = Math.max(...args.map((c) => c.chunkOrder));
+    const toReturn = Array.from(rows);
+
+    await trx.query(sql.unsafe`
+UPDATE
+    text_chunk_group
+SET
+    max_chunk_order_seen = GREATEST (${maxOrder}::int, max_chunk_order_seen::int),
+    fully_chunked = GREATEST (${maxOrder}::int, max_chunk_order_seen::int) = num_chunks - 1
+WHERE
+    text_chunk_group.id = ${common.textChunkGroupId}
+`);
+
+    return toReturn;
   }
 }
+
+const ZTextChunkGroupRow = z
+  .object({
+    id: z.string(),
+    project_id: z.string(),
+    organization_id: z.string(),
+    file_reference_id: z.string(),
+    processed_file_id: z.string(),
+    num_chunks: z.number(),
+    fully_chunked: z.boolean(),
+    fully_embedded: z.boolean(),
+  })
+  .transform((row) => ({
+    id: row.id,
+    organizationId: row.organization_id,
+    projectId: row.project_id,
+    fileReferenceId: row.file_reference_id,
+    processedFileId: row.processed_file_id,
+    numChunks: row.num_chunks,
+    fullyChunked: row.fully_chunked,
+    fullyEmbedded: row.fully_embedded,
+  }));
 
 const ZTextChunkRow = z
   .object({
@@ -196,6 +383,7 @@ const ZTextChunkRow = z
     organization_id: z.string(),
     file_reference_id: z.string(),
     processed_file_id: z.string(),
+    text_chunk_group_id: z.string(),
     chunk_order: z.number(),
     chunk_text: z.string(),
     has_embedding: z.boolean(),
@@ -206,6 +394,7 @@ const ZTextChunkRow = z
     projectId: row.project_id,
     fileReferenceId: row.file_reference_id,
     processedFileId: row.processed_file_id,
+    textChunkGroupId: row.text_chunk_group_id,
     chunkOrder: row.chunk_order,
     chunkText: row.chunk_text,
     hasEmbedding: row.has_embedding,
@@ -215,10 +404,8 @@ const ZEmbeddingRow = z
   .object({
     id: z.string(),
     embedding: z.string(),
-    embedding_size: z.number(),
   })
   .transform((row) => ({
     chunkId: row.id,
     embedding: JSON.parse(row.embedding),
-    embeddingSize: row.embedding_size,
   }));

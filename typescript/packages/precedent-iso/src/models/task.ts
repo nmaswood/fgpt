@@ -38,6 +38,7 @@ export const GenEmbeddingsConfig = z.object({
   projectId: z.string(),
   fileId: z.string(),
   processedFileId: z.string(),
+  textChunkGroupId: z.string(),
 });
 
 export const UpsertEmbeddingsConfig = z.object({

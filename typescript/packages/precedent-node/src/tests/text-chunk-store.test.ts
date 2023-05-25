@@ -80,101 +80,236 @@ afterEach(async () => {
 test("insertMany", async () => {
   const { processedFile, chunkStore } = await setup();
 
-  const [res] = await chunkStore.upsertMany([
+  const textChunkGroup = await chunkStore.upsertTextChunkGroup({
+    organizationId: processedFile.organizationId,
+    projectId: processedFile.projectId,
+    fileReferenceId: processedFile.fileReferenceId,
+    processedFileId: processedFile.id,
+    numChunks: 2,
+  });
+
+  const res = await chunkStore.upsertTextChunk(
     {
       organizationId: processedFile.organizationId,
       projectId: processedFile.projectId,
       fileReferenceId: processedFile.fileReferenceId,
       processedFileId: processedFile.id,
+      textChunkGroupId: textChunkGroup.id,
+    },
+    {
       chunkOrder: 0,
       chunkText: "hi",
       hash: ShaHash.forData("hi"),
-    },
-  ]);
+    }
+  );
 
   expect(res.id).toBeDefined();
   expect(res.chunkText).toEqual("hi");
+
+  const textChunkGroupAgain = await chunkStore.getTextChunkGroup(
+    textChunkGroup.id
+  );
+  expect(textChunkGroupAgain.fullyChunked).toBe(false);
+  expect(textChunkGroupAgain.fullyEmbedded).toBe(false);
+  expect(textChunkGroup.numChunks).toEqual(2);
+
+  await chunkStore.upsertManyTextChunks(
+    {
+      organizationId: processedFile.organizationId,
+      projectId: processedFile.projectId,
+      fileReferenceId: processedFile.fileReferenceId,
+      processedFileId: processedFile.id,
+      textChunkGroupId: textChunkGroup.id,
+    },
+    [
+      {
+        chunkOrder: 0,
+        chunkText: "hi",
+        hash: ShaHash.forData("hi"),
+      },
+    ]
+  );
+
+  const textChunkGroupAgainAgain = await chunkStore.getTextChunkGroup(
+    textChunkGroup.id
+  );
+  expect(textChunkGroupAgainAgain.fullyChunked).toBe(false);
+  expect(textChunkGroupAgainAgain.fullyEmbedded).toBe(false);
+  expect(textChunkGroupAgain.numChunks).toEqual(2);
+
+  await chunkStore.upsertManyTextChunks(
+    {
+      organizationId: processedFile.organizationId,
+      projectId: processedFile.projectId,
+      fileReferenceId: processedFile.fileReferenceId,
+      processedFileId: processedFile.id,
+      textChunkGroupId: textChunkGroup.id,
+    },
+    [
+      {
+        chunkOrder: 1,
+        chunkText: "bye",
+        hash: ShaHash.forData("bye"),
+      },
+    ]
+  );
+  const textChunkGroupFinal = await chunkStore.getTextChunkGroup(
+    textChunkGroup.id
+  );
+  expect(textChunkGroupFinal.fullyChunked).toBe(true);
+  expect(textChunkGroupFinal.fullyEmbedded).toBe(false);
+  expect(textChunkGroupFinal.numChunks).toEqual(2);
 });
 
 test("listWithNoEmbeddings", async () => {
   const { processedFile, chunkStore } = await setup();
 
-  await chunkStore.upsertMany([
-    {
-      organizationId: processedFile.organizationId,
-      projectId: processedFile.projectId,
-      fileReferenceId: processedFile.fileReferenceId,
-      processedFileId: processedFile.id,
-      chunkOrder: 0,
-      chunkText: "hello",
-      hash: ShaHash.forData("hello"),
-    },
-    {
-      organizationId: processedFile.organizationId,
-      projectId: processedFile.projectId,
-      fileReferenceId: processedFile.fileReferenceId,
-      processedFileId: processedFile.id,
-      chunkOrder: 1,
-      chunkText: "world",
-      hash: ShaHash.forData("world"),
-    },
-  ]);
+  const textChunkGroup = await chunkStore.upsertTextChunkGroup({
+    organizationId: processedFile.organizationId,
+    projectId: processedFile.projectId,
+    fileReferenceId: processedFile.fileReferenceId,
+    processedFileId: processedFile.id,
+    numChunks: 2,
+  });
 
-  const results = await chunkStore.listWithNoEmbeddings(processedFile.id);
+  const [chunk1] = await chunkStore.upsertManyTextChunks(
+    {
+      organizationId: processedFile.organizationId,
+      projectId: processedFile.projectId,
+      fileReferenceId: processedFile.fileReferenceId,
+      processedFileId: processedFile.id,
+      textChunkGroupId: textChunkGroup.id,
+    },
+
+    [
+      {
+        chunkOrder: 0,
+        chunkText: "hello",
+        hash: ShaHash.forData("hello"),
+      },
+      {
+        chunkOrder: 1,
+        chunkText: "world",
+        hash: ShaHash.forData("world"),
+      },
+    ]
+  );
+
+  const results = await chunkStore.listWithNoEmbeddings(textChunkGroup.id);
   expect(results.length).toEqual(2);
   expect(results[1].chunkText).toEqual("world");
+  await chunkStore.setManyEmbeddings(textChunkGroup.id, [
+    {
+      chunkId: chunk1.id,
+      embedding: [1, 2, 3],
+    },
+  ]);
+  expect(
+    (await chunkStore.listWithNoEmbeddings(textChunkGroup.id)).length
+  ).toEqual(1);
 });
 
 test("setManyEmbeddings", async () => {
   const { processedFile, chunkStore } = await setup();
 
-  const [res] = await chunkStore.upsertMany([
+  const textChunkGroup = await chunkStore.upsertTextChunkGroup({
+    organizationId: processedFile.organizationId,
+    projectId: processedFile.projectId,
+    fileReferenceId: processedFile.fileReferenceId,
+    processedFileId: processedFile.id,
+    numChunks: 2,
+  });
+
+  const [t1, t2] = await chunkStore.upsertManyTextChunks(
     {
       organizationId: processedFile.organizationId,
       projectId: processedFile.projectId,
       fileReferenceId: processedFile.fileReferenceId,
       processedFileId: processedFile.id,
-      chunkOrder: 0,
-      chunkText: "hi",
-      hash: ShaHash.forData("hi"),
+      textChunkGroupId: textChunkGroup.id,
     },
-  ]);
+    [
+      {
+        chunkOrder: 0,
+        chunkText: "hi",
+        hash: ShaHash.forData("hi"),
+      },
+      {
+        chunkOrder: 1,
+        chunkText: "hi",
+        hash: ShaHash.forData("hi"),
+      },
+    ]
+  );
 
-  expect(res.hasEmbedding).toEqual(false);
+  expect(t1.hasEmbedding).toEqual(false);
+  expect(t2.hasEmbedding).toEqual(false);
 
-  const [res2] = await chunkStore.setManyEmbeddings([
+  const [t1Prime] = await chunkStore.setManyEmbeddings(textChunkGroup.id, [
     {
-      chunkId: res.id,
+      chunkId: t1.id,
       embedding: [1, 2, 3],
     },
   ]);
 
-  expect(res2.hasEmbedding).toEqual(true);
+  expect(t1Prime.hasEmbedding).toEqual(true);
+
+  const textGroup = await chunkStore.getTextChunkGroup(textChunkGroup.id);
+
+  expect(textGroup.fullyEmbedded).toEqual(false);
+
+  const [t2Prime] = await chunkStore.setManyEmbeddings(textChunkGroup.id, [
+    {
+      chunkId: t2.id,
+      embedding: [1, 2, 3],
+    },
+  ]);
+
+  expect(t2Prime.hasEmbedding).toEqual(true);
+  const textGroupPrime = await chunkStore.getTextChunkGroup(textChunkGroup.id);
+
+  expect(textGroupPrime.fullyEmbedded).toEqual(true);
 });
 
 test("getEmbedding", async () => {
   const { processedFile, chunkStore } = await setup();
 
-  const [res] = await chunkStore.upsertMany([
+  const textChunkGroup = await chunkStore.upsertTextChunkGroup({
+    organizationId: processedFile.organizationId,
+    projectId: processedFile.projectId,
+    fileReferenceId: processedFile.fileReferenceId,
+    processedFileId: processedFile.id,
+    numChunks: 1,
+  });
+
+  const textChunk = await chunkStore.upsertTextChunk(
     {
       organizationId: processedFile.organizationId,
       projectId: processedFile.projectId,
       fileReferenceId: processedFile.fileReferenceId,
       processedFileId: processedFile.id,
+      textChunkGroupId: textChunkGroup.id,
+    },
+
+    {
       chunkOrder: 0,
       chunkText: "hi",
       hash: ShaHash.forData("hi"),
-    },
-  ]);
+    }
+  );
 
-  await chunkStore.setManyEmbeddings([
-    {
-      chunkId: res.id,
-      embedding: [1, 2, 3],
-    },
-  ]);
+  await chunkStore.setManyEmbeddings(
+    textChunkGroup.id,
 
-  const embedding = await chunkStore.getEmbedding(res.id);
+    [
+      {
+        chunkId: textChunk.id,
+        embedding: [1, 2, 3],
+      },
+    ]
+  );
+
+  const embedding = await chunkStore.getEmbedding(textChunk.id);
 
   expect(embedding.embedding).toEqual([1, 2, 3]);
 });

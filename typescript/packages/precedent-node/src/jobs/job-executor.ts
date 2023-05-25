@@ -103,13 +103,30 @@ export class JobExecutorImpl implements JobExecutor {
           text,
         });
 
-        await this.textChunkStore.upsertMany(
-          chunks.map((chunkText, chunkOrder) => ({
-            version: "1",
+        const textChunkGroup = await this.textChunkStore.upsertTextChunkGroup({
+          organizationId: config.organizationId,
+          projectId: config.projectId,
+          fileReferenceId: config.fileId,
+          processedFileId: config.processedFileId,
+          numChunks: chunks.length,
+        });
+
+        if (textChunkGroup.fullyChunked && textChunkGroup.fullyEmbedded) {
+          LOGGER.warn(
+            { textChunkGroup },
+            "Text chunk group is already fully chunked and embedded, skipping"
+          );
+        }
+
+        await this.textChunkStore.upsertManyTextChunks(
+          {
             organizationId: config.organizationId,
             projectId: config.projectId,
             fileReferenceId: config.fileId,
             processedFileId: config.processedFileId,
+            textChunkGroupId: textChunkGroup.id,
+          },
+          chunks.map((chunkText, chunkOrder) => ({
             chunkOrder,
             chunkText,
             hash: ShaHash.forData(chunkText),
@@ -126,6 +143,7 @@ export class JobExecutorImpl implements JobExecutor {
             projectId: config.projectId,
             fileId: config.fileId,
             processedFileId: config.processedFileId,
+            textChunkGroupId: textChunkGroup.id,
           },
         });
 
@@ -134,8 +152,9 @@ export class JobExecutorImpl implements JobExecutor {
 
       case "gen-embeddings": {
         const chunks = await this.textChunkStore.listWithNoEmbeddings(
-          config.processedFileId
+          config.textChunkGroupId
         );
+
         if (chunks.length === 0) {
           LOGGER.warn("No chunk ids with embeddings present, skipping");
           return;
@@ -145,12 +164,19 @@ export class JobExecutorImpl implements JobExecutor {
           documents: chunks.map((chunk) => chunk.chunkText),
         });
 
-        const withEmbeddings = chunks.map((chunk, i) => ({
-          chunkId: chunk.id,
-          embedding: embeddings.response[i]!,
-        }));
+        const withEmbeddings = chunks.map((chunk, i) => {
+          const embedding = embeddings.response[i];
+          if (!embedding) {
+            throw new Error("undefined embedding");
+          }
+          return {
+            chunkId: chunk.id,
+            embedding,
+          };
+        });
 
         const chunksWritten = await this.textChunkStore.setManyEmbeddings(
+          config.textChunkGroupId,
           withEmbeddings
         );
 
