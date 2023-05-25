@@ -27,6 +27,36 @@ export class ProjectRouter {
       }
     );
 
+    router.delete(
+      "/delete/:projectId",
+      async (req: express.Request, res: express.Response) => {
+        const user = req.user;
+        const args = ZCreateProjectArgs.parse(req.body);
+        const project = await this.projectStore.create({
+          name: args.name,
+          organizationId: user.organizationId,
+          creatorUserId: user.id,
+        });
+
+        res.json({ project });
+      }
+    );
+
+    router.patch(
+      "/update/:projectId",
+      async (req: express.Request, res: express.Response) => {
+        const user = req.user;
+        const args = ZCreateProjectArgs.parse(req.body);
+        const project = await this.projectStore.create({
+          name: args.name,
+          organizationId: user.organizationId,
+          creatorUserId: user.id,
+        });
+
+        res.json({ project });
+      }
+    );
+
     return router;
   }
 }

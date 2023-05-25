@@ -285,9 +285,12 @@ ORDER BY
   }
 
   async getTextChunks(ids: string[]): Promise<TextChunk[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
     const res = await this.pool.query(
       sql.type(ZTextChunkRow)`
-
 SELECT
     ${TEXT_CHUNK_FIELDS}
 FROM
