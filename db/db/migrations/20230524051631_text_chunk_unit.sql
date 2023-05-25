@@ -17,11 +17,11 @@ CREATE TABLE
     num_chunks int CHECK (num_chunks > 0) NOT NULL,
     max_chunk_order_seen int CHECK (
       max_chunk_order_seen >= 0
-      and <= num_chunks
+      AND num_chunks >= max_chunk_order_seen
     ),
     max_chunk_embedding_order_seen int CHECK (
       max_chunk_embedding_order_seen >= 0
-      and <= num_chunks
+      AND num_chunks >= max_chunk_embedding_order_seen
     ),
     fully_chunked BOOLEAN DEFAULT FALSE NOT NULL,
     fully_embedded BOOLEAN DEFAULT FALSE NOT NULL,

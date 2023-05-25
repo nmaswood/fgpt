@@ -9,17 +9,26 @@ export interface CreateProjectArgs {
   creatorUserId: string;
 }
 
+export interface UpdateProject {
+  id: string;
+  name: string;
+}
+
 export interface ProjectStore {
-  get: (projectId: string) => Promise<Project>;
+  get: (projectId: string) => Promise<Project | undefined>;
   getMany: (projectIds: string[]) => Promise<Project[]>;
   list: (organizationId: string) => Promise<Project[]>;
   create: (args: CreateProjectArgs) => Promise<Project>;
+  delete: (ids: string) => Promise<void>;
+  deleteMany: (ids: string[]) => Promise<void>;
+  updateProject: (args: UpdateProject) => Promise<Project>;
 }
 
 const PROJECT_FIELDS = sql.fragment`id, organization_id, name`;
 
 export class PSqlProjectStore implements ProjectStore {
   constructor(private readonly pool: DatabasePool) {}
+
   async list(organizationId: string): Promise<Project[]> {
     return this.pool.connect(async (cnx) => {
       const values = await cnx.query(
@@ -37,11 +46,8 @@ WHERE
     });
   }
 
-  async get(projectId: string): Promise<Project> {
+  async get(projectId: string): Promise<Project | undefined> {
     const [project] = await this.getMany([projectId]);
-    if (!project) {
-      throw new Error("project not found");
-    }
     return project;
   }
 
@@ -95,6 +101,23 @@ RETURNING
     ${PROJECT_FIELDS}
 `
     );
+  }
+
+  async delete(id: string) {
+    await this.deleteMany([id]);
+  }
+
+  async deleteMany(ids: string[]) {
+    await this.pool.query(
+      sql.unsafe`
+DELETE FROM project
+where id IN (${sql.join(ids, sql.fragment`, `)})
+`
+    );
+  }
+
+  async updateProject(_: UpdateProject): Promise<Project> {
+    throw new Error("not implemented");
   }
 }
 
