@@ -70,6 +70,7 @@ export class JobExecutorImpl implements JobExecutor {
     switch (config.type) {
       case "text-extraction": {
         const { text } = await this.textExtractor.extract(config.fileId);
+
         const processedFile = await this.processedFileStore.upsert({
           organizationId: config.organizationId,
           projectId: config.projectId,
@@ -116,6 +117,7 @@ export class JobExecutorImpl implements JobExecutor {
             { textChunkGroup },
             "Text chunk group is already fully chunked and embedded, skipping"
           );
+          return;
         }
 
         await this.textChunkStore.upsertManyTextChunks(
