@@ -26,7 +26,6 @@ export class PsqlLoadedFileStore implements LoadedFileStore {
   ): Promise<LoadedFile[]> {
     const { rows } = await cnx.query(
       sql.type(ZLoadedFileRow)`
-
 SELECT
     file_reference.id,
     file_reference.file_name,

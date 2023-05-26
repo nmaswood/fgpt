@@ -1,3 +1,4 @@
+import { isNotNull } from "@fgpt/precedent-iso";
 import { v1 as vision } from "@google-cloud/vision";
 
 import { FileReferenceStore } from "./file-reference-store";
@@ -31,7 +32,12 @@ export class CloudVisionTextExtractor implements TextExtractor {
               uri: `gs://${this.bucketName}/${file.path}`,
             },
           },
-          features: [{ type: "DOCUMENT_TEXT_DETECTION" }],
+          features: [
+            {
+              type: "DOCUMENT_TEXT_DETECTION",
+              maxResults: 100_000,
+            },
+          ],
         },
       ],
     });
@@ -42,17 +48,16 @@ export class CloudVisionTextExtractor implements TextExtractor {
 
     const [operation] = operations;
 
-    const response = operation.responses?.[0]?.responses?.[0];
-    if (!response) {
-      throw new Error("illegal state error");
-    }
-    const text = response.fullTextAnnotation?.text;
-    if (!text) {
-      throw new Error("illegal state error");
-    }
+    const responses = (operation.responses ?? []).flatMap(
+      (response) => response.responses ?? []
+    );
+
+    const fullText = responses
+      .map((response) => response.fullTextAnnotation?.text)
+      .filter(isNotNull);
 
     return {
-      text,
+      text: fullText.join(" "),
     };
   }
 }

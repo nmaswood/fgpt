@@ -274,7 +274,6 @@ const DisplayUser = () => {
             }}
           >
             <MenuList dense disablePadding>
-              <Divider />
               <MenuItem component={Link} href="/api/auth/logout">
                 <ListItemIcon>
                   <LogoutIcon />

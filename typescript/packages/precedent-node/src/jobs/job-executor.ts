@@ -216,6 +216,10 @@ export class JobExecutorImpl implements JobExecutor {
         );
         break;
       }
+      case "delete-project": {
+        LOGGER.warn("Delete project not implemented");
+        break;
+      }
       default:
         assertNever(config);
     }

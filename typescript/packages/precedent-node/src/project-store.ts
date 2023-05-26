@@ -111,7 +111,7 @@ RETURNING
     await this.pool.query(
       sql.unsafe`
 DELETE FROM project
-where id IN (${sql.join(ids, sql.fragment`, `)})
+where id IN (${sql.join(ids, sql.fragment`, `)}) CASCADE
 `
     );
   }

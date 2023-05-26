@@ -51,11 +51,18 @@ export const UpsertEmbeddingsConfig = z.object({
   chunkIds: z.string().array(),
 });
 
+export const DeleteProjectConfig = z.object({
+  type: z.literal("delete-project"),
+  version: z.literal("1"),
+  projectId: z.string(),
+});
+
 export const ZTaskConfig = z.discriminatedUnion("type", [
   TextExtractionConfig,
   TextChunkConfig,
   GenEmbeddingsConfig,
   UpsertEmbeddingsConfig,
+  DeleteProjectConfig,
 ]);
 
 export type TaskType = z.infer<typeof ZTaskType>;
