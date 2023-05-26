@@ -1,4 +1,3 @@
-// Don't forget the CSS: core and the UI components + plugins you are using.
 import "@uppy/core/dist/style.min.css";
 import "@uppy/dashboard/dist/style.min.css";
 
@@ -9,7 +8,6 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CollectionsIcon from "@mui/icons-material/Collections";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { LoadingButton } from "@mui/lab";
 import {
@@ -19,8 +17,6 @@ import {
   DialogActions,
   DialogTitle,
   IconButton,
-  List,
-  ListItem,
   ListItemIcon,
   ListItemText,
   Menu,
@@ -37,6 +33,7 @@ import React from "react";
 
 import { useFetchFiles } from "../hooks/use-fetch-files";
 import { Chat } from "./chat";
+import { DisplayFiles } from "./display-files";
 
 export const SelectedProject: React.FC<{ project: Project }> = ({
   project,
@@ -232,26 +229,7 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
                 </Button>
               </Box>
             )}
-            {files.length > 0 && (
-              <List
-                sx={{
-                  height: "100%",
-                }}
-              >
-                {files.map((file) => (
-                  <ListItem key={file.id}>
-                    <ListItemIcon>
-                      <PictureAsPdfIcon color="secondary" />
-                    </ListItemIcon>
-
-                    <ListItemText
-                      primaryTypographyProps={{ color: "white" }}
-                      primary={file.fileName}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            )}
+            {files.length > 0 && <DisplayFiles files={files} />}
           </>
         )}
 

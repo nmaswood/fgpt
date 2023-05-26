@@ -10,6 +10,7 @@ export interface InsertFileReference {
   path: string;
   contentType: string;
   sha256?: string;
+  fileSize?: number;
 }
 
 export interface FileReferenceStore {
@@ -114,21 +115,24 @@ where
         projectId,
         path,
         sha256,
+        fileSize,
       }) =>
         sql.fragment`
+
 (${fileName},
     ${bucketName},
     ${contentType},
     ${organizationId},
     ${projectId},
     ${path},
-    ${sha256 ?? null})
+    ${sha256 ?? null},
+    ${fileSize ?? null})
 `
     );
 
     const resp = await trx.query(
       sql.type(ZFileReferenceRow)`
-INSERT INTO file_reference (file_name, bucket_name, content_type, organization_id, project_id, path, hash_sha256)
+INSERT INTO file_reference (file_name, bucket_name, content_type, organization_id, project_id, path, hash_sha256, file_size)
     VALUES
         ${sql.join(values, sql.fragment`, `)}
     RETURNING

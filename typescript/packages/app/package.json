@@ -26,6 +26,7 @@
     "@mui/icons-material": "^5.11.16",
     "@mui/lab": "^5.0.0-alpha.131",
     "@mui/material": "^5.13.2",
+    "@mui/x-data-grid": "^6.5.0",
     "@uppy/core": "^3.2.0",
     "@uppy/dashboard": "^3.4.0",
     "@uppy/drag-drop": "^3.0.2",

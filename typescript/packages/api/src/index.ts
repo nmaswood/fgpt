@@ -24,6 +24,7 @@ import {
   PSqlTaskService,
   PsqlTextChunkStore,
   PsqlUserOrgService,
+  PsqlLoadedFileStore,
 } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
 import { UserOrgRouter } from "./routers/user-org-router";
@@ -70,6 +71,7 @@ async function start() {
   const projectStore = new PSqlProjectStore(pool);
 
   const fileReferenceStore = new PsqlFileReferenceStore(pool);
+  const loadedFileStore = new PsqlLoadedFileStore(pool);
   const blobStorageService = new GoogleCloudStorageService();
 
   const taskService = new PSqlTaskService(pool);
@@ -97,7 +99,8 @@ async function start() {
       fileReferenceStore,
       blobStorageService,
       SETTINGS.assetBucket,
-      taskService
+      taskService,
+      loadedFileStore
     ).init()
   );
 

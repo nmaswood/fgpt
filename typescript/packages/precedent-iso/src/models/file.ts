@@ -6,3 +6,14 @@ export interface FileReference {
   contentType: string;
   path: string;
 }
+
+export interface LoadedFile {
+  id: string;
+  fileName: string;
+  fileSize: number | undefined;
+  createdAt: Date;
+  contentType: string;
+  extractedTextLength: number | undefined;
+  fullyChunked: boolean;
+  fullyEmbedded: boolean;
+}

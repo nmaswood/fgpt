@@ -1,6 +1,7 @@
 export { dataBasePool } from "./data-base-pool";
 export * from "./file-reference-store";
 export * from "./jobs/job-executor";
+export * from "./loaded-file-store";
 export * from "./logger";
 export * from "./ml/ml-service";
 export * from "./object-store/object-store";

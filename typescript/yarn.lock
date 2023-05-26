@@ -487,6 +487,7 @@ __metadata:
     "@mui/icons-material": ^5.11.16
     "@mui/lab": ^5.0.0-alpha.131
     "@mui/material": ^5.13.2
+    "@mui/x-data-grid": ^6.5.0
     "@next/eslint-plugin-next": ^13.4.3
     "@types/eslint": ^8.40.0
     "@types/node": ^20.2.3
@@ -926,7 +927,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/utils@npm:^5.13.1":
+"@mui/utils@npm:^5.12.3, @mui/utils@npm:^5.13.1":
   version: 5.13.1
   resolution: "@mui/utils@npm:5.13.1"
   dependencies:
@@ -938,6 +939,24 @@ __metadata:
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
   checksum: 79cfc91e5a61311ac88680df3ea09f1218d0a5a766b6dadf0c5c9c72a3c36cbd903895ebb0f16497dcffb2e3601cb3b46742ae3c5e2c1f62d5ebf02babfd910f
+  languageName: node
+  linkType: hard
+
+"@mui/x-data-grid@npm:^6.5.0":
+  version: 6.5.0
+  resolution: "@mui/x-data-grid@npm:6.5.0"
+  dependencies:
+    "@babel/runtime": ^7.21.0
+    "@mui/utils": ^5.12.3
+    clsx: ^1.2.1
+    prop-types: ^15.8.1
+    reselect: ^4.1.8
+  peerDependencies:
+    "@mui/material": ^5.4.1
+    "@mui/system": ^5.4.1
+    react: ^17.0.2 || ^18.0.0
+    react-dom: ^17.0.2 || ^18.0.0
+  checksum: 01d01ce35a141c52a69c05eecc3cb00243648b5ba0600927a861fa5f13cea2447f6758d1a81bfdaf21d72ce11bbed70717eeeee1e8952469aafeeee405597485
   languageName: node
   linkType: hard
 
@@ -6525,6 +6544,13 @@ __metadata:
   dependencies:
     lodash: ^4.17.21
   checksum: fceaa448b235f9ed111aa58360129225a3cec1a897a23293dc08d2a00f001756c042a62df0a9d4d1e2669ace52dec960aea73437f407b30c51bfba2e9da208b7
+  languageName: node
+  linkType: hard
+
+"reselect@npm:^4.1.8":
+  version: 4.1.8
+  resolution: "reselect@npm:4.1.8"
+  checksum: a4ac87cedab198769a29be92bc221c32da76cfdad6911eda67b4d3e7136dca86208c3b210e31632eae31ebd2cded18596f0dd230d3ccc9e978df22f233b5583e
   languageName: node
   linkType: hard
 

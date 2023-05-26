@@ -67,6 +67,7 @@ test("insertMany", async () => {
       bucketName: "test-bucket",
       contentType: "application/pdf",
       path: "my-path/foo",
+      fileSize: 100,
     },
   ];
   const [res] = await fileReferenceStore.insertMany(refs);

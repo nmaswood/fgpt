@@ -2,6 +2,7 @@ import {
   BlobStorageService,
   FileReferenceStore,
   InsertFileReference,
+  LoadedFileStore,
   ShaHash,
   TaskService,
 } from "@fgpt/precedent-node";
@@ -19,7 +20,8 @@ export class FileRouter {
     private readonly fileReferenceStore: FileReferenceStore,
     private readonly blobStorageService: BlobStorageService,
     private readonly bucket: string,
-    private readonly taskService: TaskService
+    private readonly taskService: TaskService,
+    private readonly loadedFileStore: LoadedFileStore
   ) {}
   init() {
     const router = express.Router();
@@ -32,7 +34,12 @@ export class FileRouter {
           throw new Error("invalid request");
         }
 
-        const files = await this.fileReferenceStore.list(projectId);
+        const files = await this.loadedFileStore.paginate({
+          projectId,
+          cursor: {
+            type: "first",
+          },
+        });
         res.json({ files });
       }
     );
@@ -68,6 +75,7 @@ export class FileRouter {
           bucketName: this.bucket,
           path: filePath,
           sha256: ShaHash.forData(buffer),
+          fileSize: file.size,
         };
 
         const [fileRef] = await this.fileReferenceStore.insertMany([ref]);
