@@ -43,6 +43,10 @@ export const Chat: React.FC<{ projectId: string }> = ({ projectId }) => {
   const [input, setInput] = React.useState("");
   const [qs, setQs] = React.useState<QuestionWithAnswer[]>([]);
 
+  React.useEffect(() => {
+    setQs([]);
+  }, [projectId]);
+
   const { isMutating, trigger } = useAskQuestion();
 
   const trimmed = input.trim();
