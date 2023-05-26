@@ -92,8 +92,8 @@ class SimilarVectorRequest(BaseModel):
 
 @app.post("/similar-vectors")
 async def similar_vectors_route(req: SimilarVectorRequest):
-    ids = get_similar(req.vector, req.metadata)
-    return {"ids": ids}
+    results = get_similar(req.vector, req.metadata)
+    return {"results": results}
 
 
 

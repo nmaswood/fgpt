@@ -27,8 +27,16 @@ const ZSummaryResponse = z.object({
 
 type ZSummaryResponse = z.infer<typeof ZEmbeddingsResponse>;
 
+const ZVectorResult = z.object({
+  id: z.string(),
+  metadata: z.record(z.any()),
+  score: z.number(),
+});
+
+export type VectorResult = z.infer<typeof ZVectorResult>;
+
 const ZSimilarResponse = z.object({
-  ids: z.string().array(),
+  results: ZVectorResult.array(),
 });
 
 interface SummarizeArgs {
@@ -66,7 +74,7 @@ export interface MLServiceClient {
   getEmbeddings: (args: GetEmbeddingsArgs) => Promise<GetEmbeddingsResponse>;
   summarize: (args: SummarizeArgs) => Promise<SummarizeResponse>;
   upsertVectors: (args: UpsertVector[]) => Promise<void>;
-  getKSimilar: (args: SimiliarSearch) => Promise<string[]>;
+  getKSimilar: (args: SimiliarSearch) => Promise<VectorResult[]>;
   askQuestion(args: AskQuestionArgs): Promise<string>;
 }
 
@@ -120,7 +128,10 @@ export class MLServiceClientImpl implements MLServiceClient {
     });
   }
 
-  async getKSimilar({ vector, metadata }: SimiliarSearch): Promise<string[]> {
+  async getKSimilar({
+    vector,
+    metadata,
+  }: SimiliarSearch): Promise<VectorResult[]> {
     const response = await this.#client.post<PredictResponse>(
       "/similar-vectors",
       {
@@ -128,7 +139,7 @@ export class MLServiceClientImpl implements MLServiceClient {
         metadata,
       }
     );
-    return ZSimilarResponse.parse(response.data).ids;
+    return ZSimilarResponse.parse(response.data).results;
   }
 
   async askQuestion({ context, question }: AskQuestionArgs): Promise<string> {

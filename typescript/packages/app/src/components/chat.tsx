@@ -1,5 +1,5 @@
 import { useUser } from "@auth0/nextjs-auth0/client";
-import { assertNever } from "@fgpt/precedent-iso";
+import { assertNever, ChatResponse } from "@fgpt/precedent-iso";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ErrorIcon from "@mui/icons-material/Error";
 import InsertCommentIcon from "@mui/icons-material/InsertComment";
@@ -34,8 +34,7 @@ interface QuestionWithAnswer {
       }
     | {
         type: "data";
-        answer: string;
-        context: string[];
+        response: ChatResponse;
       };
 }
 
@@ -78,8 +77,7 @@ export const Chat: React.FC<{ projectId: string }> = ({ projectId }) => {
         question: trimmed,
         state: {
           type: "data",
-          answer: res.answer,
-          context: res.context,
+          response: res,
         },
       };
     } catch (e) {
@@ -285,13 +283,13 @@ const ResponseContent: React.FC<{ val: QuestionWithAnswer["state"] }> = ({
             height="100%"
             alignItems="center"
           >
-            <Typography color="white">{val.answer}</Typography>
-            {val.context.length > 0 && (
+            <Typography color="white">{val.response.answer}</Typography>
+            {val.response.context.length > 0 && (
               <IconButton
                 onClick={() => setOpen((prev) => !prev)}
                 sx={{
                   position: "absolute",
-                  right: 0,
+                  right: "-35px",
                 }}
               >
                 <ChevronLeftIcon
@@ -304,13 +302,14 @@ const ResponseContent: React.FC<{ val: QuestionWithAnswer["state"] }> = ({
             )}
           </Box>
 
-          {val.context.length > 0 && (
+          {val.response.context.length > 0 && (
             <Collapse in={open} timeout="auto" unmountOnExit>
               <List disablePadding>
-                {val.context.map((c, index) => (
+                {val.response.context.map((c, index) => (
                   <ListItem key={index} disableGutters>
                     <ListItemText
-                      primary={c}
+                      primary={`Similarity score: ${c.score}`}
+                      secondary={c.text}
                       primaryTypographyProps={{ color: "white" }}
                     />
                   </ListItem>

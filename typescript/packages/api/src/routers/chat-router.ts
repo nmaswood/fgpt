@@ -1,5 +1,6 @@
 import { MLServiceClient, TextChunkStore } from "@fgpt/precedent-node";
 import express from "express";
+import { keyBy } from "lodash";
 import { z } from "zod";
 
 export class ChatRouter {
@@ -23,8 +24,10 @@ export class ChatRouter {
         });
 
         const chunks = await this.textChunkStore.getTextChunks(
-          similarDocuments
+          similarDocuments.map((doc) => doc.id)
         );
+
+        const byId = keyBy(chunks, (chunk) => chunk.id);
 
         const justText = chunks.map((chunk) => chunk.chunkText);
 
@@ -35,17 +38,11 @@ export class ChatRouter {
 
         const chatResponse: ChatResponse = {
           answer: answer,
-          context: justText,
+          context: similarDocuments.map((doc) => ({
+            text: byId[doc.id]!.chunkText,
+            score: doc.score,
+          })),
         };
-        console.log(
-          {
-            projectId: args.projectId,
-            question: args.question,
-            answer: answer,
-            vector,
-          },
-          "Chat Response"
-        );
 
         res.json(chatResponse);
       }
@@ -57,7 +54,12 @@ export class ChatRouter {
 
 interface ChatResponse {
   answer: string;
-  context: string[];
+  context: ContextUnit[];
+}
+
+interface ContextUnit {
+  score: number;
+  text: string;
 }
 
 const ZChatArguments = z.object({

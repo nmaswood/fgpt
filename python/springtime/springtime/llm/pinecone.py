@@ -32,7 +32,12 @@ def upsert_vectors(upsert_vectors: list[UpsertVector]):
     )
 
 
-def get_similar(vector: list[float], metadata: dict[str, str]) -> list[str]:
+class VectorResult(BaseModel):
+    id: str
+    metadata: dict[str, str] = {}
+    score: float
+
+def get_similar(vector: list[float], metadata: dict[str, str]) -> list[VectorResult]:
     index = get_pinecone_index()
 
     result = index.query(
@@ -45,8 +50,8 @@ def get_similar(vector: list[float], metadata: dict[str, str]) -> list[str]:
     )
 
     matches = result['matches']
+    return [VectorResult(id=match['id'], metadata=match['metadata'], score=match['score']) for match in matches]
 
-    return [match['id'] for match in matches]
 
 
 def get_pinecone_index():
