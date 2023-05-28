@@ -78,12 +78,13 @@ WHERE
     );
     const { rows } = await cnx.query(
       sql.type(ZProcessedFileRow)`
+
 INSERT INTO processed_file (organization_id, project_id, file_reference_id, extracted_text, extracted_text_sha256, token_length)
     VALUES
         ${sql.join(values, sql.fragment`, `)}
     ON CONFLICT (organization_id, project_id, file_reference_id)
         DO UPDATE SET
-            extracted_text = COALESCE(processed_file.extracted_text, EXCLUDED.extracted_text)
+            extracted_text = COALESCE(EXCLUDED.extracted_text, processed_file.extracted_text)
         RETURNING
             ${FIELDS}
 `

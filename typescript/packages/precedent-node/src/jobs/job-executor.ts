@@ -8,6 +8,7 @@ import { ShaHash } from "../sha-hash";
 import { Task, TaskService } from "../task-service";
 import { TextChunkStore } from "../text-chunk-store";
 import { TextExtractor } from "../text-extractor";
+import lodashChunk from "lodash/chunk";
 
 export interface RunOptions {
   limit: number;
@@ -98,6 +99,10 @@ export class JobExecutorImpl implements JobExecutor {
         const text = await this.processedFileStore.getText(
           config.processedFileId
         );
+        if (text.length === 0) {
+          LOGGER.warn({ config }, "No text to extract");
+          return;
+        }
         const chunker = new GreedyTextChunker();
         const chunks = chunker.chunk({
           tokenChunkLimit: 500,
@@ -120,20 +125,24 @@ export class JobExecutorImpl implements JobExecutor {
           return;
         }
 
-        await this.textChunkStore.upsertManyTextChunks(
-          {
-            organizationId: config.organizationId,
-            projectId: config.projectId,
-            fileReferenceId: config.fileId,
-            processedFileId: config.processedFileId,
-            textChunkGroupId: textChunkGroup.id,
-          },
-          chunks.map((chunkText, chunkOrder) => ({
-            chunkOrder,
-            chunkText,
-            hash: ShaHash.forData(chunkText),
-          }))
-        );
+        const allChunkArgs = chunks.map((chunkText, chunkOrder) => ({
+          chunkOrder,
+          chunkText,
+          hash: ShaHash.forData(chunkText),
+        }));
+
+        for (const group of lodashChunk(allChunkArgs, 100)) {
+          await this.textChunkStore.upsertManyTextChunks(
+            {
+              organizationId: config.organizationId,
+              projectId: config.projectId,
+              fileReferenceId: config.fileId,
+              processedFileId: config.processedFileId,
+              textChunkGroupId: textChunkGroup.id,
+            },
+            group
+          );
+        }
 
         await this.taskService.insert({
           organizationId: config.organizationId,
@@ -153,48 +162,50 @@ export class JobExecutorImpl implements JobExecutor {
       }
 
       case "gen-embeddings": {
-        const chunks = await this.textChunkStore.listWithNoEmbeddings(
+        const allChunks = await this.textChunkStore.listWithNoEmbeddings(
           config.textChunkGroupId
         );
 
-        if (chunks.length === 0) {
+        if (allChunks.length === 0) {
           LOGGER.warn("No chunk ids with embeddings present, skipping");
           return;
         }
 
-        const embeddings = await this.mlService.getEmbeddings({
-          documents: chunks.map((chunk) => chunk.chunkText),
-        });
+        for (const group of lodashChunk(allChunks, 100)) {
+          LOGGER.info("Processing chunk group");
+          const embeddings = await this.mlService.getEmbeddings({
+            documents: group.map((chunk) => chunk.chunkText),
+          });
 
-        const withEmbeddings = chunks.map((chunk, i) => {
-          const embedding = embeddings.response[i];
-          if (!embedding) {
-            throw new Error("undefined embedding");
-          }
-          return {
-            chunkId: chunk.id,
-            embedding,
-          };
-        });
-
-        const chunksWritten = await this.textChunkStore.setManyEmbeddings(
-          config.textChunkGroupId,
-          withEmbeddings
-        );
-
-        await this.taskService.insert({
-          organizationId: config.organizationId,
-          projectId: config.projectId,
-          config: {
-            type: "upsert-embeddings",
-            version: "1",
+          const withEmbeddings = group.map((chunk, i) => {
+            const embedding = embeddings.response[i];
+            if (!embedding) {
+              throw new Error("undefined embedding");
+            }
+            return {
+              chunkId: chunk.id,
+              embedding,
+            };
+          });
+          const chunksWritten = await this.textChunkStore.setManyEmbeddings(
+            config.textChunkGroupId,
+            withEmbeddings
+          );
+          await this.taskService.insert({
             organizationId: config.organizationId,
             projectId: config.projectId,
-            fileId: config.fileId,
-            processedFileId: config.processedFileId,
-            chunkIds: chunksWritten.map((chunk) => chunk.id),
-          },
-        });
+            config: {
+              type: "upsert-embeddings",
+              version: "1",
+              organizationId: config.organizationId,
+              projectId: config.projectId,
+              fileId: config.fileId,
+              processedFileId: config.processedFileId,
+              chunkIds: chunksWritten.map((chunk) => chunk.id),
+            },
+          });
+        }
+
         break;
       }
       case "upsert-embeddings": {

@@ -5,7 +5,7 @@
   "dependencies": {
     "@fgpt/precedent-iso": "workspace:^",
     "@fgpt/precedent-node": "workspace:^",
-    "@types/lodash": "^4.14.194",
+    "@types/lodash": "^4.14.195",
     "@types/multer": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
@@ -44,7 +44,7 @@
     "@types/cors": "^2.8.13",
     "@types/eslint": "^8.40.0",
     "@types/express": "^4.17.17",
-    "@types/node": "^20.2.3",
+    "@types/node": "^20.2.5",
     "@types/prettier": "^2.7.2",
     "@typescript-eslint/eslint-plugin": "^5.59.7",
     "@typescript-eslint/parser": "^5.59.7",

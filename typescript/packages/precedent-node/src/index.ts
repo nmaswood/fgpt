@@ -12,4 +12,5 @@ export * from "./sha-hash";
 export * from "./task-service";
 export * from "./text-chunk-store";
 export * from "./text-extractor";
+export * from "./tika/tika-client";
 export * from "./user-org/user-org-service";

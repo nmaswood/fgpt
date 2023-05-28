@@ -4,12 +4,14 @@ dotenv.config();
 import {
   CloudVisionTextExtractor,
   dataBasePool,
+  GoogleCloudStorageService,
   JobExecutorImpl,
   MLServiceClientImpl,
   PsqlFileReferenceStore,
   PsqlProcessedFileStore,
   PSqlTaskService,
   PsqlTextChunkStore,
+  TikaHttpClient,
 } from "@fgpt/precedent-node";
 
 import { LOGGER } from "./logger";
@@ -21,9 +23,13 @@ async function start(settings: Settings) {
   const pool = await dataBasePool(settings.sql.uri);
 
   const fileReferenceStore = new PsqlFileReferenceStore(pool);
+  const blobStorageService = new GoogleCloudStorageService();
+  const tikaClient = new TikaHttpClient(settings.tikaClient);
   const textExtractor = new CloudVisionTextExtractor(
     fileReferenceStore,
-    settings.assetBucket
+    settings.assetBucket,
+    blobStorageService,
+    tikaClient
   );
   const taskService = new PSqlTaskService(pool);
 

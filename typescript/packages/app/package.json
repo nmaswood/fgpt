@@ -34,7 +34,7 @@
     "@uppy/progress-bar": "^3.0.2",
     "@uppy/react": "^3.1.2",
     "@uppy/xhr-upload": "^3.2.0",
-    "next": "^13.4.3",
+    "next": "^13.4.4",
     "next-http-proxy-middleware": "^1.2.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -42,11 +42,11 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@next/eslint-plugin-next": "^13.4.3",
+    "@next/eslint-plugin-next": "^13.4.4",
     "@types/eslint": "^8.40.0",
-    "@types/node": "^20.2.3",
+    "@types/node": "^20.2.5",
     "@types/prettier": "^2.7.2",
-    "@types/react": "^18.2.6",
+    "@types/react": "^18.2.7",
     "@types/react-dom": "^18.2.4",
     "@typescript-eslint/eslint-plugin": "^5.59.7",
     "@typescript-eslint/parser": "^5.59.7",

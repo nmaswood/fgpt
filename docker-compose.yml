@@ -30,6 +30,8 @@ services:
       - db
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/fgpt-test?sslmode=disable
+  tika:
+    image: apache/tika:latest-full
 
 volumes:
   db:

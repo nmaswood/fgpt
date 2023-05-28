@@ -33,6 +33,15 @@ provider "google" {
 
 }
 
+
+resource "google_document_ai_processor" "processor" {
+  location     = "us"
+  display_name = "text-processor"
+  type         = "OCR_PROCESSOR"
+  depends_on = [
+  google_project_service.enable_services]
+}
+
 resource "google_project_service" "enable_services" {
   for_each                   = toset(var.gcp_service_list)
   project                    = var.project
@@ -111,12 +120,10 @@ resource "google_cloud_run_v2_job" "db" {
 
 
 locals {
-
   asset_bucket = google_storage_bucket.asset_store.name
 }
 
 resource "google_cloud_run_v2_job" "job_runner" {
-
   name     = "${var.project_slug}-job-runner"
   location = "us-central1"
 
@@ -383,6 +390,53 @@ resource "google_cloud_run_v2_service" "springtime" {
   }
 }
 
+resource "google_cloud_run_v2_service" "tika" {
+  name     = "${var.project_slug}-tika"
+  location = var.region
+
+
+  template {
+
+
+    scaling {
+      max_instance_count = 4
+    }
+    containers {
+
+      ports {
+        container_port = 9998
+      }
+
+      image = "apache/tika:latest-full"
+
+      env {
+        name  = "HOST"
+        value = "0.0.0.0"
+      }
+
+      env {
+        name  = "TIKA_CLIENT"
+        value = "${google_cloud_run_v2_service.springtime.uri}/tika"
+      }
+    }
+  }
+
+  traffic {
+    type    = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
+    percent = 100
+  }
+
+  depends_on = [google_project_service.enable_services]
+}
+
+resource "google_cloud_run_service_iam_policy" "tika_public_access" {
+  location    = google_cloud_run_v2_service.tika.location
+  project     = google_cloud_run_v2_service.tika.project
+  service     = google_cloud_run_v2_service.tika.name
+  policy_data = data.google_iam_policy.no_auth.policy_data
+}
+
+
 resource "google_cloud_run_v2_service" "api" {
   name     = "${var.project_slug}-api"
   location = var.region
@@ -628,3 +682,5 @@ resource "auth0_prompt_custom_text" "example" {
     }
   )
 }
+
+
