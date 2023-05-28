@@ -162,6 +162,11 @@ resource "google_cloud_run_v2_job" "job_runner" {
           value = local.asset_bucket
         }
 
+        env {
+          name  = "TIKA_CLIENT"
+          value = "${google_cloud_run_v2_service.springtime.uri}/tika"
+        }
+
         volume_mounts {
           name       = "cloudsql"
           mount_path = "/cloudsql"
@@ -414,10 +419,6 @@ resource "google_cloud_run_v2_service" "tika" {
         value = "0.0.0.0"
       }
 
-      env {
-        name  = "TIKA_CLIENT"
-        value = "${google_cloud_run_v2_service.springtime.uri}/tika"
-      }
     }
   }
 
