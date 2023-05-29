@@ -11,6 +11,9 @@ export const DisplayFiles: React.FC<{ files: LoadedFile[] }> = ({ files }) => {
       height="100%"
       width="100%"
       padding={2}
+      paddingBottom={4}
+      maxHeight="100%"
+      overflow="auto"
     >
       <DataGrid rows={files} columns={columns} disableRowSelectionOnClick />
     </Box>
