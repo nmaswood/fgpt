@@ -26,6 +26,7 @@ export class PsqlLoadedFileStore implements LoadedFileStore {
   ): Promise<LoadedFile[]> {
     const { rows } = await cnx.query(
       sql.type(ZLoadedFileRow)`
+
 SELECT
     file_reference.id,
     file_reference.file_name,
@@ -41,6 +42,8 @@ FROM
     LEFT JOIN text_chunk_group tcg on pf.id = tcg.processed_file_id
 WHERE
     file_reference.project_id = ${projectId}
+ORDER BY
+    file_reference.uploaded_at DESC
 LIMIT ${HARD_CODED_LIMIT + 1}
 `
     );

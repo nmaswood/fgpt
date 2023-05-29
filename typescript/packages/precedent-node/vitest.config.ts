@@ -7,6 +7,7 @@ export default defineConfig({
     env: {
       SQL_URI:
         "postgres://postgres:postgres@localhost:5432/fgpt-test?sslmode=disable",
+      TIKA_CLIENT: "http://localhost:9998/tika",
     },
   },
 });

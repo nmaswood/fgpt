@@ -1,3 +1,4 @@
+from asyncio import streams
 from ..settings import SETTINGS
 
 from langchain.prompts import PromptTemplate
@@ -6,6 +7,7 @@ from langchain.chains import LLMChain
 from langchain.agents import load_tools
 from langchain.agents import initialize_agent
 from langchain.agents import AgentType
+import openai
 
 from langchain import OpenAI, ConversationChain
 
@@ -20,8 +22,7 @@ from langchain.embeddings import OpenAIEmbeddings
 
 
 embeddings = OpenAIEmbeddings()
-chat = ChatOpenAI(temperature=0)
-llm = OpenAI(temperature=0.9)
+chat = ChatOpenAI(temperature=0, streaming=True)
 
 
 def embeddings_for_documents(documents: list[str]) -> list[list[float]]:
@@ -33,56 +34,27 @@ def embedding_for_query(query: str) -> list[float]:
 
 
 def ask_question(context: str, question: str):
+
     prompt = PromptTemplate(
-        input_variables=["context"],
-        template="Given the following context: {context} answer the following question."
+        input_variables=["context", "question"],
+        template="You are an expert financial analyst. Given the following context: {context} answer the following question.\nQuestion:{question}",
     )
-    formatted_message = prompt.format(context=context[:3500])
+    formatted_message = prompt.format(
+        context=context[:3500], question=question)
 
-    messages = [
-        SystemMessage(
-            content="You are an expert financial analyst."),
-        HumanMessage(
-            content=formatted_message),
-        HumanMessage(
-            content=question),
-
-    ]
-
-    return chat(messages)
-
-
-def message_completions(input_text: str):
-    prompt = PromptTemplate(
-        input_variables=["context"],
-        template="Given the following context: {context}, what are some interesting, specific questions you would ask the client?"
+    response = openai.ChatCompletion.create(
+        model='gpt-4',
+        messages=[
+            {'role': 'user', 'content': formatted_message}
+        ],
+        temperature=0,
+        stream=True
     )
-    formatted_message = prompt.format(context=input_text[:3500])
-
-    messages = [
-        SystemMessage(
-            content="You are an expert financial analyst that is helping a client make an investment decision"),
-        HumanMessage(
-            content=formatted_message),
-
-    ]
-
-    return chat(messages)
-
-
-def summarize(input_text: str):
-    prompt = PromptTemplate(
-        input_variables=["context"],
-        template="Given the following text: {context}, please summarize the text to key points / phrases / ideas. Use a '-' to denote each point."
-    )
-    formatted_message = prompt.format(context=input_text[:3500])
-
-    messages = [
-        SystemMessage(
-            content="You are an expert financial analyst that is helping a client make an investment decision"),
-        HumanMessage(
-            content=formatted_message),
-
-    ]
-
-    return chat(messages)
+    for resp in response:
+        choices = resp['choices']
+        delta = choices[0].get('delta')
+        if not delta:
+            continue
+        content = delta.get('content')
+        if content:
+            yield content

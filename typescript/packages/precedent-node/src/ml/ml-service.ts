@@ -21,12 +21,6 @@ const ZEmbeddingsResponse = z.object({
 
 type GetEmbeddingsResponse = z.infer<typeof ZEmbeddingsResponse>;
 
-const ZSummaryResponse = z.object({
-  response: z.string(),
-});
-
-type ZSummaryResponse = z.infer<typeof ZEmbeddingsResponse>;
-
 const ZVectorResult = z.object({
   id: z.string(),
   metadata: z.record(z.any()),
@@ -38,14 +32,6 @@ export type VectorResult = z.infer<typeof ZVectorResult>;
 const ZSimilarResponse = z.object({
   results: ZVectorResult.array(),
 });
-
-interface SummarizeArgs {
-  text: string;
-}
-
-interface SummarizeResponse {
-  response: string;
-}
 
 interface UpsertVector {
   id: string;
@@ -61,21 +47,18 @@ interface SimiliarSearch {
 export interface AskQuestionArgs {
   context: string;
   question: string;
+  onData: (resp: string) => void;
+  onEnd: () => void;
 }
-
-const ZAskQuestionResponse = z.object({
-  response: z.string(),
-});
 
 export interface MLServiceClient {
   predict: (args: PredictArguments) => Promise<PredictResponse>;
   ping: () => Promise<"pong">;
   getEmbedding: (query: string) => Promise<number[]>;
   getEmbeddings: (args: GetEmbeddingsArgs) => Promise<GetEmbeddingsResponse>;
-  summarize: (args: SummarizeArgs) => Promise<SummarizeResponse>;
   upsertVectors: (args: UpsertVector[]) => Promise<void>;
   getKSimilar: (args: SimiliarSearch) => Promise<VectorResult[]>;
-  askQuestion(args: AskQuestionArgs): Promise<string>;
+  askQuestion(args: AskQuestionArgs): Promise<void>;
 }
 
 export class MLServiceClientImpl implements MLServiceClient {
@@ -114,14 +97,6 @@ export class MLServiceClientImpl implements MLServiceClient {
     return response[0]!;
   }
 
-  async summarize({ text }: SummarizeArgs): Promise<SummarizeResponse> {
-    const response = await this.#client.post<PredictResponse>("/summarize", {
-      text,
-    });
-    const parsed = ZSummaryResponse.parse(response.data);
-    return parsed;
-  }
-
   async upsertVectors(vectors: UpsertVector[]): Promise<void> {
     await this.#client.put<PredictResponse>("/upsert-vectors", {
       vectors,
@@ -142,11 +117,30 @@ export class MLServiceClientImpl implements MLServiceClient {
     return ZSimilarResponse.parse(response.data).results;
   }
 
-  async askQuestion({ context, question }: AskQuestionArgs): Promise<string> {
-    const response = await this.#client.post<PredictResponse>("/ask-question", {
-      context,
-      question,
+  async askQuestion({
+    context,
+    question,
+    onData,
+    onEnd,
+  }: AskQuestionArgs): Promise<void> {
+    const response = await this.#client.post<any>(
+      "/ask-question",
+      {
+        context,
+        question,
+      },
+      {
+        responseType: "stream",
+      }
+    );
+    const stream = response.data;
+
+    stream.on("data", (data: Buffer) => {
+      onData(data.toString());
     });
-    return ZAskQuestionResponse.parse(response.data).response;
+
+    stream.on("end", () => {
+      onEnd();
+    });
   }
 }

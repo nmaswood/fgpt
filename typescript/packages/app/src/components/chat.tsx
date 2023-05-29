@@ -1,14 +1,11 @@
 import { useUser } from "@auth0/nextjs-auth0/client";
-import { assertNever, ChatResponse } from "@fgpt/precedent-iso";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import { assertNever } from "@fgpt/precedent-iso";
 import ErrorIcon from "@mui/icons-material/Error";
 import InsertCommentIcon from "@mui/icons-material/InsertComment";
 import SendIcon from "@mui/icons-material/Send";
 import {
   Avatar,
   Box,
-  CircularProgress,
-  Collapse,
   IconButton,
   InputAdornment,
   List,
@@ -26,15 +23,15 @@ interface QuestionWithAnswer {
   question: string;
   state:
     | {
-        type: "loading";
-      }
-    | {
         type: "error";
         error: string;
       }
     | {
-        type: "data";
-        response: ChatResponse;
+        type: "rendering";
+      }
+    | {
+        type: "rendered";
+        value: string;
       };
 }
 
@@ -46,7 +43,24 @@ export const Chat: React.FC<{ projectId: string }> = ({ projectId }) => {
     setQs([]);
   }, [projectId]);
 
-  const { isMutating, trigger } = useAskQuestion();
+  const { trigger, text } = useAskQuestion((value: string) => {
+    setQs((qs) => {
+      const last = qs[qs.length - 1];
+      if (!last || last.state.type !== "rendering") {
+        return qs;
+      }
+
+      return qs.slice(0, -1).concat([
+        {
+          ...last,
+          state: {
+            type: "rendered",
+            value,
+          },
+        },
+      ]);
+    });
+  });
 
   const trimmed = input.trim();
 
@@ -56,41 +70,16 @@ export const Chat: React.FC<{ projectId: string }> = ({ projectId }) => {
       return;
     }
 
-    const withNewItem = Array.from(qs);
-    withNewItem.push({ question: trimmed, state: { type: "loading" } });
+    setQs((prev) => [
+      ...prev,
+      { question: trimmed, state: { type: "rendering" } },
+    ]);
 
-    setQs(withNewItem);
+    await trigger({
+      projectId,
+      question: trimmed,
+    });
 
-    const copy = Array.from(withNewItem);
-
-    try {
-      const res = await trigger({
-        projectId,
-        question: trimmed,
-      });
-
-      if (!res) {
-        throw new Error("illegal state");
-      }
-
-      copy[withNewItem.length - 1] = {
-        question: trimmed,
-        state: {
-          type: "data",
-          response: res,
-        },
-      };
-    } catch (e) {
-      copy[withNewItem.length - 1] = {
-        question: trimmed,
-        state: {
-          type: "error",
-          error: "Something went wrong. Please try again.",
-        },
-      };
-    }
-
-    setQs(copy);
     setInput("");
   };
 
@@ -112,7 +101,7 @@ export const Chat: React.FC<{ projectId: string }> = ({ projectId }) => {
         {qs.length > 0 && (
           <List sx={{ width: "100%" }}>
             {qs.map((q, index) => (
-              <RenderQ key={index} q={q} />
+              <RenderQ key={index} q={q} text={text} />
             ))}
           </List>
         )}
@@ -141,10 +130,7 @@ export const Chat: React.FC<{ projectId: string }> = ({ projectId }) => {
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                <IconButton
-                  disabled={trimmed.length === 0 || isMutating}
-                  onClick={submit}
-                >
+                <IconButton disabled={trimmed.length === 0} onClick={submit}>
                   <SendIcon
                     sx={{
                       transform: "rotate(-45deg) scale(0.8)",
@@ -162,7 +148,10 @@ export const Chat: React.FC<{ projectId: string }> = ({ projectId }) => {
   );
 };
 
-const RenderQ: React.FC<{ q: QuestionWithAnswer }> = ({ q }) => {
+const RenderQ: React.FC<{ q: QuestionWithAnswer; text: string }> = ({
+  q,
+  text,
+}) => {
   const { user } = useUser();
   const picture = user?.picture;
 
@@ -213,25 +202,21 @@ const RenderQ: React.FC<{ q: QuestionWithAnswer }> = ({ q }) => {
         }}
       >
         <Box ref={ref} display="flex" width="56" height="40" marginRight={2}>
-          <ResponseAvatar state={q.state.type} />
+          <ResponseAvatar state={"data"} />
         </Box>
-
-        <ResponseContent val={q.state} />
+        {q.state.type === "rendered" && (
+          <Typography color="white">{q.state.value}</Typography>
+        )}
+        {q.state.type === "rendering" && (
+          <Typography color="white">{text}</Typography>
+        )}
       </ListItem>
     </>
   );
 };
 
-const ResponseAvatar: React.FC<{ state: "loading" | "error" | "data" }> = ({
-  state,
-}) => {
+const ResponseAvatar: React.FC<{ state: "error" | "data" }> = ({ state }) => {
   switch (state) {
-    case "loading":
-      return (
-        <Box display="flex" justifyContent="center" padding={1}>
-          <CircularProgress size="2rem" />
-        </Box>
-      );
     case "error":
       return (
         <Box display="flex" justifyContent="center" padding={1}>
@@ -251,75 +236,5 @@ const ResponseAvatar: React.FC<{ state: "loading" | "error" | "data" }> = ({
       );
     default:
       assertNever(state);
-  }
-};
-
-const ResponseContent: React.FC<{ val: QuestionWithAnswer["state"] }> = ({
-  val,
-}) => {
-  const [open, setOpen] = React.useState(false);
-
-  const rotate = open ? "rotate(-90deg)" : "rotate(0)";
-
-  switch (val.type) {
-    case "loading":
-      return null;
-    case "error":
-      return <Typography color="error">An error has occured</Typography>;
-
-    case "data":
-      return (
-        <Box
-          display="flex"
-          position="relative"
-          width="100%"
-          height="100%"
-          flexDirection="column"
-        >
-          <Box
-            display="flex"
-            position="relative"
-            width="100%"
-            height="100%"
-            alignItems="center"
-          >
-            <Typography color="white">{val.response.answer}</Typography>
-            {val.response.context.length > 0 && (
-              <IconButton
-                onClick={() => setOpen((prev) => !prev)}
-                sx={{
-                  position: "absolute",
-                  right: "-35px",
-                }}
-              >
-                <ChevronLeftIcon
-                  sx={{
-                    transform: rotate,
-                    transition: "all 0.2s linear",
-                  }}
-                />
-              </IconButton>
-            )}
-          </Box>
-
-          {val.response.context.length > 0 && (
-            <Collapse in={open} timeout="auto" unmountOnExit>
-              <List disablePadding>
-                {val.response.context.map((c, index) => (
-                  <ListItem key={index} disableGutters>
-                    <ListItemText
-                      primary={`Similarity score: ${c.score}`}
-                      secondary={c.text}
-                      primaryTypographyProps={{ color: "white" }}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </Collapse>
-          )}
-        </Box>
-      );
-    default:
-      assertNever(val);
   }
 };
