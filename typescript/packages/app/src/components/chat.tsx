@@ -1,11 +1,14 @@
 import { useUser } from "@auth0/nextjs-auth0/client";
-import { assertNever } from "@fgpt/precedent-iso";
+import { assertNever, ChatResponse } from "@fgpt/precedent-iso";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ErrorIcon from "@mui/icons-material/Error";
 import InsertCommentIcon from "@mui/icons-material/InsertComment";
 import SendIcon from "@mui/icons-material/Send";
 import {
   Avatar,
   Box,
+  CircularProgress,
+  Collapse,
   IconButton,
   InputAdornment,
   List,
@@ -18,8 +21,10 @@ import {
 import React from "react";
 
 import { useAskQuestion } from "../hooks/use-ask-question";
+import { useDebugChat } from "../hooks/use-debug-chat";
 
 interface QuestionWithAnswer {
+  id: string;
   question: string;
   state:
     | {
@@ -35,15 +40,19 @@ interface QuestionWithAnswer {
       };
 }
 
-export const Chat: React.FC<{ projectId: string }> = ({ projectId }) => {
+export const Chat: React.FC<{ projectId: string; token: string }> = ({
+  projectId,
+  token,
+}) => {
   const [input, setInput] = React.useState("");
   const [qs, setQs] = React.useState<QuestionWithAnswer[]>([]);
+  const { trigger: triggerDebug, responses } = useDebugChat();
 
   React.useEffect(() => {
     setQs([]);
   }, [projectId]);
 
-  const { trigger, text } = useAskQuestion((value: string) => {
+  const { trigger, text, loading } = useAskQuestion(token, (value: string) => {
     setQs((qs) => {
       const last = qs[qs.length - 1];
       if (!last || last.state.type !== "rendering") {
@@ -70,17 +79,28 @@ export const Chat: React.FC<{ projectId: string }> = ({ projectId }) => {
       return;
     }
 
+    const id = crypto.randomUUID();
+
     setQs((prev) => [
       ...prev,
-      { question: trimmed, state: { type: "rendering" } },
+      {
+        id,
+        question: trimmed,
+        state: { type: "rendering" },
+      },
     ]);
 
+    setInput("");
     await trigger({
       projectId,
       question: trimmed,
     });
 
-    setInput("");
+    await triggerDebug({
+      id,
+      projectId,
+      question: trimmed,
+    });
   };
 
   return (
@@ -100,8 +120,13 @@ export const Chat: React.FC<{ projectId: string }> = ({ projectId }) => {
       >
         {qs.length > 0 && (
           <List sx={{ width: "100%" }}>
-            {qs.map((q, index) => (
-              <RenderQ key={index} q={q} text={text} />
+            {qs.map((q) => (
+              <RenderQ
+                key={q.id}
+                q={q}
+                text={text}
+                responses={responses[q.id] ?? []}
+              />
             ))}
           </List>
         )}
@@ -130,7 +155,10 @@ export const Chat: React.FC<{ projectId: string }> = ({ projectId }) => {
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                <IconButton disabled={trimmed.length === 0} onClick={submit}>
+                <IconButton
+                  disabled={trimmed.length === 0 || loading}
+                  onClick={submit}
+                >
                   <SendIcon
                     sx={{
                       transform: "rotate(-45deg) scale(0.8)",
@@ -148,15 +176,21 @@ export const Chat: React.FC<{ projectId: string }> = ({ projectId }) => {
   );
 };
 
-const RenderQ: React.FC<{ q: QuestionWithAnswer; text: string }> = ({
-  q,
-  text,
-}) => {
+const RenderQ: React.FC<{
+  q: QuestionWithAnswer;
+  text: string;
+  responses: ChatResponse[];
+}> = ({ q, text, responses }) => {
   const { user } = useUser();
   const picture = user?.picture;
+  console.log({ responses });
 
   const ref = React.useRef<HTMLDivElement>(null);
   const current = ref.current;
+
+  const [open, setOpen] = React.useState(false);
+
+  const rotate = open ? "rotate(-90deg)" : "rotate(0)";
 
   const [mounted, setMounted] = React.useState(false);
 
@@ -199,16 +233,62 @@ const RenderQ: React.FC<{ q: QuestionWithAnswer; text: string }> = ({
           paddingX: 20,
           background: "#343541",
           display: "flex",
+          position: "relative",
+          flexDirection: "column",
         }}
       >
-        <Box ref={ref} display="flex" width="56" height="40" marginRight={2}>
-          <ResponseAvatar state={"data"} />
+        <Box display="flex" width="100%" alignItems="center">
+          <Box ref={ref} display="flex" width="56" height="40" marginRight={2}>
+            <ResponseAvatar state={"data"} />
+          </Box>
+          {q.state.type === "rendered" && (
+            <Typography color="white">{q.state.value}</Typography>
+          )}
+          {q.state.type === "rendering" && (
+            <Typography color="white">{text}</Typography>
+          )}
+          {q.state.type === "rendering" && text.length === 0 && (
+            <CircularProgress />
+          )}
         </Box>
-        {q.state.type === "rendered" && (
-          <Typography color="white">{q.state.value}</Typography>
+
+        {responses.length > 0 && (
+          <IconButton
+            onClick={() => setOpen((prev) => !prev)}
+            sx={{
+              position: "absolute",
+              right: "35px",
+            }}
+          >
+            <ChevronLeftIcon
+              sx={{
+                transform: rotate,
+                transition: "all 0.2s linear",
+              }}
+            />
+          </IconButton>
         )}
-        {q.state.type === "rendering" && (
-          <Typography color="white">{text}</Typography>
+
+        {responses.length > 0 && (
+          <Collapse
+            in={open}
+            timeout="auto"
+            unmountOnExit
+            sx={{ width: "100%", paddingLeft: 7 }}
+          >
+            <List disablePadding>
+              {responses.map((response, index) => (
+                <ListItem key={index} disableGutters>
+                  <ListItemText
+                    primary={`
+                      Filename: ${response.filename} | Similarity score: ${response.score}`}
+                    secondary={response.text}
+                    primaryTypographyProps={{ color: "white" }}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Collapse>
         )}
       </ListItem>
     </>

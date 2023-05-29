@@ -3,6 +3,7 @@ import "@uppy/dashboard/dist/style.min.css";
 
 import { Project } from "@fgpt/precedent-iso";
 import { MAX_FILE_SIZE_BYTES } from "@fgpt/precedent-iso";
+import AssessmentIcon from "@mui/icons-material/Assessment";
 import BoltIcon from "@mui/icons-material/Bolt";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CollectionsIcon from "@mui/icons-material/Collections";
@@ -35,7 +36,7 @@ import { CLIENT_SETTINGS } from "../client-settings";
 import { useFetchFiles } from "../hooks/use-fetch-files";
 import { Chat } from "./chat";
 import { DisplayFiles } from "./display-files";
-console.log({ CLIENT_SETTINGS });
+import { DisplayReports } from "./display-reports";
 
 export const SelectedProject: React.FC<{ project: Project; token: string }> = ({
   token,
@@ -137,6 +138,11 @@ export const SelectedProject: React.FC<{ project: Project; token: string }> = ({
               icon={<BoltIcon />}
               iconPosition="start"
               label={isLargeScreen ? "Chat" : undefined}
+            />
+            <Tab
+              icon={<AssessmentIcon />}
+              iconPosition="start"
+              label={isLargeScreen ? "Reports" : undefined}
             />
           </Tabs>
           <Box display="flex" alignItems="center">
@@ -266,11 +272,12 @@ export const SelectedProject: React.FC<{ project: Project; token: string }> = ({
 
             {!filesLoading && files.length > 0 && (
               <Box display="flex" width="100%" height="100%">
-                <Chat projectId={project.id} />
+                <Chat projectId={project.id} token={token} />
               </Box>
             )}
           </>
         )}
+        {value === 3 && <DisplayReports />}
       </Box>
       {modal === "delete" && <DeleteProjectModal closeModal={closeModal} />}
       {modal === "edit" && <EditProjectModal closeModal={closeModal} />}

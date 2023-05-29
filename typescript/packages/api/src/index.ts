@@ -53,7 +53,6 @@ async function start() {
 
   app.use(
     express.json({
-      limit: "100mb",
       verify: function (req, _, buf) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (req as any).rawBody = buf;
@@ -108,7 +107,7 @@ async function start() {
     "/api/v1/chat",
     jwtCheck,
     addUser,
-    new ChatRouter(mlService, textChunkStore).init()
+    new ChatRouter(mlService, textChunkStore, fileReferenceStore).init()
   );
 
   app.use("/ping", (_, res) => {

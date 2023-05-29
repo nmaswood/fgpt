@@ -118,7 +118,6 @@ where
         fileSize,
       }) =>
         sql.fragment`
-
 (${fileName},
     ${bucketName},
     ${contentType},

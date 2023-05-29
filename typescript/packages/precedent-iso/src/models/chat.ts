@@ -1,9 +1,5 @@
 export interface ChatResponse {
-  answer: string;
-  context: ContextUnit[];
-}
-
-export interface ContextUnit {
+  filename: string;
   score: number;
   text: string;
 }

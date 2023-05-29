@@ -15,6 +15,7 @@ import {
   DialogTitle,
   Divider,
   Drawer,
+  LinearProgress,
   Link,
   List,
   ListItem,
@@ -35,6 +36,7 @@ const SIDE_BAR_PIXELS = 220;
 const SIDE_BAR_WIDTH = `${SIDE_BAR_PIXELS}px`;
 
 export const Sidebar: React.FC<{
+  projectsLoading: boolean;
   projects: Project[];
   selectedProjectId: string | undefined;
   setSelectedProjectId: (projectId: string) => void;
@@ -42,6 +44,7 @@ export const Sidebar: React.FC<{
   projectModalOpen: boolean;
   setProjectModalOpen: (v: boolean) => void;
 }> = ({
+  projectsLoading,
   projects,
   selectedProjectId,
   setSelectedProjectId,
@@ -69,6 +72,14 @@ export const Sidebar: React.FC<{
         setProjectModalOpen={setProjectModalOpen}
       />
       <Divider />
+      <Box
+        display="flex"
+        height="2px"
+        width="100%"
+        visibility={projectsLoading ? "visible" : "hidden"}
+      >
+        <LinearProgress sx={{ width: "100%" }} />
+      </Box>
       <Box display="flex" height="100%" maxHeight="100%" overflow="auto">
         {projects && projects.length > 0 && (
           <List

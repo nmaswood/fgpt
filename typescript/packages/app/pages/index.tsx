@@ -35,6 +35,7 @@ const Home: React.FC = () => {
   return (
     <Box display="flex" height="100%" width="100%">
       <Sidebar
+        projectsLoading={projectsLoading}
         projects={projects}
         selectedProjectId={selectedProjectId}
         setSelectedProjectId={setSelectedProjectId}

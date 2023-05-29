@@ -1,14 +1,22 @@
-import { isNotNull } from "@fgpt/precedent-iso";
-import { MLServiceClient, TextChunkStore } from "@fgpt/precedent-node";
+import { ChatResponse } from "@fgpt/precedent-iso";
+import {
+  FileReferenceStore,
+  MLServiceClient,
+  TextChunkStore,
+} from "@fgpt/precedent-node";
 import express from "express";
 import { keyBy } from "lodash";
 import { z } from "zod";
-//import { LOGGER } from "../logger";
+
+import { LOGGER } from "../logger";
+
+const encoder = new TextEncoder();
 
 export class ChatRouter {
   constructor(
     private readonly mlClient: MLServiceClient,
-    private readonly textChunkStore: TextChunkStore
+    private readonly textChunkStore: TextChunkStore,
+    private readonly fileReferenceStore: FileReferenceStore
   ) {}
   init() {
     const router = express.Router();
@@ -16,12 +24,7 @@ export class ChatRouter {
     router.post(
       "/chat",
       async (req: express.Request, res: express.Response) => {
-        const projectId = req.query.projectId;
-        const question = req.query.question;
-        const args = ZChatArguments.parse({
-          question,
-          projectId,
-        });
+        const args = ZChatArguments.parse(req.body);
 
         const vector = await this.mlClient.getEmbedding(args.question);
 
@@ -36,31 +39,24 @@ export class ChatRouter {
 
         const byId = keyBy(chunks, (chunk) => chunk.id);
 
-        //for (const document of similarDocuments) {
-        //if (!byId[document.id]) {
-        //LOGGER.warn(
-        //{ documentId: document.id },
-        //"No document found for id"
-        //);
-        //}
-        //}
+        const missingIds = similarDocuments
+          .map((doc) => doc.id)
+          .filter((id) => !byId[id]);
+        if (missingIds.length) {
+          LOGGER.warn({ missingIds }, "No document found for id");
+        }
 
         const justText = chunks.map((chunk) => chunk.chunkText);
 
-        const context = similarDocuments
-          .map(({ score, id }) => {
-            const text = byId[id]?.chunkText;
-
-            return text ? { score, text } : null;
-          })
-          .filter(isNotNull);
-        context;
+        res.set("Content-Type", "text/event-stream");
+        res.set("Cache-Control", "no-cache");
+        res.set("Connection", "keep-alive");
 
         await this.mlClient.askQuestion({
           context: justText.join("\n"),
           question: args.question,
           onData: (resp) => {
-            res.write(resp);
+            res.write(encoder.encode(resp));
           },
           onEnd: () => {
             res.end();
@@ -69,19 +65,64 @@ export class ChatRouter {
       }
     );
 
+    router.post(
+      "/debug",
+      async (req: express.Request, res: express.Response) => {
+        const args = ZChatArguments.parse(req.body);
+
+        const vector = await this.mlClient.getEmbedding(args.question);
+
+        const similarDocuments = await (async () => {
+          const docs = await this.mlClient.getKSimilar({
+            vector,
+            metadata: { projectId: args.projectId },
+          });
+
+          return docs.map(({ id, score, metadata }) => ({
+            id,
+            score,
+            metadata: ZVectorMetadata.parse(metadata),
+          }));
+        })();
+
+        const filesById = keyBy(
+          await this.fileReferenceStore.getMany(
+            similarDocuments.map((doc) => doc.metadata.fileId)
+          ),
+          (file) => file.id
+        );
+
+        const chunks = await this.textChunkStore.getTextChunks(
+          similarDocuments.map((doc) => doc.id)
+        );
+
+        const byId = keyBy(chunks, (chunk) => chunk.id);
+
+        const missingIds = new Set(
+          similarDocuments.map((doc) => doc.id).filter((id) => !byId[id])
+        );
+
+        if (missingIds.size > 0) {
+          LOGGER.warn({ missingIds }, "No document found for id");
+        }
+
+        const response: ChatResponse[] = similarDocuments.map((doc) => ({
+          filename: filesById[doc.metadata.fileId]?.fileName ?? "",
+          score: doc.score,
+          text: byId[doc.id]?.chunkText ?? "",
+        }));
+
+        res.json(response);
+      }
+    );
+
     return router;
   }
 }
 
-//interface ChatResponse {
-//answer: string;
-//context: ContextUnit[];
-//}
-
-//interface ContextUnit {
-//score: number;
-//text: string;
-//}
+export const ZVectorMetadata = z.object({
+  fileId: z.string(),
+});
 
 const ZChatArguments = z.object({
   projectId: z.string(),
