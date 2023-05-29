@@ -53,7 +53,7 @@ async function start() {
 
   app.use(
     express.json({
-      limit: "50mb",
+      limit: "100mb",
       verify: function (req, _, buf) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (req as any).rawBody = buf;

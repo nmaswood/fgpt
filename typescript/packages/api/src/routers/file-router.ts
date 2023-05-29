@@ -13,7 +13,13 @@ import multer from "multer";
 import path from "path";
 import { z } from "zod";
 
-const upload = multer({ dest: "/var/tmp/api-upload" });
+const upload = multer({
+  dest: "/var/tmp/api-upload",
+
+  limits: {
+    fileSize: 100 * 1024 * 1024 * 10000,
+  },
+});
 
 export class FileRouter {
   constructor(
