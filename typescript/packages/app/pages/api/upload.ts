@@ -7,6 +7,7 @@ import { SERVER_SETTINGS } from "../../src/settings";
 export const config = {
   api: {
     bodyParser: false,
+    responseLimit: "100mb",
   },
 };
 
