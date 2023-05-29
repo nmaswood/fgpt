@@ -13,6 +13,8 @@ export class TikaHttpClient implements TikaClient {
   constructor(baseURL: string) {
     this.#client = axios.create({
       baseURL,
+      // 15 minutes
+      timeout: 15 * 60 * 1000,
     });
   }
 

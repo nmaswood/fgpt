@@ -139,11 +139,17 @@ resource "google_cloud_run_v2_job" "job_runner" {
         }
       }
 
-
       timeout = "3600s"
 
       containers {
         image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/job-runner:latest"
+
+        resources {
+          limits = {
+            cpu    = "1"
+            memory = "4Gi"
+          }
+        }
 
         env {
 

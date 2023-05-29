@@ -102,6 +102,8 @@ export class FileRouter {
           },
         });
 
+        await F.unlink(file.path);
+
         res.json({ ok: true });
       }
     );
