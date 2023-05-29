@@ -1,4 +1,5 @@
 import { assertNever, GreedyTextChunker } from "@fgpt/precedent-iso";
+import lodashChunk from "lodash/chunk";
 import keyBy from "lodash/keyBy";
 
 import { LOGGER } from "../logger";
@@ -8,7 +9,6 @@ import { ShaHash } from "../sha-hash";
 import { Task, TaskService } from "../task-service";
 import { TextChunkStore } from "../text-chunk-store";
 import { TextExtractor } from "../text-extractor";
-import lodashChunk from "lodash/chunk";
 
 export interface RunOptions {
   limit: number;

@@ -67,7 +67,6 @@ WHERE
     const values = args.map(
       ({ organizationId, projectId, fileReferenceId, text, hash }) =>
         sql.fragment`
-
 (${organizationId},
     ${projectId},
     ${fileReferenceId},
@@ -78,7 +77,6 @@ WHERE
     );
     const { rows } = await cnx.query(
       sql.type(ZProcessedFileRow)`
-
 INSERT INTO processed_file (organization_id, project_id, file_reference_id, extracted_text, extracted_text_sha256, token_length)
     VALUES
         ${sql.join(values, sql.fragment`, `)}

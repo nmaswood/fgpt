@@ -584,6 +584,11 @@ resource "vercel_project" "front_end" {
       value  = var.public_api_endpoint
     },
     {
+      key    = "NEXT_PUBLIC_API_ENDPOINT"
+      target = ["production", "preview"]
+      value  = var.public_api_endpoint
+    },
+    {
       key    = "AUTH0_ISSUER_BASE_URL"
       target = ["production", "preview"]
       value  = "https://${var.auth0_domain}"

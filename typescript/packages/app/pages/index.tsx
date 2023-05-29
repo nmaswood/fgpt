@@ -6,8 +6,10 @@ import * as React from "react";
 import { SelectedProject } from "../src/components/selected-project";
 import { Sidebar } from "../src/components/side-bar";
 import { useFetchProjects } from "../src/hooks/use-fetch-projects";
+import { useFetchToken } from "../src/hooks/use-fetch-token";
 
 const Home: React.FC = () => {
+  const { data: token } = useFetchToken();
   const { data: projects, isLoading: projectsLoading } = useFetchProjects();
 
   const [selectedProjectId, setSelectedProjectId] = React.useState<
@@ -67,8 +69,8 @@ const Home: React.FC = () => {
             </Box>
           )}
 
-        {selectedProject !== undefined && (
-          <SelectedProject project={selectedProject} />
+        {token && selectedProject !== undefined && (
+          <SelectedProject token={token} project={selectedProject} />
         )}
       </Box>
     </Box>

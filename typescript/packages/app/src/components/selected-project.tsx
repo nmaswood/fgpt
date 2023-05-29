@@ -31,11 +31,13 @@ import { Dashboard } from "@uppy/react";
 import XHRUpload from "@uppy/xhr-upload";
 import React from "react";
 
+import { CLIENT_SETTINGS } from "../client-settings";
 import { useFetchFiles } from "../hooks/use-fetch-files";
 import { Chat } from "./chat";
 import { DisplayFiles } from "./display-files";
 
-export const SelectedProject: React.FC<{ project: Project }> = ({
+export const SelectedProject: React.FC<{ project: Project; token: string }> = ({
+  token,
   project,
 }) => {
   const [modal, setModal] = React.useState<"delete" | "edit" | undefined>(
@@ -53,9 +55,12 @@ export const SelectedProject: React.FC<{ project: Project }> = ({
           maxFileSize: MAX_FILE_SIZE_BYTES,
         },
       }).use(XHRUpload, {
-        endpoint: "/api/upload",
+        endpoint: `${CLIENT_SETTINGS.publicApiEndpoint}/api/v1/files/upload`,
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
       }),
-    []
+    [token]
   );
 
   React.useEffect(() => {

@@ -11,8 +11,6 @@ export class TikaHttpClient implements TikaClient {
   #client: AxiosInstance;
 
   constructor(baseURL: string) {
-    console.log("baseURL", baseURL);
-    console.log("Hello world");
     this.#client = axios.create({
       baseURL,
     });

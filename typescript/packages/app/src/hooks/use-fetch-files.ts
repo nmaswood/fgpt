@@ -7,7 +7,6 @@ export const useFetchFiles = (projectId: string) => {
     ["api/proxy/v1/files/list", string]
   >(["api/proxy/v1/files/list", projectId], fetcher);
 
-  console.log({ data });
   return { data: data ?? [], isLoading, mutate };
 };
 

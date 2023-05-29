@@ -46,8 +46,6 @@ export class GoogleCloudStorageService implements BlobStorageService {
     const bucket = this.#storage.bucket(bucketName);
 
     const [files] = await bucket.getFiles({ prefix });
-    console.log(`Listing files with prefix ${prefix}`);
-    console.log({ bucketName, prefix });
     return files.map((f) => ({
       name: f.name,
       download: async () => {
