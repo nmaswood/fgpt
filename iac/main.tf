@@ -164,7 +164,7 @@ resource "google_cloud_run_v2_job" "job_runner" {
 
         env {
           name  = "TIKA_CLIENT"
-          value = "${google_cloud_run_v2_service.springtime.uri}/tika"
+          value = "${google_cloud_run_v2_service.tika.uri}/tika"
         }
 
         volume_mounts {

@@ -14,13 +14,14 @@ async function proxy(req: NextApiRequest, res: NextApiResponse) {
   const { accessToken } = await getAccessToken(req, res);
   const target = `${SERVER_SETTINGS.publicApiEndpoint}/api/v1/files/upload`;
 
-  httpProxyMiddleware(req, res, {
+  const value = httpProxyMiddleware(req, res, {
     target,
     ignorePath: true,
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
   });
+  return value;
 }
 
 export default withApiAuthRequired(proxy);
