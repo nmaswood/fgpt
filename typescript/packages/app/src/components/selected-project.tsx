@@ -56,8 +56,7 @@ export const SelectedProject: React.FC<{ project: Project; token: string }> = ({
           maxFileSize: MAX_FILE_SIZE_BYTES,
         },
       }).use(XHRUpload, {
-        endpoint: "api/upload",
-        //endpoint: `${CLIENT_SETTINGS.publicApiEndpoint}/api/v1/files/upload`,
+        endpoint: `${CLIENT_SETTINGS.publicApiEndpoint}/api/v1/files/upload`,
         headers: {
           authorization: `Bearer ${token}`,
         },
