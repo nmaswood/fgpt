@@ -35,6 +35,7 @@ import { CLIENT_SETTINGS } from "../client-settings";
 import { useFetchFiles } from "../hooks/use-fetch-files";
 import { Chat } from "./chat";
 import { DisplayFiles } from "./display-files";
+console.log({ CLIENT_SETTINGS });
 
 export const SelectedProject: React.FC<{ project: Project; token: string }> = ({
   token,
@@ -55,7 +56,8 @@ export const SelectedProject: React.FC<{ project: Project; token: string }> = ({
           maxFileSize: MAX_FILE_SIZE_BYTES,
         },
       }).use(XHRUpload, {
-        endpoint: `${CLIENT_SETTINGS.publicApiEndpoint}/api/v1/files/upload`,
+        endpoint: "api/upload",
+        //endpoint: `${CLIENT_SETTINGS.publicApiEndpoint}/api/v1/files/upload`,
         headers: {
           authorization: `Bearer ${token}`,
         },
