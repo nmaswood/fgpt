@@ -49,6 +49,7 @@ export class TikaHttpClient implements TikaClient {
       data,
       headers: {
         "Content-type": mimeType,
+        "X-Tika-Timeout-Millis": `${15 * 60 * 1000}`,
       },
     });
     const extractData = response.data;

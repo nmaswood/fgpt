@@ -1,4 +1,4 @@
-import { assertNever, GreedyTextChunker } from "@fgpt/precedent-iso";
+import { assertNever, GreedyTextChunker, isNotNull } from "@fgpt/precedent-iso";
 import lodashChunk from "lodash/chunk";
 import keyBy from "lodash/keyBy";
 
@@ -213,18 +213,31 @@ export class JobExecutorImpl implements JobExecutor {
           config.chunkIds
         );
         const byChunkId = keyBy(embeddings, (e) => e.chunkId);
-        await this.mlService.upsertVectors(
-          config.chunkIds.map((id) => ({
-            id,
-            vector: byChunkId[id]!.embedding,
+
+        for (const chunkId of config.chunkIds) {
+          if (!byChunkId[chunkId]) {
+            LOGGER.error({ chunkId }, "Missing embedding for chunk id");
+          }
+        }
+
+        const payloads = config.chunkIds
+          .map((chunkId) => ({
+            chunkId,
+            embedding: byChunkId[chunkId]?.embedding,
+          }))
+          .filter((val) => isNotNull(val.embedding))
+          .map(({ chunkId, embedding }) => ({
+            id: chunkId,
+            vector: embedding!,
             metadata: {
               organizationId: config.organizationId,
               projectId: config.projectId,
               fileId: config.fileId,
               processedFileId: config.processedFileId,
             },
-          }))
-        );
+          }));
+
+        await this.mlService.upsertVectors(payloads);
         break;
       }
       case "delete-project": {
