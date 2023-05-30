@@ -22,7 +22,6 @@ from langchain.embeddings import OpenAIEmbeddings
 
 
 embeddings = OpenAIEmbeddings()
-chat = ChatOpenAI(temperature=0, streaming=True)
 
 
 def embeddings_for_documents(documents: list[str]) -> list[list[float]]:
@@ -43,7 +42,7 @@ def ask_question(context: str, question: str):
         context=context[:3500], question=question)
 
     response = openai.ChatCompletion.create(
-        model='gpt-4',
+        model='gpt-3.5-turbo',
         messages=[
             {'role': 'user', 'content': formatted_message}
         ],
