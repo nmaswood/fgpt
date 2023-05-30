@@ -25,6 +25,7 @@ import {
   MenuList,
   Tab,
   Tabs,
+  TextField,
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Uppy from "@uppy/core";
@@ -33,15 +34,18 @@ import XHRUpload from "@uppy/xhr-upload";
 import React from "react";
 
 import { CLIENT_SETTINGS } from "../client-settings";
+import { useDeleteProject } from "../hooks/use-delete-project";
+import { useEditProject } from "../hooks/use-edit-project";
 import { useFetchFiles } from "../hooks/use-fetch-files";
 import { Chat } from "./chat";
 import { DisplayFiles } from "./display-files";
 import { DisplayReports } from "./display-reports";
 
-export const SelectedProject: React.FC<{ project: Project; token: string }> = ({
-  token,
-  project,
-}) => {
+export const SelectedProject: React.FC<{
+  project: Project;
+  projects: Project[];
+  token: string;
+}> = ({ token, project, projects }) => {
   const [modal, setModal] = React.useState<"delete" | "edit" | undefined>(
     undefined
   );
@@ -279,15 +283,28 @@ export const SelectedProject: React.FC<{ project: Project; token: string }> = ({
         )}
         {value === 3 && <DisplayReports />}
       </Box>
-      {modal === "delete" && <DeleteProjectModal closeModal={closeModal} />}
-      {modal === "edit" && <EditProjectModal closeModal={closeModal} />}
+      {modal === "delete" && (
+        <DeleteProjectModal closeModal={closeModal} projectId={project.id} />
+      )}
+      {modal === "edit" && (
+        <EditProjectModal
+          closeModal={closeModal}
+          projectId={project.id}
+          projectName={project.name}
+          projects={projects}
+        />
+      )}
     </>
   );
 };
 
 const DeleteProjectModal: React.FC<{
+  projectId: string;
   closeModal: () => void;
-}> = ({ closeModal }) => {
+}> = ({ closeModal, projectId }) => {
+  const { trigger, isMutating } = useDeleteProject();
+  const [text, setText] = React.useState("");
+
   return (
     <Dialog
       open
@@ -300,14 +317,43 @@ const DeleteProjectModal: React.FC<{
         },
       }}
     >
-      <DialogTitle>Delete project| TODO</DialogTitle>
+      <DialogTitle>Delete project</DialogTitle>
       <DialogActions>
-        <Button onClick={closeModal} color="primary">
-          Cancel
-        </Button>
-        <LoadingButton variant="contained" color="secondary">
-          Delete project
-        </LoadingButton>
+        <Box
+          display="flex"
+          width="100%"
+          height="100%"
+          flexDirection="column"
+          gap={3}
+        >
+          <TextField
+            label="Confirmation"
+            placeholder="Type DELETE to confirm"
+            value={text}
+            variant="outlined"
+            onChange={(e) => {
+              setText(e.target.value);
+            }}
+            autoFocus
+          />
+          <Box display="flex" width="100%" justifyContent="flex-end">
+            <Button onClick={closeModal} color="primary">
+              Cancel
+            </Button>
+            <LoadingButton
+              variant="contained"
+              color="secondary"
+              loading={isMutating}
+              disabled={text !== "DELETE"}
+              onClick={async () => {
+                await trigger({ id: projectId });
+                closeModal();
+              }}
+            >
+              Delete project
+            </LoadingButton>
+          </Box>
+        </Box>
       </DialogActions>
     </Dialog>
   );
@@ -315,7 +361,18 @@ const DeleteProjectModal: React.FC<{
 
 const EditProjectModal: React.FC<{
   closeModal: () => void;
-}> = ({ closeModal }) => {
+  projectId: string;
+  projectName: string;
+  projects: Project[];
+}> = ({ closeModal, projectName, projectId, projects }) => {
+  const [text, setText] = React.useState("");
+  const { trigger, isMutating } = useEditProject();
+  const trimmed = text.trim();
+
+  const projectNames = React.useMemo(
+    () => new Set(projects.map((project) => project.name)),
+    [projects]
+  );
   return (
     <Dialog
       open
@@ -328,14 +385,50 @@ const EditProjectModal: React.FC<{
         },
       }}
     >
-      <DialogTitle>Edit project| TODO</DialogTitle>
+      <DialogTitle>Edit project name</DialogTitle>
       <DialogActions>
-        <Button onClick={closeModal} color="primary">
-          Cancel
-        </Button>
-        <LoadingButton variant="contained" color="secondary">
-          Change a thing
-        </LoadingButton>
+        <Box
+          display="flex"
+          width="100%"
+          height="100%"
+          flexDirection="column"
+          gap={3}
+        >
+          <TextField
+            label="New name"
+            variant="outlined"
+            value={text}
+            onChange={(e) => {
+              setText(e.target.value);
+            }}
+            autoFocus
+          />
+
+          <Box display="flex" justifyContent="flex-end">
+            <Button onClick={closeModal} color="primary">
+              Cancel
+            </Button>
+            <LoadingButton
+              variant="contained"
+              color="secondary"
+              disabled={
+                trimmed.length <= 3 ||
+                isMutating ||
+                trimmed === projectName ||
+                projectNames.has(trimmed)
+              }
+              onClick={async () => {
+                await trigger({
+                  id: projectId,
+                  name: trimmed,
+                });
+                closeModal();
+              }}
+            >
+              Change name
+            </LoadingButton>
+          </Box>
+        </Box>
       </DialogActions>
     </Dialog>
   );

@@ -21,7 +21,7 @@ export interface ProjectStore {
   create: (args: CreateProjectArgs) => Promise<Project>;
   delete: (ids: string) => Promise<void>;
   deleteMany: (ids: string[]) => Promise<void>;
-  updateProject: (args: UpdateProject) => Promise<Project>;
+  update: (args: UpdateProject) => Promise<Project>;
 }
 
 const PROJECT_FIELDS = sql.fragment`id, organization_id, name`;
@@ -110,14 +110,30 @@ RETURNING
   async deleteMany(ids: string[]) {
     await this.pool.query(
       sql.unsafe`
-DELETE FROM project
-where id IN (${sql.join(ids, sql.fragment`, `)}) CASCADE
+DELETE FROM project CASCADE
+where id IN (${sql.join(ids, sql.fragment`, `)})
 `
     );
   }
 
-  async updateProject(_: UpdateProject): Promise<Project> {
-    throw new Error("not implemented");
+  async update({ id, name }: UpdateProject): Promise<Project> {
+    return this.pool.connect(async (cnx) => {
+      const project = await cnx.one(
+        sql.type(ZProjectRow)`
+
+UPDATE
+    Project
+SET
+    name = ${name}
+WHERE
+    id = ${id}
+RETURNING
+    ${PROJECT_FIELDS}
+`
+      );
+
+      return project;
+    });
   }
 }
 

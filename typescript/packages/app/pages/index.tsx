@@ -20,6 +20,16 @@ const Home: React.FC = () => {
     const [project] = projects ?? [];
     if (project && !selectedProjectId) {
       setSelectedProjectId(project.id);
+      return;
+    }
+    if (!selectedProjectId) {
+      return;
+    }
+
+    const projectExists =
+      projects?.find((p) => p.id === selectedProjectId) !== undefined;
+    if (!projectExists && project) {
+      setSelectedProjectId(project.id);
     }
   }, [projects, selectedProjectId]);
 
@@ -71,7 +81,11 @@ const Home: React.FC = () => {
           )}
 
         {token && selectedProject !== undefined && (
-          <SelectedProject token={token} project={selectedProject} />
+          <SelectedProject
+            token={token}
+            project={selectedProject}
+            projects={projects}
+          />
         )}
       </Box>
     </Box>

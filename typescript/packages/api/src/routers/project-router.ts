@@ -1,9 +1,12 @@
-import { ProjectStore } from "@fgpt/precedent-node";
+import { ProjectStore, TaskService } from "@fgpt/precedent-node";
 import express from "express";
 import { z } from "zod";
 
 export class ProjectRouter {
-  constructor(private readonly projectStore: ProjectStore) {}
+  constructor(
+    private readonly projectStore: ProjectStore,
+    private readonly taskService: TaskService
+  ) {}
   init() {
     const router = express.Router();
 
@@ -30,27 +33,31 @@ export class ProjectRouter {
     router.delete(
       "/delete/:projectId",
       async (req: express.Request, res: express.Response) => {
-        const user = req.user;
-        const args = ZCreateProjectArgs.parse(req.body);
-        const project = await this.projectStore.create({
-          name: args.name,
-          organizationId: user.organizationId,
-          creatorUserId: user.id,
-        });
+        const projectId = req.params.projectId;
+        if (typeof projectId !== "string") {
+          throw new Error("invalid request");
+        }
 
-        res.json({ project });
+        await this.projectStore.delete(projectId);
+        res.json({ status: "ok" });
       }
     );
 
     router.patch(
-      "/update/:projectId",
+      "/update",
       async (req: express.Request, res: express.Response) => {
         const user = req.user;
-        const args = ZCreateProjectArgs.parse(req.body);
-        const project = await this.projectStore.create({
-          name: args.name,
+        const args = ZUpdateProjectArgs.parse(req.body);
+        const project = await this.projectStore.update(args);
+
+        await this.taskService.insert({
           organizationId: user.organizationId,
-          creatorUserId: user.id,
+          projectId: project.id,
+          config: {
+            type: "delete-project",
+            version: "1",
+            projectId: project.id,
+          },
         });
 
         res.json({ project });
@@ -60,6 +67,11 @@ export class ProjectRouter {
     return router;
   }
 }
+
+const ZUpdateProjectArgs = z.object({
+  id: z.string(),
+  name: z.string(),
+});
 
 const ZCreateProjectArgs = z.object({
   name: z.string(),
