@@ -25,12 +25,14 @@ import {
   PsqlTextChunkStore,
   PsqlUserOrgService,
   PsqlLoadedFileStore,
+  PsqlReportStore,
 } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
 import { UserOrgRouter } from "./routers/user-org-router";
 import { ProjectRouter } from "./routers/project-router";
 import { FileRouter } from "./routers/file-router";
 import { ChatRouter } from "./routers/chat-router";
+import { ReportRouter } from "./routers/report-router";
 
 LOGGER.info("Server starting ...");
 
@@ -79,6 +81,8 @@ async function start() {
 
   const mlService = new MLServiceClientImpl(SETTINGS.mlServiceUri);
 
+  const reportStore = new PsqlReportStore(pool);
+
   app.use(cors({ origin: "*" }));
 
   app.use("/api/v1/user-org", jwtCheck, addUser, new UserOrgRouter().init());
@@ -108,6 +112,13 @@ async function start() {
     jwtCheck,
     addUser,
     new ChatRouter(mlService, textChunkStore, fileReferenceStore).init()
+  );
+
+  app.use(
+    "/api/v1/reports",
+    jwtCheck,
+    addUser,
+    new ReportRouter(reportStore).init()
   );
 
   app.use("/ping", (_, res) => {

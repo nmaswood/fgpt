@@ -281,7 +281,7 @@ export const SelectedProject: React.FC<{
             )}
           </>
         )}
-        {value === 3 && <DisplayReports />}
+        {value === 3 && <DisplayReports projectId={project.id} />}
       </Box>
       {modal === "delete" && (
         <DeleteProjectModal closeModal={closeModal} projectId={project.id} />

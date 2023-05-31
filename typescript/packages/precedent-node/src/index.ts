@@ -8,6 +8,7 @@ export * from "./object-store/object-store";
 export * from "./processed-file-store";
 export * from "./project-store";
 export * from "./project-store";
+export * from "./report-store";
 export * from "./sha-hash";
 export * from "./task-service";
 export * from "./text-chunk-store";
