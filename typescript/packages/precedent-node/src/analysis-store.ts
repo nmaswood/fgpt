@@ -1,8 +1,8 @@
 import {
-  MAX_ANALYSIS_LIMIT,
   Analysis,
   AnalysisDefinition,
   AnalysisOutput,
+  MAX_ANALYSIS_LIMIT,
   ZAnalysisDefinition,
   ZAnalysisOutput,
 } from "@fgpt/precedent-iso";

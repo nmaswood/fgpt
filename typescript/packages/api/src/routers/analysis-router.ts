@@ -1,5 +1,9 @@
 import { ZAnalysisItem } from "@fgpt/precedent-iso";
-import { AnalysisStore, TaskService } from "@fgpt/precedent-node";
+import {
+  AnalysisStore,
+  STANDARD_ANALYSIS,
+  TaskService,
+} from "@fgpt/precedent-node";
 import express from "express";
 import { z } from "zod";
 
@@ -33,7 +37,7 @@ export class AnalysisRouter {
           projectId: body.projectId,
           definition: {
             version: "1",
-            items: body.additionalItems,
+            items: STANDARD_ANALYSIS,
           },
         });
 

@@ -1,3 +1,6 @@
+export * from "./analysis-constants";
+export * from "./analysis-service";
+export * from "./analysis-store";
 export { dataBasePool } from "./data-base-pool";
 export * from "./file-reference-store";
 export * from "./jobs/job-executor";
@@ -8,8 +11,6 @@ export * from "./object-store/object-store";
 export * from "./processed-file-store";
 export * from "./project-store";
 export * from "./project-store";
-export * from "./analysis-store";
-export * from "./analysis-constants";
 export * from "./sha-hash";
 export * from "./task-service";
 export * from "./text-chunk-store";

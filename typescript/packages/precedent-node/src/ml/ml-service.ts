@@ -44,11 +44,16 @@ interface SimiliarSearch {
   metadata: Record<string, string>;
 }
 
-export interface AskQuestionArgs {
+export interface AskQuestionStreamingArgs {
   context: string;
   question: string;
   onData: (resp: string) => void;
   onEnd: () => void;
+}
+
+export interface AskQuestion {
+  context: string;
+  question: string;
 }
 
 export interface MLServiceClient {
@@ -58,7 +63,8 @@ export interface MLServiceClient {
   getEmbeddings: (args: GetEmbeddingsArgs) => Promise<GetEmbeddingsResponse>;
   upsertVectors: (args: UpsertVector[]) => Promise<void>;
   getKSimilar: (args: SimiliarSearch) => Promise<VectorResult[]>;
-  askQuestion(args: AskQuestionArgs): Promise<void>;
+  askQuestion(args: AskQuestion): Promise<string>;
+  askQuestionStreaming(args: AskQuestionStreamingArgs): Promise<void>;
 }
 
 export class MLServiceClientImpl implements MLServiceClient {
@@ -117,14 +123,24 @@ export class MLServiceClientImpl implements MLServiceClient {
     return ZSimilarResponse.parse(response.data).results;
   }
 
-  async askQuestion({
+  async askQuestion({ context, question }: AskQuestion): Promise<string> {
+    const response = await this.#client.post<unknown>("/ask-question", {
+      context,
+      question,
+    });
+
+    const parsed = ZAskQuestionResponse.parse(response.data);
+    return parsed.data;
+  }
+
+  async askQuestionStreaming({
     context,
     question,
     onData,
     onEnd,
-  }: AskQuestionArgs): Promise<void> {
+  }: AskQuestionStreamingArgs): Promise<void> {
     const response = await this.#client.post<any>(
-      "/ask-question",
+      "/ask-question-streaming",
       {
         context,
         question,
@@ -144,3 +160,7 @@ export class MLServiceClientImpl implements MLServiceClient {
     });
   }
 }
+
+const ZAskQuestionResponse = z.object({
+  data: z.string(),
+});

@@ -2,6 +2,8 @@ import { assertNever, GreedyTextChunker, isNotNull } from "@fgpt/precedent-iso";
 import lodashChunk from "lodash/chunk";
 import keyBy from "lodash/keyBy";
 
+import { AnalysisService } from "../analysis-service";
+import { AnalysisStore } from "../analysis-store";
 import { LOGGER } from "../logger";
 import { MLServiceClient } from "../ml/ml-service";
 import { ProcessedFileStore } from "../processed-file-store";
@@ -24,7 +26,9 @@ export class JobExecutorImpl implements JobExecutor {
     private readonly taskService: TaskService,
     private readonly processedFileStore: ProcessedFileStore,
     private readonly textChunkStore: TextChunkStore,
-    private readonly mlService: MLServiceClient
+    private readonly mlService: MLServiceClient,
+    private readonly analysisService: AnalysisService,
+    private readonly analysisStore: AnalysisStore
   ) {}
 
   async run(options: RunOptions): Promise<void> {
@@ -246,6 +250,13 @@ export class JobExecutorImpl implements JobExecutor {
       }
 
       case "create-analysis": {
+        const output = await this.analysisService.analyze(config.analysisId);
+
+        await this.analysisStore.update({
+          id: config.analysisId,
+          output,
+        });
+
         LOGGER.warn("Create analysis not implemented");
         break;
       }

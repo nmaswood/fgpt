@@ -38,8 +38,8 @@ import { useDeleteProject } from "../hooks/use-delete-project";
 import { useEditProject } from "../hooks/use-edit-project";
 import { useFetchFiles } from "../hooks/use-fetch-files";
 import { Chat } from "./chat";
-import { DisplayFiles } from "./display-files";
 import { DisplayAnalyses } from "./display-analyses";
+import { DisplayFiles } from "./display-files";
 
 export const SelectedProject: React.FC<{
   project: Project;
@@ -110,7 +110,7 @@ export const SelectedProject: React.FC<{
     setAnchorEl(null);
   };
 
-  const isLargeScreen = useMediaQuery("(min-width:600px)");
+  const isLargeScreen = useMediaQuery("(min-width:750px)");
 
   return (
     <>
@@ -155,7 +155,7 @@ export const SelectedProject: React.FC<{
                 startIcon={<SettingsIcon />}
                 onClick={handleClick}
                 variant="outlined"
-                sx={{ height: "40px" }}
+                sx={{ height: "40px", whiteSpace: "nowrap" }}
               >
                 Project settings
               </Button>

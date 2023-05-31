@@ -32,7 +32,7 @@ import React from "react";
 
 import { useCreateProject } from "../hooks/use-create-project";
 
-const SIDE_BAR_PIXELS = 220;
+const SIDE_BAR_PIXELS = 200;
 const SIDE_BAR_WIDTH = `${SIDE_BAR_PIXELS}px`;
 
 export const Sidebar: React.FC<{

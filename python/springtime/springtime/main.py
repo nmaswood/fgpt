@@ -10,7 +10,7 @@ from fastapi import status, HTTPException
 from fastapi import FastAPI, Body
 
 
-from springtime.llm.ml import ask_question, embeddings_for_documents
+from springtime.llm.ml import ask_question_streaming, embeddings_for_documents,ask_question
 from springtime.llm.pinecone import UpsertVector, get_similar, upsert_vectors
 from .settings import SETTINGS
 
@@ -30,10 +30,16 @@ class AskQuestionRequest(BaseModel):
 class AskQuestionResponse(BaseModel):
     response: str
 
-
 @app.post("/ask-question")
 async def ask_question_route(req: AskQuestionRequest):
-    stream = ask_question(req.context, req.question)
+    answer = ask_question(req.context, req.question)
+
+    return {"data": answer}
+
+
+@app.post("/ask-question-streaming")
+async def ask_question_streaming_route(req: AskQuestionRequest):
+    stream = ask_question_streaming(req.context, req.question)
     response = StreamingResponse(
         content=stream,
         media_type='text/event-stream'

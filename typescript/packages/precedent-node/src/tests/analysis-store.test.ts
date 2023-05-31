@@ -1,9 +1,9 @@
 import { sql } from "slonik";
 import { afterEach, beforeEach, expect, test } from "vitest";
 
+import { PsqlAnalysisStore } from "../analysis-store";
 import { dataBasePool } from "../data-base-pool";
 import { PSqlProjectStore } from "../project-store";
-import { PsqlAnalysisStore } from "../analysis-store";
 import { PsqlUserOrgService } from "../user-org/user-org-service";
 import { TEST_SETTINGS } from "./test-settings";
 

@@ -1,5 +1,9 @@
 from asyncio import streams
+import re
 from ..settings import SETTINGS
+
+from loguru import logger
+
 
 from langchain.prompts import PromptTemplate
 
@@ -32,7 +36,7 @@ def embedding_for_query(query: str) -> list[float]:
     return embeddings.embed_query(query)
 
 
-def ask_question(context: str, question: str):
+def ask_question_streaming(context: str, question: str):
 
     prompt = PromptTemplate(
         input_variables=["context", "question"],
@@ -57,3 +61,28 @@ def ask_question(context: str, question: str):
         content = delta.get('content')
         if content:
             yield content
+
+def ask_question(context: str, question: str):
+
+    prompt = PromptTemplate(
+        input_variables=["context", "question"],
+        template="You are an expert financial analyst. Given the following context: {context} answer the following question.\nQuestion:{question}",
+    )
+    formatted_message = prompt.format(
+        context=context[:3500], question=question)
+
+    response = openai.ChatCompletion.create(
+        # model='gpt-4',
+        model='gpt-3.5-turbo',
+        messages=[
+            {'role': 'user', 'content': formatted_message}
+        ],
+        temperature=0,
+    )
+    choices = response["choices"]
+    if len(choices) == 0:
+        logger.warning("No choices returned from OpenAI")
+    first_choice = choices[0]
+    return first_choice["message"]["content"]
+
+

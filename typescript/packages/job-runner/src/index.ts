@@ -2,11 +2,13 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 import {
+  AnalyisServiceImpl,
   CloudVisionTextExtractor,
   dataBasePool,
   GoogleCloudStorageService,
   JobExecutorImpl,
   MLServiceClientImpl,
+  PsqlAnalysisStore,
   PsqlFileReferenceStore,
   PsqlProcessedFileStore,
   PSqlTaskService,
@@ -39,12 +41,21 @@ async function start(settings: Settings) {
 
   const mlServiceClient = new MLServiceClientImpl(settings.mlServiceUri);
 
+  const analysisStore = new PsqlAnalysisStore(pool);
+  const analysisService = new AnalyisServiceImpl(
+    analysisStore,
+    mlServiceClient,
+    textChunkStore
+  );
+
   const executor = new JobExecutorImpl(
     textExtractor,
     taskService,
     processedFileStore,
     textChunkStore,
-    mlServiceClient
+    mlServiceClient,
+    analysisService,
+    analysisStore
   );
 
   LOGGER.info("Running executor...");

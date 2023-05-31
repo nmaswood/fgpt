@@ -5,6 +5,8 @@ export const ZTaskType = z.enum([
   "text-chunk",
   "gen-embeddings",
   "upsert-embeddings",
+  "delete-project",
+  "create-analysis",
 ]);
 
 export const ZTaskStatus = z.enum([

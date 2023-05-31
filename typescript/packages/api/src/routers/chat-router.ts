@@ -52,7 +52,7 @@ export class ChatRouter {
         res.set("Cache-Control", "no-cache");
         res.set("Connection", "keep-alive");
 
-        await this.mlClient.askQuestion({
+        await this.mlClient.askQuestionStreaming({
           context: justText.join("\n"),
           question: args.question,
           onData: (resp) => {
