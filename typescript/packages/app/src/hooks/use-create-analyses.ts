@@ -1,21 +1,21 @@
 import { AnalysisItem } from "@fgpt/precedent-iso";
 import useSWRMutation from "swr/mutation";
 
-import { useListReports } from "./use-list-reports";
+import { useListAnalyses } from "./use-list-analyses";
 
-export const useCreateReport = (projectId: string) => {
-  const { mutate } = useListReports(projectId);
+export const useCreateAnalysis = (projectId: string) => {
+  const { mutate } = useListAnalyses(projectId);
 
   const res = useSWRMutation<
     string,
     unknown,
-    "/api/proxy/v1/reports/create",
+    "/api/proxy/v1/analyses/create",
     {
       projectId: string;
       name: string;
       additionalItems: AnalysisItem[];
     }
-  >("/api/proxy/v1/reports/create", async (url: string, args) => {
+  >("/api/proxy/v1/analyses/create", async (url: string, args) => {
     const res = await fetch(url, {
       method: "POST",
       body: JSON.stringify(args.arg),

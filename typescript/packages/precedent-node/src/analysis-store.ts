@@ -1,49 +1,54 @@
 import {
-  MAX_REPORT_LIMIT,
-  Report,
-  ReportDefinition,
-  ReportOutput,
-  ZReportDefinition,
-  ZReportOutput,
+  MAX_ANALYSIS_LIMIT,
+  Analysis,
+  AnalysisDefinition,
+  AnalysisOutput,
+  ZAnalysisDefinition,
+  ZAnalysisOutput,
 } from "@fgpt/precedent-iso";
 import { DatabasePool, DatabaseTransactionConnection, sql } from "slonik";
 import { z } from "zod";
 
-export interface InsertReport {
+export interface InsertAnalysis {
   organizationId: string;
   projectId: string;
   name: string;
-  definition: ReportDefinition;
+  definition: AnalysisDefinition;
 }
 
-export interface UpdateReport {
+export interface UpdateAnalysis {
   id: string;
   name?: string;
-  output?: ReportOutput;
+  output?: AnalysisOutput;
   taskId?: string;
 }
 
-export interface ReportStore {
-  get(id: string): Promise<Report>;
-  getMany(ids: string[]): Promise<Report[]>;
-  list(projectId: string): Promise<Report[]>;
-  update(args: UpdateReport): Promise<Report>;
-  insert(args: InsertReport): Promise<Report>;
-  insertMany(args: InsertReport[]): Promise<Report[]>;
+export interface AnalysisStore {
+  get(id: string): Promise<Analysis>;
+  getMany(ids: string[]): Promise<Analysis[]>;
+  list(projectId: string): Promise<Analysis[]>;
+  update(args: UpdateAnalysis): Promise<Analysis>;
+  insert(args: InsertAnalysis): Promise<Analysis>;
+  insertMany(args: InsertAnalysis[]): Promise<Analysis[]>;
   delete(id: string): Promise<void>;
   deleteMany(ids: string[]): Promise<void>;
 }
 
 const FIELDS = sql.fragment` id, organization_id, project_id, task_id, name, definition, output`;
 
-export class PsqlReportStore implements ReportStore {
+export class PsqlAnalysisStore implements AnalysisStore {
   constructor(private readonly pool: DatabasePool) {}
 
-  async update({ id, name, output, taskId }: UpdateReport): Promise<Report> {
+  async update({
+    id,
+    name,
+    output,
+    taskId,
+  }: UpdateAnalysis): Promise<Analysis> {
     return this.pool.one(
-      sql.type(ZReportRow)`
+      sql.type(ZAnalysisRow)`
 UPDATE
-    report
+    analysis
 SET
     name = COALESCE(${name ?? null}, name),
     output = COALESCE(${JSON.stringify(output ?? null)}, output),
@@ -56,7 +61,7 @@ RETURNING
     );
   }
 
-  async get(id: string): Promise<Report> {
+  async get(id: string): Promise<Analysis> {
     const [file] = await this.getMany([id]);
     if (!file) {
       throw new Error("file not found");
@@ -64,15 +69,15 @@ RETURNING
     return file;
   }
 
-  getMany(ids: string[]): Promise<Report[]> {
+  getMany(ids: string[]): Promise<Analysis[]> {
     const uniq = [...new Set(ids)];
     return this.pool.connect(async (cnx) => {
       const { rows } = await cnx.query(
-        sql.type(ZReportRow)`
+        sql.type(ZAnalysisRow)`
 SELECT
     ${FIELDS}
 FROM
-    report
+    analysis
 WHERE
     id IN (${sql.join(uniq, sql.fragment`, `)})
 `
@@ -81,14 +86,14 @@ WHERE
     });
   }
 
-  async list(projectId: string): Promise<Report[]> {
+  async list(projectId: string): Promise<Analysis[]> {
     return this.pool.connect(async (cnx) => {
       const { rows } = await cnx.query(
-        sql.type(ZReportRow)`
+        sql.type(ZAnalysisRow)`
 SELECT
     ${FIELDS}
 FROM
-    report
+    analysis
 WHERE
     project_id = ${projectId}
 `
@@ -97,7 +102,7 @@ WHERE
     });
   }
 
-  async insert(args: InsertReport): Promise<Report> {
+  async insert(args: InsertAnalysis): Promise<Analysis> {
     const [res] = await this.insertMany([args]);
     if (!res) {
       throw new Error("illegal state");
@@ -105,7 +110,7 @@ WHERE
     return res;
   }
 
-  async insertMany(args: InsertReport[]): Promise<Report[]> {
+  async insertMany(args: InsertAnalysis[]): Promise<Analysis[]> {
     if (args.length === 0) {
       return [];
     }
@@ -117,8 +122,8 @@ WHERE
 
   async #insertMany(
     trx: DatabaseTransactionConnection,
-    args: InsertReport[]
-  ): Promise<Report[]> {
+    args: InsertAnalysis[]
+  ): Promise<Analysis[]> {
     const [arg] = args;
     if (!arg) {
       throw new Error("illegal state");
@@ -128,12 +133,12 @@ WHERE
 SELECT
     COUNT(*) as count
 FROM
-    REPORT
+    analysis
 where
     project_id = ${arg.projectId}
 `);
-    if (count >= MAX_REPORT_LIMIT) {
-      throw new Error("too many reports for this project");
+    if (count >= MAX_ANALYSIS_LIMIT) {
+      throw new Error("too many items for this project");
     }
 
     const values = args.map(
@@ -147,8 +152,8 @@ where
     );
 
     const resp = await trx.query(
-      sql.type(ZReportRow)`
-INSERT INTO report (organization_id, project_id, name, definition)
+      sql.type(ZAnalysisRow)`
+INSERT INTO analysis (organization_id, project_id, name, definition)
     VALUES
         ${sql.join(values, sql.fragment`, `)}
     RETURNING
@@ -165,24 +170,24 @@ INSERT INTO report (organization_id, project_id, name, definition)
 
   async deleteMany(ids: string[]): Promise<void> {
     await this.pool.query(sql.unsafe`
-DELETE FROM report
+DELETE FROM analysis
 WHERE id IN (${sql.join(ids, sql.fragment`, `)})
 `);
   }
 }
 
-const ZReportRow = z
+const ZAnalysisRow = z
   .object({
     id: z.string(),
     organization_id: z.string(),
     project_id: z.string(),
     task_id: z.string().nullable(),
     name: z.string(),
-    definition: ZReportDefinition,
-    output: ZReportOutput.nullable(),
+    definition: ZAnalysisDefinition,
+    output: ZAnalysisOutput.nullable(),
   })
   .transform(
-    (row): Report => ({
+    (row): Analysis => ({
       id: row.id,
       organizationId: row.organization_id,
       projectId: row.project_id,

@@ -1,6 +1,8 @@
 -- migrate:up
+DROP TABLE IF EXISTS analysis;
+
 CREATE TABLE
-  IF NOT EXISTS report (
+  IF NOT EXISTS analysis (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
     organization_id UUID REFERENCES organization (id) NOT NULL,
     project_id UUID REFERENCES project (id) NOT NULL,
@@ -14,7 +16,7 @@ CREATE TABLE
     output jsonb
   );
 
-CREATE UNIQUE INDEX IF NOT EXISTS "report_name" ON "report" ("organization_id", "project_id", "name");
+CREATE UNIQUE INDEX IF NOT EXISTS "analysis_name" ON "analysis" ("organization_id", "project_id", "name");
 
 -- migrate:down
-DROP TABLE IF EXISTS report;
+DROP TABLE IF EXISTS analysis;

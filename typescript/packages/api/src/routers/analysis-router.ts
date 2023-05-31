@@ -1,10 +1,13 @@
 import { ZAnalysisItem } from "@fgpt/precedent-iso";
-import { ReportStore } from "@fgpt/precedent-node";
+import { AnalysisStore, TaskService } from "@fgpt/precedent-node";
 import express from "express";
 import { z } from "zod";
 
-export class ReportRouter {
-  constructor(private readonly reportStore: ReportStore) {}
+export class AnalysisRouter {
+  constructor(
+    private readonly analysisStore: AnalysisStore,
+    private readonly taskService: TaskService
+  ) {}
   init() {
     const router = express.Router();
 
@@ -15,8 +18,8 @@ export class ReportRouter {
         if (typeof projectId !== "string") {
           throw new Error("invalid request");
         }
-        const reports = await this.reportStore.list(projectId);
-        res.json({ reports });
+        const analyses = await this.analysisStore.list(projectId);
+        res.json({ analyses });
       }
     );
 
@@ -24,7 +27,7 @@ export class ReportRouter {
       "/create",
       async (req: express.Request, res: express.Response) => {
         const body = ZCreateRequestBody.parse(req.body);
-        const report = await this.reportStore.insert({
+        const analysis = await this.analysisStore.insert({
           organizationId: req.user.organizationId,
           name: body.name,
           projectId: body.projectId,
@@ -33,7 +36,25 @@ export class ReportRouter {
             items: body.additionalItems,
           },
         });
-        res.json({ report });
+
+        const task = await this.taskService.insert({
+          organizationId: req.user.organizationId,
+          projectId: body.projectId,
+          config: {
+            type: "create-analysis",
+            version: "1",
+            organizationId: req.user.organizationId,
+            projectId: body.projectId,
+            analysisId: analysis.id,
+          },
+        });
+
+        const analysisWithTask = await this.analysisStore.update({
+          id: analysis.id,
+          taskId: task.id,
+        });
+
+        res.json({ analysis: analysisWithTask });
       }
     );
 
@@ -45,7 +66,7 @@ export class ReportRouter {
           throw new Error("invalid request");
         }
 
-        await this.reportStore.delete(id);
+        await this.analysisStore.delete(id);
 
         res.json({ status: "ok" });
       }

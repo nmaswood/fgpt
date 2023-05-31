@@ -244,6 +244,11 @@ export class JobExecutorImpl implements JobExecutor {
         LOGGER.warn("Delete project not implemented");
         break;
       }
+
+      case "create-analysis": {
+        LOGGER.warn("Create analysis not implemented");
+        break;
+      }
       default:
         assertNever(config);
     }

@@ -57,12 +57,21 @@ export const DeleteProjectConfig = z.object({
   projectId: z.string(),
 });
 
+export const CreateAnalysisConfig = z.object({
+  type: z.literal("create-analysis"),
+  version: z.literal("1"),
+  organizationId: z.string(),
+  projectId: z.string(),
+  analysisId: z.string(),
+});
+
 export const ZTaskConfig = z.discriminatedUnion("type", [
   TextExtractionConfig,
   TextChunkConfig,
   GenEmbeddingsConfig,
   UpsertEmbeddingsConfig,
   DeleteProjectConfig,
+  CreateAnalysisConfig,
 ]);
 
 export type TaskType = z.infer<typeof ZTaskType>;

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, expect, test } from "vitest";
 
 import { dataBasePool } from "../data-base-pool";
 import { PSqlProjectStore } from "../project-store";
-import { PsqlReportStore } from "../report-store";
+import { PsqlAnalysisStore } from "../analysis-store";
 import { PsqlUserOrgService } from "../user-org/user-org-service";
 import { TEST_SETTINGS } from "./test-settings";
 
@@ -26,14 +26,14 @@ async function setup() {
     creatorUserId: user.id,
   });
 
-  const reportStore = new PsqlReportStore(pool);
+  const analysisStore = new PsqlAnalysisStore(pool);
 
   return {
     pool,
     userId: user.id,
     organizationId: user.organizationId,
     projectId: project.id,
-    reportStore,
+    analysisStore,
   };
 }
 
@@ -41,7 +41,7 @@ beforeEach(async () => {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
 
   await pool.query(
-    sql.unsafe`TRUNCATE TABLE app_user, organization, project, report CASCADE`
+    sql.unsafe`TRUNCATE TABLE app_user, organization, project, analysis CASCADE`
   );
 });
 
@@ -54,9 +54,9 @@ afterEach(async () => {
 });
 
 test("insert", async () => {
-  const { reportStore, projectId, organizationId } = await setup();
+  const { analysisStore, projectId, organizationId } = await setup();
 
-  const report = await reportStore.insert({
+  const analysis = await analysisStore.insert({
     organizationId,
     projectId,
     name: "test",
@@ -65,14 +65,14 @@ test("insert", async () => {
       items: [],
     },
   });
-  expect(report.name).toBe("test");
-  expect(report.output).toBeUndefined();
+  expect(analysis.name).toBe("test");
+  expect(analysis.output).toBeUndefined();
 });
 
 test("get", async () => {
-  const { reportStore, projectId, organizationId } = await setup();
+  const { analysisStore, projectId, organizationId } = await setup();
 
-  const { id } = await reportStore.insert({
+  const { id } = await analysisStore.insert({
     organizationId,
     projectId,
     name: "test",
@@ -82,15 +82,15 @@ test("get", async () => {
     },
   });
 
-  const report = await reportStore.get(id);
+  const analysis = await analysisStore.get(id);
 
-  expect(report.name).toBe("test");
+  expect(analysis.name).toBe("test");
 });
 
 test("list", async () => {
-  const { reportStore, projectId, organizationId } = await setup();
+  const { analysisStore, projectId, organizationId } = await setup();
 
-  await reportStore.insert({
+  await analysisStore.insert({
     organizationId,
     projectId,
     name: "test",
@@ -100,15 +100,15 @@ test("list", async () => {
     },
   });
 
-  const [report] = await reportStore.list(projectId);
+  const [analysis] = await analysisStore.list(projectId);
 
-  expect(report.name).toBe("test");
+  expect(analysis.name).toBe("test");
 });
 
 test("update", async () => {
-  const { reportStore, projectId, organizationId } = await setup();
+  const { analysisStore, projectId, organizationId } = await setup();
 
-  const { id } = await reportStore.insert({
+  const { id } = await analysisStore.insert({
     organizationId,
     projectId,
     name: "test",
@@ -118,18 +118,18 @@ test("update", async () => {
     },
   });
 
-  const report = await reportStore.update({
+  const analysis = await analysisStore.update({
     id,
     name: "test2",
   });
 
-  expect(report.name).toBe("test2");
+  expect(analysis.name).toBe("test2");
 });
 
 test("delete", async () => {
-  const { reportStore, projectId, organizationId } = await setup();
+  const { analysisStore, projectId, organizationId } = await setup();
 
-  const { id } = await reportStore.insert({
+  const { id } = await analysisStore.insert({
     organizationId,
     projectId,
     name: "test",
@@ -139,8 +139,8 @@ test("delete", async () => {
     },
   });
 
-  await reportStore.delete(id);
+  await analysisStore.delete(id);
 
-  const [report] = await reportStore.list(projectId);
-  expect(report).toBeUndefined();
+  const [analysis] = await analysisStore.list(projectId);
+  expect(analysis).toBeUndefined();
 });

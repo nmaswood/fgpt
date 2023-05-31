@@ -39,7 +39,7 @@ import { useEditProject } from "../hooks/use-edit-project";
 import { useFetchFiles } from "../hooks/use-fetch-files";
 import { Chat } from "./chat";
 import { DisplayFiles } from "./display-files";
-import { DisplayReports } from "./display-reports";
+import { DisplayAnalyses } from "./display-analyses";
 
 export const SelectedProject: React.FC<{
   project: Project;
@@ -146,7 +146,7 @@ export const SelectedProject: React.FC<{
             <Tab
               icon={<AssessmentIcon />}
               iconPosition="start"
-              label={isLargeScreen ? "Reports" : undefined}
+              label={isLargeScreen ? "Analyses" : undefined}
             />
           </Tabs>
           <Box display="flex" alignItems="center">
@@ -281,7 +281,7 @@ export const SelectedProject: React.FC<{
             )}
           </>
         )}
-        {value === 3 && <DisplayReports projectId={project.id} />}
+        {value === 3 && <DisplayAnalyses projectId={project.id} />}
       </Box>
       {modal === "delete" && (
         <DeleteProjectModal closeModal={closeModal} projectId={project.id} />

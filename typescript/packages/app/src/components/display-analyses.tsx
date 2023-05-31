@@ -1,4 +1,4 @@
-import { Report } from "@fgpt/precedent-iso";
+import { Analysis } from "@fgpt/precedent-iso";
 import AddIcon from "@mui/icons-material/Add";
 import { LoadingButton } from "@mui/lab";
 import {
@@ -12,15 +12,15 @@ import {
 } from "@mui/material";
 import React from "react";
 
-import { useCreateReport } from "../hooks/use-create-report";
-import { useListReports } from "../hooks/use-list-reports";
+import { useCreateAnalysis } from "../hooks/use-create-analyses";
+import { useListAnalyses } from "../hooks/use-list-analyses";
 
-export const DisplayReports: React.FC<{ projectId: string }> = ({
+export const DisplayAnalyses: React.FC<{ projectId: string }> = ({
   projectId,
 }) => {
   const [modal, setModal] = React.useState(false);
   const closeModal = () => setModal(false);
-  const { data, isLoading } = useListReports(projectId);
+  const { data, isLoading } = useListAnalyses(projectId);
   console.log(data);
   return (
     <>
@@ -40,7 +40,7 @@ export const DisplayReports: React.FC<{ projectId: string }> = ({
               setModal(true);
             }}
           >
-            Generate report
+            Generate analysis
           </Button>
         )}
         {data.length > 0 && (
@@ -64,35 +64,35 @@ export const DisplayReports: React.FC<{ projectId: string }> = ({
                 width: "fit-content",
               }}
             >
-              Generate report
+              Generate analysis
             </Button>
-            <ForReports reports={data} />
+            <ForAnalyses analyses={data} />
           </Box>
         )}
       </Box>
       {modal && (
-        <CreateReportModal
+        <CreateAnalysisModal
           projectId={projectId}
           closeModal={closeModal}
-          reports={data}
+          analyses={data}
         />
       )}
     </>
   );
 };
 
-const CreateReportModal: React.FC<{
+const CreateAnalysisModal: React.FC<{
   closeModal: () => void;
   projectId: string;
-  reports: Report[];
-}> = ({ closeModal, projectId, reports }) => {
+  analyses: Analysis[];
+}> = ({ closeModal, projectId, analyses }) => {
   const [text, setText] = React.useState("");
-  const { trigger, isMutating } = useCreateReport(projectId);
+  const { trigger, isMutating } = useCreateAnalysis(projectId);
   const trimmed = text.trim();
 
-  const reportNames = React.useMemo(
-    () => new Set(reports.map((r) => r.name)),
-    [reports]
+  const names = React.useMemo(
+    () => new Set(analyses.map((r) => r.name)),
+    [analyses]
   );
   return (
     <Dialog
@@ -106,7 +106,7 @@ const CreateReportModal: React.FC<{
         },
       }}
     >
-      <DialogTitle>Create a new report</DialogTitle>
+      <DialogTitle>Create a new analysis</DialogTitle>
       <DialogActions>
         <Box
           display="flex"
@@ -132,9 +132,7 @@ const CreateReportModal: React.FC<{
             <LoadingButton
               variant="contained"
               color="secondary"
-              disabled={
-                trimmed.length <= 3 || isMutating || reportNames.has(trimmed)
-              }
+              disabled={trimmed.length <= 3 || isMutating || names.has(trimmed)}
               onClick={async () => {
                 await trigger({
                   name: trimmed,
@@ -144,7 +142,7 @@ const CreateReportModal: React.FC<{
                 closeModal();
               }}
             >
-              Create report
+              Create analysis
             </LoadingButton>
           </Box>
         </Box>
@@ -153,21 +151,21 @@ const CreateReportModal: React.FC<{
   );
 };
 
-const ForReports: React.FC<{ reports: Report[] }> = ({ reports }) => {
+const ForAnalyses: React.FC<{ analyses: Analysis[] }> = ({ analyses }) => {
   return (
     <Box display="flex" flexDirection="column" gap={2}>
-      {reports.map((report) => (
-        <ForReport key={report.id} report={report} />
+      {analyses.map((analysis) => (
+        <ForAnalysis key={analysis.id} analysis={analysis} />
       ))}
     </Box>
   );
 };
 
-const ForReport: React.FC<{ report: Report }> = ({ report }) => {
+const ForAnalysis: React.FC<{ analysis: Analysis }> = ({ analysis }) => {
   return (
     <Box display="flex">
       <Typography variant="body1" color="white">
-        {report.name}
+        {analysis.name}
       </Typography>
     </Box>
   );
