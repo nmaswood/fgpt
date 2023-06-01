@@ -19,6 +19,9 @@ pinecone-client = "^2.2.1"
 neo4j = "^5.8.0"
 py2neo = "^2021.2.3"
 tiktoken = "^0.3.3"
+opentelemetry-api = "^1.18.0"
+opentelemetry-sdk = "^1.18.0"
+opentelemetry-exporter-gcp-trace = "^1.5.0"
 
 
 [build-system]

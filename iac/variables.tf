@@ -44,8 +44,7 @@ variable "gcp_service_list" {
     "serviceusage.googleapis.com",
     "sqladmin.googleapis.com",
     "cloudbuild.googleapis.com",
-    "vision.googleapis.com",
-    "documentai.googleapis.com"
+    "cloudprofiler.googleapis.com"
   ]
 }
 

@@ -33,8 +33,13 @@ import { ProjectRouter } from "./routers/project-router";
 import { FileRouter } from "./routers/file-router";
 import { ChatRouter } from "./routers/chat-router";
 import { AnalysisRouter } from "./routers/analysis-router";
+import * as T from "./telemetry";
 
 LOGGER.info("Server starting ...");
+if (SETTINGS.tracingEnabled) {
+  LOGGER.info("Tracing enabled");
+  T.init();
+}
 
 const jwtCheck = expressjwt({
   secret: expressJwtSecret({

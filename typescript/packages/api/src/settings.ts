@@ -13,6 +13,7 @@ const ZSettings = z.object({
     issuer: z.string(),
   }),
   assetBucket: z.string(),
+  tracingEnabled: z.boolean(),
 });
 
 export const SETTINGS = ZSettings.parse({
@@ -29,4 +30,5 @@ export const SETTINGS = ZSettings.parse({
   },
 
   assetBucket: process.env["ASSET_BUCKET"],
+  tracingEnabled: process.env["TRACING_ENABLED"] ?? false,
 });

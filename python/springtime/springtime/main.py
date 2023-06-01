@@ -1,5 +1,6 @@
 import time
 from typing import Any
+from loguru import logger
 from pydantic import BaseModel
 from pydantic.schema import get_schema_ref
 import uvicorn
@@ -10,11 +11,18 @@ from fastapi import status, HTTPException
 from fastapi import FastAPI, Body
 
 
-from springtime.llm.ml import ask_question_streaming, embeddings_for_documents,ask_question
+from springtime.llm.ml import ask_question_streaming, embeddings_for_documents, ask_question
 from springtime.llm.pinecone import UpsertVector, get_similar, upsert_vectors
 from .settings import SETTINGS
+from .telemetry import init
 
 app = FastAPI()
+
+logger.info("Starting server")
+
+if SETTINGS.telemetry_enabled:
+    logger.info("Telemetry enabled")
+    init()
 
 
 @app.get("/ping")
@@ -29,6 +37,7 @@ class AskQuestionRequest(BaseModel):
 
 class AskQuestionResponse(BaseModel):
     response: str
+
 
 @app.post("/ask-question")
 async def ask_question_route(req: AskQuestionRequest):

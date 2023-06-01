@@ -5,6 +5,7 @@ import {
 } from "@fgpt/precedent-iso";
 
 import { AnalysisStore } from "./analysis-store";
+import { LOGGER } from "./logger";
 import { MLServiceClient } from "./ml/ml-service";
 import { TextChunkStore } from "./text-chunk-store";
 
@@ -24,8 +25,9 @@ export class AnalyisServiceImpl implements AnalysisService {
     const definition = analysis.definition;
     const items: AnalysisOutputItem[] = [];
 
-    for (const { name, prompts } of definition.items) {
+    for (const [index, { name, prompts }] of definition.items.entries()) {
       const responses: AnalysisOutputResponse[] = [];
+      LOGGER.info({ name, index }, "Analyzing item");
 
       for (const prompt of prompts) {
         const response = await this.analyzeForPrompt({

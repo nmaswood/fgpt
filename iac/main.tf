@@ -173,6 +173,11 @@ resource "google_cloud_run_v2_job" "job_runner" {
           value = "${google_cloud_run_v2_service.tika.uri}/tika"
         }
 
+        env {
+          name  = "TRACING_ENABLED"
+          value = "true"
+        }
+
         volume_mounts {
           name       = "cloudsql"
           mount_path = "/cloudsql"
@@ -392,6 +397,11 @@ resource "google_cloud_run_v2_service" "springtime" {
         name  = "PINECONE_NAMESPACE"
         value = var.pinecone_namespace
       }
+
+      env {
+        name  = "TRACING_ENABLED"
+        value = "true"
+      }
     }
   }
 
@@ -496,6 +506,11 @@ resource "google_cloud_run_v2_service" "api" {
       env {
         name  = "ASSET_BUCKET"
         value = local.asset_bucket
+      }
+
+      env {
+        name  = "TRACING_ENABLED"
+        value = "true"
       }
 
 
