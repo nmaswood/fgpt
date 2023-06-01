@@ -1,4 +1,5 @@
 import { TraceExporter } from "@google-cloud/opentelemetry-cloud-trace-exporter";
+import { start } from "@google-cloud/profiler";
 import { registerInstrumentations } from "@opentelemetry/instrumentation";
 import { ExpressInstrumentation } from "@opentelemetry/instrumentation-express";
 import { HttpInstrumentation } from "@opentelemetry/instrumentation-http";
@@ -16,4 +17,6 @@ export function init() {
   const exporter = new TraceExporter();
   provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
   provider.register();
+
+  start();
 }
