@@ -4,7 +4,6 @@ import { LoadingButton } from "@mui/lab";
 import {
   Box,
   Button,
-  Collapse,
   Dialog,
   DialogActions,
   DialogTitle,
@@ -162,7 +161,6 @@ const ForAnalyses: React.FC<{ analyses: Analysis[] }> = ({ analyses }) => {
 };
 
 const ForAnalysis: React.FC<{ analysis: Analysis }> = ({ analysis }) => {
-  //const [isOpen, setIsOpen] = React.useState(false);
   return (
     <Box display="flex">
       <Typography variant="body1" color="white">

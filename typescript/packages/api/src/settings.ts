@@ -30,5 +30,5 @@ export const SETTINGS = ZSettings.parse({
   },
 
   assetBucket: process.env["ASSET_BUCKET"],
-  tracingEnabled: process.env["TRACING_ENABLED"] ?? false,
+  tracingEnabled: process.env["TRACING_ENABLED"]?.toLowerCase() === "true",
 });

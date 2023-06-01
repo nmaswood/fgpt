@@ -20,5 +20,5 @@ export const SETTINGS = ZSettings.parse({
   mlServiceUri: process.env["ML_SERVICE_URI"],
   assetBucket: process.env["ASSET_BUCKET"],
   tikaClient: process.env["TIKA_CLIENT"],
-  tracingEnabled: process.env["TRACING_ENABLED"] ?? false,
+  tracingEnabled: process.env["TRACING_ENABLED"]?.toLowerCase() === "true",
 });
