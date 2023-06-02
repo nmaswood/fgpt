@@ -33,13 +33,9 @@ import { ProjectRouter } from "./routers/project-router";
 import { FileRouter } from "./routers/file-router";
 import { ChatRouter } from "./routers/chat-router";
 import { AnalysisRouter } from "./routers/analysis-router";
-import * as T from "./telemetry";
+import { TextGroupRouter } from "./routers/text-group-router";
 
 LOGGER.info("Server starting ...");
-if (SETTINGS.tracingEnabled) {
-  LOGGER.info("Tracing enabled");
-  T.init();
-}
 
 const jwtCheck = expressjwt({
   secret: expressJwtSecret({
@@ -78,7 +74,9 @@ async function start() {
 
   const fileReferenceStore = new PsqlFileReferenceStore(pool);
   const loadedFileStore = new PsqlLoadedFileStore(pool);
-  const blobStorageService = new GoogleCloudStorageService();
+  const blobStorageService = new GoogleCloudStorageService(
+    SETTINGS.urlSigningServiceAccountPath
+  );
 
   const taskService = new PSqlTaskService(pool);
 
@@ -124,6 +122,13 @@ async function start() {
     jwtCheck,
     addUser,
     new AnalysisRouter(analysisStore, taskService).init()
+  );
+
+  app.use(
+    "/api/v1/text",
+    jwtCheck,
+    addUser,
+    new TextGroupRouter(textChunkStore).init()
   );
 
   app.use("/ping", (_, res) => {

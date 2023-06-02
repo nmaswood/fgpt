@@ -118,7 +118,7 @@ export class FileRouter {
         }
 
         const file = await this.fileReferenceStore.get(fileId);
-        const signedUrl = this.blobStorageService.getSignedUrl(
+        const signedUrl = await this.blobStorageService.getSignedUrl(
           this.bucket,
           file.path
         );
@@ -126,7 +126,6 @@ export class FileRouter {
         res.json({ signedUrl });
       }
     );
-
     return router;
   }
 }
@@ -134,7 +133,6 @@ export class FileRouter {
 const ZFileBody = z.object({
   projectId: z.string(),
 });
-ZFileBody;
 
 const ZFile = z.object({
   fieldname: z.string(),

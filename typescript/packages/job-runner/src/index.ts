@@ -18,13 +18,11 @@ import {
 
 import { LOGGER } from "./logger";
 import { SETTINGS, Settings } from "./settings";
-import * as T from "./telemetry";
 
 LOGGER.info("Starting job runner...");
 
 if (SETTINGS.tracingEnabled) {
   LOGGER.info("Telemetry enabled");
-  T.init();
 }
 
 async function start(settings: Settings) {

@@ -15,8 +15,13 @@ export interface CloudFile {
 export class GoogleCloudStorageService implements BlobStorageService {
   #storage: Storage;
 
-  constructor() {
+  constructor(serviceAccountPath?: string) {
     this.#storage = new Storage({
+      ...(serviceAccountPath
+        ? {
+            keyFilename: serviceAccountPath,
+          }
+        : {}),
       retryOptions: {
         autoRetry: true,
         maxRetries: 4,
@@ -58,16 +63,17 @@ export class GoogleCloudStorageService implements BlobStorageService {
 
   async getSignedUrl(bucketName: string, fileName: string): Promise<string> {
     const bucket = this.#storage.bucket(bucketName);
-    const [url] = await bucket.file(fileName).getSignedUrl({
+    const resp = await bucket.file(fileName).getSignedUrl({
       version: "v4",
       action: "read",
       expires: getTruncatedTime(),
     });
 
-    return url;
+    return resp[0];
   }
 }
 
+// this is to produce more cacheable urls
 const getTruncatedTime = () => {
   const currentTime = new Date();
   const d = new Date(currentTime);

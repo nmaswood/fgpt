@@ -1,3 +1,4 @@
+import { TextChunkGroup } from "@fgpt/precedent-iso";
 import {
   DatabasePool,
   DatabasePoolConnection,
@@ -46,17 +47,6 @@ export interface UpsertTextChunkGroup {
   numChunks: number;
 }
 
-export interface TextChunkGroup {
-  id: string;
-  organizationId: string;
-  projectId: string;
-  fileReferenceId: string;
-  processedFileId: string;
-  numChunks: number;
-  fullyChunked: boolean;
-  fullyEmbedded: boolean;
-}
-
 export interface EmbeddingResult {
   chunkId: string;
   embedding: number[];
@@ -66,8 +56,13 @@ export interface SetManyEmbeddings {
   chunkId: string;
   embedding: number[];
 }
+
 export interface TextChunkStore {
   getTextChunkGroup(id: string): Promise<TextChunkGroup>;
+  getTextChunkGroupByFileId(id: string): Promise<TextChunkGroup>;
+
+  getTextChunk(groupId: string, order: number): Promise<TextChunk>;
+
   upsertTextChunkGroup(args: UpsertTextChunkGroup): Promise<TextChunkGroup>;
   upsertManyTextChunkGroups(
     args: UpsertTextChunkGroup[]
@@ -114,6 +109,36 @@ WHERE
 `);
     });
   }
+
+  async getTextChunk(groupId: string, order: number): Promise<TextChunk> {
+    order;
+    return this.pool.one(
+      sql.type(ZTextChunkRow)`
+
+SELECT
+    ${TEXT_CHUNK_FIELDS}
+FROM
+    text_chunk
+WHERE
+    text_chunk_group_id = ${groupId}
+    AND chunk_order = ${order}
+`
+    );
+  }
+
+  async getTextChunkGroupByFileId(fileId: string): Promise<TextChunkGroup> {
+    return this.pool.connect(async (cnx) => {
+      return cnx.one(sql.type(ZTextChunkGroupRow)`
+SELECT
+    ${TEXT_CHUNK_GROUP_FIELDS}
+FROM
+    text_chunk_group
+WHERE
+    file_reference_id = ${fileId}
+`);
+    });
+  }
+
   async upsertTextChunkGroup(
     args: UpsertTextChunkGroup
   ): Promise<TextChunkGroup> {

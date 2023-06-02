@@ -1,6 +1,7 @@
 import { LoadedFile } from "@fgpt/precedent-iso";
-import { Box } from "@mui/material";
+import { Box, Link } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import NextLink from "next/link";
 import React from "react";
 
 export const DisplayFiles: React.FC<{ files: LoadedFile[] }> = ({ files }) => {
@@ -20,12 +21,19 @@ export const DisplayFiles: React.FC<{ files: LoadedFile[] }> = ({ files }) => {
   );
 };
 
-const columns: GridColDef[] = [
+const columns: GridColDef<LoadedFile>[] = [
   {
     field: "fileName",
     headerName: "File name",
     flex: 1,
     minWidth: 300,
+    renderCell: ({ row }) => {
+      return (
+        <Link component={NextLink} href={`files/${row.id}`}>
+          {row.fileName}
+        </Link>
+      );
+    },
   },
   {
     field: "contentType",

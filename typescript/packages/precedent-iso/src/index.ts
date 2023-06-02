@@ -11,6 +11,7 @@ export * from "./models/organization";
 export * from "./models/project";
 export * from "./models/sql-helpers";
 export * from "./models/task";
+export * from "./models/text-group";
 export { IdentitySub, User } from "./models/user";
 export * from "./subject";
 export * from "./text-chunker/text-chunker";
