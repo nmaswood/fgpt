@@ -3,7 +3,7 @@ import re
 from ..settings import SETTINGS
 
 from loguru import logger
-
+from retry import retry
 
 from langchain.prompts import PromptTemplate
 
@@ -62,6 +62,8 @@ def ask_question_streaming(context: str, question: str):
         if content:
             yield content
 
+
+@retry(tries=3, delay=1, backoff=2)
 def ask_question(context: str, question: str):
 
     prompt = PromptTemplate(
@@ -84,5 +86,3 @@ def ask_question(context: str, question: str):
         logger.warning("No choices returned from OpenAI")
     first_choice = choices[0]
     return first_choice["message"]["content"]
-
-

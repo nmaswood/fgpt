@@ -26,16 +26,20 @@ export class AnalyisServiceImpl implements AnalysisService {
     const items: AnalysisOutputItem[] = [];
 
     for (const [index, { name, prompts }] of definition.items.entries()) {
-      const responses: AnalysisOutputResponse[] = [];
-      LOGGER.info({ name, index }, "Analyzing item");
+      LOGGER.info(
+        { name, index: index + 1, total: definition.items.length + 1 },
+        "Analyzing item"
+      );
 
-      for (const prompt of prompts) {
-        const response = await this.analyzeForPrompt({
-          prompt,
-          projectId: analysis.projectId,
-        });
-        responses.push(response);
-      }
+      const responses = await Promise.all(
+        prompts.map((prompt) =>
+          this.analyzeForPrompt({
+            prompt,
+            projectId: analysis.projectId,
+          })
+        )
+      );
+
       items.push({
         name,
         responses,
