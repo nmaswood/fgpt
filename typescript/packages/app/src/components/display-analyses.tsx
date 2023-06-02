@@ -228,9 +228,9 @@ const DisplayOutputResponse: React.FC<{ response: AnalysisOutputResponse }> = ({
 }) => {
   return (
     <Box display="flex" flexDirection="column">
-      <Typography color="secondary">{prompt}</Typography>
-      <Typography color="white">{answer}</Typography>
-      <Typography color="white">{text}</Typography>
+      <Typography color="secondary">Prompt:{prompt}</Typography>
+      <Typography color="white">Answer:{answer}</Typography>
+      <Typography color="primary">Context: {text}</Typography>
     </Box>
   );
 };
