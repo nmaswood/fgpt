@@ -108,6 +108,25 @@ export class FileRouter {
       }
     );
 
+    router.get(
+      "/signed-url/:fileId",
+      async (req: express.Request, res: express.Response) => {
+        const fileId = req.params.fileId;
+
+        if (typeof fileId !== "string") {
+          throw new Error("invalid request");
+        }
+
+        const file = await this.fileReferenceStore.get(fileId);
+        const signedUrl = this.blobStorageService.getSignedUrl(
+          this.bucket,
+          file.path
+        );
+
+        res.json({ signedUrl });
+      }
+    );
+
     return router;
   }
 }
