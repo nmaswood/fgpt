@@ -1,5 +1,10 @@
-import { Analysis } from "@fgpt/precedent-iso";
+import {
+  Analysis,
+  AnalysisOutputItem,
+  AnalysisOutputResponse,
+} from "@fgpt/precedent-iso";
 import AddIcon from "@mui/icons-material/Add";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import { LoadingButton } from "@mui/lab";
 import {
   Box,
@@ -7,6 +12,7 @@ import {
   Dialog,
   DialogActions,
   DialogTitle,
+  IconButton,
   TextField,
   Typography,
 } from "@mui/material";
@@ -152,7 +158,7 @@ const CreateAnalysisModal: React.FC<{
 
 const ForAnalyses: React.FC<{ analyses: Analysis[] }> = ({ analyses }) => {
   return (
-    <Box display="flex" flexDirection="column" gap={2}>
+    <Box display="flex" flexDirection="column" gap={2} overflow="auto">
       {analyses.map((analysis) => (
         <ForAnalysis key={analysis.id} analysis={analysis} />
       ))}
@@ -161,11 +167,68 @@ const ForAnalyses: React.FC<{ analyses: Analysis[] }> = ({ analyses }) => {
 };
 
 const ForAnalysis: React.FC<{ analysis: Analysis }> = ({ analysis }) => {
+  const [open, setOpen] = React.useState(false);
+  const rotate = open ? "rotate(-90deg)" : "rotate(0)";
+
+  const items = analysis?.output?.items ?? [];
   return (
-    <Box display="flex">
-      <Typography variant="body1" color="white">
-        {analysis.name}
-      </Typography>
+    <Box display="flex" flexDirection="column" overflow="auto">
+      <Box display="flex">
+        <Typography variant="body1" color="white">
+          {analysis.name}
+        </Typography>
+        <IconButton
+          onClick={() => setOpen((prev) => !prev)}
+          sx={{
+            position: "absolute",
+            right: "35px",
+          }}
+        >
+          <ChevronLeftIcon
+            sx={{
+              transform: rotate,
+              transition: "all 0.2s linear",
+            }}
+          />
+        </IconButton>
+      </Box>
+      {open && (
+        <Box display="flex" maxHeight="100%" overflow="auto">
+          {items.length > 0 && (
+            <Box display="flex" flexDirection="column" gap={2} overflow="auto">
+              {items.map((item, index) => (
+                <DisplayOutputItem key={index} item={item} />
+              ))}
+            </Box>
+          )}
+        </Box>
+      )}
+    </Box>
+  );
+};
+
+const DisplayOutputItem: React.FC<{ item: AnalysisOutputItem }> = ({
+  item: { name, responses },
+}) => {
+  return (
+    <Box display="flex" flexDirection="column">
+      <Typography color="primary">{name}</Typography>
+
+      {responses.map((response, index) => (
+        <DisplayOutputResponse key={index} response={response} />
+      ))}
+    </Box>
+  );
+};
+
+const DisplayOutputResponse: React.FC<{ response: AnalysisOutputResponse }> = ({
+  response: { prompt, answer, text },
+}) => {
+  return (
+    <Box display="flex" flexDirection="column">
+      <Typography color="secondary">{prompt}</Typography>
+      <Typography color="white">{answer}</Typography>
+      <Typography color="white">{text}</Typography>
     </Box>
   );
 };
