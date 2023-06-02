@@ -177,20 +177,22 @@ const ForAnalysis: React.FC<{ analysis: Analysis }> = ({ analysis }) => {
         <Typography variant="body1" color="white">
           {analysis.name}
         </Typography>
-        <IconButton
-          onClick={() => setOpen((prev) => !prev)}
-          sx={{
-            position: "absolute",
-            right: "35px",
-          }}
-        >
-          <ChevronLeftIcon
+        {items.length > 0 && (
+          <IconButton
+            onClick={() => setOpen((prev) => !prev)}
             sx={{
-              transform: rotate,
-              transition: "all 0.2s linear",
+              position: "absolute",
+              right: "35px",
             }}
-          />
-        </IconButton>
+          >
+            <ChevronLeftIcon
+              sx={{
+                transform: rotate,
+                transition: "all 0.2s linear",
+              }}
+            />
+          </IconButton>
+        )}
       </Box>
       {open && (
         <Box display="flex" maxHeight="100%" overflow="auto">

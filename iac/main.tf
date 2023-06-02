@@ -68,8 +68,14 @@ resource "google_sql_database_instance" "instance" {
 resource "google_storage_bucket" "asset_store" {
   name     = "fgpt-asset-store"
   location = "US"
-}
 
+  cors {
+    origin          = ["http://${var.vercel_domain}", "https://${var.vercel_domain}", "http://*.${var.vercel_domain}", "https://*.${var.vercel_domain}"]
+    method          = ["GET", "HEAD", "PUT", "POST", "DELETE"]
+    response_header = ["*"]
+    max_age_seconds = 3600
+  }
+}
 
 resource "google_artifact_registry_repository" "project-registry" {
   location      = var.region
@@ -122,6 +128,8 @@ resource "google_cloud_run_v2_job" "db" {
 locals {
   asset_bucket = google_storage_bucket.asset_store.name
 }
+
+
 
 resource "google_cloud_run_v2_job" "job_runner" {
   name     = "${var.project_slug}-job-runner"
