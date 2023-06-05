@@ -26,6 +26,7 @@ import {
   PsqlUserOrgService,
   PsqlLoadedFileStore,
   PsqlAnalysisStore,
+  PsqlChatStore,
 } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
 import { UserOrgRouter } from "./routers/user-org-router";
@@ -86,6 +87,8 @@ async function start() {
 
   const analysisStore = new PsqlAnalysisStore(pool);
 
+  const chatStore = new PsqlChatStore(pool);
+
   app.use(cors({ origin: "*" }));
 
   app.use("/api/v1/user-org", jwtCheck, addUser, new UserOrgRouter().init());
@@ -114,7 +117,12 @@ async function start() {
     "/api/v1/chat",
     jwtCheck,
     addUser,
-    new ChatRouter(mlService, textChunkStore, fileReferenceStore).init()
+    new ChatRouter(
+      mlService,
+      textChunkStore,
+      fileReferenceStore,
+      chatStore
+    ).init()
   );
 
   app.use(

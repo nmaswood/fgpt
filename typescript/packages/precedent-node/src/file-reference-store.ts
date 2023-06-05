@@ -2,6 +2,8 @@ import { FileReference, MAX_FILE_COUNT } from "@fgpt/precedent-iso";
 import { DatabasePool, DatabaseTransactionConnection, sql } from "slonik";
 import { z } from "zod";
 
+import { ZCountRow } from "./sql/models";
+
 export interface InsertFileReference {
   fileName: string;
   organizationId: string;
@@ -160,7 +162,3 @@ const ZFileReferenceRow = z
     contentType: row.content_type,
     path: row.path,
   }));
-
-const ZCountRow = z.object({
-  count: z.number(),
-});

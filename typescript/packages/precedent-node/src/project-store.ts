@@ -3,6 +3,8 @@ import { MAX_PROJECT_LIMIT } from "@fgpt/precedent-iso";
 import { DatabasePool, DatabaseTransactionConnection, sql } from "slonik";
 import { z } from "zod";
 
+import { ZCountRow } from "./sql/models";
+
 export interface CreateProjectArgs {
   name: string;
   organizationId: string;
@@ -136,10 +138,6 @@ RETURNING
     });
   }
 }
-
-const ZCountRow = z.object({
-  count: z.number(),
-});
 
 const ZProjectRow = z
   .object({

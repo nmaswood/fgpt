@@ -9,6 +9,8 @@ import {
 import { DatabasePool, DatabaseTransactionConnection, sql } from "slonik";
 import { z } from "zod";
 
+import { ZCountRow } from "./sql/models";
+
 export interface InsertAnalysis {
   organizationId: string;
   projectId: string;
@@ -197,7 +199,3 @@ const ZAnalysisRow = z
       output: row.output ?? undefined,
     })
   );
-
-const ZCountRow = z.object({
-  count: z.number(),
-});

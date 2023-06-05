@@ -1,5 +1,6 @@
 import { ChatResponse } from "@fgpt/precedent-iso";
 import {
+  ChatStore,
   FileReferenceStore,
   MLServiceClient,
   TextChunkStore,
@@ -16,10 +17,37 @@ export class ChatRouter {
   constructor(
     private readonly mlClient: MLServiceClient,
     private readonly textChunkStore: TextChunkStore,
-    private readonly fileReferenceStore: FileReferenceStore
+    private readonly fileReferenceStore: FileReferenceStore,
+    private readonly chatStore: ChatStore
   ) {}
   init() {
     const router = express.Router();
+
+    router.get(
+      "/list-chats",
+      async (req: express.Request, res: express.Response) => {
+        const body = ZListChatRequest.parse(req.body);
+
+        const chats = await this.chatStore.listChats(body.projectId);
+
+        res.json({ chats });
+      }
+    );
+
+    router.post(
+      "/create-chat",
+      async (req: express.Request, res: express.Response) => {
+        const body = ZCreateChatRequest.parse(req.body);
+
+        const chat = await this.chatStore.insertChat({
+          organizationId: req.user.organizationId,
+          projectId: body.projectId,
+          creatorId: req.user.id,
+        });
+
+        res.json({ chat });
+      }
+    );
 
     router.post(
       "/chat",
@@ -120,7 +148,7 @@ export class ChatRouter {
   }
 }
 
-export const ZVectorMetadata = z.object({
+const ZVectorMetadata = z.object({
   fileId: z.string(),
 });
 
@@ -128,3 +156,7 @@ const ZChatArguments = z.object({
   projectId: z.string(),
   question: z.string(),
 });
+
+const ZListChatRequest = z.object({ projectId: z.string() });
+
+const ZCreateChatRequest = z.object({ projectId: z.string() });
