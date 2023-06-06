@@ -107,6 +107,8 @@ test("insertChatEntry", async () => {
     creatorId,
     chatId: chat.id,
     question: "What is your favorite color?",
+    context: "context",
+    answer: "answer",
   });
 
   expect(chatEntry.question).toEqual("What is your favorite color?");
@@ -128,6 +130,8 @@ test("updateChatEntry", async () => {
     creatorId,
     chatId: chat.id,
     question: "What is your favorite color?",
+    context: "context",
+    answer: "answer",
   });
 
   const renamedChatEntry = await chatStore.updateChatEntry({
@@ -155,6 +159,8 @@ test("listChatEntries", async () => {
     creatorId,
     chatId: chat.id,
     question: "What is your favorite color?",
+    context: "context",
+    answer: "answer",
   });
 
   const [firstChatEntry] = await chatStore.listChatEntries(chat.id);
@@ -178,6 +184,8 @@ test("deleteChat", async () => {
     creatorId,
     chatId: chat.id,
     question: "What is your favorite color?",
+    context: "context",
+    answer: "answer",
   });
 
   const entries = await chatStore.listChatEntries(chat.id);

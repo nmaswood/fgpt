@@ -22,7 +22,8 @@ export interface InsertChatEntry {
   creatorId: string;
   chatId: string;
   question: string;
-  answer?: string;
+  context: string;
+  answer: string;
 }
 
 export interface UpdateChatEntry {
@@ -31,7 +32,7 @@ export interface UpdateChatEntry {
 }
 
 const CHAT_FIELDS = sql.fragment`chat.id as chat_id, chat.name as chat_name`;
-const CHAT_ENTRY_FIELDS = sql.fragment`chat_entry.id as chat_entry_id, question, answer`;
+const CHAT_ENTRY_FIELDS = sql.fragment`chat_entry.id as chat_entry_id, question_v2 as question, answer`;
 
 export interface ChatStore {
   insertChat(chat: InsertChat): Promise<Chat>;
@@ -77,7 +78,6 @@ RETURNING
 
   async updateChat({ chatId, name }: UpdateChat): Promise<Chat> {
     return this.pool.one(sql.type(ZChatRow)`
-
 UPDATE
     chat
 SET
@@ -103,6 +103,7 @@ RETURNING
       chatId,
       creatorId,
       question,
+      context,
       answer,
     }: InsertChatEntry
   ): Promise<ChatEntry> {
@@ -119,19 +120,12 @@ WHERE
     }
 
     return trx.one(sql.type(ZChatEntryRow)`
-
-INSERT INTO chat_entry (organization_id, project_id, creator_id, chat_id, question, answer, entry_order)
-    VALUES (${organizationId}, ${projectId}, ${creatorId}, ${chatId}, ${JSON.stringify(
+INSERT INTO chat_entry (organization_id, project_id, creator_id, chat_id, question_v2, context, answer, entry_order)
+    VALUES (${organizationId}, ${projectId}, ${creatorId}, ${chatId}, ${question}, ${context}, ${JSON.stringify(
       {
-        question,
+        answer,
       }
-    )}, ${
-      answer
-        ? JSON.stringify({
-            answer,
-          })
-        : null
-    }, COALESCE((
+    )}, COALESCE((
             SELECT
                 MAX(entry_order)
                 FROM chat_entry
@@ -214,10 +208,6 @@ const ZChatRow = z
     })
   );
 
-const ZChatEntryQuestion = z.object({
-  question: z.string(),
-});
-
 const ZChatEntryAnswer = z.object({
   answer: z.string(),
 });
@@ -225,13 +215,13 @@ const ZChatEntryAnswer = z.object({
 const ZChatEntryRow = z
   .object({
     chat_entry_id: z.string(),
-    question: ZChatEntryQuestion,
+    question: z.string(),
     answer: ZChatEntryAnswer.nullable(),
   })
   .transform(
     (row): ChatEntry => ({
       id: row.chat_entry_id,
-      question: row.question.question,
+      question: row.question,
       answer: row.answer?.answer ?? undefined,
     })
   );

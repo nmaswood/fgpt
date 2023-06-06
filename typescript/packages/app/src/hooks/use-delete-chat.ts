@@ -8,9 +8,9 @@ export const useDeleteChat = (projectId: string) => {
   const res = useSWRMutation<
     string,
     unknown,
-    "/api/proxy/v1/projects/delete",
+    "/api/proxy/v1/chat/delete-chat",
     { id: string }
-  >("/api/proxy/v1/projects/delete", async (url: string, args) => {
+  >("/api/proxy/v1/chat/delete-chat", async (url: string, args) => {
     const res = await fetch(`${url}/${args.arg.id}`, {
       method: "DELETE",
     });

@@ -53,6 +53,7 @@ export class ChatRouter {
       async (req: express.Request, res: express.Response) => {
         const body = ZDeleteChatRequest.parse(req.params);
         await this.chatStore.deleteChat(body.chatId);
+        console.log(body);
         res.json({ status: "ok" });
       }
     );
@@ -110,8 +111,10 @@ export class ChatRouter {
 
         const buffer: string[] = [];
 
+        const context = justText.join("\n");
+
         await this.mlClient.askQuestionStreaming({
-          context: justText.join("\n"),
+          context,
           question: args.question,
           onData: (resp) => {
             const encoded = encoder.encode(resp);
@@ -127,6 +130,7 @@ export class ChatRouter {
               chatId: args.chatId,
               question: args.question,
               answer: buffer.join(""),
+              context,
             });
           },
         });
