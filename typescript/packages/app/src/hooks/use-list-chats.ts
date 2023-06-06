@@ -11,10 +11,11 @@ export const useFetchChats = (projectId: string) => {
 };
 
 async function fetcher([url, projectId]: [
-  "api/proxy/v1/chat/list-chats",
+  "api/proxyjv1/chat/list-chats",
   string
 ]): Promise<Chat[]> {
   const response = await fetch(`${url}/${projectId}`);
   const data = await response.json();
+
   return data.chats;
 }

@@ -5,6 +5,7 @@ import { CLIENT_SETTINGS } from "../client-settings";
 interface Arguments {
   projectId: string;
   question: string;
+  chatId: string;
 }
 
 const decoder = new TextDecoder();
@@ -19,7 +20,7 @@ export const useAskQuestion = (
 
   const text = React.useMemo(() => buffer.join(""), [buffer]);
   const trigger = React.useRef<(args: Arguments) => Promise<void>>(
-    async function fetchData({ projectId, question }) {
+    async function fetchData({ projectId, question, chatId }) {
       try {
         setLoading(true);
         const res = await fetch(
@@ -29,6 +30,7 @@ export const useAskQuestion = (
             body: JSON.stringify({
               projectId,
               question,
+              chatId,
             }),
             headers: {
               Authorization: `Bearer ${token}`,

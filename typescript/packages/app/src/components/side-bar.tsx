@@ -174,11 +174,12 @@ const CreateProject: React.FC<{
           }}
           size="medium"
           startIcon={<AddIcon />}
-          sx={{ width: "100%" }}
+          sx={{ width: "100%", whiteSpace: "nowrap" }}
           color="primary"
         >
           Create project
         </LoadingButton>
+
         {projectModalOpen && (
           <FormDialog
             onClose={() => setProjectModalOpen(false)}

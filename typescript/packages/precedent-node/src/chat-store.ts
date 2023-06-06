@@ -22,6 +22,7 @@ export interface InsertChatEntry {
   creatorId: string;
   chatId: string;
   question: string;
+  answer?: string;
 }
 
 export interface UpdateChatEntry {
@@ -35,10 +36,11 @@ const CHAT_ENTRY_FIELDS = sql.fragment`chat_entry.id as chat_entry_id, question,
 export interface ChatStore {
   insertChat(chat: InsertChat): Promise<Chat>;
   updateChat(update: UpdateChat): Promise<Chat>;
-  insertChatEntry(chatEntry: InsertChat): Promise<ChatEntry>;
+  insertChatEntry(chatEntry: InsertChatEntry): Promise<ChatEntry>;
   updateChatEntry(chatEntry: UpdateChatEntry): Promise<ChatEntry>;
   listChats(projectId: string): Promise<Chat[]>;
   listChatEntries(chatId: string): Promise<ChatEntry[]>;
+  deleteChat(chatId: string): Promise<void>;
 }
 
 export class PsqlChatStore implements ChatStore {
@@ -95,7 +97,14 @@ RETURNING
 
   async #insertChatEntry(
     trx: DatabaseTransactionConnection,
-    { organizationId, projectId, chatId, creatorId, question }: InsertChatEntry
+    {
+      organizationId,
+      projectId,
+      chatId,
+      creatorId,
+      question,
+      answer,
+    }: InsertChatEntry
   ): Promise<ChatEntry> {
     const count = await trx.oneFirst(sql.type(ZCountRow)`
 SELECT
@@ -111,12 +120,18 @@ WHERE
 
     return trx.one(sql.type(ZChatEntryRow)`
 
-INSERT INTO chat_entry (organization_id, project_id, creator_id, chat_id, question, entry_order)
+INSERT INTO chat_entry (organization_id, project_id, creator_id, chat_id, question, answer, entry_order)
     VALUES (${organizationId}, ${projectId}, ${creatorId}, ${chatId}, ${JSON.stringify(
       {
         question,
       }
-    )}, COALESCE((
+    )}, ${
+      answer
+        ? JSON.stringify({
+            answer,
+          })
+        : null
+    }, COALESCE((
             SELECT
                 MAX(entry_order)
                 FROM chat_entry
@@ -155,6 +170,8 @@ FROM
     chat
 WHERE
     project_id = ${projectId}
+ORDER BY
+    chat.created_at DESC
 `);
     return Array.from(resp.rows);
   }
@@ -169,6 +186,19 @@ WHERE
     chat_id = ${chatId}
 `);
     return Array.from(result.rows);
+  }
+
+  async deleteChat(chatId: string): Promise<void> {
+    await this.pool.transaction(async (trx) => {
+      await trx.query(sql.unsafe`
+DELETE FROM chat_entry
+where chat_id = ${chatId}
+`);
+      await trx.query(sql.unsafe`
+DELETE FROM chat
+where id = ${chatId}
+`);
+    });
   }
 }
 

@@ -37,6 +37,7 @@ class VectorResult(BaseModel):
     metadata: dict[str, str] = {}
     score: float
 
+
 def get_similar(vector: list[float], metadata: dict[str, str]) -> list[VectorResult]:
     index = get_pinecone_index()
 
@@ -53,10 +54,8 @@ def get_similar(vector: list[float], metadata: dict[str, str]) -> list[VectorRes
     return [VectorResult(id=match['id'], metadata=match['metadata'], score=match['score']) for match in matches]
 
 
-
 def get_pinecone_index():
     global INDEX
     if INDEX is None:
         INDEX = pinecone.Index(index_name=SETTINGS.pinecone_index)
     return INDEX
-

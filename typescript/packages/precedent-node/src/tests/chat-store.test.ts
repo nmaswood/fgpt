@@ -161,3 +161,32 @@ test("listChatEntries", async () => {
 
   expect(firstChatEntry.id).toEqual(chatEntry.id);
 });
+
+test("deleteChat", async () => {
+  const { creatorId, projectId, organizationId, chatStore } = await setup();
+
+  const chat = await chatStore.insertChat({
+    organizationId,
+    projectId,
+    creatorId,
+    name: "I love cows",
+  });
+
+  await chatStore.insertChatEntry({
+    organizationId,
+    projectId,
+    creatorId,
+    chatId: chat.id,
+    question: "What is your favorite color?",
+  });
+
+  const entries = await chatStore.listChatEntries(chat.id);
+  expect(entries.length).toEqual(1);
+
+  await chatStore.deleteChat(chat.id);
+  const entriesAfterDelete = await chatStore.listChatEntries(chat.id);
+  expect(entriesAfterDelete.length).toEqual(0);
+
+  const chatsAfterDelete = await chatStore.listChats(projectId);
+  expect(chatsAfterDelete.length).toEqual(0);
+});

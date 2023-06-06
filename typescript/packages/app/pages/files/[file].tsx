@@ -24,7 +24,6 @@ export default function Page() {
 
 const ForFileId: React.FC<{ fileId: string }> = ({ fileId }) => {
   const { data: textChunkGroup } = useFetchTextChunkGroup(fileId);
-  console.log(textChunkGroup);
 
   const { data: url } = useFetchSignedUrl(fileId);
   return (

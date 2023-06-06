@@ -1,5 +1,10 @@
 import { useUser } from "@auth0/nextjs-auth0/client";
-import { assertNever, ChatResponse } from "@fgpt/precedent-iso";
+import {
+  assertNever,
+  Chat,
+  ChatEntry,
+  ChatResponse,
+} from "@fgpt/precedent-iso";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ErrorIcon from "@mui/icons-material/Error";
 import InsertCommentIcon from "@mui/icons-material/InsertComment";
@@ -21,9 +26,11 @@ import {
 import React from "react";
 
 import { useAskQuestion } from "../hooks/use-ask-question";
-import { useDebugChat } from "../hooks/use-debug-chat";
+import { useCreateChat } from "../hooks/use-create-chat";
+import { useFetchChatEntries } from "../hooks/use-fetch-chat-entry";
+import { DisplayChatList } from "./display-chats";
 
-interface QuestionWithAnswer {
+interface EntryToRender {
   id: string;
   question: string;
   state:
@@ -40,19 +47,35 @@ interface QuestionWithAnswer {
       };
 }
 
-export const Chat: React.FC<{ projectId: string; token: string }> = ({
-  projectId,
-  token,
-}) => {
+export const DisplayChat: React.FC<{
+  projectId: string;
+  token: string;
+  chats: Chat[];
+  chatsLoading: boolean;
+}> = ({ projectId, token, chats }) => {
+  const [selectedChatId, setSelectedChatId] = React.useState<
+    string | undefined
+  >(undefined);
+
+  const selectedChatIdx = chats.findIndex((c) => c.id === selectedChatId);
+
+  const { data: chatEntries } = useFetchChatEntries(selectedChatId);
+
   const [input, setInput] = React.useState("");
-  const [qs, setQs] = React.useState<QuestionWithAnswer[]>([]);
-  const { trigger: triggerDebug, responses } = useDebugChat();
+  const [qs, setQs] = React.useState<EntryToRender[]>([]);
+
+  const { trigger: createChat, isMutating: createChatIsLoading } =
+    useCreateChat(projectId);
 
   React.useEffect(() => {
     setQs([]);
-  }, [projectId]);
+  }, [projectId, selectedChatId]);
 
-  const { trigger, text, loading } = useAskQuestion(token, (value: string) => {
+  const {
+    trigger: askQuestion,
+    text,
+    loading,
+  } = useAskQuestion(token, (value: string) => {
     setQs((qs) => {
       const last = qs[qs.length - 1];
       if (!last || last.state.type !== "rendering") {
@@ -74,6 +97,9 @@ export const Chat: React.FC<{ projectId: string; token: string }> = ({
   const trimmed = input.trim();
 
   const submit = async () => {
+    if (loading || createChatIsLoading) {
+      return;
+    }
     const trimmed = input.trim();
     if (!trimmed.length) {
       return;
@@ -91,99 +117,174 @@ export const Chat: React.FC<{ projectId: string; token: string }> = ({
     ]);
 
     setInput("");
-    await trigger({
-      projectId,
-      question: trimmed,
-    });
 
-    await triggerDebug({
-      id,
+    const getChatId = async () => {
+      if (selectedChatId) {
+        return selectedChatId;
+      }
+      const chat = await createChat({
+        name: "New chat",
+      });
+
+      if (!chat) {
+        throw new Error("chat could not be created");
+      }
+      return chat.id;
+    };
+
+    const chatId = await getChatId();
+
+    setSelectedChatId(chatId);
+
+    await askQuestion({
       projectId,
       question: trimmed,
+      chatId,
     });
   };
 
   return (
-    <Box
-      display="flex"
-      width="100%"
-      height="100%"
-      flexDirection="column"
-      gap={15}
-    >
+    <Box display="flex" width="100%" height="100%">
+      <DisplayChatList
+        chats={chats}
+        selectedChatId={selectedChatId}
+        setSelectedChatId={setSelectedChatId}
+        selectedChatIdx={selectedChatIdx}
+        createChat={(name: string) => createChat({ name })}
+        projectId={projectId}
+      />
       <Box
         display="flex"
         width="100%"
         height="100%"
-        maxHeight="100%"
-        overflow="auto"
+        flexDirection="column"
+        gap={15}
       >
-        {qs.length > 0 && (
-          <List sx={{ width: "100%" }}>
-            {qs.map((q) => (
-              <RenderQ
-                key={q.id}
-                q={q}
-                text={text}
-                responses={responses[q.id] ?? []}
-              />
-            ))}
-          </List>
-        )}
-      </Box>
-      <Box
-        display="flex"
-        width="100%"
-        height="160px"
-        paddingX={20}
-        position="sticky"
-        bottom={0}
-      >
-        <TextField
-          placeholder="Send a message..."
-          fullWidth
-          value={input}
-          onChange={(e) => {
-            setInput(e.target.value);
-          }}
-          onKeyPress={(ev) => {
-            if (ev.key === "Enter") {
-              submit();
-              ev.preventDefault();
-            }
-          }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  disabled={trimmed.length === 0 || loading}
-                  onClick={submit}
-                >
-                  <SendIcon
-                    sx={{
-                      transform: "rotate(-45deg) scale(0.8)",
-                      paddingBottom: 1,
-                    }}
-                  />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-        ;
+        <Box
+          display="flex"
+          width="100%"
+          height="100%"
+          maxHeight="100%"
+          overflow="auto"
+        >
+          {(qs.length > 0 || chatEntries.length > 0) && (
+            <List sx={{ width: "100%" }}>
+              {chatEntries.map((chatEntry) => (
+                <RenderChatEntryFromServer
+                  key={chatEntry.id}
+                  chatEntry={chatEntry}
+                />
+              ))}
+              {qs.map((q) => (
+                <RenderChatEntryFromClient
+                  key={q.id}
+                  q={q}
+                  text={text}
+                  responses={[]}
+                />
+              ))}
+            </List>
+          )}
+        </Box>
+        <Box
+          display="flex"
+          width="100%"
+          height="160px"
+          paddingX={20}
+          position="sticky"
+          bottom={0}
+        >
+          <TextField
+            placeholder="Send a message..."
+            fullWidth
+            value={input}
+            onChange={(e) => {
+              setInput(e.target.value);
+            }}
+            onKeyPress={(ev) => {
+              if (ev.key === "Enter") {
+                submit();
+                ev.preventDefault();
+              }
+            }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    disabled={
+                      trimmed.length === 0 || loading || createChatIsLoading
+                    }
+                    onClick={submit}
+                  >
+                    <SendIcon
+                      sx={{
+                        transform: "rotate(-45deg) scale(0.8)",
+                        paddingBottom: 1,
+                      }}
+                    />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Box>
       </Box>
     </Box>
   );
 };
 
-const RenderQ: React.FC<{
-  q: QuestionWithAnswer;
+const RenderChatEntryFromServer: React.FC<{
+  chatEntry: ChatEntry;
+}> = ({ chatEntry }) => {
+  const { user } = useUser();
+  const picture = user?.picture;
+
+  return (
+    <>
+      <ListItem
+        sx={{
+          paddingY: 3,
+          paddingX: 20,
+        }}
+      >
+        {picture && (
+          <ListItemAvatar>
+            <Avatar src={picture} variant="rounded" />
+          </ListItemAvatar>
+        )}
+        <ListItemText
+          primary={chatEntry.question}
+          primaryTypographyProps={{ color: "white" }}
+        />
+      </ListItem>
+      <ListItem
+        sx={{
+          paddingY: 3,
+          paddingX: 20,
+          background: "#343541",
+          display: "flex",
+          position: "relative",
+          flexDirection: "column",
+        }}
+      >
+        <Box display="flex" width="100%" alignItems="center">
+          <Box display="flex" width="56" height="40" marginRight={2}>
+            <ResponseAvatar state={"data"} />
+          </Box>
+          <Typography color="white">{chatEntry.answer}</Typography>
+        </Box>
+      </ListItem>
+    </>
+  );
+};
+
+const RenderChatEntryFromClient: React.FC<{
+  q: EntryToRender;
   text: string;
   responses: ChatResponse[];
 }> = ({ q, text, responses }) => {
   const { user } = useUser();
   const picture = user?.picture;
-  console.log({ responses });
 
   const ref = React.useRef<HTMLDivElement>(null);
   const current = ref.current;

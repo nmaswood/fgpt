@@ -1,4 +1,4 @@
-import type { Project } from "@fgpt/precedent-iso";
+import type { Chat } from "@fgpt/precedent-iso";
 import useSWRMutation from "swr/mutation";
 
 import { useFetchChats } from "./use-list-chats";
@@ -7,18 +7,22 @@ export const useCreateChat = (projectId: string) => {
   const { mutate } = useFetchChats(projectId);
 
   const res = useSWRMutation<
-    Project,
-    unknown,
+    Chat,
+    { name: string },
     "/api/proxy/v1/chat/create-chat",
-    unknown
+    { name: string }
   >("/api/proxy/v1/chat/create-chat", async (url: string, args) => {
-    console.log(args);
+    const body = {
+      projectId,
+      ...args.arg,
+    };
+
     const res = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      //body: JSON.stringify(args.arg),
+      body: JSON.stringify(body),
     });
     const data = await res.json();
     mutate();

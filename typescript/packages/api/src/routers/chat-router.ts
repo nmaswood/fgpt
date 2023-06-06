@@ -24,12 +24,10 @@ export class ChatRouter {
     const router = express.Router();
 
     router.get(
-      "/list-chats",
+      "/list-chats/:projectId",
       async (req: express.Request, res: express.Response) => {
-        const body = ZListChatRequest.parse(req.body);
-
+        const body = ZListChatRequest.parse(req.params);
         const chats = await this.chatStore.listChats(body.projectId);
-
         res.json({ chats });
       }
     );
@@ -43,11 +41,41 @@ export class ChatRouter {
           organizationId: req.user.organizationId,
           projectId: body.projectId,
           creatorId: req.user.id,
+          name: body.name,
         });
 
         res.json({ chat });
       }
     );
+
+    router.delete(
+      "/delete-chat/:chatId",
+      async (req: express.Request, res: express.Response) => {
+        const body = ZDeleteChatRequest.parse(req.params);
+        await this.chatStore.deleteChat(body.chatId);
+        res.json({ status: "ok" });
+      }
+    );
+
+    router.get(
+      "/chat-entry/:chatId",
+      async (req: express.Request, res: express.Response) => {
+        const body = ZGetChatEntryRequest.parse(req.params);
+
+        const chatEntries = await this.chatStore.listChatEntries(body.chatId);
+
+        res.json({ chatEntries });
+      }
+    );
+
+    router.put("/chat", async (req: express.Request, res: express.Response) => {
+      const args = ZEditChatRequest.parse(req.body);
+      const chat = await this.chatStore.updateChat({
+        chatId: args.id,
+        name: args.name,
+      });
+      res.json({ chat });
+    });
 
     router.post(
       "/chat",
@@ -80,14 +108,26 @@ export class ChatRouter {
         res.set("Cache-Control", "no-cache");
         res.set("Connection", "keep-alive");
 
+        const buffer: string[] = [];
+
         await this.mlClient.askQuestionStreaming({
           context: justText.join("\n"),
           question: args.question,
           onData: (resp) => {
-            res.write(encoder.encode(resp));
+            const encoded = encoder.encode(resp);
+            res.write(encoded);
+            buffer.push(resp);
           },
-          onEnd: () => {
+          onEnd: async () => {
             res.end();
+            await this.chatStore.insertChatEntry({
+              organizationId: req.user.organizationId,
+              projectId: args.projectId,
+              creatorId: req.user.id,
+              chatId: args.chatId,
+              question: args.question,
+              answer: buffer.join(""),
+            });
           },
         });
       }
@@ -152,11 +192,26 @@ const ZVectorMetadata = z.object({
   fileId: z.string(),
 });
 
+const ZEditChatRequest = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
 const ZChatArguments = z.object({
   projectId: z.string(),
   question: z.string(),
+  chatId: z.string(),
 });
 
 const ZListChatRequest = z.object({ projectId: z.string() });
 
-const ZCreateChatRequest = z.object({ projectId: z.string() });
+const ZGetChatEntryRequest = z.object({ chatId: z.string() });
+
+const ZCreateChatRequest = z.object({
+  projectId: z.string(),
+  name: z.string(),
+});
+
+const ZDeleteChatRequest = z.object({
+  chatId: z.string(),
+});

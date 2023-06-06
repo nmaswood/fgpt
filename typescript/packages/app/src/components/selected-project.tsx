@@ -37,7 +37,8 @@ import { CLIENT_SETTINGS } from "../client-settings";
 import { useDeleteProject } from "../hooks/use-delete-project";
 import { useEditProject } from "../hooks/use-edit-project";
 import { useFetchFiles } from "../hooks/use-fetch-files";
-import { Chat } from "./chat";
+import { useFetchChats } from "../hooks/use-list-chats";
+import { DisplayChat } from "./chat";
 import { DisplayAnalyses } from "./display-analyses";
 import { DisplayFiles } from "./display-files";
 
@@ -78,6 +79,8 @@ export const SelectedProject: React.FC<{
     mutate,
     isLoading: filesLoading,
   } = useFetchFiles(project.id);
+
+  const { data: chats, isLoading: chatsLoading } = useFetchChats(project.id);
 
   const [value, setValue] = React.useState(2);
 
@@ -250,36 +253,14 @@ export const SelectedProject: React.FC<{
         )}
 
         {value === 2 && (
-          <>
-            {!filesLoading && files.length === 0 && (
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                width="100%"
-                height="100%"
-              >
-                <Button
-                  variant="outlined"
-                  onClick={() => {
-                    setValue(0);
-                  }}
-                  color="secondary"
-                  size="large"
-                  startIcon={<CloudUploadIcon />}
-                  sx={{ width: "fit-content" }}
-                >
-                  Upload files to begin
-                </Button>
-              </Box>
-            )}
-
-            {!filesLoading && files.length > 0 && (
-              <Box display="flex" width="100%" height="100%">
-                <Chat projectId={project.id} token={token} />
-              </Box>
-            )}
-          </>
+          <Box display="flex" width="100%" height="100%">
+            <DisplayChat
+              projectId={project.id}
+              token={token}
+              chats={chats}
+              chatsLoading={chatsLoading}
+            />
+          </Box>
         )}
         {value === 3 && <DisplayAnalyses projectId={project.id} />}
       </Box>
