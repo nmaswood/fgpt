@@ -53,7 +53,6 @@ export class ChatRouter {
       async (req: express.Request, res: express.Response) => {
         const body = ZDeleteChatRequest.parse(req.params);
         await this.chatStore.deleteChat(body.chatId);
-        console.log(body);
         res.json({ status: "ok" });
       }
     );

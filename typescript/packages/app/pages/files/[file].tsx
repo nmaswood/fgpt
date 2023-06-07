@@ -1,5 +1,6 @@
-import { usePdf } from "@mikecousins/react-pdf";
-import { Button, ButtonGroup, Paper, Typography } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { Button, ButtonGroup, Card, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useRouter } from "next/router";
 import React from "react";
@@ -8,7 +9,7 @@ import { useFetchSignedUrl } from "../../src/hooks/use-fetch-signed-url";
 import { useFetchTextChunk } from "../../src/hooks/use-fetch-text-chunk";
 import { useFetchTextChunkGroup } from "../../src/hooks/use-fetch-text-chunk-group";
 
-export default function Page() {
+export default function DisplayFile() {
   const router = useRouter();
   const fileId = (() => {
     const fileId = router.query.file;
@@ -24,82 +25,80 @@ export default function Page() {
 
 const ForFileId: React.FC<{ fileId: string }> = ({ fileId }) => {
   const { data: textChunkGroup } = useFetchTextChunkGroup(fileId);
-
   const { data: url } = useFetchSignedUrl(fileId);
+  const [order, setOrder] = React.useState(0);
   return (
-    <Box sx={{ width: "100%", height: "100%" }}>
-      <pre>{JSON.stringify(textChunkGroup, null, 2)}</pre>
-
-      {textChunkGroup && (
-        <DisplayChunks
-          textGroupId={textChunkGroup.id}
-          numChunks={textChunkGroup.numChunks}
-        />
+    <Paper sx={{ display: "flex", width: "100%", height: "100%" }}>
+      {url && (
+        <object
+          data={url}
+          type="application/pdf"
+          style={{ width: "100%", height: "100%" }}
+        >
+          <iframe
+            src={`https://docs.google.com/viewer?url=${url}&embedded=true`}
+          />
+        </object>
       )}
-
-      {url && <DisplayPdf url={url} />}
-    </Box>
+      <Box
+        width="500px"
+        height="100%"
+        onKeyPress={(e) => {
+          console.log(e.key);
+        }}
+      >
+        {textChunkGroup && (
+          <DisplayTextChunkGroup
+            textGroupId={textChunkGroup.id}
+            numChunks={textChunkGroup.numChunks}
+            order={order}
+            onPrev={() => setOrder((order) => order - 1)}
+            onNext={() => setOrder((order) => order + 1)}
+          />
+        )}
+      </Box>
+    </Paper>
   );
 };
 
-const DisplayChunks: React.FC<{ textGroupId: string; numChunks: number }> = ({
-  textGroupId,
-  numChunks,
-}) => {
-  const [order, setOrder] = React.useState(0);
-
+const DisplayTextChunkGroup: React.FC<{
+  textGroupId: string;
+  numChunks: number;
+  order: number;
+  onPrev: () => void;
+  onNext: () => void;
+}> = ({ textGroupId, numChunks, order, onPrev, onNext }) => {
   const { data } = useFetchTextChunk(textGroupId, order);
 
   return (
-    <Paper>
-      <ButtonGroup>
-        <Button
-          disabled={!data || order === 0}
-          onClick={() => setOrder((order) => order - 1)}
-        >
-          Prev
-        </Button>
-        <Button
-          disabled={!data || order + 1 === numChunks}
-          onClick={() => setOrder((order) => order + 1)}
-        >
-          Next
-        </Button>
-      </ButtonGroup>
+    <Card sx={{ display: "flex", padding: 3, gap: 2, flexDirection: "column" }}>
+      <Box
+        display="flex"
+        width="100%"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Typography>
+          Chunk: {order + 1} / {numChunks}
+        </Typography>
+        <ButtonGroup>
+          <Button
+            disabled={!data || order === 0}
+            onClick={onPrev}
+            startIcon={<ArrowBackIcon />}
+          >
+            Prev
+          </Button>
+          <Button
+            disabled={!data || order + 1 === numChunks}
+            onClick={onNext}
+            endIcon={<ArrowForwardIcon />}
+          >
+            Next
+          </Button>
+        </ButtonGroup>
+      </Box>
       {data && <Typography>{data.chunkText}</Typography>}
-    </Paper>
+    </Card>
   );
 };
-
-const DisplayPdf: React.FC<{ url: string }> = React.memo(({ url }) => {
-  const [page, setPage] = React.useState(1);
-  const canvasRef = React.useRef(null);
-
-  const { pdfDocument } = usePdf({
-    file: url,
-    page,
-    canvasRef,
-  });
-
-  return (
-    <Paper>
-      {pdfDocument && pdfDocument.numPages && (
-        <Box display="flex" width="100%" justifyContent="center">
-          <ButtonGroup>
-            <Button disabled={page === 1} onClick={() => setPage(page - 1)}>
-              Previous
-            </Button>
-            <Button
-              disabled={page === pdfDocument.numPages}
-              onClick={() => setPage(page + 1)}
-            >
-              Next
-            </Button>
-          </ButtonGroup>
-        </Box>
-      )}
-      <canvas ref={canvasRef} />
-    </Paper>
-  );
-});
-DisplayPdf.displayName = "DisplayPdf";

@@ -21,10 +21,6 @@ import { SETTINGS, Settings } from "./settings";
 
 LOGGER.info("Starting job runner...");
 
-if (SETTINGS.tracingEnabled) {
-  LOGGER.info("Telemetry enabled");
-}
-
 async function start(settings: Settings) {
   const pool = await dataBasePool(settings.sql.uri);
 

@@ -1,6 +1,6 @@
+import { ChatHistory } from "@fgpt/precedent-iso";
 import axios, { AxiosInstance } from "axios";
 import z from "zod";
-import { ChatHistory } from "@fgpt/precedent-iso";
 
 interface PredictArguments {
   content: string;

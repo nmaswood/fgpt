@@ -1,8 +1,8 @@
 import {
   Chat,
   ChatEntry,
-  MAX_CHAT_LIMIT,
   ChatHistory,
+  MAX_CHAT_LIMIT,
 } from "@fgpt/precedent-iso";
 import { DatabasePool, DatabaseTransactionConnection, sql } from "slonik";
 import { z } from "zod";
@@ -201,15 +201,15 @@ where id = ${chatId}
 
   async listChatHistory(chatId: string): Promise<ChatHistory[]> {
     const resp = await this.pool.query(sql.type(ZChatHistory)`
+
 SELECT
-  question_v2 as question
+    question_v2 as question
 FROM
     chat_entry
 WHERE
     chat_id = ${chatId}
 ORDER BY
-    entry_order
-    ASC
+    entry_order ASC
 `);
     return Array.from(resp.rows);
   }
