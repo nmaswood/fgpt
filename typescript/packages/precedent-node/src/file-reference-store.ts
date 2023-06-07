@@ -36,7 +36,10 @@ export class PsqlFileReferenceStore implements FileReferenceStore {
     return file;
   }
 
-  getMany(fileIds: string[]): Promise<FileReference[]> {
+  async getMany(fileIds: string[]): Promise<FileReference[]> {
+    if (fileIds.length === 0) {
+      return [];
+    }
     const uniq = [...new Set(fileIds)];
     return this.pool.connect(async (cnx) => {
       const { rows } = await cnx.query(

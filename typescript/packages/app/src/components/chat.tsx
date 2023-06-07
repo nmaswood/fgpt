@@ -1,10 +1,5 @@
 import { useUser } from "@auth0/nextjs-auth0/client";
-import {
-  assertNever,
-  Chat,
-  ChatEntry,
-  ChatResponse,
-} from "@fgpt/precedent-iso";
+import { assertNever, Chat, ChatEntry } from "@fgpt/precedent-iso";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ErrorIcon from "@mui/icons-material/Error";
 import InsertCommentIcon from "@mui/icons-material/InsertComment";
@@ -16,16 +11,26 @@ import {
   Collapse,
   IconButton,
   InputAdornment,
+  Link,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   TextField,
   Typography,
 } from "@mui/material";
+import NextLink from "next/link";
 import React from "react";
 
 import { useAskQuestion } from "../hooks/use-ask-question";
+import { useFetchContext } from "../hooks/use-context-chat";
 import { useCreateChat } from "../hooks/use-create-chat";
 import { useDeleteChat } from "../hooks/use-delete-chat";
 import { useFetchChatEntries } from "../hooks/use-fetch-chat-entry";
@@ -67,6 +72,10 @@ export const DisplayChat: React.FC<{
   const [entriesToRender, setEntriesToRender] = React.useState<EntryToRender[]>(
     []
   );
+
+  React.useEffect(() => {
+    setSelectedChatId(undefined);
+  }, [projectId]);
 
   const filtered = (() => {
     if (!selectedChatId) {
@@ -203,12 +212,7 @@ export const DisplayChat: React.FC<{
                 />
               ))}
               {filtered.map((q) => (
-                <RenderChatEntryFromClient
-                  key={q.id}
-                  q={q}
-                  text={text}
-                  responses={[]}
-                />
+                <RenderChatEntryFromClient key={q.id} q={q} text={text} />
               ))}
             </List>
           )}
@@ -266,6 +270,9 @@ const RenderChatEntryFromServer: React.FC<{
   const { user } = useUser();
   const picture = user?.picture;
 
+  const [open, setOpen] = React.useState(false);
+  const rotate = open ? "rotate(-90deg)" : "rotate(0)";
+
   return (
     <>
       <ListItem
@@ -294,13 +301,96 @@ const RenderChatEntryFromServer: React.FC<{
           flexDirection: "column",
         }}
       >
-        <Box display="flex" width="100%" alignItems="center">
-          <Box display="flex" width="56" height="40" marginRight={2}>
-            <ResponseAvatar state={"data"} />
+        <Box display="flex" width="100%" flexDirection="column">
+          <Box display="flex" width="100%" alignItems="center">
+            <Box display="flex" width="56" height="40" marginRight={2}>
+              <ResponseAvatar state={"data"} />
+            </Box>
+            <Typography color="white">{chatEntry.answer}</Typography>
+            <IconButton
+              onClick={() => setOpen((prev) => !prev)}
+              sx={{
+                position: "absolute",
+                right: "35px",
+              }}
+            >
+              <ChevronLeftIcon
+                sx={{
+                  transform: rotate,
+                  transition: "all 0.2s linear",
+                }}
+              />
+            </IconButton>
           </Box>
-          <Typography color="white">{chatEntry.answer}</Typography>
+          <Collapse
+            in={open}
+            timeout="auto"
+            unmountOnExit
+            sx={{ width: "100%", paddingLeft: 7 }}
+          >
+            <DisplayContextForId id={chatEntry.id} />
+          </Collapse>
         </Box>
       </ListItem>
+    </>
+  );
+};
+
+const DisplayContextForId: React.FC<{ id: string }> = ({ id }) => {
+  const { data } = useFetchContext(id);
+  return (
+    <>
+      {data.length > 0 && (
+        <TableContainer
+          component={Paper}
+          sx={{
+            maxWidth: "100%",
+            marginTop: 1,
+          }}
+        >
+          <Table aria-label="simple table">
+            <TableHead>
+              <TableRow>
+                <TableCell align="left">Filename</TableCell>
+                <TableCell align="right">Score</TableCell>
+                <TableCell
+                  align="left"
+                  sx={{
+                    wordWrap: "break-word",
+                    maxWidth: "350px",
+                  }}
+                >
+                  Content
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.map((row, idx) => (
+                <TableRow
+                  key={idx}
+                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                >
+                  <TableCell align="left">
+                    <Link component={NextLink} href={`files/${row.fileId}`}>
+                      <Typography>{row.filename}</Typography>
+                    </Link>
+                  </TableCell>
+                  <TableCell align="right">{row.score}</TableCell>
+                  <TableCell
+                    align="left"
+                    sx={{
+                      wordWrap: "break-word",
+                      maxWidth: "350px",
+                    }}
+                  >
+                    {row.text}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
     </>
   );
 };
@@ -308,17 +398,12 @@ const RenderChatEntryFromServer: React.FC<{
 const RenderChatEntryFromClient: React.FC<{
   q: EntryToRender;
   text: string;
-  responses: ChatResponse[];
-}> = ({ q, text, responses }) => {
+}> = ({ q, text }) => {
   const { user } = useUser();
   const picture = user?.picture;
 
   const ref = React.useRef<HTMLDivElement>(null);
   const current = ref.current;
-
-  const [open, setOpen] = React.useState(false);
-
-  const rotate = open ? "rotate(-90deg)" : "rotate(0)";
 
   const [mounted, setMounted] = React.useState(false);
 
@@ -379,45 +464,6 @@ const RenderChatEntryFromClient: React.FC<{
             <CircularProgress />
           )}
         </Box>
-
-        {responses.length > 0 && (
-          <IconButton
-            onClick={() => setOpen((prev) => !prev)}
-            sx={{
-              position: "absolute",
-              right: "35px",
-            }}
-          >
-            <ChevronLeftIcon
-              sx={{
-                transform: rotate,
-                transition: "all 0.2s linear",
-              }}
-            />
-          </IconButton>
-        )}
-
-        {responses.length > 0 && (
-          <Collapse
-            in={open}
-            timeout="auto"
-            unmountOnExit
-            sx={{ width: "100%", paddingLeft: 7 }}
-          >
-            <List disablePadding>
-              {responses.map((response, index) => (
-                <ListItem key={index} disableGutters>
-                  <ListItemText
-                    primary={`
-                      Filename: ${response.filename} | Similarity score: ${response.score}`}
-                    secondary={response.text}
-                    primaryTypographyProps={{ color: "white" }}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          </Collapse>
-        )}
       </ListItem>
     </>
   );

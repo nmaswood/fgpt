@@ -107,7 +107,7 @@ test("insertChatEntry", async () => {
     creatorId,
     chatId: chat.id,
     question: "What is your favorite color?",
-    context: "context",
+    context: [],
     answer: "answer",
   });
 
@@ -130,7 +130,8 @@ test("updateChatEntry", async () => {
     creatorId,
     chatId: chat.id,
     question: "What is your favorite color?",
-    context: "context",
+
+    context: [],
     answer: "answer",
   });
 
@@ -159,7 +160,7 @@ test("listChatEntries", async () => {
     creatorId,
     chatId: chat.id,
     question: "What is your favorite color?",
-    context: "context",
+    context: [],
     answer: "answer",
   });
 
@@ -184,7 +185,7 @@ test("deleteChat", async () => {
     creatorId,
     chatId: chat.id,
     question: "What is your favorite color?",
-    context: "context",
+    context: [],
     answer: "answer",
   });
 
@@ -215,10 +216,41 @@ test("listChatHistory", async () => {
     creatorId,
     chatId: chat.id,
     question: "What is your favorite color?",
-    context: "context",
+    context: [],
     answer: "answer",
   });
 
   const [history] = await chatStore.listChatHistory(chat.id);
   expect(history.question).toEqual("What is your favorite color?");
+});
+
+test("getContext", async () => {
+  const { creatorId, projectId, organizationId, chatStore } = await setup();
+
+  const chat = await chatStore.insertChat({
+    organizationId,
+    projectId,
+    creatorId,
+    name: "I love cows",
+  });
+
+  const entry = await chatStore.insertChatEntry({
+    organizationId,
+    projectId,
+    creatorId,
+    chatId: chat.id,
+    question: "What is your favorite color?",
+    context: [
+      {
+        filename: "hi.pdf",
+        score: 0.5,
+        text: "hi",
+        fileId: "hi",
+      },
+    ],
+    answer: "answer",
+  });
+
+  const [context] = await chatStore.getContext(entry.id);
+  expect(context.filename).toEqual("hi.pdf");
 });

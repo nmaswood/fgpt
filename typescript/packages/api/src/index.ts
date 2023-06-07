@@ -120,8 +120,8 @@ async function start() {
     new ChatRouter(
       mlService,
       textChunkStore,
-      fileReferenceStore,
-      chatStore
+      chatStore,
+      fileReferenceStore
     ).init()
   );
 

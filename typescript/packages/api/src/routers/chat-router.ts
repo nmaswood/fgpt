@@ -1,4 +1,3 @@
-import { ChatResponse } from "@fgpt/precedent-iso";
 import {
   ChatStore,
   FileReferenceStore,
@@ -17,8 +16,8 @@ export class ChatRouter {
   constructor(
     private readonly mlClient: MLServiceClient,
     private readonly textChunkStore: TextChunkStore,
-    private readonly fileReferenceStore: FileReferenceStore,
-    private readonly chatStore: ChatStore
+    private readonly chatStore: ChatStore,
+    private readonly fileReferenceStore: FileReferenceStore
   ) {}
   init() {
     const router = express.Router();
@@ -84,19 +83,31 @@ export class ChatRouter {
 
         const vector = await this.mlClient.getEmbedding(args.question);
 
-        const similarDocuments = await this.mlClient.getKSimilar({
-          vector,
-          metadata: { projectId: args.projectId },
-        });
+        const similarDocuments = await (async () => {
+          const docs = await this.mlClient.getKSimilar({
+            vector,
+            metadata: { projectId: args.projectId },
+          });
 
-        const [chunks, history] = await Promise.all([
+          return docs.map(({ id, score, metadata }) => ({
+            id,
+            score,
+            metadata: ZVectorMetadata.parse(metadata),
+          }));
+        })();
+
+        const [chunks, history, files] = await Promise.all([
           this.textChunkStore.getTextChunks(
             similarDocuments.map((doc) => doc.id)
           ),
           this.chatStore.listChatHistory(args.chatId),
+          this.fileReferenceStore.getMany(
+            similarDocuments.map((doc) => doc.metadata.fileId)
+          ),
         ]);
 
         const byId = keyBy(chunks, (chunk) => chunk.id);
+        const filesById = keyBy(files, (file) => file.id);
 
         const missingIds = similarDocuments
           .map((doc) => doc.id)
@@ -113,10 +124,8 @@ export class ChatRouter {
 
         const buffer: string[] = [];
 
-        const context = justText.join("\n");
-
         await this.mlClient.askQuestionStreaming({
-          context,
+          context: justText.join("\n"),
           history,
           question: args.question,
           onData: (resp) => {
@@ -133,61 +142,24 @@ export class ChatRouter {
               chatId: args.chatId,
               question: args.question,
               answer: buffer.join(""),
-              context,
+              context: similarDocuments.map((doc) => ({
+                fileId: doc.metadata.fileId,
+                filename: filesById[doc.metadata.fileId]?.fileName ?? "",
+                score: doc.score,
+                text: byId[doc.id]?.chunkText ?? "",
+              })),
             });
           },
         });
       }
     );
 
-    router.post(
-      "/debug",
+    router.get(
+      "/context/:chatEntryId",
       async (req: express.Request, res: express.Response) => {
-        const args = ZChatArguments.parse(req.body);
-
-        const vector = await this.mlClient.getEmbedding(args.question);
-
-        const similarDocuments = await (async () => {
-          const docs = await this.mlClient.getKSimilar({
-            vector,
-            metadata: { projectId: args.projectId },
-          });
-
-          return docs.map(({ id, score, metadata }) => ({
-            id,
-            score,
-            metadata: ZVectorMetadata.parse(metadata),
-          }));
-        })();
-
-        const filesById = keyBy(
-          await this.fileReferenceStore.getMany(
-            similarDocuments.map((doc) => doc.metadata.fileId)
-          ),
-          (file) => file.id
-        );
-
-        const chunks = await this.textChunkStore.getTextChunks(
-          similarDocuments.map((doc) => doc.id)
-        );
-
-        const byId = keyBy(chunks, (chunk) => chunk.id);
-
-        const missingIds = new Set(
-          similarDocuments.map((doc) => doc.id).filter((id) => !byId[id])
-        );
-
-        if (missingIds.size > 0) {
-          LOGGER.warn({ missingIds }, "No document found for id");
-        }
-
-        const response: ChatResponse[] = similarDocuments.map((doc) => ({
-          filename: filesById[doc.metadata.fileId]?.fileName ?? "",
-          score: doc.score,
-          text: byId[doc.id]?.chunkText ?? "",
-        }));
-
-        res.json(response);
+        const args = ZContextRequest.parse(req.params);
+        const context = await this.chatStore.getContext(args.chatEntryId);
+        res.json({ context });
       }
     );
 
@@ -221,4 +193,8 @@ const ZCreateChatRequest = z.object({
 
 const ZDeleteChatRequest = z.object({
   chatId: z.string(),
+});
+
+const ZContextRequest = z.object({
+  chatEntryId: z.string(),
 });

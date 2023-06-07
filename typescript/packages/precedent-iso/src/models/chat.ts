@@ -10,11 +10,16 @@ export interface ChatEntry {
 }
 
 export interface ChatResponse {
-  filename: string;
-  score: number;
   text: string;
 }
 
 export interface ChatHistory {
   question: string;
+}
+
+export interface ChatContext {
+  fileId: string;
+  filename: string;
+  score: number;
+  text: string;
 }

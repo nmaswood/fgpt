@@ -1,5 +1,6 @@
 import {
   Chat,
+  ChatContext,
   ChatEntry,
   ChatHistory,
   MAX_CHAT_LIMIT,
@@ -27,7 +28,7 @@ export interface InsertChatEntry {
   creatorId: string;
   chatId: string;
   question: string;
-  context: string;
+  context: ChatContext[];
   answer: string;
 }
 
@@ -48,6 +49,7 @@ export interface ChatStore {
   listChatEntries(chatId: string): Promise<ChatEntry[]>;
   deleteChat(chatId: string): Promise<void>;
   listChatHistory(chatId: string): Promise<ChatHistory[]>;
+  getContext(chatEntryId: string): Promise<ChatContext[]>;
 }
 
 export class PsqlChatStore implements ChatStore {
@@ -126,12 +128,12 @@ WHERE
     }
 
     return trx.one(sql.type(ZChatEntryRow)`
-INSERT INTO chat_entry (organization_id, project_id, creator_id, chat_id, question_v2, context, answer, entry_order)
-    VALUES (${organizationId}, ${projectId}, ${creatorId}, ${chatId}, ${question}, ${context}, ${JSON.stringify(
-      {
-        answer,
-      }
-    )}, COALESCE((
+INSERT INTO chat_entry (organization_id, project_id, creator_id, chat_id, question_v2, context_v2, answer, entry_order)
+    VALUES (${organizationId}, ${projectId}, ${creatorId}, ${chatId}, ${question}, ${JSON.stringify(
+      context
+    )}, ${JSON.stringify({
+      answer,
+    })}, COALESCE((
             SELECT
                 MAX(entry_order)
                 FROM chat_entry
@@ -201,7 +203,6 @@ where id = ${chatId}
 
   async listChatHistory(chatId: string): Promise<ChatHistory[]> {
     const resp = await this.pool.query(sql.type(ZChatHistory)`
-
 SELECT
     question_v2 as question
 FROM
@@ -213,7 +214,29 @@ ORDER BY
 `);
     return Array.from(resp.rows);
   }
+
+  async getContext(chatEntryId: string): Promise<ChatContext[]> {
+    return this.pool.oneFirst(sql.type(ZGetChatContext)`
+SELECT
+    COALESCE(context_v2, '[]'::jsonb) as context
+FROM
+    chat_entry
+WHERE
+    id = ${chatEntryId}
+`);
+  }
 }
+
+const ZChatContext = z.object({
+  fileId: z.string(),
+  filename: z.string(),
+  score: z.number().min(0).max(1),
+  text: z.string(),
+});
+
+const ZGetChatContext = z.object({
+  context: z.array(ZChatContext),
+});
 
 const ZChatRow = z
   .object({
