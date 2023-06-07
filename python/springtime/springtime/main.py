@@ -1,28 +1,19 @@
-import time
 from typing import Any
 from loguru import logger
 from pydantic import BaseModel
-from pydantic.schema import get_schema_ref
 import uvicorn
 from starlette.responses import StreamingResponse
-from fastapi import status, HTTPException
 
-
-from fastapi import FastAPI, Body
-
+from fastapi import FastAPI
 
 from springtime.llm.ml import ask_question_streaming, embeddings_for_documents, ask_question
+from springtime.llm.models import ChatHistory
 from springtime.llm.pinecone import UpsertVector, get_similar, upsert_vectors
 from .settings import SETTINGS
-from .telemetry import init
 
 app = FastAPI()
 
 logger.info("Starting server")
-
-if SETTINGS.telemetry_enabled:
-    logger.info("Telemetry enabled")
-    init()
 
 
 @app.get("/ping")
@@ -33,6 +24,7 @@ async def ping():
 class AskQuestionRequest(BaseModel):
     context: str
     question: str
+    history: list[ChatHistory]
 
 
 class AskQuestionResponse(BaseModel):
@@ -48,7 +40,7 @@ async def ask_question_route(req: AskQuestionRequest):
 
 @app.post("/ask-question-streaming")
 async def ask_question_streaming_route(req: AskQuestionRequest):
-    stream = ask_question_streaming(req.context, req.question)
+    stream = ask_question_streaming(req.context, req.question, req.history)
     response = StreamingResponse(
         content=stream,
         media_type='text/event-stream'

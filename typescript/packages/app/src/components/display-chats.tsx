@@ -16,7 +16,6 @@ import {
 } from "@mui/material";
 import React from "react";
 
-import { useDeleteChat } from "../hooks/use-delete-chat";
 import { useEditChat } from "../hooks/use-edit-chat";
 
 export const DisplayChatList: React.FC<{
@@ -25,6 +24,8 @@ export const DisplayChatList: React.FC<{
   setSelectedChatId: (s: string) => void;
   selectedChatIdx: number;
   createChat: (name: string) => Promise<Chat | undefined>;
+  deleteChat: (name: string) => Promise<unknown>;
+  isMutating: boolean;
   projectId: string;
 }> = ({
   chats,
@@ -33,9 +34,9 @@ export const DisplayChatList: React.FC<{
   selectedChatIdx,
   createChat,
   projectId,
+  deleteChat,
+  isMutating,
 }) => {
-  const { trigger, isMutating } = useDeleteChat(projectId);
-
   return (
     <Box
       display="flex"
@@ -95,7 +96,7 @@ export const DisplayChatList: React.FC<{
             selectedChatId={selectedChatId}
             setSelectedChatId={setSelectedChatId}
             isLoading={isMutating}
-            onDelete={(id: string) => trigger({ id })}
+            onDelete={deleteChat}
             projectId={projectId}
           />
         ))}

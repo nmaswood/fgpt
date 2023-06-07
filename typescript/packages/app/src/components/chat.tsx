@@ -27,12 +27,14 @@ import React from "react";
 
 import { useAskQuestion } from "../hooks/use-ask-question";
 import { useCreateChat } from "../hooks/use-create-chat";
+import { useDeleteChat } from "../hooks/use-delete-chat";
 import { useFetchChatEntries } from "../hooks/use-fetch-chat-entry";
 import { DisplayChatList } from "./display-chats";
 
 interface EntryToRender {
   id: string;
   question: string;
+  chatId: string;
   state:
     | {
         type: "error";
@@ -62,21 +64,43 @@ export const DisplayChat: React.FC<{
   const { data: chatEntries } = useFetchChatEntries(selectedChatId);
 
   const [input, setInput] = React.useState("");
-  const [qs, setQs] = React.useState<EntryToRender[]>([]);
+  const [entriesToRender, setEntriesToRender] = React.useState<EntryToRender[]>(
+    []
+  );
+
+  const filtered = (() => {
+    if (!selectedChatId) {
+      return [];
+    }
+    const filteredEntries = entriesToRender.filter(
+      (e) => e.chatId === selectedChatId
+    );
+
+    const final = filteredEntries.filter(
+      (e, idx) => chatEntries[idx]?.question !== e.question
+    );
+    return final;
+  })();
 
   const { trigger: createChat, isMutating: createChatIsLoading } =
     useCreateChat(projectId);
 
-  React.useEffect(() => {
-    setQs([]);
-  }, [projectId, selectedChatId]);
+  const { trigger: deleteChat, isMutating: isDeleteChatMutating } =
+    useDeleteChat(projectId);
+
+  const onDelete = async (id: string) => {
+    await deleteChat({ id });
+    if (id === selectedChatId) {
+      setSelectedChatId(undefined);
+    }
+  };
 
   const {
     trigger: askQuestion,
     text,
     loading,
   } = useAskQuestion(token, (value: string) => {
-    setQs((qs) => {
+    setEntriesToRender((qs) => {
       const last = qs[qs.length - 1];
       if (!last || last.state.type !== "rendering") {
         return qs;
@@ -107,17 +131,6 @@ export const DisplayChat: React.FC<{
 
     const id = crypto.randomUUID();
 
-    setQs((prev) => [
-      ...prev,
-      {
-        id,
-        question: trimmed,
-        state: { type: "rendering" },
-      },
-    ]);
-
-    setInput("");
-
     const getChatId = async () => {
       if (selectedChatId) {
         return selectedChatId;
@@ -136,6 +149,18 @@ export const DisplayChat: React.FC<{
 
     setSelectedChatId(chatId);
 
+    setEntriesToRender((prev) => [
+      ...prev,
+      {
+        id,
+        chatId,
+        question: trimmed,
+        state: { type: "rendering" },
+      },
+    ]);
+
+    setInput("");
+
     await askQuestion({
       projectId,
       question: trimmed,
@@ -152,6 +177,8 @@ export const DisplayChat: React.FC<{
         selectedChatIdx={selectedChatIdx}
         createChat={(name: string) => createChat({ name })}
         projectId={projectId}
+        isMutating={createChatIsLoading || isDeleteChatMutating}
+        deleteChat={onDelete}
       />
       <Box
         display="flex"
@@ -167,7 +194,7 @@ export const DisplayChat: React.FC<{
           maxHeight="100%"
           overflow="auto"
         >
-          {(qs.length > 0 || chatEntries.length > 0) && (
+          {(filtered.length > 0 || chatEntries.length > 0) && (
             <List sx={{ width: "100%" }}>
               {chatEntries.map((chatEntry) => (
                 <RenderChatEntryFromServer
@@ -175,7 +202,7 @@ export const DisplayChat: React.FC<{
                   chatEntry={chatEntry}
                 />
               ))}
-              {qs.map((q) => (
+              {filtered.map((q) => (
                 <RenderChatEntryFromClient
                   key={q.id}
                   q={q}

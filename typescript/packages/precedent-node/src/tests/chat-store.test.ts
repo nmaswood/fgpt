@@ -198,3 +198,27 @@ test("deleteChat", async () => {
   const chatsAfterDelete = await chatStore.listChats(projectId);
   expect(chatsAfterDelete.length).toEqual(0);
 });
+
+test("listChatHistory", async () => {
+  const { creatorId, projectId, organizationId, chatStore } = await setup();
+
+  const chat = await chatStore.insertChat({
+    organizationId,
+    projectId,
+    creatorId,
+    name: "I love cows",
+  });
+
+  await chatStore.insertChatEntry({
+    organizationId,
+    projectId,
+    creatorId,
+    chatId: chat.id,
+    question: "What is your favorite color?",
+    context: "context",
+    answer: "answer",
+  });
+
+  const [history] = await chatStore.listChatHistory(chat.id);
+  expect(history.question).toEqual("What is your favorite color?");
+});

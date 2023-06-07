@@ -1,4 +1,9 @@
-import { Chat, ChatEntry, MAX_CHAT_LIMIT } from "@fgpt/precedent-iso";
+import {
+  Chat,
+  ChatEntry,
+  MAX_CHAT_LIMIT,
+  ChatHistory,
+} from "@fgpt/precedent-iso";
 import { DatabasePool, DatabaseTransactionConnection, sql } from "slonik";
 import { z } from "zod";
 
@@ -42,6 +47,7 @@ export interface ChatStore {
   listChats(projectId: string): Promise<Chat[]>;
   listChatEntries(chatId: string): Promise<ChatEntry[]>;
   deleteChat(chatId: string): Promise<void>;
+  listChatHistory(chatId: string): Promise<ChatHistory[]>;
 }
 
 export class PsqlChatStore implements ChatStore {
@@ -141,7 +147,6 @@ RETURNING
     chatEntryId,
   }: UpdateChatEntry): Promise<ChatEntry> {
     return this.pool.one(sql.type(ZChatEntryRow)`
-
 UPDATE
     chat_entry
 SET
@@ -157,7 +162,6 @@ RETURNING
 
   async listChats(projectId: string): Promise<Chat[]> {
     const resp = await this.pool.query(sql.type(ZChatRow)`
-
 SELECT
     ${CHAT_FIELDS}
 FROM
@@ -194,6 +198,21 @@ where id = ${chatId}
 `);
     });
   }
+
+  async listChatHistory(chatId: string): Promise<ChatHistory[]> {
+    const resp = await this.pool.query(sql.type(ZChatHistory)`
+SELECT
+  question_v2 as question
+FROM
+    chat_entry
+WHERE
+    chat_id = ${chatId}
+ORDER BY
+    entry_order
+    ASC
+`);
+    return Array.from(resp.rows);
+  }
 }
 
 const ZChatRow = z
@@ -225,3 +244,7 @@ const ZChatEntryRow = z
       answer: row.answer?.answer ?? undefined,
     })
   );
+
+const ZChatHistory = z.object({
+  question: z.string(),
+});

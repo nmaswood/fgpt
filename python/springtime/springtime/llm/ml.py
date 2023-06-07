@@ -1,28 +1,11 @@
-from asyncio import streams
-import re
-from ..settings import SETTINGS
-
 from loguru import logger
 from retry import retry
-
-from langchain.prompts import PromptTemplate
-
-from langchain.chains import LLMChain
-from langchain.agents import load_tools
-from langchain.agents import initialize_agent
-from langchain.agents import AgentType
 import openai
 
-from langchain import OpenAI, ConversationChain
-
-from langchain.chat_models import ChatOpenAI
-from langchain.schema import (
-    AIMessage,
-    HumanMessage,
-    SystemMessage
-)
-
 from langchain.embeddings import OpenAIEmbeddings
+from springtime.llm.models import ChatHistory
+
+from springtime.llm.prompt import create_prompt
 
 
 embeddings = OpenAIEmbeddings()
@@ -36,19 +19,14 @@ def embedding_for_query(query: str) -> list[float]:
     return embeddings.embed_query(query)
 
 
-def ask_question_streaming(context: str, question: str):
-
-    prompt = PromptTemplate(
-        input_variables=["context", "question"],
-        template="You are an expert financial analyst. Given the following context: {context} answer the following question.\nQuestion:{question}",
-    )
-    formatted_message = prompt.format(
-        context=context[:3500], question=question)
-
+def ask_question_streaming(context: str, question: str,
+                           history: list[ChatHistory]
+                           ):
+    prompt = create_prompt(context, question, history)
     response = openai.ChatCompletion.create(
         model='gpt-3.5-turbo',
         messages=[
-            {'role': 'user', 'content': formatted_message}
+            {'role': 'user', 'content': prompt}
         ],
         temperature=0,
         stream=True
@@ -65,11 +43,7 @@ def ask_question_streaming(context: str, question: str):
 
 @retry(tries=3, delay=1, backoff=2)
 def ask_question(context: str, question: str):
-
-    prompt = PromptTemplate(
-        input_variables=["context", "question"],
-        template="You are an expert financial analyst. Given the following context: {context} answer the following question.\nQuestion:{question}",
-    )
+    prompt = create_prompt(context, question, [])
     formatted_message = prompt.format(
         context=context[:3500], question=question)
 

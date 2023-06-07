@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import z from "zod";
+import { ChatHistory } from "@fgpt/precedent-iso";
 
 interface PredictArguments {
   content: string;
@@ -47,6 +48,7 @@ interface SimiliarSearch {
 export interface AskQuestionStreamingArgs {
   context: string;
   question: string;
+  history: ChatHistory[];
   onData: (resp: string) => void;
   onEnd: () => void;
 }
@@ -138,12 +140,14 @@ export class MLServiceClientImpl implements MLServiceClient {
     question,
     onData,
     onEnd,
+    history,
   }: AskQuestionStreamingArgs): Promise<void> {
     const response = await this.#client.post<any>(
       "/ask-question-streaming",
       {
         context,
         question,
+        history,
       },
       {
         responseType: "stream",

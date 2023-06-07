@@ -90,9 +90,12 @@ export class ChatRouter {
           metadata: { projectId: args.projectId },
         });
 
-        const chunks = await this.textChunkStore.getTextChunks(
-          similarDocuments.map((doc) => doc.id)
-        );
+        const [chunks, history] = await Promise.all([
+          this.textChunkStore.getTextChunks(
+            similarDocuments.map((doc) => doc.id)
+          ),
+          this.chatStore.listChatHistory(args.chatId),
+        ]);
 
         const byId = keyBy(chunks, (chunk) => chunk.id);
 
@@ -115,6 +118,7 @@ export class ChatRouter {
 
         await this.mlClient.askQuestionStreaming({
           context,
+          history,
           question: args.question,
           onData: (resp) => {
             const encoded = encoder.encode(resp);

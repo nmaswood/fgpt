@@ -14,3 +14,7 @@ export interface ChatResponse {
   score: number;
   text: string;
 }
+
+export interface ChatHistory {
+  question: string;
+}
