@@ -82,6 +82,8 @@ test("paginate", async () => {
     fileReferenceId: processedFile.fileReferenceId,
     processedFileId: processedFile.id,
     numChunks: 1,
+    strategy: "greedy_v0",
+    embeddingsWillBeGenerated: true,
   });
 
   const textChunk = await chunkStore.upsertTextChunk(

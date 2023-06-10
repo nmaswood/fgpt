@@ -86,6 +86,8 @@ test("insertMany", async () => {
     fileReferenceId: processedFile.fileReferenceId,
     processedFileId: processedFile.id,
     numChunks: 2,
+    strategy: "greedy_v0",
+    embeddingsWillBeGenerated: true,
   });
 
   const res = await chunkStore.upsertTextChunk(
@@ -170,6 +172,8 @@ test("listWithNoEmbeddings", async () => {
     fileReferenceId: processedFile.fileReferenceId,
     processedFileId: processedFile.id,
     numChunks: 2,
+    strategy: "greedy_v0",
+    embeddingsWillBeGenerated: true,
   });
 
   const [chunk1] = await chunkStore.upsertManyTextChunks(
@@ -218,6 +222,8 @@ test("setManyEmbeddings", async () => {
     fileReferenceId: processedFile.fileReferenceId,
     processedFileId: processedFile.id,
     numChunks: 2,
+    strategy: "greedy_v0",
+    embeddingsWillBeGenerated: true,
   });
 
   const [t1, t2] = await chunkStore.upsertManyTextChunks(
@@ -280,6 +286,8 @@ test("getEmbedding", async () => {
     fileReferenceId: processedFile.fileReferenceId,
     processedFileId: processedFile.id,
     numChunks: 1,
+    strategy: "greedy_v0",
+    embeddingsWillBeGenerated: true,
   });
 
   const textChunk = await chunkStore.upsertTextChunk(

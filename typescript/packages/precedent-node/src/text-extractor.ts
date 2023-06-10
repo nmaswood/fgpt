@@ -12,7 +12,7 @@ export interface ExtractResponse {
   text: string;
 }
 
-export class CloudVisionTextExtractor implements TextExtractor {
+export class TikaTextExtractor implements TextExtractor {
   constructor(
     private readonly fileReferenceStore: FileReferenceStore,
     private readonly bucketName: string,

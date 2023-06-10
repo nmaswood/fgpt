@@ -1,9 +1,9 @@
 import * as dotenv from "dotenv";
 
 dotenv.config();
+import { isNotNull } from "@fgpt/precedent-iso";
 import {
   AnalyisServiceImpl,
-  CloudVisionTextExtractor,
   dataBasePool,
   GoogleCloudStorageService,
   JobExecutorImpl,
@@ -14,6 +14,7 @@ import {
   PSqlTaskService,
   PsqlTextChunkStore,
   TikaHttpClient,
+  TikaTextExtractor,
 } from "@fgpt/precedent-node";
 
 import { LOGGER } from "./logger";
@@ -27,7 +28,7 @@ async function start(settings: Settings) {
   const fileReferenceStore = new PsqlFileReferenceStore(pool);
   const blobStorageService = new GoogleCloudStorageService();
   const tikaClient = new TikaHttpClient(settings.tikaClient);
-  const textExtractor = new CloudVisionTextExtractor(
+  const textExtractor = new TikaTextExtractor(
     fileReferenceStore,
     settings.assetBucket,
     blobStorageService,
@@ -59,10 +60,19 @@ async function start(settings: Settings) {
   );
 
   LOGGER.info("Running executor...");
-  await executor.run({
+  const results = await executor.run({
     limit: 1_000,
     retryLimit: 3,
   });
+  const erroredTaskIds = results
+    .filter((r) => r.status === "failed")
+    .map((r) => r.taskId)
+    .filter(isNotNull);
+
+  if (erroredTaskIds.length) {
+    LOGGER.error({ erroredTaskIds }, "Some tasks failed");
+    throw new Error("some tasks failed");
+  }
 }
 
 start(SETTINGS);

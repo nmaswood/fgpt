@@ -1,4 +1,4 @@
-import { TextChunkGroup } from "@fgpt/precedent-iso";
+import { ChunkStrategy, TextChunkGroup } from "@fgpt/precedent-iso";
 import {
   DatabasePool,
   DatabasePoolConnection,
@@ -7,7 +7,6 @@ import {
 } from "slonik";
 import { z } from "zod";
 
-const CHUNK_STRATEGY = "greedy_v0" as const;
 const EMBEDDING_INFO = {
   type: "ada-002",
   size: 1536,
@@ -45,6 +44,8 @@ export interface UpsertTextChunkGroup {
   fileReferenceId: string;
   processedFileId: string;
   numChunks: number;
+  strategy: ChunkStrategy;
+  embeddingsWillBeGenerated: boolean;
 }
 
 export interface EmbeddingResult {
@@ -114,7 +115,6 @@ WHERE
     order;
     return this.pool.one(
       sql.type(ZTextChunkRow)`
-
 SELECT
     ${TEXT_CHUNK_FIELDS}
 FROM
@@ -171,6 +171,8 @@ WHERE
         fileReferenceId,
         processedFileId,
         numChunks,
+        strategy,
+        embeddingsWillBeGenerated,
       }) =>
         sql.fragment`
 (${organizationId},
@@ -178,15 +180,16 @@ WHERE
     ${fileReferenceId},
     ${processedFileId},
     ${numChunks},
-    ${CHUNK_STRATEGY},
+    ${strategy},
     ${EMBEDDING_INFO.type},
-    ${EMBEDDING_INFO.size})
+    ${EMBEDDING_INFO.size},
+    ${embeddingsWillBeGenerated})
 `
     );
     // fix this later
     const { rows } = await trx.query(
       sql.type(ZTextChunkGroupRow)`
-INSERT INTO text_chunk_group (organization_id, project_id, file_reference_id, processed_file_id, num_chunks, chunk_strategy, embedding_strategy, embedding_size)
+INSERT INTO text_chunk_group (organization_id, project_id, file_reference_id, processed_file_id, num_chunks, chunk_strategy, embedding_strategy, embedding_size, embeddings_will_be_generated)
     VALUES
         ${sql.join(values, sql.fragment`, `)}
     ON CONFLICT (organization_id, project_id, file_reference_id, processed_file_id, chunk_strategy, embedding_strategy)

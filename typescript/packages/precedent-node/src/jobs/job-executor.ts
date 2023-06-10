@@ -1,4 +1,9 @@
-import { assertNever, GreedyTextChunker, isNotNull } from "@fgpt/precedent-iso";
+import {
+  assertNever,
+  GREEDY_VO_CHUNK_SIZE,
+  GreedyTextChunker,
+  isNotNull,
+} from "@fgpt/precedent-iso";
 import lodashChunk from "lodash/chunk";
 import keyBy from "lodash/keyBy";
 
@@ -17,8 +22,20 @@ export interface RunOptions {
   retryLimit: number;
 }
 
+export interface ExecutionResult {
+  taskId: string | undefined;
+  status: "succeeded" | "failed";
+}
+
+function withTaskId(taskId: string | undefined) {
+  return (status: "succeeded" | "failed"): ExecutionResult => ({
+    taskId,
+    status,
+  });
+}
+
 export interface JobExecutor {
-  run: (optionss: RunOptions) => Promise<void>;
+  run: (optionss: RunOptions) => Promise<ExecutionResult[]>;
 }
 export class JobExecutorImpl implements JobExecutor {
   constructor(
@@ -31,13 +48,17 @@ export class JobExecutorImpl implements JobExecutor {
     private readonly analysisStore: AnalysisStore
   ) {}
 
-  async run(options: RunOptions): Promise<void> {
+  async run(options: RunOptions): Promise<ExecutionResult[]> {
+    const results: ExecutionResult[] = [];
     for (let i = 0; i < options.limit; i++) {
       const [task] = await this.taskService.setAsPending({ limit: 1 });
 
+      const statusForTask = withTaskId(task?.id);
+
       if (!task) {
         LOGGER.info("No more work to do");
-        return;
+        results.push(statusForTask("succeeded"));
+        break;
       }
       LOGGER.info({ task }, "Executing task");
       try {
@@ -45,13 +66,18 @@ export class JobExecutorImpl implements JobExecutor {
         await this.taskService.setAsCompleted([
           { taskId: task.id, status: "succeeded", output: {} },
         ]);
+
+        results.push(statusForTask("succeeded"));
       } catch (err) {
         LOGGER.error(err);
         await this.taskService.setAsCompleted([
           { taskId: task.id, status: "failed", output: {} },
         ]);
+
+        results.push(statusForTask("failed"));
       }
     }
+    return results;
   }
 
   async #executeWithRetry(options: RunOptions, task: Task): Promise<void> {
@@ -109,7 +135,7 @@ export class JobExecutorImpl implements JobExecutor {
         }
         const chunker = new GreedyTextChunker();
         const chunks = chunker.chunk({
-          tokenChunkLimit: 500,
+          tokenChunkLimit: GREEDY_VO_CHUNK_SIZE,
           text,
         });
 
@@ -119,6 +145,8 @@ export class JobExecutorImpl implements JobExecutor {
           fileReferenceId: config.fileId,
           processedFileId: config.processedFileId,
           numChunks: chunks.length,
+          strategy: "greedy_v0",
+          embeddingsWillBeGenerated: true,
         });
 
         if (textChunkGroup.fullyChunked && textChunkGroup.fullyEmbedded) {
@@ -135,17 +163,15 @@ export class JobExecutorImpl implements JobExecutor {
           hash: ShaHash.forData(chunkText),
         }));
 
+        const commonArgs = {
+          organizationId: config.organizationId,
+          projectId: config.projectId,
+          fileReferenceId: config.fileId,
+          processedFileId: config.processedFileId,
+          textChunkGroupId: textChunkGroup.id,
+        };
         for (const group of lodashChunk(allChunkArgs, 100)) {
-          await this.textChunkStore.upsertManyTextChunks(
-            {
-              organizationId: config.organizationId,
-              projectId: config.projectId,
-              fileReferenceId: config.fileId,
-              processedFileId: config.processedFileId,
-              textChunkGroupId: textChunkGroup.id,
-            },
-            group
-          );
+          await this.textChunkStore.upsertManyTextChunks(commonArgs, group);
         }
 
         await this.taskService.insert({
