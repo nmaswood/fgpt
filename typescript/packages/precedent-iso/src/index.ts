@@ -7,6 +7,7 @@ export * from "./is-not-null";
 export * from "./models/analysis";
 export * from "./models/chat";
 export * from "./models/file";
+export * as Outputs from "./models/llm-outputs";
 export * from "./models/organization";
 export * from "./models/project";
 export * from "./models/sql-helpers";
