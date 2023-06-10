@@ -3,6 +3,7 @@ import {
   GREEDY_VO_CHUNK_SIZE,
   GreedyTextChunker,
   isNotNull,
+  TextChunkConfig,
 } from "@fgpt/precedent-iso";
 import lodashChunk from "lodash/chunk";
 import keyBy from "lodash/keyBy";
@@ -37,7 +38,9 @@ function withTaskId(taskId: string | undefined) {
 export interface JobExecutor {
   run: (optionss: RunOptions) => Promise<ExecutionResult[]>;
 }
+
 export class JobExecutorImpl implements JobExecutor {
+  CHUNKER = new GreedyTextChunker();
   constructor(
     private readonly textExtractor: TextExtractor,
     private readonly taskService: TaskService,
@@ -133,8 +136,7 @@ export class JobExecutorImpl implements JobExecutor {
           LOGGER.warn({ config }, "No text to extract");
           return;
         }
-        const chunker = new GreedyTextChunker();
-        const chunks = chunker.chunk({
+        const chunks = this.CHUNKER.chunk({
           tokenChunkLimit: GREEDY_VO_CHUNK_SIZE,
           text,
         });
@@ -145,7 +147,7 @@ export class JobExecutorImpl implements JobExecutor {
           fileReferenceId: config.fileId,
           processedFileId: config.processedFileId,
           numChunks: chunks.length,
-          strategy: "greedy_v0",
+          strategy: config.strategy ?? "greedy_v0",
           embeddingsWillBeGenerated: true,
         });
 
@@ -289,5 +291,9 @@ export class JobExecutorImpl implements JobExecutor {
       default:
         assertNever(config);
     }
+  }
+
+  async chunkText(_: TextChunkConfig) {
+    throw new Error("not implemented");
   }
 }

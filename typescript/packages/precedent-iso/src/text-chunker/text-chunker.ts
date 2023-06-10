@@ -12,11 +12,11 @@ export interface TextChunker {
   chunk(args: ChunkTextArgs): string[];
 }
 
-// 4k does not have embeddings generated
-export const ZChunkStrategy = z.enum(["greedy_v0", "greedy_4k"]);
+// 5k does not have embeddings generated
+export const ZChunkStrategy = z.enum(["greedy_v0", "greedy_5k"]);
 
 export const GREEDY_VO_CHUNK_SIZE = 500;
-export const GREEDY_4k_CHUNK_SIZE = 4_000;
+export const GREEDY_5k_CHUNK_SIZE = 5_000;
 
 export type ChunkStrategy = z.infer<typeof ZChunkStrategy>;
 

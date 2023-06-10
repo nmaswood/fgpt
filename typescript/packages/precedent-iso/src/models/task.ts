@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { ZChunkStrategy } from "../text-chunker/text-chunker";
+
 export const ZTaskType = z.enum([
   "text-extraction",
   "text-chunk",
@@ -7,6 +9,7 @@ export const ZTaskType = z.enum([
   "upsert-embeddings",
   "delete-project",
   "create-analysis",
+  "text-chunk-5k",
 ]);
 
 export const ZTaskStatus = z.enum([
@@ -16,7 +19,7 @@ export const ZTaskStatus = z.enum([
   "failed",
 ]);
 
-export const TextExtractionConfig = z.object({
+export const ZTextExtractionConfig = z.object({
   type: z.literal("text-extraction"),
   version: z.literal("1"),
   organizationId: z.string(),
@@ -24,16 +27,19 @@ export const TextExtractionConfig = z.object({
   fileId: z.string(),
 });
 
-export const TextChunkConfig = z.object({
+export const ZTextChunkConfig = z.object({
   type: z.literal("text-chunk"),
   version: z.literal("1"),
   organizationId: z.string(),
   projectId: z.string(),
   fileId: z.string(),
   processedFileId: z.string(),
+  strategy: ZChunkStrategy.optional(),
 });
 
-export const GenEmbeddingsConfig = z.object({
+export type TextChunkConfig = z.infer<typeof ZTextChunkConfig>;
+
+export const ZGenEmbeddingsConfig = z.object({
   type: z.literal("gen-embeddings"),
   version: z.literal("1"),
   organizationId: z.string(),
@@ -43,7 +49,7 @@ export const GenEmbeddingsConfig = z.object({
   textChunkGroupId: z.string(),
 });
 
-export const UpsertEmbeddingsConfig = z.object({
+export const ZUpsertEmbeddingsConfig = z.object({
   type: z.literal("upsert-embeddings"),
   version: z.literal("1"),
   organizationId: z.string(),
@@ -53,13 +59,13 @@ export const UpsertEmbeddingsConfig = z.object({
   chunkIds: z.string().array(),
 });
 
-export const DeleteProjectConfig = z.object({
+export const ZDeleteProjectConfig = z.object({
   type: z.literal("delete-project"),
   version: z.literal("1"),
   projectId: z.string(),
 });
 
-export const CreateAnalysisConfig = z.object({
+export const ZCreateAnalysisConfig = z.object({
   type: z.literal("create-analysis"),
   version: z.literal("1"),
   organizationId: z.string(),
@@ -68,12 +74,12 @@ export const CreateAnalysisConfig = z.object({
 });
 
 export const ZTaskConfig = z.discriminatedUnion("type", [
-  TextExtractionConfig,
-  TextChunkConfig,
-  GenEmbeddingsConfig,
-  UpsertEmbeddingsConfig,
-  DeleteProjectConfig,
-  CreateAnalysisConfig,
+  ZTextExtractionConfig,
+  ZTextChunkConfig,
+  ZGenEmbeddingsConfig,
+  ZUpsertEmbeddingsConfig,
+  ZDeleteProjectConfig,
+  ZCreateAnalysisConfig,
 ]);
 
 export type TaskType = z.infer<typeof ZTaskType>;
