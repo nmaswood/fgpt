@@ -72,7 +72,7 @@ async function start(settings: Settings) {
   const results = await executor.run({
     limit: 1_000,
     retryLimit: 3,
-    setTaskToErrorOnFailure: SETTINGS.setTaskToErrorOnFailure,
+    debugMode: SETTINGS.debugMode,
   });
   const erroredTaskIds = results
     .filter((r) => r.status === "failed")

@@ -24,8 +24,7 @@ import { TextExtractor } from "../text-extractor";
 export interface RunOptions {
   limit: number;
   retryLimit: number;
-  // basically just for testing
-  setTaskToErrorOnFailure: boolean;
+  debugMode: boolean;
 }
 
 export interface ExecutionResult {
@@ -81,12 +80,12 @@ export class JobExecutorImpl implements JobExecutor {
         results.push(statusForTask("succeeded"));
       } catch (err) {
         LOGGER.error(err);
-        if (options.setTaskToErrorOnFailure) {
+        if (options.debugMode) {
+          await this.taskService.setAsQueued(task.id);
+        } else {
           await this.taskService.setAsCompleted([
             { taskId: task.id, status: "failed", output: {} },
           ]);
-        } else {
-          await this.taskService.setAsQueued(task.id);
         }
 
         results.push(statusForTask("failed"));
