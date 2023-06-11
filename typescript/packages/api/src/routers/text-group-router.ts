@@ -27,7 +27,7 @@ export class TextGroupRouter {
       "/text-group-chunk",
       async (req: express.Request, res: express.Response) => {
         const params = ZTextGroupChunkRequest.parse(req.body);
-        const chunk = await this.textChunkStore.getTextChunk(
+        const chunk = await this.textChunkStore.getTextChunkByOrder(
           params.textGroupId,
           params.order
         );

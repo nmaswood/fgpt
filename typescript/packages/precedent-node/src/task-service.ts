@@ -38,6 +38,7 @@ export interface TaskService {
   insertMany(configs: CreateTask[]): Promise<Task[]>;
   setAsPending(config: SetAsPendingConfig): Promise<Task[]>;
   setAsCompleted(config: SetAsCompleted[]): Promise<Task[]>;
+  setAsQueued(taskId: string): Promise<Task>;
 }
 
 const FIELDS = sql.fragment`task.id, task.organization_id, task.project_id, task.task_type, task.status, task.config`;
@@ -50,6 +51,22 @@ export class PSqlTaskService implements TaskService {
       throw new Error("failed to make task");
     }
     return task;
+  }
+
+  async setAsQueued(taskId: string): Promise<Task> {
+    return this.pool.one(
+      sql.type(ZFromTaskRow)`
+UPDATE
+    task
+SET
+    status = 'queued',
+    status_updated_at = now(),
+WHERE
+    task.id = ${taskId}
+RETURNING
+    ${FIELDS}
+`
+    );
   }
 
   async setAsCompleted(config: SetAsCompleted[]): Promise<Task[]> {
@@ -91,7 +108,7 @@ RETURNING
 `
       );
 
-      return resp.rows.map(toTask);
+      return Array.from(resp.rows);
     });
 
     return tasks;
@@ -124,7 +141,7 @@ RETURNING
 `
       );
 
-      return resp.rows.map(toTask);
+      return Array.from(resp.rows);
     });
 
     return tasks;
@@ -148,30 +165,30 @@ INSERT INTO task (organization_id, project_id, task_type, status, config)
 `
       );
 
-      return resp.rows.map(toTask);
+      return Array.from(resp.rows);
     });
     return tasks;
   }
 }
 
-const ZFromTaskRow = z.object({
-  id: z.string().uuid(),
-  organization_id: z.string().uuid(),
-  project_id: z.string().uuid(),
-  task_type: ZTaskType,
-  status: ZTaskStatus,
-  config: ZTaskConfig,
-});
-
-function toTask(row: z.infer<typeof ZFromTaskRow>): Task {
-  return {
-    id: row.id,
-    organizationId: row.organization_id,
-    projectId: row.project_id,
-    status: row.status,
-    config: ZTaskConfig.parse(row.config),
-  };
-}
+const ZFromTaskRow = z
+  .object({
+    id: z.string().uuid(),
+    organization_id: z.string().uuid(),
+    project_id: z.string().uuid(),
+    task_type: ZTaskType,
+    status: ZTaskStatus,
+    config: ZTaskConfig,
+  })
+  .transform(
+    (row): Task => ({
+      id: row.id,
+      organizationId: row.organization_id,
+      projectId: row.project_id,
+      status: row.status,
+      config: ZTaskConfig.parse(row.config),
+    })
+  );
 
 function toFragment({ organizationId, projectId, config }: CreateTask) {
   return sql.fragment`(${organizationId}, ${projectId}, ${

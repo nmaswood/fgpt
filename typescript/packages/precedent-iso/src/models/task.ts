@@ -9,7 +9,7 @@ export const ZTaskType = z.enum([
   "upsert-embeddings",
   "delete-project",
   "create-analysis",
-  "text-chunk-5k",
+  "llm-outputs",
 ]);
 
 export const ZTaskStatus = z.enum([
@@ -73,6 +73,19 @@ export const ZCreateAnalysisConfig = z.object({
   analysisId: z.string(),
 });
 
+export const ZLLMOutputsConfig = z.object({
+  type: z.literal("llm-outputs"),
+  version: z.literal("1"),
+  organizationId: z.string(),
+  projectId: z.string(),
+  fileReferenceId: z.string(),
+  processedFileId: z.string(),
+  textChunkGroupId: z.string(),
+  textChunkId: z.string(),
+});
+
+export type LLMOutputsConfig = z.infer<typeof ZLLMOutputsConfig>;
+
 export const ZTaskConfig = z.discriminatedUnion("type", [
   ZTextExtractionConfig,
   ZTextChunkConfig,
@@ -80,6 +93,7 @@ export const ZTaskConfig = z.discriminatedUnion("type", [
   ZUpsertEmbeddingsConfig,
   ZDeleteProjectConfig,
   ZCreateAnalysisConfig,
+  ZLLMOutputsConfig,
 ]);
 
 export type TaskType = z.infer<typeof ZTaskType>;

@@ -62,7 +62,8 @@ export interface TextChunkStore {
   getTextChunkGroup(id: string): Promise<TextChunkGroup>;
   getTextChunkGroupByFileId(id: string): Promise<TextChunkGroup>;
 
-  getTextChunk(groupId: string, order: number): Promise<TextChunk>;
+  getTextChunkById(id: string): Promise<TextChunk>;
+  getTextChunkByOrder(groupId: string, order: number): Promise<TextChunk>;
 
   upsertTextChunkGroup(args: UpsertTextChunkGroup): Promise<TextChunkGroup>;
   upsertManyTextChunkGroups(
@@ -91,7 +92,7 @@ export interface TextChunkStore {
   listWithNoEmbeddings(processedFileId: string): Promise<TextChunk[]>;
 }
 
-const TEXT_CHUNK_FIELDS = sql.fragment`text_chunk.id, organization_id, project_id, file_reference_id, processed_file_id, chunk_order, chunk_text, text_chunk.embedding IS NOT NULL AS has_embedding, text_chunk_group_id`;
+const TEXT_CHUNK_FIELDS = sql.fragment`text_chunk.id, text_chunk.organization_id, text_chunk.project_id, text_chunk.file_reference_id, text_chunk.processed_file_id, text_chunk.chunk_order, text_chunk.chunk_text, text_chunk.embedding IS NOT NULL AS has_embedding, text_chunk_group_id`;
 
 const TEXT_CHUNK_GROUP_FIELDS = sql.fragment`text_chunk_group.id, organization_id, project_id, file_reference_id, processed_file_id, num_chunks,  fully_chunked, fully_embedded`;
 
@@ -111,8 +112,24 @@ WHERE
     });
   }
 
-  async getTextChunk(groupId: string, order: number): Promise<TextChunk> {
-    order;
+  async getTextChunkById(id: string): Promise<TextChunk> {
+    return this.pool.one(
+      sql.type(ZTextChunkRow)`
+
+SELECT
+    ${TEXT_CHUNK_FIELDS}
+FROM
+    text_chunk
+WHERE
+    id = ${id}
+`
+    );
+  }
+
+  async getTextChunkByOrder(
+    groupId: string,
+    order: number
+  ): Promise<TextChunk> {
     return this.pool.one(
       sql.type(ZTextChunkRow)`
 SELECT
@@ -297,13 +314,16 @@ WHERE
     return this.pool.connect(async (cnx) => {
       const resp = await cnx.query(
         sql.type(ZTextChunkRow)`
+
 SELECT
     ${TEXT_CHUNK_FIELDS}
 FROM
     text_chunk
+    JOIN text_chunk_group ON text_chunk_group.id = text_chunk.text_chunk_group_id
 WHERE
     text_chunk_group_id = ${textGroupId}
     AND embedding IS NULL
+    AND text_chunk_group.embeddings_will_be_generated = true
 ORDER BY
     chunk_order ASC
 `

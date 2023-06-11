@@ -15,6 +15,8 @@ import {
   PsqlTextChunkStore,
   TikaHttpClient,
   TikaTextExtractor,
+  PsqlQuestionStore,
+  PsqlSummaryStore,
 } from "@fgpt/precedent-node";
 
 import { LOGGER } from "./logger";
@@ -49,6 +51,9 @@ async function start(settings: Settings) {
     textChunkStore
   );
 
+  const summaryStore = new PsqlSummaryStore(pool);
+  const questionStore = new PsqlQuestionStore(pool);
+
   const executor = new JobExecutorImpl(
     textExtractor,
     taskService,
@@ -56,13 +61,16 @@ async function start(settings: Settings) {
     textChunkStore,
     mlServiceClient,
     analysisService,
-    analysisStore
+    analysisStore,
+    summaryStore,
+    questionStore
   );
 
   LOGGER.info("Running executor...");
   const results = await executor.run({
     limit: 1_000,
     retryLimit: 3,
+    setTaskToErrorOnFailure: SETTINGS.setTaskToErrorOnFailure,
   });
   const erroredTaskIds = results
     .filter((r) => r.status === "failed")

@@ -58,6 +58,15 @@ export interface AskQuestion {
   question: string;
 }
 
+export interface LLMOutputArgs {
+  text: string;
+}
+
+export interface LLMOutputResponse {
+  summaries: string[];
+  questions: string[];
+}
+
 export interface MLServiceClient {
   predict: (args: PredictArguments) => Promise<PredictResponse>;
   ping: () => Promise<"pong">;
@@ -67,6 +76,7 @@ export interface MLServiceClient {
   getKSimilar: (args: SimiliarSearch) => Promise<VectorResult[]>;
   askQuestion(args: AskQuestion): Promise<string>;
   askQuestionStreaming(args: AskQuestionStreamingArgs): Promise<void>;
+  llmOutput(args: LLMOutputArgs): Promise<LLMOutputResponse>;
 }
 
 export class MLServiceClientImpl implements MLServiceClient {
@@ -163,8 +173,21 @@ export class MLServiceClientImpl implements MLServiceClient {
       onEnd();
     });
   }
+
+  async llmOutput({ text }: LLMOutputArgs): Promise<LLMOutputResponse> {
+    const response = await this.#client.post<unknown>("/llm-output", {
+      text,
+    });
+    const parsed = ZLLMOutputResponse.parse(response.data);
+    return parsed;
+  }
 }
 
 const ZAskQuestionResponse = z.object({
   data: z.string(),
+});
+
+const ZLLMOutputResponse = z.object({
+  summaries: z.array(z.string()),
+  questions: z.array(z.string()),
 });

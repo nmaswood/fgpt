@@ -1,5 +1,6 @@
 import {
   assertNever,
+  GREEDY_5k_CHUNK_SIZE,
   GREEDY_VO_CHUNK_SIZE,
   GreedyTextChunker,
   isNotNull,
@@ -10,6 +11,8 @@ import keyBy from "lodash/keyBy";
 
 import { AnalysisService } from "../analysis-service";
 import { AnalysisStore } from "../analysis-store";
+import { QuestionStore } from "../llm-outputs/question-store";
+import { SummaryStore } from "../llm-outputs/summary-store";
 import { LOGGER } from "../logger";
 import { MLServiceClient } from "../ml/ml-service";
 import { ProcessedFileStore } from "../processed-file-store";
@@ -21,6 +24,8 @@ import { TextExtractor } from "../text-extractor";
 export interface RunOptions {
   limit: number;
   retryLimit: number;
+  // basically just for testing
+  setTaskToErrorOnFailure: boolean;
 }
 
 export interface ExecutionResult {
@@ -40,6 +45,7 @@ export interface JobExecutor {
 }
 
 export class JobExecutorImpl implements JobExecutor {
+  STRATEGIES = ["greedy_v0", "greedy_5k"] as const;
   CHUNKER = new GreedyTextChunker();
   constructor(
     private readonly textExtractor: TextExtractor,
@@ -48,7 +54,9 @@ export class JobExecutorImpl implements JobExecutor {
     private readonly textChunkStore: TextChunkStore,
     private readonly mlService: MLServiceClient,
     private readonly analysisService: AnalysisService,
-    private readonly analysisStore: AnalysisStore
+    private readonly analysisStore: AnalysisStore,
+    private readonly summaryStore: SummaryStore,
+    private readonly questionStore: QuestionStore
   ) {}
 
   async run(options: RunOptions): Promise<ExecutionResult[]> {
@@ -73,9 +81,13 @@ export class JobExecutorImpl implements JobExecutor {
         results.push(statusForTask("succeeded"));
       } catch (err) {
         LOGGER.error(err);
-        await this.taskService.setAsCompleted([
-          { taskId: task.id, status: "failed", output: {} },
-        ]);
+        if (options.setTaskToErrorOnFailure) {
+          await this.taskService.setAsCompleted([
+            { taskId: task.id, status: "failed", output: {} },
+          ]);
+        } else {
+          await this.taskService.setAsQueued(task.id);
+        }
 
         results.push(statusForTask("failed"));
       }
@@ -113,83 +125,26 @@ export class JobExecutorImpl implements JobExecutor {
           hash: ShaHash.forData(text),
         });
 
-        await this.taskService.insert({
-          organizationId: config.organizationId,
-          projectId: config.projectId,
-          config: {
-            type: "text-chunk",
-            version: "1",
+        for (const strategy of this.STRATEGIES) {
+          await this.taskService.insert({
             organizationId: config.organizationId,
             projectId: config.projectId,
-            fileId: config.fileId,
-            processedFileId: processedFile.id,
-          },
-        });
+            config: {
+              type: "text-chunk",
+              version: "1",
+              organizationId: config.organizationId,
+              projectId: config.projectId,
+              fileId: config.fileId,
+              processedFileId: processedFile.id,
+              strategy,
+            },
+          });
+        }
 
         break;
       }
       case "text-chunk": {
-        const text = await this.processedFileStore.getText(
-          config.processedFileId
-        );
-        if (text.length === 0) {
-          LOGGER.warn({ config }, "No text to extract");
-          return;
-        }
-        const chunks = this.CHUNKER.chunk({
-          tokenChunkLimit: GREEDY_VO_CHUNK_SIZE,
-          text,
-        });
-
-        const textChunkGroup = await this.textChunkStore.upsertTextChunkGroup({
-          organizationId: config.organizationId,
-          projectId: config.projectId,
-          fileReferenceId: config.fileId,
-          processedFileId: config.processedFileId,
-          numChunks: chunks.length,
-          strategy: config.strategy ?? "greedy_v0",
-          embeddingsWillBeGenerated: true,
-        });
-
-        if (textChunkGroup.fullyChunked && textChunkGroup.fullyEmbedded) {
-          LOGGER.warn(
-            { textChunkGroup },
-            "Text chunk group is already fully chunked and embedded, skipping"
-          );
-          return;
-        }
-
-        const allChunkArgs = chunks.map((chunkText, chunkOrder) => ({
-          chunkOrder,
-          chunkText,
-          hash: ShaHash.forData(chunkText),
-        }));
-
-        const commonArgs = {
-          organizationId: config.organizationId,
-          projectId: config.projectId,
-          fileReferenceId: config.fileId,
-          processedFileId: config.processedFileId,
-          textChunkGroupId: textChunkGroup.id,
-        };
-        for (const group of lodashChunk(allChunkArgs, 100)) {
-          await this.textChunkStore.upsertManyTextChunks(commonArgs, group);
-        }
-
-        await this.taskService.insert({
-          organizationId: config.organizationId,
-          projectId: config.projectId,
-          config: {
-            type: "gen-embeddings",
-            version: "1",
-            organizationId: config.organizationId,
-            projectId: config.projectId,
-            fileId: config.fileId,
-            processedFileId: config.processedFileId,
-            textChunkGroupId: textChunkGroup.id,
-          },
-        });
-
+        await this.#chunkText(config);
         break;
       }
 
@@ -288,12 +243,156 @@ export class JobExecutorImpl implements JobExecutor {
         LOGGER.warn("Create analysis not implemented");
         break;
       }
+
+      case "llm-outputs": {
+        const chunk = await this.textChunkStore.getTextChunkById(
+          config.textChunkId
+        );
+        const { summaries, questions } = await this.mlService.llmOutput({
+          text: chunk.chunkText,
+        });
+
+        await this.summaryStore.insertMany(
+          summaries.map((summary) => ({
+            ...config,
+            summary,
+            hash: ShaHash.forData(summary),
+          }))
+        );
+
+        await this.questionStore.insertMany(
+          questions.map((question) => ({
+            ...config,
+            question,
+            hash: ShaHash.forData(question),
+          }))
+        );
+
+        break;
+      }
+
       default:
         assertNever(config);
     }
   }
 
-  async chunkText(_: TextChunkConfig) {
-    throw new Error("not implemented");
+  async #chunkText(config: TextChunkConfig) {
+    const text = await this.processedFileStore.getText(config.processedFileId);
+    if (text.length === 0) {
+      LOGGER.warn({ config }, "No text to extract");
+      return;
+    }
+
+    const strategy = config.strategy ?? "greedy_v0";
+    const common = {
+      organizationId: config.organizationId,
+      projectId: config.projectId,
+      fileReferenceId: config.fileId,
+      processedFileId: config.processedFileId,
+    };
+
+    switch (strategy) {
+      case "greedy_v0": {
+        const chunks = this.CHUNKER.chunk({
+          tokenChunkLimit: GREEDY_VO_CHUNK_SIZE,
+          text,
+        });
+
+        const textChunkGroup = await this.textChunkStore.upsertTextChunkGroup({
+          ...common,
+          numChunks: chunks.length,
+          strategy,
+          embeddingsWillBeGenerated: true,
+        });
+
+        if (textChunkGroup.fullyChunked && textChunkGroup.fullyEmbedded) {
+          LOGGER.warn(
+            { textChunkGroup },
+            "Text chunk group is already fully chunked and embedded, skipping"
+          );
+          return;
+        }
+        const allChunkArgs = chunks.map((chunkText, chunkOrder) => ({
+          chunkOrder,
+          chunkText,
+          hash: ShaHash.forData(chunkText),
+        }));
+        const commonArgs = {
+          ...common,
+          textChunkGroupId: textChunkGroup.id,
+        };
+
+        for (const group of lodashChunk(allChunkArgs, 100)) {
+          await this.textChunkStore.upsertManyTextChunks(commonArgs, group);
+        }
+
+        await this.taskService.insert({
+          organizationId: config.organizationId,
+          projectId: config.projectId,
+          config: {
+            type: "gen-embeddings",
+            version: "1",
+            organizationId: config.organizationId,
+            projectId: config.projectId,
+            fileId: config.fileId,
+            processedFileId: config.processedFileId,
+            textChunkGroupId: textChunkGroup.id,
+          },
+        });
+        break;
+      }
+      case "greedy_5k": {
+        const chunks = this.CHUNKER.chunk({
+          tokenChunkLimit: GREEDY_5k_CHUNK_SIZE,
+          text,
+        });
+
+        const textChunkGroup = await this.textChunkStore.upsertTextChunkGroup({
+          ...common,
+          numChunks: chunks.length,
+          strategy,
+          embeddingsWillBeGenerated: false,
+        });
+
+        const allChunkArgs = chunks.map((chunkText, chunkOrder) => ({
+          chunkOrder,
+          chunkText,
+          hash: ShaHash.forData(chunkText),
+        }));
+
+        const commonArgs = {
+          ...common,
+          textChunkGroupId: textChunkGroup.id,
+        };
+
+        for (const group of lodashChunk(allChunkArgs, 100)) {
+          const chunks = await this.textChunkStore.upsertManyTextChunks(
+            commonArgs,
+            group
+          );
+
+          await this.taskService.insertMany(
+            chunks.map((chunk) => ({
+              organizationId: config.organizationId,
+              projectId: config.projectId,
+              config: {
+                type: "llm-outputs",
+                version: "1",
+                organizationId: config.organizationId,
+                projectId: config.projectId,
+                fileReferenceId: config.fileId,
+                processedFileId: config.processedFileId,
+                textChunkGroupId: textChunkGroup.id,
+                textChunkId: chunk.id,
+              },
+            }))
+          );
+        }
+
+        break;
+      }
+      default:
+        assertNever(strategy);
+    }
   }
 }

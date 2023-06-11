@@ -38,6 +38,23 @@ async def ask_question_route(req: AskQuestionRequest):
     return {"data": answer}
 
 
+class LLMOutputRequest(BaseModel):
+    text: str
+
+
+
+class LLMOutputResponse(BaseModel):
+    summaries: list[str] = []
+    questions: list[str] = []
+    
+
+@app.post("/llm-output")
+async def llm_output_route(req: LLMOutputRequest):
+
+    return LLMOutputResponse()
+
+
+
 @app.post("/ask-question-streaming")
 async def ask_question_streaming_route(req: AskQuestionRequest):
     stream = ask_question_streaming(req.context, req.question, req.history)

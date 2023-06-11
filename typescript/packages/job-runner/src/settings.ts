@@ -8,6 +8,7 @@ const ZSettings = z.object({
   assetBucket: z.string(),
   tikaClient: z.string(),
   tracingEnabled: z.boolean(),
+  setTaskToErrorOnFailure: z.boolean(),
 });
 
 export type Settings = z.infer<typeof ZSettings>;
@@ -21,4 +22,6 @@ export const SETTINGS = ZSettings.parse({
   assetBucket: process.env["ASSET_BUCKET"],
   tikaClient: process.env["TIKA_CLIENT"],
   tracingEnabled: process.env["TRACING_ENABLED"]?.toLowerCase() === "true",
+  setTaskToErrorOnFailure:
+    process.env["SET_TASK_TO_ERROR_ON_FAILURE"]?.toLowerCase() !== "false",
 });
