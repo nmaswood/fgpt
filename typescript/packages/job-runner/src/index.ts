@@ -67,6 +67,8 @@ async function start(settings: Settings) {
   );
 
   LOGGER.info("Running executor...");
+  LOGGER.info(SETTINGS);
+
   const results = await executor.run({
     limit: 1_000,
     retryLimit: 3,

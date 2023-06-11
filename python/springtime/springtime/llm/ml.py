@@ -1,6 +1,11 @@
+from guardrails.utils.pydantic_utils import register_pydantic
+from pydantic import BaseModel
 from loguru import logger
 from retry import retry
 import openai
+import guardrails as gd
+import os
+
 
 from langchain.embeddings import OpenAIEmbeddings
 from springtime.llm.models import ChatHistory
@@ -60,3 +65,34 @@ def ask_question(context: str, question: str):
         logger.warning("No choices returned from OpenAI")
     first_choice = choices[0]
     return first_choice["message"]["content"]
+
+
+@register_pydantic
+class Output(BaseModel):
+    '''
+    Information about a document
+
+    Args:
+        summaries list[str]: A list of key points describing the summary of the document.
+        questions list[str]: A list of interesting questions one could ask about the document.
+    '''
+    summaries: list[str]
+    questions: list[str]
+
+
+def get_llm_output(text: str) -> Output:
+    dir = os.path.dirname(__file__)
+    path = os.path.join(dir, "llm-output.xml")
+    guard = gd.Guard.from_rail(path)
+    print(guard.prompt)
+    print(text)
+
+    raw_llm_response, validated_response = guard(
+        openai.Completion.create,
+        model="text-davinci-003",
+        prompt_params={"document": text.replace("gmail", "")},
+        max_tokens=512,
+        temperature=0,
+        num_reasks=2,
+    )
+    return Output(**validated_response)
