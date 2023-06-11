@@ -135,3 +135,32 @@ test("insertMany", async () => {
 
   expect(summary.summary).toEqual("hi");
 });
+
+test("getForFile", async () => {
+  const {
+    organizationId,
+    projectId,
+    fileReferenceId,
+    processedFileId,
+    textChunkGroupId,
+    textChunkId,
+    summaryStore,
+  } = await setup();
+
+  await summaryStore.insertMany([
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      processedFileId,
+      textChunkGroupId,
+      textChunkId,
+      summary: "hi",
+      hash: "foo",
+    },
+  ]);
+
+  const [summary] = await summaryStore.getForFile(fileReferenceId);
+
+  expect(summary.summary).toEqual("hi");
+});

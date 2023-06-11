@@ -16,9 +16,9 @@ export class TextGroupRouter {
         }
 
         const textGroup = await this.textChunkStore.getTextChunkGroupByFileId(
+          "greedy_v0",
           fileId
         );
-
         res.json({ textGroup });
       }
     );

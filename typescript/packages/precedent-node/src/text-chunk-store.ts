@@ -60,7 +60,10 @@ export interface SetManyEmbeddings {
 
 export interface TextChunkStore {
   getTextChunkGroup(id: string): Promise<TextChunkGroup>;
-  getTextChunkGroupByFileId(id: string): Promise<TextChunkGroup>;
+  getTextChunkGroupByFileId(
+    strategy: ChunkStrategy,
+    id: string
+  ): Promise<TextChunkGroup>;
 
   getTextChunkById(id: string): Promise<TextChunk>;
   getTextChunkByOrder(groupId: string, order: number): Promise<TextChunk>;
@@ -115,7 +118,6 @@ WHERE
   async getTextChunkById(id: string): Promise<TextChunk> {
     return this.pool.one(
       sql.type(ZTextChunkRow)`
-
 SELECT
     ${TEXT_CHUNK_FIELDS}
 FROM
@@ -143,7 +145,10 @@ WHERE
     );
   }
 
-  async getTextChunkGroupByFileId(fileId: string): Promise<TextChunkGroup> {
+  async getTextChunkGroupByFileId(
+    strategy: ChunkStrategy,
+    fileId: string
+  ): Promise<TextChunkGroup> {
     return this.pool.connect(async (cnx) => {
       return cnx.one(sql.type(ZTextChunkGroupRow)`
 SELECT
@@ -152,6 +157,7 @@ FROM
     text_chunk_group
 WHERE
     file_reference_id = ${fileId}
+    and chunk_strategy = ${strategy}
 `);
     });
   }

@@ -4,6 +4,7 @@ import { Button, ButtonGroup, Card, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useRouter } from "next/router";
 import React from "react";
+import { useFetchOutput } from "../../src/hooks/use-fetch-output";
 
 import { useFetchSignedUrl } from "../../src/hooks/use-fetch-signed-url";
 import { useFetchTextChunk } from "../../src/hooks/use-fetch-text-chunk";
@@ -27,6 +28,8 @@ const ForFileId: React.FC<{ fileId: string }> = ({ fileId }) => {
   const { data: textChunkGroup } = useFetchTextChunkGroup(fileId);
   const { data: url } = useFetchSignedUrl(fileId);
   const [order, setOrder] = React.useState(0);
+  const { data: outputs } = useFetchOutput(fileId);
+  console.log({ outputs, textChunkGroup });
   return (
     <Paper sx={{ display: "flex", width: "100%", height: "100%" }}>
       {url && (
@@ -40,22 +43,31 @@ const ForFileId: React.FC<{ fileId: string }> = ({ fileId }) => {
           />
         </object>
       )}
-      <Box
-        width="500px"
-        height="100%"
-        onKeyPress={(e) => {
-          console.log(e.key);
-        }}
-      >
-        {textChunkGroup && (
-          <DisplayTextChunkGroup
-            textGroupId={textChunkGroup.id}
-            numChunks={textChunkGroup.numChunks}
-            order={order}
-            onPrev={() => setOrder((order) => order - 1)}
-            onNext={() => setOrder((order) => order + 1)}
-          />
-        )}
+      <Box width="600px" height="100%" display="flex" flexDirection="column">
+        <Box display="flex" width="100%" height="50%">
+          {textChunkGroup && (
+            <DisplayTextChunkGroup
+              textGroupId={textChunkGroup.id}
+              numChunks={textChunkGroup.numChunks}
+              order={order}
+              onPrev={() => setOrder((order) => order - 1)}
+              onNext={() => setOrder((order) => order + 1)}
+            />
+          )}
+        </Box>
+
+        <Box display="flex" width="100%" height="50%" overflow="auto">
+          <pre>
+            {JSON.stringify(
+              {
+                summaries: outputs.summaries.map((s) => s.summary),
+                questions: outputs.questions.map((s) => s.question),
+              },
+              null,
+              2
+            )}
+          </pre>
+        </Box>
       </Box>
     </Paper>
   );

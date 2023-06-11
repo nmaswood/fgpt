@@ -28,3 +28,8 @@ export interface Metrics {
   textChunkGroupId: string;
   metrics: Record<string, any>;
 }
+
+export interface Outputs {
+  summaries: Summary[];
+  questions: Question[];
+}

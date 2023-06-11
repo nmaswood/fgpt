@@ -11,12 +11,12 @@ import {
   PsqlAnalysisStore,
   PsqlFileReferenceStore,
   PsqlProcessedFileStore,
+  PsqlQuestionStore,
+  PsqlSummaryStore,
   PSqlTaskService,
   PsqlTextChunkStore,
   TikaHttpClient,
   TikaTextExtractor,
-  PsqlQuestionStore,
-  PsqlSummaryStore,
 } from "@fgpt/precedent-node";
 
 import { LOGGER } from "./logger";

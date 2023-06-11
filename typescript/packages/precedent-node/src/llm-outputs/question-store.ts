@@ -15,11 +15,24 @@ export interface InsertQuestion {
 
 const FIELDS = sql.fragment`id, organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, text_chunk_id, question`;
 export interface QuestionStore {
+  getForFile(fileReferenceId: string): Promise<Outputs.Question[]>;
   insertMany(questions: InsertQuestion[]): Promise<Outputs.Question[]>;
 }
 
 export class PsqlQuestionStore implements QuestionStore {
   constructor(private readonly pool: DatabasePool) {}
+
+  async getForFile(fileReferenceId: string): Promise<Outputs.Question[]> {
+    const result = await this.pool.query(sql.type(ZQuestionRow)`
+SELECT
+    ${FIELDS}
+FROM
+    text_chunk_question
+WHERE
+    file_reference_id = ${fileReferenceId}
+`);
+    return Array.from(result.rows);
+  }
 
   async insertMany(questions: InsertQuestion[]): Promise<Outputs.Question[]> {
     if (questions.length === 0) {

@@ -27,6 +27,8 @@ import {
   PsqlLoadedFileStore,
   PsqlAnalysisStore,
   PsqlChatStore,
+  PsqlSummaryStore,
+  PsqlQuestionStore,
 } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
 import { UserOrgRouter } from "./routers/user-org-router";
@@ -35,6 +37,7 @@ import { FileRouter } from "./routers/file-router";
 import { ChatRouter } from "./routers/chat-router";
 import { AnalysisRouter } from "./routers/analysis-router";
 import { TextGroupRouter } from "./routers/text-group-router";
+import { LLMOutputRouter } from "./routers/llm-output.router";
 
 LOGGER.info("Server starting ...");
 
@@ -89,6 +92,9 @@ async function start() {
 
   const chatStore = new PsqlChatStore(pool);
 
+  const summaryStore = new PsqlSummaryStore(pool);
+  const questionStore = new PsqlQuestionStore(pool);
+
   app.use(cors({ origin: "*" }));
 
   app.use("/api/v1/user-org", jwtCheck, addUser, new UserOrgRouter().init());
@@ -137,6 +143,13 @@ async function start() {
     jwtCheck,
     addUser,
     new TextGroupRouter(textChunkStore).init()
+  );
+
+  app.use(
+    "/api/v1/output",
+    jwtCheck,
+    addUser,
+    new LLMOutputRouter(summaryStore, questionStore).init()
   );
 
   app.use("/ping", (_, res) => {
