@@ -65,6 +65,11 @@ export interface LLMOutputArgs {
 export interface LLMOutputResponse {
   summaries: string[];
   questions: string[];
+  metrics: {
+    value: string;
+    description: string;
+  }[];
+  entities: string[];
 }
 
 export interface MLServiceClient {
@@ -178,8 +183,7 @@ export class MLServiceClientImpl implements MLServiceClient {
     const response = await this.#client.post<unknown>("/llm-output", {
       text,
     });
-    const parsed = ZLLMOutputResponse.parse(response.data);
-    return parsed;
+    return ZLLMOutputResponse.parse(response.data);
   }
 }
 
@@ -187,7 +191,14 @@ const ZAskQuestionResponse = z.object({
   data: z.string(),
 });
 
+const ZMetric = z.object({
+  description: z.string(),
+  value: z.string(),
+});
+
 const ZLLMOutputResponse = z.object({
   summaries: z.array(z.string()),
   questions: z.array(z.string()),
+  metrics: z.array(ZMetric),
+  entities: z.array(z.string()),
 });

@@ -127,9 +127,10 @@ test("insertMany", async () => {
       processedFileId,
       textChunkGroupId,
       textChunkId,
-      metrics: { hi: "bye" },
+      value: "hi",
+      description: "bye",
     },
   ]);
-
-  expect(row.metrics).toEqual({ hi: "bye" });
+  expect(row.value).toEqual("hi");
+  expect(row.description).toEqual("bye");
 });

@@ -6,7 +6,7 @@ from starlette.responses import StreamingResponse
 
 from fastapi import FastAPI
 
-from springtime.llm.ml import ask_question_streaming, embeddings_for_documents, ask_question, get_llm_output
+from springtime.llm.ml import Metric, ask_question_streaming, embeddings_for_documents, ask_question, get_output
 from springtime.llm.models import ChatHistory
 from springtime.llm.pinecone import UpsertVector, get_similar, upsert_vectors
 from .settings import SETTINGS
@@ -45,11 +45,13 @@ class LLMOutputRequest(BaseModel):
 class LLMOutputResponse(BaseModel):
     summaries: list[str] = []
     questions: list[str] = []
+    metrics: list[Metric] = []
+    entities: list[str] = []
 
 
 @app.post("/llm-output")
 async def llm_output_route(req: LLMOutputRequest):
-    res = get_llm_output(req.text)
+    res = get_output(req.text)
     return res
 
 

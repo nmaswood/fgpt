@@ -11,6 +11,7 @@ import keyBy from "lodash/keyBy";
 
 import { AnalysisService } from "../analysis-service";
 import { AnalysisStore } from "../analysis-store";
+import { MetricsStore } from "../llm-outputs/metrics-store";
 import { QuestionStore } from "../llm-outputs/question-store";
 import { SummaryStore } from "../llm-outputs/summary-store";
 import { LOGGER } from "../logger";
@@ -55,7 +56,8 @@ export class JobExecutorImpl implements JobExecutor {
     private readonly analysisService: AnalysisService,
     private readonly analysisStore: AnalysisStore,
     private readonly summaryStore: SummaryStore,
-    private readonly questionStore: QuestionStore
+    private readonly questionStore: QuestionStore,
+    private readonly metricsStore: MetricsStore
   ) {}
 
   async run(options: RunOptions): Promise<ExecutionResult[]> {
@@ -70,7 +72,7 @@ export class JobExecutorImpl implements JobExecutor {
         results.push(statusForTask("succeeded"));
         break;
       }
-      LOGGER.info({ task }, "Executing task");
+      LOGGER.info({ task }, `Executing task ${task.config.type}`);
       try {
         await this.#executeWithRetry(options, task);
         await this.taskService.setAsCompleted([
@@ -247,9 +249,10 @@ export class JobExecutorImpl implements JobExecutor {
         const chunk = await this.textChunkStore.getTextChunkById(
           config.textChunkId
         );
-        const { summaries, questions } = await this.mlService.llmOutput({
-          text: chunk.chunkText,
-        });
+        const { summaries, questions, metrics } =
+          await this.mlService.llmOutput({
+            text: chunk.chunkText,
+          });
 
         await this.summaryStore.insertMany(
           summaries.map((summary) => ({
@@ -264,6 +267,14 @@ export class JobExecutorImpl implements JobExecutor {
             ...config,
             question,
             hash: ShaHash.forData(question),
+          }))
+        );
+
+        await this.metricsStore.insertMany(
+          metrics.map((metric) => ({
+            ...config,
+            description: metric.description,
+            value: metric.value,
           }))
         );
 

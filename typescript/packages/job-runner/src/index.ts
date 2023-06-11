@@ -10,6 +10,7 @@ import {
   MLServiceClientImpl,
   PsqlAnalysisStore,
   PsqlFileReferenceStore,
+  PsqlMetricsStore,
   PsqlProcessedFileStore,
   PsqlQuestionStore,
   PsqlSummaryStore,
@@ -53,6 +54,7 @@ async function start(settings: Settings) {
 
   const summaryStore = new PsqlSummaryStore(pool);
   const questionStore = new PsqlQuestionStore(pool);
+  const metricsStore = new PsqlMetricsStore(pool);
 
   const executor = new JobExecutorImpl(
     textExtractor,
@@ -63,7 +65,8 @@ async function start(settings: Settings) {
     analysisService,
     analysisStore,
     summaryStore,
-    questionStore
+    questionStore,
+    metricsStore
   );
 
   LOGGER.info("Running executor...");

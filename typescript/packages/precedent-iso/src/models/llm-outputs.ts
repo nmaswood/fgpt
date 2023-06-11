@@ -26,10 +26,17 @@ export interface Metrics {
   processedFileId: string;
   textChunkId: string;
   textChunkGroupId: string;
-  metrics: Record<string, any>;
+  value: string | undefined;
+  description: string | undefined;
+}
+
+export interface Metric {
+  description: string;
+  value: string;
 }
 
 export interface Outputs {
   summaries: Summary[];
   questions: Question[];
+  metrics: Metric[];
 }

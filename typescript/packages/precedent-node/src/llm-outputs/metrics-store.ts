@@ -9,10 +9,11 @@ export interface InsertMetric {
   processedFileId: string;
   textChunkId: string;
   textChunkGroupId: string;
-  metrics: Record<string, any>;
+  value: string | undefined;
+  description: string | undefined;
 }
 
-const FIELDS = sql.fragment`id, organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, text_chunk_id, metrics`;
+const FIELDS = sql.fragment`id, organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, text_chunk_id, value, description`;
 export interface MetricsStore {
   insertMany(metrics: InsertMetric[]): Promise<Outputs.Metrics[]>;
 }
@@ -32,7 +33,8 @@ export class PsqlMetricsStore implements MetricsStore {
         processedFileId,
         textChunkGroupId,
         textChunkId,
-        metrics,
+        value,
+        description,
       }) =>
         sql.fragment`
 (${organizationId},
@@ -41,12 +43,15 @@ export class PsqlMetricsStore implements MetricsStore {
     ${processedFileId},
     ${textChunkGroupId},
     ${textChunkId},
-    ${JSON.stringify(metrics)})
+    ${value ?? null},
+    ${description ?? null},
+    ${JSON.stringify({})}
+)
 `
     );
 
     const res = await this.pool.query(sql.type(ZMetricsRow)`
-INSERT INTO text_chunk_metrics (organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, text_chunk_id, metrics)
+INSERT INTO text_chunk_metrics (organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, text_chunk_id, value, description, metrics)
     VALUES
         ${sql.join(values, sql.fragment`, `)}
     RETURNING
@@ -66,7 +71,8 @@ const ZMetricsRow = z
     processed_file_id: z.string(),
     text_chunk_group_id: z.string(),
     text_chunk_id: z.string(),
-    metrics: z.record(z.string(), z.any()),
+    value: z.string().nullable(),
+    description: z.string().nullable(),
   })
   .transform(
     (row): Outputs.Metrics => ({
@@ -77,6 +83,7 @@ const ZMetricsRow = z
       processedFileId: row.processed_file_id,
       textChunkGroupId: row.text_chunk_group_id,
       textChunkId: row.text_chunk_id,
-      metrics: row.metrics,
+      value: row.value ?? undefined,
+      description: row.description ?? undefined,
     })
   );

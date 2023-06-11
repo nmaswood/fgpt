@@ -4,6 +4,7 @@ import useSWR from "swr";
 const EMPTY_OUTPUTS: Outputs.Outputs = {
   summaries: [],
   questions: [],
+  metrics: [],
 };
 
 export const useFetchOutput = (fileReferenceId: string) => {

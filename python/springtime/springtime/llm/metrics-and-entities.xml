@@ -1,0 +1,34 @@
+<rail version="0.1">
+
+    <output name="output">
+
+
+        <list name="metrics" description="Notable numbers in the document">
+            <object>
+                <string name="description" description="Description of what the metric represents" />
+                <string name="value" value="numerical value of the metric" />
+            </object>
+        </list>
+
+
+        <list name="entities" description="Named entities present in the document. Each entry is a seperate named entity">
+            <string name="entity" description='Named entity such as a person, location, or corporation' />
+        </list>
+
+
+    </output>
+
+
+    <prompt>
+        Given the following document, gather the information requested.
+
+        '{{document}}'
+
+
+        @xml_prefix_prompt
+
+        {output_schema}
+
+        @complete_json_suffix_v2</prompt>
+
+</rail>

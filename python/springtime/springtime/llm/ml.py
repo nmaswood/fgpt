@@ -67,25 +67,35 @@ def ask_question(context: str, question: str):
     return first_choice["message"]["content"]
 
 
+class Metric(BaseModel):
+    description: str
+    value: str
+
+
 @register_pydantic
 class Output(BaseModel):
-    '''
-    Information about a document
-
-    Args:
-        summaries list[str]: A list of key points describing the summary of the document.
-        questions list[str]: A list of interesting questions one could ask about the document.
-    '''
-    summaries: list[str]
-    questions: list[str]
+    summaries: list[str] = []
+    questions: list[str] = []
+    metrics: list[Metric] = []
+    entities: list[str] = []
 
 
-def get_llm_output(text: str) -> Output:
+@register_pydantic
+class QuestionsAndSummaries(BaseModel):
+    summaries: list[str] = []
+    questions: list[str] = []
+
+
+@register_pydantic
+class MetricsAndEntities(BaseModel):
+    metrics: list[Metric] = []
+    entities: list[str] = []
+
+
+def get_questions_and_summaries(text: str) -> QuestionsAndSummaries:
     dir = os.path.dirname(__file__)
-    path = os.path.join(dir, "llm-output.xml")
+    path = os.path.join(dir, "questions-and-summaries.xml")
     guard = gd.Guard.from_rail(path)
-    print(guard.prompt)
-    print(text)
 
     raw_llm_response, validated_response = guard(
         openai.Completion.create,
@@ -95,4 +105,39 @@ def get_llm_output(text: str) -> Output:
         temperature=0,
         num_reasks=2,
     )
-    return Output(**validated_response)
+    print(validated_response)
+
+    return QuestionsAndSummaries(**validated_response)
+
+
+def get_metrics_and_entities(text: str) -> MetricsAndEntities:
+    dir = os.path.dirname(__file__)
+    path = os.path.join(dir, "metrics-and-entities.xml")
+    guard = gd.Guard.from_rail(path)
+
+    raw_llm_response, validated_response = guard(
+        openai.Completion.create,
+        model="text-davinci-003",
+        prompt_params={"document": text.replace("gmail", "")},
+        max_tokens=512,
+        temperature=0,
+        num_reasks=2,
+    )
+    print(validated_response)
+    if not validated_response:
+        logger.error("No metrics or entities found")
+        return MetricsAndEntities()
+
+    return MetricsAndEntities(**validated_response)
+
+
+def get_output(text: str) -> Output:
+    questions_and_summaries = get_questions_and_summaries(text)
+    metrics_and_entities = get_metrics_and_entities(text)
+
+    return Output(
+        summaries=questions_and_summaries.summaries,
+        questions=questions_and_summaries.questions,
+        metrics=metrics_and_entities.metrics,
+        entities=metrics_and_entities.entities,
+    )
