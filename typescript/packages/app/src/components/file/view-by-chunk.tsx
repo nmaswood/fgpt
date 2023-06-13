@@ -101,7 +101,7 @@ export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
               color="primary"
               value={view}
               exclusive
-              onChange={(e, value) => setView(value)}
+              onChange={(_, value) => setView(value)}
             >
               <ToggleButton value="view">Data overview</ToggleButton>
               <ToggleButton value="chat">Prompt exploration</ToggleButton>
