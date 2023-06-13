@@ -284,6 +284,7 @@ export const SelectedProject: React.FC<{
                 isDeleteChatMutating ||
                 isEditingChatMutating
               }
+              questions={[]}
             />
           </Box>
         )}

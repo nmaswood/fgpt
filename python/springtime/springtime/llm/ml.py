@@ -29,7 +29,7 @@ def ask_question_streaming(context: str, question: str,
                            ):
     prompt = create_prompt(context, question, history)
     response = openai.ChatCompletion.create(
-        model='gpt-3.5-turbo',
+        model='gpt-3.5',
         messages=[
             {'role': 'user', 'content': prompt}
         ],

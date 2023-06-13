@@ -15,6 +15,7 @@ import {
   List,
   ListItem,
   ListItemAvatar,
+  ListItemButton,
   ListItemText,
   Paper,
   Table,
@@ -25,7 +26,6 @@ import {
   TableRow,
   TextField,
   Typography,
-  ListItemButton,
 } from "@mui/material";
 import NextLink from "next/link";
 import React from "react";
@@ -196,11 +196,11 @@ export const DisplayChat: React.FC<{
     >
       <Box
         display="grid"
-        width="500px"
+        width="400px"
         height="100%"
         overflow="auto"
         maxHeight="100%"
-        gridTemplateRows="1fr 1fr"
+        gridTemplateRows={questions.length > 0 ? "1fr 1fr" : undefined}
       >
         <DisplayChatList
           chats={chats}
@@ -274,7 +274,7 @@ export const DisplayChat: React.FC<{
                 <InputAdornment position="end">
                   <IconButton
                     disabled={trimmed.length === 0 || loading || isMutating}
-                    onClick={submit}
+                    onClick={() => submit()}
                   >
                     <SendIcon
                       sx={{

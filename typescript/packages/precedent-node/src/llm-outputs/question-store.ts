@@ -30,13 +30,15 @@ export class PsqlQuestionStore implements QuestionStore {
     limit: number
   ): Promise<string[]> {
     const result = await this.pool.query(sql.type(ZGetForFile)`
+
 SELECT
     question
 FROM
     text_chunk_question
 WHERE
     file_reference_id = ${fileReferenceId}
-ORDER BY random()
+ORDER BY
+    random()
 LIMIT ${limit}
 `);
     return result.rows.map((row) => row.question);

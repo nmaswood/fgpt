@@ -60,9 +60,12 @@ export class PsqlChatStore implements ChatStore {
 
   async getChat(id: string): Promise<Chat> {
     return this.pool.one(sql.type(ZChatRow)`
-SELECT ${CHAT_FIELDS}
-FROM chat
-WHERE 
+
+SELECT
+    ${CHAT_FIELDS}
+FROM
+    chat
+WHERE
     id = ${id}
 `);
   }
