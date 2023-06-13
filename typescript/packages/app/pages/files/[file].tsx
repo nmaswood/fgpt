@@ -7,10 +7,13 @@ import React from "react";
 import { DisplayFileChat } from "../../src/components/file/display-file-chat";
 import { DisplayFileReport } from "../../src/components/file/report";
 import { ViewByChunk } from "../../src/components/file/view-by-chunk";
+import { useFetchFile } from "../../src/hooks/use-fetch-file";
 import { useFetchSignedUrl } from "../../src/hooks/use-fetch-signed-url";
-
+import { useFetchToken } from "../../src/hooks/use-fetch-token";
 export default function DisplayFile() {
   const router = useRouter();
+
+  const { data: token } = useFetchToken();
   const fileId = (() => {
     const fileId = router.query.file;
     return typeof fileId === "string" ? fileId : undefined;
@@ -18,12 +21,16 @@ export default function DisplayFile() {
 
   return (
     <Box display="flex" width="100%" height="100%">
-      {fileId && <ForFileId fileId={fileId} />}
+      {fileId && token && <ForFileId fileId={fileId} token={token} />}
     </Box>
   );
 }
 
-const ForFileId: React.FC<{ fileId: string }> = ({ fileId }) => {
+const ForFileId: React.FC<{ fileId: string; token: string }> = ({
+  fileId,
+  token,
+}) => {
+  const { data: file } = useFetchFile(fileId);
   const { data: url } = useFetchSignedUrl(fileId);
 
   const [showPdf, setShowPdf] = React.useState(true);
@@ -88,7 +95,13 @@ const ForFileId: React.FC<{ fileId: string }> = ({ fileId }) => {
         >
           {value === 0 && <ViewByChunk fileId={fileId} />}
           {value === 1 && <DisplayFileReport />}
-          {value === 2 && <DisplayFileChat />}
+          {value === 2 && file && (
+            <DisplayFileChat
+              fileReferenceId={file.id}
+              projectId={file.projectId}
+              token={token}
+            />
+          )}
         </Box>
       </Box>
     </Paper>

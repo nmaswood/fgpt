@@ -105,9 +105,13 @@ def get_questions_and_summaries(text: str) -> QuestionsAndSummaries:
         temperature=0,
         num_reasks=2,
     )
-    print(validated_response)
-
-    return QuestionsAndSummaries(**validated_response)
+    try:
+        return QuestionsAndSummaries(**validated_response)
+    except Exception as e:
+        logger.error(e)
+        logger.error(text)
+        logger.error(raw_llm_response)
+        return QuestionsAndSummaries()
 
 
 def get_metrics_and_entities(text: str) -> MetricsAndEntities:
@@ -133,7 +137,8 @@ def get_metrics_and_entities(text: str) -> MetricsAndEntities:
 
 def get_output(text: str) -> Output:
     questions_and_summaries = get_questions_and_summaries(text)
-    metrics_and_entities = get_metrics_and_entities(text)
+    # metrics_and_entities = get_metrics_and_entities(text)
+    metrics_and_entities = MetricsAndEntities()
 
     return Output(
         summaries=questions_and_summaries.summaries,

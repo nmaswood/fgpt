@@ -2,7 +2,7 @@ import useSWR from "swr";
 
 export const useFetchToken = () => {
   const { data, isLoading, mutate } = useSWR<string>(
-    "api/token",
+    "/api/token",
     async (url) => {
       const response = await fetch(url);
       const data = await response.json();

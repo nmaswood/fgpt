@@ -59,9 +59,27 @@ export class LLMOutputRouter {
       }
     );
 
+    router.get(
+      "/sample-file/:fileReferenceId",
+      async (req: express.Request, res: express.Response) => {
+        const body = ZSampleRequest.parse(req.params);
+
+        const questions = await this.questionStore.sampleForFile(
+          body.fileReferenceId,
+          10
+        );
+
+        res.json({ questions });
+      }
+    );
+
     return router;
   }
 }
+
+const ZSampleRequest = z.object({
+  fileReferenceId: z.string(),
+});
 
 const ZPlaygroundRequest = z.object({
   textChunkId: z.string(),

@@ -3,9 +3,10 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
+    "-dev::server": "NODE_OPTIONS='--inspect' next dev",
     "dev::server": "NODE_OPTIONS='--inspect' next dev",
     "dev::watch": "yarn tsc --noEmit --incremental --watch",
-    "dev": "concurrently --names \"NEXT,WATCH\" -c \"bgBlue.bold,bgMagenta.bold\" \"yarn dev::server\" \"yarn dev::watch\"",
+    "dev": "concurrently --names \"NEXT,WATCH\" -c \"bgBlue.bold,bgMagenta.bold\" \"yarn start\" \"yarn dev::watch\"",
     "build": "next build",
     "start": "next start",
     "test": "yarn vitest src/tests",

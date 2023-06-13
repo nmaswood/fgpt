@@ -1,20 +1,23 @@
 import { Chat } from "@fgpt/precedent-iso";
 import useSWR from "swr";
 
-export const useFetchChats = (projectId: string) => {
+export type ChatLocation = "project" | "file";
+export const useFetchChats = (location: ChatLocation, id: string) => {
   const { data, isLoading, mutate } = useSWR<
     Chat[],
-    ["api/proxy/v1/chat/list-chats", string]
-  >(["api/proxy/v1/chat/list-chats", projectId], fetcher);
+    ["/api/proxy/v1/chat", string, string]
+  >(["/api/proxy/v1/chat", location, id], fetcher);
 
   return { data: data ?? [], isLoading, mutate };
 };
 
-async function fetcher([url, projectId]: [
-  "api/proxyjv1/chat/list-chats",
+async function fetcher([url, location, id]: [
+  "/api/proxy/v1/chat",
+  string,
   string
 ]): Promise<Chat[]> {
-  const response = await fetch(`${url}/${projectId}`);
+  const finalUrl = `${url}/list-${location}-chats/${id}`;
+  const response = await fetch(finalUrl);
   const data = await response.json();
 
   return data.chats;

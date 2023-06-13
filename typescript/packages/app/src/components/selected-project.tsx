@@ -34,7 +34,10 @@ import XHRUpload from "@uppy/xhr-upload";
 import React from "react";
 
 import { CLIENT_SETTINGS } from "../client-settings";
+import { useCreateChat } from "../hooks/use-create-chat";
+import { useDeleteChat } from "../hooks/use-delete-chat";
 import { useDeleteProject } from "../hooks/use-delete-project";
+import { useEditChat } from "../hooks/use-edit-chat";
 import { useEditProject } from "../hooks/use-edit-project";
 import { useFetchFiles } from "../hooks/use-fetch-files";
 import { useFetchChats } from "../hooks/use-list-chats";
@@ -80,7 +83,10 @@ export const SelectedProject: React.FC<{
     isLoading: filesLoading,
   } = useFetchFiles(project.id);
 
-  const { data: chats, isLoading: chatsLoading } = useFetchChats(project.id);
+  const { data: chats, isLoading: chatsLoading } = useFetchChats(
+    "project",
+    project.id
+  );
 
   const [value, setValue] = React.useState(2);
 
@@ -114,6 +120,17 @@ export const SelectedProject: React.FC<{
   };
 
   const isLargeScreen = useMediaQuery("(min-width:750px)");
+
+  const { trigger: createChat, isMutating: createChatIsLoading } =
+    useCreateChat("project", project.id);
+
+  const { trigger: deleteChat, isMutating: isDeleteChatMutating } =
+    useDeleteChat("project", project.id);
+
+  const { trigger: editChat, isMutating: isEditingChatMutating } = useEditChat(
+    "project",
+    project.id
+  );
 
   return (
     <>
@@ -259,6 +276,14 @@ export const SelectedProject: React.FC<{
               token={token}
               chats={chats}
               chatsLoading={chatsLoading}
+              createChat={createChat}
+              deleteChat={deleteChat}
+              editChat={editChat}
+              isMutating={
+                createChatIsLoading ||
+                isDeleteChatMutating ||
+                isEditingChatMutating
+              }
             />
           </Box>
         )}

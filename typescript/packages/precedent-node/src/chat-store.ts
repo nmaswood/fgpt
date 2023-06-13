@@ -14,6 +14,7 @@ export interface InsertChat {
   organizationId: string;
   projectId: string;
   creatorId: string;
+  fileReferenceId?: string;
   name?: string;
 }
 
@@ -37,15 +38,17 @@ export interface UpdateChatEntry {
   answer: string;
 }
 
-const CHAT_FIELDS = sql.fragment`chat.id as chat_id, chat.name as chat_name`;
+const CHAT_FIELDS = sql.fragment`chat.id as chat_id, chat.name as chat_name, chat.file_reference_id as file_reference_id`;
 const CHAT_ENTRY_FIELDS = sql.fragment`chat_entry.id as chat_entry_id, question_v2 as question, answer`;
 
 export interface ChatStore {
+  getChat(id: string): Promise<Chat>;
   insertChat(chat: InsertChat): Promise<Chat>;
   updateChat(update: UpdateChat): Promise<Chat>;
   insertChatEntry(chatEntry: InsertChatEntry): Promise<ChatEntry>;
   updateChatEntry(chatEntry: UpdateChatEntry): Promise<ChatEntry>;
-  listChats(projectId: string): Promise<Chat[]>;
+  listProjectChats(projectId: string): Promise<Chat[]>;
+  listfileReferenceChats(fileReferenceId: string): Promise<Chat[]>;
   listChatEntries(chatId: string): Promise<ChatEntry[]>;
   deleteChat(chatId: string): Promise<void>;
   listChatHistory(chatId: string): Promise<ChatHistory[]>;
@@ -54,6 +57,15 @@ export interface ChatStore {
 
 export class PsqlChatStore implements ChatStore {
   constructor(private readonly pool: DatabasePool) {}
+
+  async getChat(id: string): Promise<Chat> {
+    return this.pool.one(sql.type(ZChatRow)`
+SELECT ${CHAT_FIELDS}
+FROM chat
+WHERE 
+    id = ${id}
+`);
+  }
 
   async insertChat(chat: InsertChat): Promise<Chat> {
     return this.pool.transaction(async (trx) => this.#insertChat(trx, chat));
@@ -75,10 +87,10 @@ WHERE
       throw new Error("max limit reached");
     }
     return trx.one(sql.type(ZChatRow)`
-INSERT INTO chat (organization_id, project_id, creator_id, name)
+INSERT INTO chat (organization_id, project_id, creator_id, name, file_reference_id)
     VALUES (${chat.organizationId}, ${chat.projectId}, ${chat.creatorId}, ${
       chat.name ?? null
-    })
+    }, ${chat.fileReferenceId ?? null})
 RETURNING
     ${CHAT_FIELDS}
 `);
@@ -162,7 +174,7 @@ RETURNING
 `);
   }
 
-  async listChats(projectId: string): Promise<Chat[]> {
+  async listProjectChats(projectId: string): Promise<Chat[]> {
     const resp = await this.pool.query(sql.type(ZChatRow)`
 SELECT
     ${CHAT_FIELDS}
@@ -170,6 +182,21 @@ FROM
     chat
 WHERE
     project_id = ${projectId}
+    AND file_reference_id IS NULL
+ORDER BY
+    chat.created_at DESC
+`);
+    return Array.from(resp.rows);
+  }
+
+  async listfileReferenceChats(fileReferenceId: string): Promise<Chat[]> {
+    const resp = await this.pool.query(sql.type(ZChatRow)`
+SELECT
+    ${CHAT_FIELDS}
+FROM
+    chat
+WHERE
+    file_reference_id = ${fileReferenceId}
 ORDER BY
     chat.created_at DESC
 `);
@@ -242,11 +269,13 @@ const ZChatRow = z
   .object({
     chat_id: z.string(),
     chat_name: z.string().nullable(),
+    file_reference_id: z.string().nullable(),
   })
   .transform(
     (row): Chat => ({
       id: row.chat_id,
       name: row.chat_name ?? undefined,
+      fileReferenceId: row.file_reference_id ?? undefined,
     })
   );
 

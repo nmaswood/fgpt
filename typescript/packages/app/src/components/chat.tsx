@@ -25,14 +25,13 @@ import {
   TableRow,
   TextField,
   Typography,
+  ListItemButton,
 } from "@mui/material";
 import NextLink from "next/link";
 import React from "react";
 
 import { useAskQuestion } from "../hooks/use-ask-question";
 import { useFetchContext } from "../hooks/use-context-chat";
-import { useCreateChat } from "../hooks/use-create-chat";
-import { useDeleteChat } from "../hooks/use-delete-chat";
 import { useFetchChatEntries } from "../hooks/use-fetch-chat-entry";
 import { DisplayChatList } from "./display-chats";
 
@@ -59,7 +58,23 @@ export const DisplayChat: React.FC<{
   token: string;
   chats: Chat[];
   chatsLoading: boolean;
-}> = ({ projectId, token, chats }) => {
+  fileReferenceId?: string;
+  createChat: (args: { name: string }) => Promise<Chat | undefined>;
+  deleteChat: (args: { id: string }) => Promise<string | undefined>;
+  editChat: (args: { id: string; name: string }) => Promise<unknown>;
+  isMutating: boolean;
+  questions: string[];
+}> = ({
+  projectId,
+  token,
+  chats,
+  fileReferenceId,
+  isMutating,
+  createChat,
+  deleteChat,
+  editChat,
+  questions,
+}) => {
   const [selectedChatId, setSelectedChatId] = React.useState<
     string | undefined
   >(undefined);
@@ -75,7 +90,7 @@ export const DisplayChat: React.FC<{
 
   React.useEffect(() => {
     setSelectedChatId(undefined);
-  }, [projectId]);
+  }, [projectId, fileReferenceId]);
 
   const filtered = (() => {
     if (!selectedChatId) {
@@ -90,12 +105,6 @@ export const DisplayChat: React.FC<{
     );
     return final;
   })();
-
-  const { trigger: createChat, isMutating: createChatIsLoading } =
-    useCreateChat(projectId);
-
-  const { trigger: deleteChat, isMutating: isDeleteChatMutating } =
-    useDeleteChat(projectId);
 
   const onDelete = async (id: string) => {
     await deleteChat({ id });
@@ -129,11 +138,11 @@ export const DisplayChat: React.FC<{
 
   const trimmed = input.trim();
 
-  const submit = async () => {
-    if (loading || createChatIsLoading) {
+  const submit = async (question?: string) => {
+    if (loading || isMutating) {
       return;
     }
-    const trimmed = input.trim();
+    const trimmed = question ?? input.trim();
     if (!trimmed.length) {
       return;
     }
@@ -178,17 +187,39 @@ export const DisplayChat: React.FC<{
   };
 
   return (
-    <Box display="flex" width="100%" height="100%">
-      <DisplayChatList
-        chats={chats}
-        selectedChatId={selectedChatId}
-        setSelectedChatId={setSelectedChatId}
-        selectedChatIdx={selectedChatIdx}
-        createChat={(name: string) => createChat({ name })}
-        projectId={projectId}
-        isMutating={createChatIsLoading || isDeleteChatMutating}
-        deleteChat={onDelete}
-      />
+    <Box
+      display="flex"
+      width="100%"
+      height="100%"
+      maxHeight="100%"
+      overflow="auto"
+    >
+      <Box
+        display="grid"
+        width="500px"
+        height="100%"
+        overflow="auto"
+        maxHeight="100%"
+        gridTemplateRows="1fr 1fr"
+      >
+        <DisplayChatList
+          chats={chats}
+          selectedChatId={selectedChatId}
+          setSelectedChatId={setSelectedChatId}
+          selectedChatIdx={selectedChatIdx}
+          createChat={(name: string) => createChat({ name })}
+          isMutating={isMutating}
+          deleteChat={onDelete}
+          editChat={editChat}
+        />
+        {questions.length && (
+          <DisplayQuestions
+            questions={questions}
+            disabled={isMutating}
+            askQuestion={(question: string) => submit(question)}
+          />
+        )}
+      </Box>
       <Box
         display="flex"
         width="100%"
@@ -242,9 +273,7 @@ export const DisplayChat: React.FC<{
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
-                    disabled={
-                      trimmed.length === 0 || loading || createChatIsLoading
-                    }
+                    disabled={trimmed.length === 0 || loading || isMutating}
                     onClick={submit}
                   >
                     <SendIcon
@@ -491,4 +520,36 @@ const ResponseAvatar: React.FC<{ state: "error" | "data" }> = ({ state }) => {
     default:
       assertNever(state);
   }
+};
+
+const DisplayQuestions: React.FC<{
+  questions: string[];
+  askQuestion: (question: string) => void;
+  disabled: boolean;
+}> = ({ questions, askQuestion, disabled }) => {
+  return (
+    <Box
+      display="flex"
+      width="100%"
+      height="100%"
+      maxHeight="100%"
+      overflow="auto"
+    >
+      <List disablePadding>
+        {questions.map((question, idx) => {
+          return (
+            <ListItemButton
+              key={idx}
+              disabled={disabled}
+              onClick={() => askQuestion(question)}
+            >
+              <ListItem disablePadding>
+                <ListItemText primary={question}></ListItemText>
+              </ListItem>
+            </ListItemButton>
+          );
+        })}
+      </List>
+    </Box>
+  );
 };

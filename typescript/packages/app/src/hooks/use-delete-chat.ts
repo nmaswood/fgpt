@@ -1,9 +1,9 @@
 import useSWRMutation from "swr/mutation";
 
-import { useFetchChats } from "./use-list-chats";
+import { ChatLocation, useFetchChats } from "./use-list-chats";
 
-export const useDeleteChat = (projectId: string) => {
-  const { mutate } = useFetchChats(projectId);
+export const useDeleteChat = (location: ChatLocation, projectId: string) => {
+  const { mutate } = useFetchChats(location, projectId);
 
   const res = useSWRMutation<
     string,

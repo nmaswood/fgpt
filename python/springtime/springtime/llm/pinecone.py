@@ -1,6 +1,3 @@
-from os import name
-from re import S
-import random
 import pinecone
 
 from pydantic import BaseModel
@@ -40,6 +37,8 @@ class VectorResult(BaseModel):
 
 def get_similar(vector: list[float], metadata: dict[str, str]) -> list[VectorResult]:
     index = get_pinecone_index()
+
+    print(metadata)
 
     result = index.query(
         vector=vector,

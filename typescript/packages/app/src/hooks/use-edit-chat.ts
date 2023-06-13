@@ -1,12 +1,12 @@
 import useSWRMutation from "swr/mutation";
 
-import { useFetchChats } from "./use-list-chats";
+import { ChatLocation,useFetchChats } from "./use-list-chats";
 
-export const useEditChat = (projectId: string) => {
-  const { mutate } = useFetchChats(projectId);
+export const useEditChat = (location: ChatLocation, projectId: string) => {
+  const { mutate } = useFetchChats(location, projectId);
 
   const res = useSWRMutation<
-    string,
+    undefined,
     unknown,
     "/api/proxy/v1/chat/chat",
     { id: string; name: string }
@@ -21,7 +21,7 @@ export const useEditChat = (projectId: string) => {
     });
     const data = await res.json();
     mutate();
-    return data.project;
+    return data.chat;
   });
 
   return res;

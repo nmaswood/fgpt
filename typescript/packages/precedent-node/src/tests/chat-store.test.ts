@@ -3,6 +3,7 @@ import { beforeEach, expect, test } from "vitest";
 
 import { PsqlChatStore } from "../chat-store";
 import { dataBasePool } from "../data-base-pool";
+import { PsqlFileReferenceStore } from "../file-reference-store";
 import { PSqlProjectStore } from "../project-store";
 import { PsqlUserOrgService } from "../user-org/user-org-service";
 import { TEST_SETTINGS } from "./test-settings";
@@ -12,6 +13,7 @@ async function setup() {
 
   const userOrgService = new PsqlUserOrgService(pool);
   const projectService = new PSqlProjectStore(pool);
+  const fileReferenceStore = new PsqlFileReferenceStore(pool);
 
   const user = await userOrgService.upsert({
     sub: {
@@ -28,10 +30,19 @@ async function setup() {
   });
 
   const chatStore = new PsqlChatStore(pool);
+  const file = await fileReferenceStore.insert({
+    fileName: "hi",
+    organizationId: user.organizationId,
+    projectId: project.id,
+    bucketName: "test",
+    path: "test",
+    contentType: "application/pdf",
+  });
   return {
     creatorId: user.id,
     projectId: project.id,
     organizationId: user.organizationId,
+    fileReferenceId: file.id,
     chatStore,
   };
 }
@@ -45,7 +56,8 @@ beforeEach(async () => {
 });
 
 test("insertChat", async () => {
-  const { creatorId, projectId, organizationId, chatStore } = await setup();
+  const { creatorId, projectId, organizationId, chatStore, fileReferenceId } =
+    await setup();
 
   const chat = await chatStore.insertChat({
     organizationId,
@@ -55,10 +67,22 @@ test("insertChat", async () => {
   });
 
   expect(chat.name).toEqual("I love cows");
+  expect(chat.fileReferenceId).toBeUndefined();
+
+  const fileChat = await chatStore.insertChat({
+    organizationId,
+    projectId,
+    creatorId,
+    name: "I love cows",
+    fileReferenceId,
+  });
+
+  expect(fileChat.fileReferenceId).toBeDefined();
 });
 
-test("listChats", async () => {
-  const { creatorId, projectId, organizationId, chatStore } = await setup();
+test("listProjectChats", async () => {
+  const { creatorId, projectId, organizationId, chatStore, fileReferenceId } =
+    await setup();
 
   const chat = await chatStore.insertChat({
     organizationId,
@@ -67,10 +91,20 @@ test("listChats", async () => {
     name: "I love cows",
   });
 
-  const [firstChat] = await chatStore.listChats(projectId);
+  await chatStore.insertChat({
+    organizationId,
+    projectId,
+    creatorId,
+    name: "I love cows",
+    fileReferenceId,
+  });
+
+  const chats = await chatStore.listProjectChats(projectId);
+  const [firstChat, secondChat] = chats;
 
   expect(firstChat.name).toEqual(chat.name);
   expect(chat.id).toEqual(firstChat.id);
+  expect(secondChat).toBeUndefined();
 });
 
 test("updateChat", async () => {
@@ -196,7 +230,7 @@ test("deleteChat", async () => {
   const entriesAfterDelete = await chatStore.listChatEntries(chat.id);
   expect(entriesAfterDelete.length).toEqual(0);
 
-  const chatsAfterDelete = await chatStore.listChats(projectId);
+  const chatsAfterDelete = await chatStore.listProjectChats(projectId);
   expect(chatsAfterDelete.length).toEqual(0);
 });
 
@@ -253,4 +287,19 @@ test("getContext", async () => {
 
   const [context] = await chatStore.getContext(entry.id);
   expect(context.filename).toEqual("hi.pdf");
+});
+
+test("getChat", async () => {
+  const { creatorId, projectId, organizationId, chatStore } = await setup();
+
+  const chat = await chatStore.insertChat({
+    organizationId,
+    projectId,
+    creatorId,
+    name: "I love cows",
+  });
+
+  const chatAgain = await chatStore.getChat(chat.id);
+
+  expect(chatAgain.id).toEqual(chat.id);
 });

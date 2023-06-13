@@ -1,6 +1,7 @@
 export interface Chat {
   id: string;
   name: string | undefined;
+  fileReferenceId: string | undefined;
 }
 
 export interface ChatEntry {

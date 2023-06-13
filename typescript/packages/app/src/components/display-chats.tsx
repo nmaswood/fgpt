@@ -16,8 +16,6 @@ import {
 } from "@mui/material";
 import React from "react";
 
-import { useEditChat } from "../hooks/use-edit-chat";
-
 export const DisplayChatList: React.FC<{
   chats: Chat[];
   selectedChatId: string | undefined;
@@ -26,16 +24,16 @@ export const DisplayChatList: React.FC<{
   createChat: (name: string) => Promise<Chat | undefined>;
   deleteChat: (name: string) => Promise<unknown>;
   isMutating: boolean;
-  projectId: string;
+  editChat: (args: { id: string; name: string }) => Promise<unknown>;
 }> = ({
   chats,
   selectedChatId,
   setSelectedChatId,
   selectedChatIdx,
   createChat,
-  projectId,
   deleteChat,
   isMutating,
+  editChat,
 }) => {
   return (
     <Box
@@ -97,7 +95,8 @@ export const DisplayChatList: React.FC<{
             setSelectedChatId={setSelectedChatId}
             isLoading={isMutating}
             onDelete={deleteChat}
-            projectId={projectId}
+            editChat={editChat}
+            isMutating={isMutating}
           />
         ))}
       </List>
@@ -111,17 +110,17 @@ const ListItemEntry: React.FC<{
   setSelectedChatId: (s: string) => void;
   isLoading: boolean;
   onDelete: (chatId: string) => void;
-  projectId: string;
+  editChat: (args: { id: string; name: string }) => Promise<unknown>;
+  isMutating: boolean;
 }> = ({
   chat,
   selectedChatId,
   setSelectedChatId,
   isLoading: propsIsLoading,
   onDelete,
-  projectId,
+  editChat,
+  isMutating,
 }) => {
-  const { trigger, isMutating } = useEditChat(projectId);
-
   const [isEditing, setIsEditing] = React.useState(false);
 
   const [name, setName] = React.useState(chat.name ?? "");
@@ -135,7 +134,7 @@ const ListItemEntry: React.FC<{
       return;
     }
 
-    await trigger({ id: chat.id, name: trimmed });
+    await editChat({ id: chat.id, name: trimmed });
     setIsEditing(false);
   };
 

@@ -192,3 +192,32 @@ test("getForChunk", async () => {
 
   expect(question).toEqual("hi");
 });
+
+test("sampleForFile", async () => {
+  const {
+    organizationId,
+    projectId,
+    fileReferenceId,
+    processedFileId,
+    textChunkGroupId,
+    textChunkId,
+    questionStore,
+  } = await setup();
+
+  await questionStore.insertMany([
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      processedFileId,
+      textChunkGroupId,
+      textChunkId,
+      question: "hi",
+      hash: "foo",
+    },
+  ]);
+
+  const [question] = await questionStore.getForChunk(textChunkId);
+
+  expect(question).toEqual("hi");
+});

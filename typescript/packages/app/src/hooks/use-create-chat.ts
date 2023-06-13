@@ -1,10 +1,10 @@
 import type { Chat } from "@fgpt/precedent-iso";
 import useSWRMutation from "swr/mutation";
 
-import { useFetchChats } from "./use-list-chats";
+import { ChatLocation, useFetchChats } from "./use-list-chats";
 
-export const useCreateChat = (projectId: string) => {
-  const { mutate } = useFetchChats(projectId);
+export const useCreateChat = (location: ChatLocation, id: string) => {
+  const { mutate } = useFetchChats(location, id);
 
   const res = useSWRMutation<
     Chat,
@@ -13,10 +13,10 @@ export const useCreateChat = (projectId: string) => {
     { name: string }
   >("/api/proxy/v1/chat/create-chat", async (url: string, args) => {
     const body = {
-      projectId,
+      id,
+      location,
       ...args.arg,
     };
-
     const res = await fetch(url, {
       method: "POST",
       headers: {

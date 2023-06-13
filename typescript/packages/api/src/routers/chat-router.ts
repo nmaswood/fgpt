@@ -1,3 +1,4 @@
+import { assertNever } from "@fgpt/precedent-iso";
 import {
   ChatStore,
   FileReferenceStore,
@@ -23,10 +24,21 @@ export class ChatRouter {
     const router = express.Router();
 
     router.get(
-      "/list-chats/:projectId",
+      "/list-project-chats/:projectId",
       async (req: express.Request, res: express.Response) => {
-        const body = ZListChatRequest.parse(req.params);
-        const chats = await this.chatStore.listChats(body.projectId);
+        const body = ZListProjectChatRequest.parse(req.params);
+        const chats = await this.chatStore.listProjectChats(body.projectId);
+        res.json({ chats });
+      }
+    );
+
+    router.get(
+      "/list-file-chats/:fileReferenceId",
+      async (req: express.Request, res: express.Response) => {
+        const body = ZListFileChatRequest.parse(req.params);
+        const chats = await this.chatStore.listfileReferenceChats(
+          body.fileReferenceId
+        );
         res.json({ chats });
       }
     );
@@ -36,9 +48,27 @@ export class ChatRouter {
       async (req: express.Request, res: express.Response) => {
         const body = ZCreateChatRequest.parse(req.body);
 
+        const value = await (async () => {
+          switch (body.location) {
+            case "project":
+              return {
+                projectId: body.id,
+              };
+            case "file": {
+              const file = await this.fileReferenceStore.get(body.id);
+              return {
+                projectId: file.projectId,
+                fileReferenceId: file.id,
+              };
+            }
+            default:
+              assertNever(body.location);
+          }
+        })();
+
         const chat = await this.chatStore.insertChat({
+          ...value,
           organizationId: req.user.organizationId,
-          projectId: body.projectId,
           creatorId: req.user.id,
           name: body.name,
         });
@@ -81,12 +111,19 @@ export class ChatRouter {
       async (req: express.Request, res: express.Response) => {
         const args = ZChatArguments.parse(req.body);
 
+        const chat = await this.chatStore.getChat(args.chatId);
         const vector = await this.mlClient.getEmbedding(args.question);
 
+        const metadata = chat.fileReferenceId
+          ? // note foot gun re fileId
+            { fileId: chat.fileReferenceId }
+          : { projectId: args.projectId };
+
+        debugger;
         const similarDocuments = await (async () => {
           const docs = await this.mlClient.getKSimilar({
             vector,
-            metadata: { projectId: args.projectId },
+            metadata,
           });
 
           return docs.map(({ id, score, metadata }) => ({
@@ -182,12 +219,16 @@ const ZChatArguments = z.object({
   chatId: z.string(),
 });
 
-const ZListChatRequest = z.object({ projectId: z.string() });
+const ZListProjectChatRequest = z.object({ projectId: z.string() });
+const ZListFileChatRequest = z.object({ fileReferenceId: z.string() });
 
 const ZGetChatEntryRequest = z.object({ chatId: z.string() });
 
+const ZChatLocation = z.enum(["project", "file"]);
+
 const ZCreateChatRequest = z.object({
-  projectId: z.string(),
+  id: z.string(),
+  location: ZChatLocation,
   name: z.string(),
 });
 

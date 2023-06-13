@@ -126,9 +126,22 @@ export class FileRouter {
         res.json({ signedUrl });
       }
     );
+
+    router.get(
+      "/single/:fileReferenceId",
+      async (req: express.Request, res: express.Response) => {
+        const params = ZSingleRequest.parse(req.params);
+        const file = await this.fileReferenceStore.get(params.fileReferenceId);
+        res.json({ file });
+      }
+    );
     return router;
   }
 }
+
+const ZSingleRequest = z.object({
+  fileReferenceId: z.string(),
+});
 
 const ZFileBody = z.object({
   projectId: z.string(),
