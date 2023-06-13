@@ -149,7 +149,12 @@ async function start() {
     "/api/v1/output",
     jwtCheck,
     addUser,
-    new LLMOutputRouter(summaryStore, questionStore).init()
+    new LLMOutputRouter(
+      summaryStore,
+      questionStore,
+      mlService,
+      textChunkStore
+    ).init()
   );
 
   app.use("/ping", (_, res) => {

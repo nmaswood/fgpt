@@ -141,3 +141,19 @@ def get_output(text: str) -> Output:
         metrics=metrics_and_entities.metrics,
         entities=metrics_and_entities.entities,
     )
+
+
+def from_user(prompt: str, text: str):
+    dir = os.path.dirname(__file__)
+
+    guard = gd.Guard.from_rail_string(prompt)
+
+    raw_llm_response, validated_response = guard(
+        openai.Completion.create,
+        model="text-davinci-003",
+        prompt_params={"document": text.replace("gmail", "")},
+        max_tokens=512,
+        temperature=0,
+        num_reasks=2,
+    )
+    return raw_llm_response, validated_response

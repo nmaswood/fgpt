@@ -1,10 +1,13 @@
 import { TextChunk } from "@fgpt/precedent-iso";
 import useSWR from "swr";
 
-export const useFetchTextChunk = (fileId: string, order: number) => {
+export const useFetchTextChunk = (
+  fileId: string | undefined,
+  order: number
+) => {
   const { data, isLoading, mutate } = useSWR<
-    TextChunk,
-    ["/api/proxy/v1/text/text-group-chunk", string, number]
+    TextChunk | undefined,
+    ["/api/proxy/v1/text/text-group-chunk", string | undefined, number]
   >(["/api/proxy/v1/text/text-group-chunk", fileId, order], fetcher);
 
   return { data, isLoading, mutate };
@@ -12,9 +15,12 @@ export const useFetchTextChunk = (fileId: string, order: number) => {
 
 async function fetcher([url, textGroupId, order]: [
   "/api/proxy/v1/text/text-group-chunk",
-  string,
+  string | undefined,
   number
-]): Promise<TextChunk> {
+]): Promise<TextChunk | undefined> {
+  if (!textGroupId) {
+    return undefined;
+  }
   const response = await fetch(url, {
     body: JSON.stringify({ textGroupId, order }),
     method: "POST",

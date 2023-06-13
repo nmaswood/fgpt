@@ -122,7 +122,6 @@ where id IN (${sql.join(ids, sql.fragment`, `)})
     return this.pool.connect(async (cnx) => {
       const project = await cnx.one(
         sql.type(ZProjectRow)`
-
 UPDATE
     Project
 SET

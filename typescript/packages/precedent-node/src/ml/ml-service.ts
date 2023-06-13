@@ -72,6 +72,16 @@ export interface LLMOutputResponse {
   entities: string[];
 }
 
+export interface PlaygroundRequest {
+  text: string;
+  prompt: string;
+}
+
+export interface PlaygroundResponse {
+  raw: string;
+  validated: Record<string, any>;
+}
+
 export interface MLServiceClient {
   predict: (args: PredictArguments) => Promise<PredictResponse>;
   ping: () => Promise<"pong">;
@@ -82,6 +92,7 @@ export interface MLServiceClient {
   askQuestion(args: AskQuestion): Promise<string>;
   askQuestionStreaming(args: AskQuestionStreamingArgs): Promise<void>;
   llmOutput(args: LLMOutputArgs): Promise<LLMOutputResponse>;
+  playGround(args: PlaygroundRequest): Promise<PlaygroundResponse>;
 }
 
 export class MLServiceClientImpl implements MLServiceClient {
@@ -185,11 +196,29 @@ export class MLServiceClientImpl implements MLServiceClient {
     });
     return ZLLMOutputResponse.parse(response.data);
   }
+
+  async playGround(args: PlaygroundRequest): Promise<PlaygroundResponse> {
+    const response = await this.#client.post<unknown>("/playground", {
+      text: args.text,
+      prompt: args.prompt,
+    });
+    return ZPlaygroundResponse.parse(response.data);
+  }
 }
 
 const ZAskQuestionResponse = z.object({
   data: z.string(),
 });
+
+const ZPlaygroundResponse = z
+  .object({
+    raw: z.string(),
+    validated: z.record(z.any()).nullable(),
+  })
+  .transform((row) => ({
+    raw: row.raw,
+    validated: row.validated ?? {},
+  }));
 
 const ZMetric = z.object({
   description: z.string(),

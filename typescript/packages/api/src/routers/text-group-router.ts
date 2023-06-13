@@ -1,3 +1,4 @@
+import { ZChunkStrategy } from "@fgpt/precedent-iso";
 import { TextChunkStore } from "@fgpt/precedent-node";
 import express from "express";
 import { z } from "zod";
@@ -8,16 +9,13 @@ export class TextGroupRouter {
     const router = express.Router();
 
     router.get(
-      "/text-group/:fileId",
+      "/text-group/:chunkStrategy/:fileId",
       async (req: express.Request, res: express.Response) => {
-        const fileId = req.params.fileId;
-        if (typeof fileId !== "string") {
-          throw new Error("invalid request");
-        }
+        const body = ZTextChunkRequest.parse(req.params);
 
         const textGroup = await this.textChunkStore.getTextChunkGroupByFileId(
-          "greedy_v0",
-          fileId
+          body.chunkStrategy,
+          body.fileId
         );
         res.json({ textGroup });
       }
@@ -39,6 +37,11 @@ export class TextGroupRouter {
     return router;
   }
 }
+
+const ZTextChunkRequest = z.object({
+  fileId: z.string(),
+  chunkStrategy: ZChunkStrategy,
+});
 
 const ZTextGroupChunkRequest = z.object({
   textGroupId: z.string(),

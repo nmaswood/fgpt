@@ -45,8 +45,7 @@ export class PsqlMetricsStore implements MetricsStore {
     ${textChunkId},
     ${value ?? null},
     ${description ?? null},
-    ${JSON.stringify({})}
-)
+    ${JSON.stringify({})})
 `
     );
 

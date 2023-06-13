@@ -15,24 +15,36 @@ export interface InsertSummary {
 
 const FIELDS = sql.fragment`id, organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, text_chunk_id, summary`;
 export interface SummaryStore {
-  getForFile(fileReferenceId: string): Promise<Outputs.Summary[]>;
+  getForFile(fileReferenceId: string): Promise<string[]>;
+  getForChunk(chunkId: string): Promise<string[]>;
   insertMany(summaries: InsertSummary[]): Promise<Outputs.Summary[]>;
 }
 
 export class PsqlSummaryStore implements SummaryStore {
   constructor(private readonly pool: DatabasePool) {}
 
-  async getForFile(fileReferenceId: string): Promise<Outputs.Summary[]> {
-    const result = await this.pool.query(sql.type(ZSummaryRow)`
-
+  async getForFile(fileReferenceId: string): Promise<string[]> {
+    const result = await this.pool.query(sql.type(ZGetForFile)`
 SELECT
-    ${FIELDS}
+    summary
 FROM
     text_chunk_summary
 WHERE
     file_reference_id = ${fileReferenceId}
 `);
-    return Array.from(result.rows);
+    return result.rows.map((row) => row.summary);
+  }
+
+  async getForChunk(chunkId: string): Promise<string[]> {
+    const result = await this.pool.query(sql.type(ZGetForFile)`
+SELECT
+    summary
+FROM
+    text_chunk_summary
+WHERE
+    text_chunk_id = ${chunkId}
+`);
+    return result.rows.map((row) => row.summary);
   }
 
   async insertMany(summaries: InsertSummary[]): Promise<Outputs.Summary[]> {
@@ -73,6 +85,10 @@ INSERT INTO text_chunk_summary (organization_id, project_id, file_reference_id, 
     return Array.from(res.rows);
   }
 }
+
+const ZGetForFile = z.object({
+  summary: z.string(),
+});
 
 const ZSummaryRow = z
   .object({

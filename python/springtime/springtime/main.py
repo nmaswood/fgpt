@@ -6,7 +6,7 @@ from starlette.responses import StreamingResponse
 
 from fastapi import FastAPI
 
-from springtime.llm.ml import Metric, ask_question_streaming, embeddings_for_documents, ask_question, get_output
+from springtime.llm.ml import Metric, ask_question_streaming, embeddings_for_documents, ask_question, from_user, get_output
 from springtime.llm.models import ChatHistory
 from springtime.llm.pinecone import UpsertVector, get_similar, upsert_vectors
 from .settings import SETTINGS
@@ -101,7 +101,25 @@ async def similar_vectors_route(req: SimilarVectorRequest):
     return {"results": results}
 
 
+class PlaygroundRequest(BaseModel):
+    text: str
+    prompt: str
+
+
+class PlaygroundResponse(BaseModel):
+    raw: str
+    validated: dict[str, Any]
+
+
+@app.post("/playground")
+async def playground_route(req: PlaygroundRequest):
+
+    raw, validated = from_user(req.prompt, req.text)
+    return PlaygroundResponse(raw=raw, validated=validated)
+
 # todo disable reload in prod
+
+
 def start():
     uvicorn.run("springtime.main:app", host=SETTINGS.host,
                 port=SETTINGS.port,

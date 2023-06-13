@@ -18,7 +18,6 @@
 
         '{{document}}'
 
-
         @xml_prefix_prompt
 
         {output_schema}

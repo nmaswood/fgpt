@@ -320,7 +320,6 @@ WHERE
     return this.pool.connect(async (cnx) => {
       const resp = await cnx.query(
         sql.type(ZTextChunkRow)`
-
 SELECT
     ${TEXT_CHUNK_FIELDS}
 FROM
