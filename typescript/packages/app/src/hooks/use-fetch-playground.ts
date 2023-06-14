@@ -15,7 +15,7 @@ export const useFetchPlayground = () => {
       body: JSON.stringify(args.arg),
     });
     const data = await res.json();
-    return data.response;
+    return data.response.raw;
   });
 
   return res;

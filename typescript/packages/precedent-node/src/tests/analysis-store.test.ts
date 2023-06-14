@@ -3,6 +3,7 @@ import { afterEach, beforeEach, expect, test } from "vitest";
 
 import { PsqlAnalysisStore } from "../analysis-store";
 import { dataBasePool } from "../data-base-pool";
+import { PsqlFileReferenceStore } from "../file-reference-store";
 import { PSqlProjectStore } from "../project-store";
 import { PsqlUserOrgService } from "../user-org/user-org-service";
 import { TEST_SETTINGS } from "./test-settings";
@@ -25,14 +26,24 @@ async function setup() {
     organizationId: user.organizationId,
     creatorUserId: user.id,
   });
+  const fileReferenceStore = new PsqlFileReferenceStore(pool);
 
   const analysisStore = new PsqlAnalysisStore(pool);
+  const file = await fileReferenceStore.insert({
+    fileName: "hi",
+    organizationId: user.organizationId,
+    projectId: project.id,
+    bucketName: "test",
+    path: "test",
+    contentType: "application/pdf",
+  });
 
   return {
     pool,
     userId: user.id,
     organizationId: user.organizationId,
     projectId: project.id,
+    fileReferenceId: file.id,
     analysisStore,
   };
 }
@@ -54,7 +65,8 @@ afterEach(async () => {
 });
 
 test("insert", async () => {
-  const { analysisStore, projectId, organizationId } = await setup();
+  const { analysisStore, projectId, organizationId, fileReferenceId } =
+    await setup();
 
   const analysis = await analysisStore.insert({
     organizationId,
@@ -64,13 +76,20 @@ test("insert", async () => {
       version: "1",
       items: [],
     },
+    fileReferenceId,
   });
   expect(analysis.name).toBe("test");
   expect(analysis.output).toBeUndefined();
 });
 
 test("get", async () => {
-  const { analysisStore, projectId, organizationId } = await setup();
+  const {
+    analysisStore,
+    projectId,
+    organizationId,
+
+    fileReferenceId,
+  } = await setup();
 
   const { id } = await analysisStore.insert({
     organizationId,
@@ -80,6 +99,7 @@ test("get", async () => {
       version: "1",
       items: [],
     },
+    fileReferenceId,
   });
 
   const analysis = await analysisStore.get(id);
@@ -88,7 +108,8 @@ test("get", async () => {
 });
 
 test("list", async () => {
-  const { analysisStore, projectId, organizationId } = await setup();
+  const { analysisStore, projectId, organizationId, fileReferenceId } =
+    await setup();
 
   await analysisStore.insert({
     organizationId,
@@ -98,6 +119,7 @@ test("list", async () => {
       version: "1",
       items: [],
     },
+    fileReferenceId,
   });
 
   const [analysis] = await analysisStore.list(projectId);
@@ -106,7 +128,8 @@ test("list", async () => {
 });
 
 test("update", async () => {
-  const { analysisStore, projectId, organizationId } = await setup();
+  const { analysisStore, projectId, organizationId, fileReferenceId } =
+    await setup();
 
   const { id } = await analysisStore.insert({
     organizationId,
@@ -116,6 +139,7 @@ test("update", async () => {
       version: "1",
       items: [],
     },
+    fileReferenceId,
   });
 
   const analysis = await analysisStore.update({
@@ -127,7 +151,13 @@ test("update", async () => {
 });
 
 test("delete", async () => {
-  const { analysisStore, projectId, organizationId } = await setup();
+  const {
+    analysisStore,
+    projectId,
+    organizationId,
+
+    fileReferenceId,
+  } = await setup();
 
   const { id } = await analysisStore.insert({
     organizationId,
@@ -137,6 +167,7 @@ test("delete", async () => {
       version: "1",
       items: [],
     },
+    fileReferenceId,
   });
 
   await analysisStore.delete(id);

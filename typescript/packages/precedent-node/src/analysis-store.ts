@@ -2,18 +2,16 @@ import {
   Analysis,
   AnalysisDefinition,
   AnalysisOutput,
-  MAX_ANALYSIS_LIMIT,
   ZAnalysisDefinition,
   ZAnalysisOutput,
 } from "@fgpt/precedent-iso";
 import { DatabasePool, DatabaseTransactionConnection, sql } from "slonik";
 import { z } from "zod";
 
-import { ZCountRow } from "./sql/models";
-
 export interface InsertAnalysis {
   organizationId: string;
   projectId: string;
+  fileReferenceId: string;
   name: string;
   definition: AnalysisDefinition;
 }
@@ -36,7 +34,7 @@ export interface AnalysisStore {
   deleteMany(ids: string[]): Promise<void>;
 }
 
-const FIELDS = sql.fragment` id, organization_id, project_id, task_id, name, definition, output`;
+const FIELDS = sql.fragment` id, organization_id, project_id, task_id, name, definition, output, file_reference_id`;
 
 export class PsqlAnalysisStore implements AnalysisStore {
   constructor(private readonly pool: DatabasePool) {}
@@ -131,31 +129,21 @@ WHERE
       throw new Error("illegal state");
     }
 
-    const count = await trx.oneFirst(sql.type(ZCountRow)`
-SELECT
-    COUNT(*) as count
-FROM
-    analysis
-where
-    project_id = ${arg.projectId}
-`);
-    if (count >= MAX_ANALYSIS_LIMIT) {
-      throw new Error("too many items for this project");
-    }
-
     const values = args.map(
-      ({ organizationId, projectId, name, definition }) =>
+      ({ organizationId, projectId, name, definition, fileReferenceId }) =>
         sql.fragment`
+
 (${organizationId},
     ${projectId},
     ${name},
-    ${JSON.stringify(definition)})
+    ${JSON.stringify(definition)},
+    ${fileReferenceId})
 `
     );
 
     const resp = await trx.query(
       sql.type(ZAnalysisRow)`
-INSERT INTO analysis (organization_id, project_id, name, definition)
+INSERT INTO analysis (organization_id, project_id, name, definition, file_reference_id)
     VALUES
         ${sql.join(values, sql.fragment`, `)}
     RETURNING
@@ -187,6 +175,7 @@ const ZAnalysisRow = z
     name: z.string(),
     definition: ZAnalysisDefinition,
     output: ZAnalysisOutput.nullable(),
+    file_reference_id: z.string().nullable(),
   })
   .transform(
     (row): Analysis => ({
@@ -197,5 +186,6 @@ const ZAnalysisRow = z
       name: row.name,
       definition: row.definition,
       output: row.output ?? undefined,
+      fileReferenceId: row.file_reference_id ?? undefined,
     })
   );

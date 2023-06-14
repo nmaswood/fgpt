@@ -8,6 +8,7 @@ export interface Analysis {
   name: string;
   definition: AnalysisDefinition;
   output: AnalysisOutput | undefined;
+  fileReferenceId: string | undefined;
 }
 
 export const ZAnalysisItem = z.object({

@@ -79,7 +79,6 @@ export interface PlaygroundRequest {
 
 export interface PlaygroundResponse {
   raw: string;
-  validated: Record<string, any>;
 }
 
 export interface MLServiceClient {
@@ -213,11 +212,9 @@ const ZAskQuestionResponse = z.object({
 const ZPlaygroundResponse = z
   .object({
     raw: z.string(),
-    validated: z.record(z.any()).nullable(),
   })
   .transform((row) => ({
     raw: row.raw,
-    validated: row.validated ?? {},
   }));
 
 const ZMetric = z.object({

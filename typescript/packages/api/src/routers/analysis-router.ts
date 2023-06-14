@@ -1,4 +1,3 @@
-import { ZAnalysisItem } from "@fgpt/precedent-iso";
 import {
   AnalysisStore,
   STANDARD_ANALYSIS,
@@ -33,12 +32,13 @@ export class AnalysisRouter {
         const body = ZCreateRequestBody.parse(req.body);
         const analysis = await this.analysisStore.insert({
           organizationId: req.user.organizationId,
-          name: body.name,
+          name: body.name ?? "DEFAULT_NAME",
           projectId: body.projectId,
           definition: {
             version: "1",
             items: STANDARD_ANALYSIS,
           },
+          fileReferenceId: body.fileReferenceId,
         });
 
         const task = await this.taskService.insert({
@@ -81,7 +81,7 @@ export class AnalysisRouter {
 }
 
 const ZCreateRequestBody = z.object({
-  name: z.string(),
+  name: z.string().nullable(),
   projectId: z.string(),
-  additionalItems: ZAnalysisItem.array(),
+  fileReferenceId: z.string(),
 });

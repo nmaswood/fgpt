@@ -108,14 +108,12 @@ class PlaygroundRequest(BaseModel):
 
 class PlaygroundResponse(BaseModel):
     raw: str
-    validated: dict[str, Any]
 
 
 @app.post("/playground")
 async def playground_route(req: PlaygroundRequest):
-
-    raw, validated = from_user(req.prompt, req.text)
-    return PlaygroundResponse(raw=raw, validated=validated)
+    raw = from_user(req.prompt, req.text)
+    return PlaygroundResponse(raw=raw)
 
 # todo disable reload in prod
 

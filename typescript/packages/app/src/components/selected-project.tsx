@@ -3,7 +3,6 @@ import "@uppy/dashboard/dist/style.min.css";
 
 import { Project } from "@fgpt/precedent-iso";
 import { MAX_FILE_SIZE_BYTES } from "@fgpt/precedent-iso";
-import AssessmentIcon from "@mui/icons-material/Assessment";
 import BoltIcon from "@mui/icons-material/Bolt";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CollectionsIcon from "@mui/icons-material/Collections";
@@ -42,7 +41,6 @@ import { useEditProject } from "../hooks/use-edit-project";
 import { useFetchFiles } from "../hooks/use-fetch-files";
 import { useFetchChats } from "../hooks/use-list-chats";
 import { DisplayChat } from "./chat";
-import { DisplayAnalyses } from "./display-analyses";
 import { DisplayFiles } from "./display-files";
 
 export const SelectedProject: React.FC<{
@@ -162,11 +160,6 @@ export const SelectedProject: React.FC<{
               icon={<BoltIcon />}
               iconPosition="start"
               label={isLargeScreen ? "Chat" : undefined}
-            />
-            <Tab
-              icon={<AssessmentIcon />}
-              iconPosition="start"
-              label={isLargeScreen ? "Analyses" : undefined}
             />
           </Tabs>
           <Box display="flex" alignItems="center">
@@ -288,7 +281,6 @@ export const SelectedProject: React.FC<{
             />
           </Box>
         )}
-        {value === 3 && <DisplayAnalyses projectId={project.id} />}
       </Box>
       {modal === "delete" && (
         <DeleteProjectModal closeModal={closeModal} projectId={project.id} />

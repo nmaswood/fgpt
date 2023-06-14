@@ -29,7 +29,7 @@ def ask_question_streaming(context: str, question: str,
                            ):
     prompt = create_prompt(context, question, history)
     response = openai.ChatCompletion.create(
-        model='gpt-3.5',
+        model='gpt-3.5-turbo',
         messages=[
             {'role': 'user', 'content': prompt}
         ],
@@ -149,16 +149,17 @@ def get_output(text: str) -> Output:
 
 
 def from_user(prompt: str, text: str):
-    dir = os.path.dirname(__file__)
-
-    guard = gd.Guard.from_rail_string(prompt)
-
-    raw_llm_response, validated_response = guard(
-        openai.Completion.create,
-        model="text-davinci-003",
-        prompt_params={"document": text.replace("gmail", "")},
-        max_tokens=512,
+    formatted = prompt.replace("{document}", text)
+    response = openai.ChatCompletion.create(
+        # model='gpt-4',
+        model='gpt-3.5-turbo',
+        messages=[
+            {'role': 'user', 'content': formatted}
+        ],
         temperature=0,
-        num_reasks=2,
     )
-    return raw_llm_response, validated_response
+    choices = response["choices"]
+    if len(choices) == 0:
+        logger.warning("No choices returned from OpenAI")
+    first_choice = choices[0]
+    return first_choice["message"]["content"]

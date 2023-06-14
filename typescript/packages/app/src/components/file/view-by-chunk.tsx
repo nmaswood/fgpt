@@ -22,7 +22,7 @@ import { useFetchOutputForChunk } from "../../hooks/use-fetch-output";
 import { useFetchPlayground } from "../../hooks/use-fetch-playground";
 import { useFetchTextChunk } from "../../hooks/use-fetch-text-chunk";
 import { useFetchTextChunkGroup } from "../../hooks/use-fetch-text-chunk-group";
-import { GUARD_RAILS_PROMPT } from "./default-prompt";
+import { BASIC_PROMPT } from "./default-prompt";
 
 export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
   const [order, setOrder] = React.useState(0);
@@ -164,7 +164,7 @@ const DisplayOutput: React.FC<{ text: string; outputs: Outputs.Outputs }> = ({
 
 const DisplayChat: React.FC<{ textChunkId: string }> = ({ textChunkId }) => {
   const { data, trigger, isMutating, error } = useFetchPlayground();
-  const [prompt, setPrompt] = React.useState(GUARD_RAILS_PROMPT);
+  const [prompt, setPrompt] = React.useState(BASIC_PROMPT);
 
   const trimmed = prompt.trim();
   return (
@@ -177,7 +177,7 @@ const DisplayChat: React.FC<{ textChunkId: string }> = ({ textChunkId }) => {
       overflow="auto"
     >
       <TextField
-        placeholder="Use {{document}} to template in the text chunk"
+        placeholder="Use {document} to template in the text chunk"
         multiline
         rows={20}
         maxRows={Infinity}
