@@ -1,6 +1,6 @@
 import {
   assertNever,
-  GREEDY_5k_CHUNK_SIZE,
+  CHUNK_STRATEGY_TO_CHUNK_SIZE,
   GREEDY_VO_CHUNK_SIZE,
   GreedyTextChunker,
   isNotNull,
@@ -11,7 +11,7 @@ import keyBy from "lodash/keyBy";
 
 import { AnalysisService } from "../analysis-service";
 import { AnalysisStore } from "../analysis-store";
-import { MetricsStore } from "../llm-outputs/metrics-store";
+import { MiscOutputStore } from "../llm-outputs/metrics-store";
 import { QuestionStore } from "../llm-outputs/question-store";
 import { SummaryStore } from "../llm-outputs/summary-store";
 import { LOGGER } from "../logger";
@@ -45,7 +45,7 @@ export interface JobExecutor {
 }
 
 export class JobExecutorImpl implements JobExecutor {
-  STRATEGIES = ["greedy_v0", "greedy_5k"] as const;
+  STRATEGIES = ["greedy_v0", "greedy_5k", "greedy_15k"] as const;
   CHUNKER = new GreedyTextChunker();
   constructor(
     private readonly textExtractor: TextExtractor,
@@ -57,7 +57,7 @@ export class JobExecutorImpl implements JobExecutor {
     private readonly analysisStore: AnalysisStore,
     private readonly summaryStore: SummaryStore,
     private readonly questionStore: QuestionStore,
-    private readonly metricsStore: MetricsStore
+    private readonly metricsStore: MiscOutputStore
   ) {}
 
   async run(options: RunOptions): Promise<ExecutionResult[]> {
@@ -249,10 +249,9 @@ export class JobExecutorImpl implements JobExecutor {
         const chunk = await this.textChunkStore.getTextChunkById(
           config.textChunkId
         );
-        const { summaries, questions, metrics } =
-          await this.mlService.llmOutput({
-            text: chunk.chunkText,
-          });
+        const { summaries, questions } = await this.mlService.llmOutput({
+          text: chunk.chunkText,
+        });
 
         await this.summaryStore.insertMany(
           summaries.map((summary) => ({
@@ -270,13 +269,7 @@ export class JobExecutorImpl implements JobExecutor {
           }))
         );
 
-        await this.metricsStore.insertMany(
-          metrics.map((metric) => ({
-            ...config,
-            description: metric.description,
-            value: metric.value,
-          }))
-        );
+        this.metricsStore;
 
         break;
       }
@@ -351,9 +344,10 @@ export class JobExecutorImpl implements JobExecutor {
         });
         break;
       }
+      case "greedy_15k":
       case "greedy_5k": {
         const chunks = this.CHUNKER.chunk({
-          tokenChunkLimit: GREEDY_5k_CHUNK_SIZE,
+          tokenChunkLimit: CHUNK_STRATEGY_TO_CHUNK_SIZE[strategy],
           text,
         });
 
@@ -380,6 +374,10 @@ export class JobExecutorImpl implements JobExecutor {
             commonArgs,
             group
           );
+          if (strategy === "greedy_5k") {
+            LOGGER.info("Skipping LLM Generation");
+            continue;
+          }
 
           await this.taskService.insertMany(
             chunks.map((chunk) => ({

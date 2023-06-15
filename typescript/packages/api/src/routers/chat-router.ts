@@ -119,7 +119,6 @@ export class ChatRouter {
             { fileId: chat.fileReferenceId }
           : { projectId: args.projectId };
 
-        debugger;
         const similarDocuments = await (async () => {
           const docs = await this.mlClient.getKSimilar({
             vector,

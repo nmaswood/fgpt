@@ -27,8 +27,9 @@ import {
   PsqlLoadedFileStore,
   PsqlAnalysisStore,
   PsqlChatStore,
-  PsqlSummaryStore,
   PsqlQuestionStore,
+  ReportServiceImpl,
+  PsqlMiscOutputStore,
 } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
 import { UserOrgRouter } from "./routers/user-org-router";
@@ -92,8 +93,9 @@ async function start() {
 
   const chatStore = new PsqlChatStore(pool);
 
-  const summaryStore = new PsqlSummaryStore(pool);
   const questionStore = new PsqlQuestionStore(pool);
+  const metricsStore = new PsqlMiscOutputStore(pool);
+  const reportService = new ReportServiceImpl(questionStore, metricsStore);
 
   app.use(cors({ origin: "*" }));
 
@@ -150,10 +152,10 @@ async function start() {
     jwtCheck,
     addUser,
     new LLMOutputRouter(
-      summaryStore,
       questionStore,
       mlService,
-      textChunkStore
+      textChunkStore,
+      reportService
     ).init()
   );
 

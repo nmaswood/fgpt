@@ -2,26 +2,46 @@ import { Outputs } from "@fgpt/precedent-iso";
 import { DatabasePool, sql } from "slonik";
 import { z } from "zod";
 
-export interface InsertMetric {
+export interface InsertMiscValue {
   organizationId: string;
   projectId: string;
   fileReferenceId: string;
   processedFileId: string;
   textChunkId: string;
   textChunkGroupId: string;
-  value: string | undefined;
-  description: string | undefined;
+  value: Outputs.MiscValue;
 }
 
-const FIELDS = sql.fragment`id, organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, text_chunk_id, value, description`;
-export interface MetricsStore {
-  insertMany(metrics: InsertMetric[]): Promise<Outputs.Metrics[]>;
+const FIELDS = sql.fragment`id, organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, text_chunk_id, metrics`;
+export interface MiscOutputStore {
+  getForFile(fileReferenceId: string): Promise<Outputs.MiscValue[]>;
+  insertMany(metrics: InsertMiscValue[]): Promise<Outputs.MiscValueRow[]>;
 }
 
-export class PsqlMetricsStore implements MetricsStore {
+export class PsqlMiscOutputStore implements MiscOutputStore {
   constructor(private readonly pool: DatabasePool) {}
 
-  async insertMany(metrics: InsertMetric[]): Promise<Outputs.Metrics[]> {
+  async getForFile(fileReferenceId: string): Promise<Outputs.MiscValue[]> {
+    fileReferenceId;
+    const result = await this.pool.query(sql.type(
+      z.object({ metrics: ZMiscValue })
+    )`
+SELECT
+    metrics
+FROM
+    text_chunk_metrics
+    JOIN text_chunk ON text_chunk.id = text_chunk_metrics.text_chunk_id
+WHERE
+    text_chunk_metrics.file_reference_id = ${fileReferenceId}
+ORDER BY
+    text_chunk.chunk_order DESC
+`);
+    return result.rows.map((row) => row.metrics);
+  }
+
+  async insertMany(
+    metrics: InsertMiscValue[]
+  ): Promise<Outputs.MiscValueRow[]> {
     if (metrics.length === 0) {
       return [];
     }
@@ -34,7 +54,6 @@ export class PsqlMetricsStore implements MetricsStore {
         textChunkGroupId,
         textChunkId,
         value,
-        description,
       }) =>
         sql.fragment`
 (${organizationId},
@@ -43,14 +62,13 @@ export class PsqlMetricsStore implements MetricsStore {
     ${processedFileId},
     ${textChunkGroupId},
     ${textChunkId},
-    ${value ?? null},
-    ${description ?? null},
-    ${JSON.stringify({})})
+    ${null},
+    ${JSON.stringify(value)})
 `
     );
 
     const res = await this.pool.query(sql.type(ZMetricsRow)`
-INSERT INTO text_chunk_metrics (organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, text_chunk_id, value, description, metrics)
+INSERT INTO text_chunk_metrics (organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, text_chunk_id, value, metrics)
     VALUES
         ${sql.join(values, sql.fragment`, `)}
     RETURNING
@@ -61,6 +79,32 @@ INSERT INTO text_chunk_metrics (organization_id, project_id, file_reference_id, 
   }
 }
 
+const ZFinancialSummary = z.object({
+  investmentRisks: z.string().array(),
+  investmentMerits: z.string().array(),
+  financialSummaries: z.string().array(),
+});
+
+const ZTerm = z.object({
+  termValue: z.string(),
+  termName: z.string(),
+});
+
+const ZMiscValue = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("terms"),
+    value: ZTerm.array(),
+  }),
+  z.object({
+    type: z.literal("financial_summary"),
+    value: ZFinancialSummary,
+  }),
+  z.object({
+    type: z.literal("summary"),
+    value: z.string().array(),
+  }),
+]);
+
 const ZMetricsRow = z
   .object({
     id: z.string(),
@@ -70,11 +114,10 @@ const ZMetricsRow = z
     processed_file_id: z.string(),
     text_chunk_group_id: z.string(),
     text_chunk_id: z.string(),
-    value: z.string().nullable(),
-    description: z.string().nullable(),
+    metrics: ZMiscValue,
   })
   .transform(
-    (row): Outputs.Metrics => ({
+    (row): Outputs.MiscValueRow => ({
       id: row.id,
       organizationId: row.organization_id,
       projectId: row.project_id,
@@ -82,7 +125,6 @@ const ZMetricsRow = z
       processedFileId: row.processed_file_id,
       textChunkGroupId: row.text_chunk_group_id,
       textChunkId: row.text_chunk_id,
-      value: row.value ?? undefined,
-      description: row.description ?? undefined,
+      value: row.metrics,
     })
   );

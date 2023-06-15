@@ -70,6 +70,7 @@ export const ZCreateAnalysisConfig = z.object({
   version: z.literal("1"),
   organizationId: z.string(),
   projectId: z.string(),
+  fileReferenceId: z.string(),
   analysisId: z.string(),
 });
 

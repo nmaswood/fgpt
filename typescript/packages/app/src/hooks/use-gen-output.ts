@@ -1,17 +1,14 @@
 import useSWRMutation from "swr/mutation";
 
-export const useFetchPlayground = () => {
+export const useGenerateOutput = () => {
   const res = useSWRMutation<
     { raw: string; validated: Record<string, unknown> },
     unknown,
-    "/api/proxy/v1/output/playground",
+    "/api/proxy/v1/output/gen-chunk-output",
     {
       textChunkId: string;
-      functionName: string;
-      prompt: string;
-      jsonSchema: string;
     }
-  >("/api/proxy/v1/output/playground", async (url: string, args) => {
+  >("/api/proxy/v1/output/gen-chunk-output", async (url: string, args) => {
     const res = await fetch(url, {
       method: "POST",
       headers: {
@@ -20,7 +17,7 @@ export const useFetchPlayground = () => {
       body: JSON.stringify(args.arg),
     });
     const data = await res.json();
-    return data.response.raw;
+    return data.output;
   });
 
   return res;

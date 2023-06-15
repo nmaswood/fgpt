@@ -1,16 +1,16 @@
-from guardrails.utils.pydantic_utils import register_pydantic
+from typing import Any
 from pydantic import BaseModel
 from loguru import logger
 from retry import retry
 import openai
-import guardrails as gd
-import os
 
+import json
 
 from langchain.embeddings import OpenAIEmbeddings
 from springtime.llm.models import ChatHistory
 
 from springtime.llm.prompt import create_prompt
+from springtime.llm.prompts import questions_schema, summaries_schema, terms_schema, financial_summary_schema
 
 
 embeddings = OpenAIEmbeddings()
@@ -50,7 +50,7 @@ def ask_question_streaming(context: str, question: str,
 def ask_question(context: str, question: str):
     prompt = create_prompt(context, question, [])
     formatted_message = prompt.format(
-        context=context[:3500], question=question)
+        context=context[:5000], question=question)
 
     response = openai.ChatCompletion.create(
         # model='gpt-4',
@@ -67,99 +67,131 @@ def ask_question(context: str, question: str):
     return first_choice["message"]["content"]
 
 
-class Metric(BaseModel):
-    description: str
-    value: str
+class Question(BaseModel):
+    question: str
 
 
-@register_pydantic
+class Questions(BaseModel):
+    questions: list[Question] = []
+
+
+class FinancialSummary(BaseModel):
+    investment_merits: list[str] = []
+    investment_risks: list[str] = []
+    financial_summaries: list[str] = []
+
+
+class Term(BaseModel):
+    term_value: str
+    term_name: str
+
+
+class Terms(BaseModel):
+    terms: list[Term] = []
+
+
 class Output(BaseModel):
     summaries: list[str] = []
     questions: list[str] = []
-    metrics: list[Metric] = []
-    entities: list[str] = []
+    terms: list[Term] = []
+    financial_summary: FinancialSummary
 
 
-@register_pydantic
-class QuestionsAndSummaries(BaseModel):
+class Summaries(BaseModel):
     summaries: list[str] = []
-    questions: list[str] = []
 
 
-@register_pydantic
-class MetricsAndEntities(BaseModel):
-    metrics: list[Metric] = []
-    entities: list[str] = []
+class PlaygroundRequest(BaseModel):
+    text: str
+    prompt: str
+    json_schema: dict[str, Any]
+    function_name: str
 
 
-def get_questions_and_summaries(text: str) -> QuestionsAndSummaries:
-    dir = os.path.dirname(__file__)
-    path = os.path.join(dir, "questions-and-summaries.xml")
-    guard = gd.Guard.from_rail(path)
-
-    raw_llm_response, validated_response = guard(
-        openai.Completion.create,
-        model="text-davinci-003",
-        prompt_params={"document": text.replace("gmail", "")},
-        max_tokens=512,
-        temperature=0,
-        num_reasks=2,
+def get_questions(text: str) -> list[str]:
+    req = PlaygroundRequest(
+        text=text,
+        prompt="You are an expert financial analyst. Parse the document for the requested information.",
+        json_schema=questions_schema,
+        function_name='parse_questions'
     )
+    response = call_function(req)
+    questions = Questions(**response)
+    return [q.question for q in questions.questions]
+
+
+def get_fin_summary(text: str) -> FinancialSummary:
+    req = PlaygroundRequest(
+        text=text,
+        prompt="You are an expert financial analyst. Parse the document for the requested information. If the information is not available, do not return anything.",
+        json_schema=financial_summary_schema,
+        function_name='parse_financial_summary'
+    )
+    response = call_function(req)
     try:
-        return QuestionsAndSummaries(**validated_response)
+        return FinancialSummary(**response)
     except Exception as e:
         logger.error(e)
-        logger.error(text)
-        logger.error(raw_llm_response)
-        return QuestionsAndSummaries()
+        return FinancialSummary()
 
 
-def get_metrics_and_entities(text: str) -> MetricsAndEntities:
-    dir = os.path.dirname(__file__)
-    path = os.path.join(dir, "metrics-and-entities.xml")
-    guard = gd.Guard.from_rail(path)
-
-    raw_llm_response, validated_response = guard(
-        openai.Completion.create,
-        model="text-davinci-003",
-        prompt_params={"document": text.replace("gmail", "")},
-        max_tokens=512,
-        temperature=0,
-        num_reasks=2,
+def get_terms(text: str) -> list[Term]:
+    req = PlaygroundRequest(
+        text=text,
+        prompt="You are an expert financial analyst. Parse the document for the requested information. If the information is not available, return 'Not Available'",
+        json_schema=terms_schema,
+        function_name='parse_terms'
     )
-    print(validated_response)
-    if not validated_response:
-        logger.error("No metrics or entities found")
-        return MetricsAndEntities()
+    response = call_function(req)
+    terms_from_model = Terms(**response)
+    terms = [
+        term for term in terms_from_model.terms if term.term_value != 'Not Available']
+    return terms
 
-    return MetricsAndEntities(**validated_response)
+
+def get_summaries(text: str) -> list[str]:
+    req = PlaygroundRequest(
+        text=text,
+        prompt="You are an expert financial analyst. Parse the document for the requested information",
+        json_schema=summaries_schema,
+        function_name='parse_summaries'
+    )
+    response = call_function(req)
+    summaries = Summaries(**response)
+    return summaries.summaries
 
 
 def get_output(text: str) -> Output:
-    questions_and_summaries = get_questions_and_summaries(text)
-    # metrics_and_entities = get_metrics_and_entities(text)
-    metrics_and_entities = MetricsAndEntities()
+    questions = get_questions(text)
+    summaries = get_summaries(text)
+    terms = get_terms(text)
+    fin_summary = get_fin_summary(text)
 
     return Output(
-        summaries=questions_and_summaries.summaries,
-        questions=questions_and_summaries.questions,
-        metrics=metrics_and_entities.metrics,
-        entities=metrics_and_entities.entities,
+        summaries=summaries,
+        questions=questions,
+        terms=terms,
+        financial_summary=fin_summary
     )
 
 
-def from_user(prompt: str, text: str):
-    formatted = prompt.replace("{document}", text)
-    response = openai.ChatCompletion.create(
-        # model='gpt-4',
-        model='gpt-3.5-turbo',
+def call_function(req: PlaygroundRequest) -> dict[str, Any]:
+
+    print("Running request")
+    completion = openai.ChatCompletion.create(
+        model="gpt-4-0613",
+        # model='gpt-3.5-turbo-16k-0613'
         messages=[
-            {'role': 'user', 'content': formatted}
+            {"role": "system",
+                "content": req.prompt
+             },
+            {"role": "user", "content": "Document: {}".format(req.text)}
         ],
+        functions=[{"name": req.function_name, "parameters": req.json_schema}],
+        function_call={"name": req.function_name},
         temperature=0,
     )
-    choices = response["choices"]
-    if len(choices) == 0:
-        logger.warning("No choices returned from OpenAI")
-    first_choice = choices[0]
-    return first_choice["message"]["content"]
+
+    res = completion.choices[0].message.function_call.arguments
+
+    return json.loads(res)

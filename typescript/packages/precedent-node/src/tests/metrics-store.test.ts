@@ -3,7 +3,7 @@ import { afterEach, beforeEach, expect, test } from "vitest";
 
 import { dataBasePool } from "../data-base-pool";
 import { PsqlFileReferenceStore } from "../file-reference-store";
-import { PsqlMetricsStore } from "../llm-outputs/metrics-store";
+import { PsqlMiscOutputStore } from "../llm-outputs/metrics-store";
 import { PsqlProcessedFileStore } from "../processed-file-store";
 import { PSqlProjectStore } from "../project-store";
 import { ShaHash } from "../sha-hash";
@@ -79,7 +79,7 @@ async function setup() {
     ]
   );
 
-  const metricsStore = new PsqlMetricsStore(pool);
+  const metricsStore = new PsqlMiscOutputStore(pool);
 
   return {
     pool,
@@ -119,7 +119,7 @@ test("insertMany", async () => {
     metricsStore,
   } = await setup();
 
-  const [row] = await metricsStore.insertMany([
+  const [financialSummary] = await metricsStore.insertMany([
     {
       organizationId,
       projectId,
@@ -127,10 +127,136 @@ test("insertMany", async () => {
       processedFileId,
       textChunkGroupId,
       textChunkId,
-      value: "hi",
-      description: "bye",
+      value: {
+        type: "financial_summary",
+        value: {
+          investmentRisks: ["foo"],
+          investmentMerits: ["bar"],
+          financialSummaries: ["baz"],
+        },
+      },
     },
   ]);
-  expect(row.value).toEqual("hi");
-  expect(row.description).toEqual("bye");
+
+  expect(financialSummary.value).toEqual({
+    type: "financial_summary",
+    value: {
+      investmentRisks: ["foo"],
+      investmentMerits: ["bar"],
+      financialSummaries: ["baz"],
+    },
+  });
+
+  const [terms] = await metricsStore.insertMany([
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      processedFileId,
+      textChunkGroupId,
+      textChunkId,
+      value: {
+        type: "terms",
+        value: [
+          {
+            termValue: "value",
+            termName: "name",
+          },
+        ],
+      },
+    },
+  ]);
+
+  expect(terms.value).toEqual({
+    type: "terms",
+    value: [
+      {
+        termValue: "value",
+        termName: "name",
+      },
+    ],
+  });
+
+  const [summary] = await metricsStore.insertMany([
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      processedFileId,
+      textChunkGroupId,
+      textChunkId,
+      value: {
+        type: "summary",
+        value: ["hi there"],
+      },
+    },
+  ]);
+
+  expect(summary.value).toEqual({
+    type: "summary",
+    value: ["hi there"],
+  });
+});
+
+test("getFile", async () => {
+  const {
+    organizationId,
+    projectId,
+    fileReferenceId,
+    processedFileId,
+    textChunkGroupId,
+    textChunkId,
+    metricsStore,
+  } = await setup();
+
+  await metricsStore.insertMany([
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      processedFileId,
+      textChunkGroupId,
+      textChunkId,
+      value: {
+        type: "financial_summary",
+        value: {
+          investmentRisks: ["foo"],
+          investmentMerits: ["bar"],
+          financialSummaries: ["baz"],
+        },
+      },
+    },
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      processedFileId,
+      textChunkGroupId,
+      textChunkId,
+      value: {
+        type: "terms",
+        value: [
+          {
+            termValue: "value",
+            termName: "name",
+          },
+        ],
+      },
+    },
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      processedFileId,
+      textChunkGroupId,
+      textChunkId,
+      value: {
+        type: "summary",
+        value: ["hi there"],
+      },
+    },
+  ]);
+
+  const output = await metricsStore.getForFile(fileReferenceId);
+  expect(output.length).toEqual(3);
 });

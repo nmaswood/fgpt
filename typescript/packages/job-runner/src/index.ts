@@ -10,7 +10,7 @@ import {
   MLServiceClientImpl,
   PsqlAnalysisStore,
   PsqlFileReferenceStore,
-  PsqlMetricsStore,
+  PsqlMiscOutputStore,
   PsqlProcessedFileStore,
   PsqlQuestionStore,
   PsqlSummaryStore,
@@ -54,7 +54,7 @@ async function start(settings: Settings) {
 
   const summaryStore = new PsqlSummaryStore(pool);
   const questionStore = new PsqlQuestionStore(pool);
-  const metricsStore = new PsqlMetricsStore(pool);
+  const metricsStore = new PsqlMiscOutputStore(pool);
 
   const executor = new JobExecutorImpl(
     textExtractor,

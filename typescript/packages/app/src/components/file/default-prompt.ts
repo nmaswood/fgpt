@@ -1,18 +1,3 @@
-export const BASIC_PROMPT = `
-Parse the document below. Output your response conforming to the json schema provided:
-
-{
-    "type": "object",
-    "properties": {
-        "questions": {
-            "type": "array",
-            "description": "An interesting question a user could help ask to understand the document.",
-            "items": {
-                "type": "string"
-            }
-        }
-    }
-}
-
-{document}
-`;
+export const BASIC_SCHEMA = `
+{\n  "type": "object",\n  "properties": {\n    "terms": {\n      "type": "array",\n      "items": {\n        "type": "object",\n        "properties": {\n          "term_value": {\n            "type": "string"\n          },\n          "term_name": {\n            "type": "string",\n            "enum": [\n              "Company Overview",\n              "Company Description",\n              "Company Industry",\n              "Document Overview",\n              "Document Name",\n              "Document Date",\n              "Lead Arranger",\n              "Most Recent Revenue",\n              "Most Recent Full Year EBITDA",\n              "Most Recent Full Year Net Income"\n            ]\n          },\n          "confidence": {\n            "type": "number",\n            "description": "How confident the model is in the value returned",\n            "minimum": 0,\n            "maximum": 100\n          }\n        },\n        "required": [\n          "term_value",\n          "term_name",\n          "confidence"\n        ]\n      }\n    }\n  },\n  "required": [\n    "terms"\n  ]\n}
+`.trim();

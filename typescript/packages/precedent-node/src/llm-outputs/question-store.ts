@@ -46,12 +46,16 @@ LIMIT ${limit}
 
   async getForFile(fileReferenceId: string): Promise<string[]> {
     const result = await this.pool.query(sql.type(ZGetForFile)`
+
 SELECT
     question
 FROM
     text_chunk_question
+    JOIN text_chunk ON text_chunk.id = text_chunk_question.text_chunk_id
 WHERE
-    file_reference_id = ${fileReferenceId}
+    text_chunk_question.file_reference_id = ${fileReferenceId}
+ORDER BY
+    text_chunk.chunk_order DESC
 `);
     return result.rows.map((row) => row.question);
   }

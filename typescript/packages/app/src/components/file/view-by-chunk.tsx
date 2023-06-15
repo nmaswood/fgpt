@@ -1,4 +1,4 @@
-import { ChunkStrategy, Outputs } from "@fgpt/precedent-iso";
+import { ChunkStrategy } from "@fgpt/precedent-iso";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { LoadingButton } from "@mui/lab";
@@ -18,17 +18,17 @@ import {
 import { Box } from "@mui/system";
 import React from "react";
 
-import { useFetchOutputForChunk } from "../../hooks/use-fetch-output";
 import { useFetchPlayground } from "../../hooks/use-fetch-playground";
 import { useFetchTextChunk } from "../../hooks/use-fetch-text-chunk";
 import { useFetchTextChunkGroup } from "../../hooks/use-fetch-text-chunk-group";
-import { BASIC_PROMPT } from "./default-prompt";
+import { useGenerateOutput } from "../../hooks/use-gen-output";
+import { BASIC_SCHEMA } from "./default-prompt";
 
 export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
   const [order, setOrder] = React.useState(0);
 
   const [chunkStrategy, setChunkStrategy] =
-    React.useState<ChunkStrategy>("greedy_5k");
+    React.useState<ChunkStrategy>("greedy_15k");
 
   const setChunkStrategyAndResetOrder = (chunkStrategy: ChunkStrategy) => {
     setChunkStrategy(chunkStrategy);
@@ -42,9 +42,9 @@ export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
 
   const { data: textChunk } = useFetchTextChunk(textChunkGroup?.id, order);
 
-  const { data: outputs } = useFetchOutputForChunk(textChunk?.id);
-
-  const [view, setView] = React.useState<"view" | "chat">("view");
+  const [view, setView] = React.useState<"view" | "chat" | "test_output">(
+    "chat"
+  );
 
   return (
     <Box display="flex" width="100%" height="100%">
@@ -68,6 +68,7 @@ export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
               >
                 <MenuItem value="greedy_v0">Greedy 500</MenuItem>
                 <MenuItem value="greedy_5k">Greedy 5000</MenuItem>
+                <MenuItem value="greedy_15k">Greedy 15000</MenuItem>
               </Select>
             </FormControl>
             <Box display="flex" flexDirection="column">
@@ -103,16 +104,20 @@ export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
               exclusive
               onChange={(_, value) => setView(value)}
             >
-              <ToggleButton value="view">Data overview</ToggleButton>
-              <ToggleButton value="chat">Prompt exploration</ToggleButton>
+              <ToggleButton value="view">See chunk text</ToggleButton>
+              <ToggleButton value="chat">Prompt playground</ToggleButton>
+              <ToggleButton value="test_output">Trigger output</ToggleButton>
             </ToggleButtonGroup>
           </Box>
 
-          {textChunk && outputs && view === "view" && (
-            <DisplayOutput text={textChunk.chunkText} outputs={outputs} />
+          {textChunk && view === "view" && (
+            <DisplayOutput text={textChunk.chunkText} />
           )}
           {textChunk && view === "chat" && (
             <DisplayChat textChunkId={textChunk.id} />
+          )}
+          {textChunk && view === "test_output" && (
+            <TestOutput textChunkId={textChunk.id} />
           )}
         </Box>
       )}
@@ -120,10 +125,7 @@ export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
   );
 };
 
-const DisplayOutput: React.FC<{ text: string; outputs: Outputs.Outputs }> = ({
-  text,
-  outputs,
-}) => {
+const DisplayOutput: React.FC<{ text: string }> = ({ text }) => {
   return (
     <Box
       display="grid"
@@ -144,27 +146,17 @@ const DisplayOutput: React.FC<{ text: string; outputs: Outputs.Outputs }> = ({
       >
         <Typography overflow="auto">{text}</Typography>
       </Card>
-      <Card
-        variant="outlined"
-        sx={{
-          padding: 1,
-          overflow: "auto",
-          minHeight: "100%",
-          maxHeight: "100%",
-          maxWidth: "100%",
-        }}
-      >
-        <pre>
-          <code>{JSON.stringify(outputs, null, 2)}</code>
-        </pre>
-      </Card>
     </Box>
   );
 };
 
 const DisplayChat: React.FC<{ textChunkId: string }> = ({ textChunkId }) => {
   const { data, trigger, isMutating, error } = useFetchPlayground();
-  const [prompt, setPrompt] = React.useState(BASIC_PROMPT);
+  const [functionName, setFunctionName] = React.useState("parse_document");
+  const [prompt, setPrompt] = React.useState(
+    "You are an expert financial analyst. Parse the document for the requested information. If the information is not available, return 'Not Available'"
+  );
+  const [jsonSchema, setJsonSchema] = React.useState(BASIC_SCHEMA);
 
   const trimmed = prompt.trim();
   return (
@@ -175,20 +167,60 @@ const DisplayChat: React.FC<{ textChunkId: string }> = ({ textChunkId }) => {
       minWidth="100%"
       flexDirection="column"
       overflow="auto"
+      gap={1}
     >
       <TextField
-        placeholder="Use {document} to template in the text chunk"
+        placeholder="Function name"
         multiline
-        rows={20}
-        maxRows={Infinity}
+        rows={1}
+        maxRows={1}
+        value={functionName}
+        onChange={(e) => setFunctionName(e.target.value)}
+        fullWidth
+      />
+      <TextField
+        placeholder="Prompt"
+        multiline
+        rows={2}
+        maxRows={3}
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         fullWidth
       />
+      <TextField
+        placeholder="JSON Schema"
+        multiline
+        rows={20}
+        maxRows={Infinity}
+        value={jsonSchema}
+        onChange={(e) => setJsonSchema(e.target.value)}
+        fullWidth
+      />
+
       <LoadingButton
-        disabled={trimmed.length === 0}
+        disabled={
+          trimmed.length === 0 ||
+          functionName.length === 0 ||
+          jsonSchema.length === 0
+        }
         loading={isMutating}
-        onClick={() => trigger({ textChunkId, prompt: trimmed })}
+        onClick={() => {
+          const parsed = (() => {
+            try {
+              return JSON.parse(jsonSchema);
+            } catch (e) {
+              return null;
+            }
+          })();
+          if (parsed !== null) {
+            trigger({
+              textChunkId,
+              prompt: trimmed,
+              functionName,
+              jsonSchema: parsed,
+            });
+          }
+        }}
       >
         Submit
       </LoadingButton>
@@ -200,6 +232,7 @@ const DisplayChat: React.FC<{ textChunkId: string }> = ({ textChunkId }) => {
                 overflow: "auto",
                 maxWidth: "100%",
                 height: "100%",
+                minHeight: "300px",
                 border: "0.5px solid lightgray",
                 whiteSpace: "pre-wrap",
               }}
@@ -210,6 +243,46 @@ const DisplayChat: React.FC<{ textChunkId: string }> = ({ textChunkId }) => {
           {error && <pre>{JSON.stringify(error, null, 2)}</pre>}
         </>
       </Box>
+    </Box>
+  );
+};
+
+const TestOutput: React.FC<{ textChunkId: string }> = ({ textChunkId }) => {
+  const { data, trigger, isMutating } = useGenerateOutput();
+
+  return (
+    <Box
+      display="flex"
+      flexDirection="column"
+      width="100%"
+      height="100%"
+      maxHeight="100%"
+      maxWidth="100%"
+      overflow="auto"
+      gap={2}
+    >
+      <LoadingButton
+        loading={isMutating}
+        onClick={() => trigger({ textChunkId })}
+        variant="outlined"
+      >
+        Generate output
+      </LoadingButton>
+
+      {data && (
+        <pre
+          style={{
+            overflow: "auto",
+            maxWidth: "100%",
+            height: "100%",
+            minHeight: "300px",
+            border: "0.5px solid lightgray",
+            whiteSpace: "pre-wrap",
+          }}
+        >
+          {JSON.stringify(data, null, 2)}
+        </pre>
+      )}
     </Box>
   );
 };

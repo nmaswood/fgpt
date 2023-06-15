@@ -6,7 +6,7 @@ from starlette.responses import StreamingResponse
 
 from fastapi import FastAPI
 
-from springtime.llm.ml import Metric, ask_question_streaming, embeddings_for_documents, ask_question, from_user, get_output
+from springtime.llm.ml import FinancialSummary,  PlaygroundRequest, Term, ask_question_streaming, embeddings_for_documents, ask_question, call_function, get_output
 from springtime.llm.models import ChatHistory
 from springtime.llm.pinecone import UpsertVector, get_similar, upsert_vectors
 from .settings import SETTINGS
@@ -45,8 +45,8 @@ class LLMOutputRequest(BaseModel):
 class LLMOutputResponse(BaseModel):
     summaries: list[str] = []
     questions: list[str] = []
-    metrics: list[Metric] = []
-    entities: list[str] = []
+    terms: list[Term] = []
+    financial_summary: FinancialSummary = []
 
 
 @app.post("/llm-output")
@@ -101,18 +101,14 @@ async def similar_vectors_route(req: SimilarVectorRequest):
     return {"results": results}
 
 
-class PlaygroundRequest(BaseModel):
-    text: str
-    prompt: str
-
-
 class PlaygroundResponse(BaseModel):
-    raw: str
+    raw: dict[str, Any]
 
 
 @app.post("/playground")
 async def playground_route(req: PlaygroundRequest):
-    raw = from_user(req.prompt, req.text)
+    raw = call_function(req)
+    print(raw)
     return PlaygroundResponse(raw=raw)
 
 # todo disable reload in prod

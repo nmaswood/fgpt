@@ -1,7 +1,7 @@
 import {
   MLServiceClient,
   QuestionStore,
-  SummaryStore,
+  ReportService,
   TextChunkStore,
 } from "@fgpt/precedent-node";
 import express from "express";
@@ -9,37 +9,38 @@ import { z } from "zod";
 
 export class LLMOutputRouter {
   constructor(
-    private readonly summaryStore: SummaryStore,
     private readonly questionStore: QuestionStore,
     private readonly mlService: MLServiceClient,
-    private readonly chunkStore: TextChunkStore
+    private readonly chunkStore: TextChunkStore,
+    private readonly reportService: ReportService
   ) {}
   init() {
     const router = express.Router();
-
-    router.get(
-      "/file-output/:fileReferenceId",
-      async (req: express.Request, res: express.Response) => {
-        const body = ZOutputRequest.parse(req.params);
-
-        const [questions, summaries] = await Promise.all([
-          this.questionStore.getForFile(body.fileReferenceId),
-          this.summaryStore.getForFile(body.fileReferenceId),
-        ]);
-        res.json({ questions, summaries });
-      }
-    );
 
     router.get(
       "/chunk-output/:textChunkId",
       async (req: express.Request, res: express.Response) => {
         const body = ZChunkRequest.parse(req.params);
 
-        const [questions, summaries] = await Promise.all([
-          this.questionStore.getForChunk(body.textChunkId),
-          this.summaryStore.getForChunk(body.textChunkId),
-        ]);
-        res.json({ questions, summaries });
+        const questions = await this.questionStore.getForChunk(
+          body.textChunkId
+        );
+        res.json({ questions });
+      }
+    );
+
+    router.post(
+      "/gen-chunk-output",
+      async (req: express.Request, res: express.Response) => {
+        const body = ZGenChunkRequest.parse(req.body);
+
+        const chunk = await this.chunkStore.getTextChunkById(body.textChunkId);
+
+        const output = await this.mlService.llmOutput({
+          text: chunk.chunkText,
+        });
+
+        res.json({ output });
       }
     );
 
@@ -53,6 +54,8 @@ export class LLMOutputRouter {
         const response = await this.mlService.playGround({
           text: chunk.chunkText,
           prompt: body.prompt,
+          jsonSchema: body.jsonSchema,
+          functionName: body.functionName,
         });
 
         res.json({ response });
@@ -73,6 +76,19 @@ export class LLMOutputRouter {
       }
     );
 
+    router.get(
+      "/report/:fileReferenceId",
+      async (req: express.Request, res: express.Response) => {
+        const body = ZSampleRequest.parse(req.params);
+
+        const report = await this.reportService.forFileReferenceId(
+          body.fileReferenceId
+        );
+
+        res.json({ report });
+      }
+    );
+
     return router;
   }
 }
@@ -84,9 +100,14 @@ const ZSampleRequest = z.object({
 const ZPlaygroundRequest = z.object({
   textChunkId: z.string(),
   prompt: z.string(),
+  functionName: z.string(),
+  jsonSchema: z.record(z.any()),
 });
 
-const ZOutputRequest = z.object({ fileReferenceId: z.string() });
 const ZChunkRequest = z.object({
+  textChunkId: z.string(),
+});
+
+const ZGenChunkRequest = z.object({
   textChunkId: z.string(),
 });

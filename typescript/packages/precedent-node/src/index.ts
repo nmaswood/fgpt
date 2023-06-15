@@ -7,6 +7,7 @@ export * from "./file-reference-store";
 export * from "./jobs/job-executor";
 export * from "./llm-outputs/metrics-store";
 export * from "./llm-outputs/question-store";
+export * from "./llm-outputs/report-service";
 export * from "./llm-outputs/summary-store";
 export * from "./loaded-file-store";
 export * from "./logger";

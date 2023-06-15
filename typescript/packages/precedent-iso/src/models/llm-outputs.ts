@@ -18,7 +18,22 @@ export interface Question {
   textChunkGroupId: string;
   question: string;
 }
-export interface Metrics {
+
+export type MiscValue =
+  | {
+      type: "terms";
+      value: Term[];
+    }
+  | {
+      type: "financial_summary";
+      value: FinancialSummary;
+    }
+  | {
+      type: "summary";
+      value: string[];
+    };
+
+export interface MiscValueRow {
   id: string;
   organizationId: string;
   projectId: string;
@@ -26,17 +41,30 @@ export interface Metrics {
   processedFileId: string;
   textChunkId: string;
   textChunkGroupId: string;
-  value: string | undefined;
-  description: string | undefined;
+  value: MiscValue;
 }
 
-export interface Metric {
-  description: string;
-  value: string;
+export interface Term {
+  termValue: string;
+  termName: string;
+}
+
+export interface FinancialSummary {
+  investmentRisks: string[];
+  investmentMerits: string[];
+  financialSummaries: string[];
 }
 
 export interface Outputs {
   summaries: Summary[];
   questions: Question[];
-  metrics: Metric[];
+  financialSummary: FinancialSummary;
+  terms: Term[];
+}
+
+export interface Report {
+  questions: string[];
+  summaries: string[];
+  financialSummary: FinancialSummary;
+  terms: Term[];
 }

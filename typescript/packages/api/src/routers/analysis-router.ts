@@ -50,6 +50,7 @@ export class AnalysisRouter {
             organizationId: req.user.organizationId,
             projectId: body.projectId,
             analysisId: analysis.id,
+            fileReferenceId: body.fileReferenceId,
           },
         });
 
