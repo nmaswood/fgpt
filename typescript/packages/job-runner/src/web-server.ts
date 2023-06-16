@@ -3,6 +3,8 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import "express-async-errors"; // eslint-disable-line
 
+import { z } from "zod";
+
 import express from "express";
 
 import { LOGGER } from "./logger";
@@ -15,11 +17,37 @@ async function start({ port, host }: WebServerSettings) {
   const app = express();
   app.enable("trust proxy");
 
-  app.use("/ping", (_, res) => {
+  app.get("/ping", (_, res) => {
     res.json({ ping: "pong" });
+  });
+
+  app.post("/", (req, res) => {
+    const rawMessage = req.body?.message;
+    //const parsed = ZMessage.safeParse(rawMessage);
+    console.log({ rawMessage });
+
+    //if (!parsed.success) {
+    //const formatted = parsed.error.format();
+    //res.status(400).send(`Bad Request: ${formatted}`);
+    //return;
+    //}
+
+    if (!rawMessage) {
+      const msg = "no Pub/Sub message received";
+      console.error(`error: ${msg}`);
+      res.status(400).send(`Bad Request: ${msg}`);
+      return;
+    }
+
+    res.status(204).send();
   });
 
   app.listen(port, host);
 }
 
 start(WEB_SERVER_SETTINGS);
+
+export const ZMessage = z.object({
+  version: z.literal("1"),
+  taskId: z.string().min(1),
+});
