@@ -4,14 +4,14 @@ import useSWR from "swr";
 export const useFetchReport = (fileReferenceId: string) => {
   const { data, isLoading, mutate } = useSWR<
     Outputs.Report,
-    ["/api/proxy/v1/output/file-output", string]
-  >(["/api/proxy/v1/output/file-output", fileReferenceId], fileFetcher);
+    ["/api/proxy/v1/output/report", string]
+  >(["/api/proxy/v1/output/report", fileReferenceId], fileFetcher);
 
   return { data, isLoading, mutate };
 };
 
 async function fileFetcher([url, fileReferenceId]: [
-  "/api/proxy/v1/output/file-output",
+  "/api/proxy/v1/output/report",
   string
 ]): Promise<Outputs.Report> {
   const response = await fetch(`${url}/${fileReferenceId}`);

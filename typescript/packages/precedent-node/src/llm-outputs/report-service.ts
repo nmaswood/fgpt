@@ -55,11 +55,11 @@ export class ReportServiceImpl implements ReportService {
           break;
         case "terms": {
           const uniqueTerms = value.value.filter(
-            (term) => !alreadySeenTerms.has(term.termValue)
+            (term) => !alreadySeenTerms.has(term.termName)
           );
           acc.terms.push(...uniqueTerms);
           for (const term of uniqueTerms) {
-            alreadySeenTerms.add(term.termValue);
+            alreadySeenTerms.add(term.termName);
           }
           break;
         }

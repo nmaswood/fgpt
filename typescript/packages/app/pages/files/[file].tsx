@@ -1,6 +1,5 @@
 import MenuIcon from "@mui/icons-material/Menu";
-import { IconButton, Paper, Tab, Tabs } from "@mui/material";
-import { Box } from "@mui/system";
+import { Box, IconButton, Paper, Tab, Tabs } from "@mui/material";
 import { useRouter } from "next/router";
 import React from "react";
 
@@ -80,7 +79,7 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
             indicatorColor="secondary"
           >
             <Tab label={"Text chunks"} />
-            <Tab label={"Analysis (Report)"} />
+            <Tab label={"Report"} />
             <Tab label={"Chat"} />
           </Tabs>
         </Box>
@@ -94,7 +93,7 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
           padding={2}
         >
           {value === 0 && <ViewByChunk fileId={fileId} />}
-          {value === 1 && <DisplayFileReport />}
+          {value === 1 && <DisplayFileReport fileReferenceId={fileId} />}
           {value === 2 && file && (
             <DisplayFileChat
               fileReferenceId={file.id}

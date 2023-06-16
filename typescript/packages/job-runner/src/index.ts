@@ -13,7 +13,6 @@ import {
   PsqlMiscOutputStore,
   PsqlProcessedFileStore,
   PsqlQuestionStore,
-  PsqlSummaryStore,
   PSqlTaskService,
   PsqlTextChunkStore,
   TikaHttpClient,
@@ -52,7 +51,6 @@ async function start(settings: Settings) {
     textChunkStore
   );
 
-  const summaryStore = new PsqlSummaryStore(pool);
   const questionStore = new PsqlQuestionStore(pool);
   const metricsStore = new PsqlMiscOutputStore(pool);
 
@@ -64,7 +62,6 @@ async function start(settings: Settings) {
     mlServiceClient,
     analysisService,
     analysisStore,
-    summaryStore,
     questionStore,
     metricsStore
   );

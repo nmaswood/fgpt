@@ -34,7 +34,7 @@ FROM
 WHERE
     text_chunk_metrics.file_reference_id = ${fileReferenceId}
 ORDER BY
-    text_chunk.chunk_order DESC
+    text_chunk.chunk_order ASC
 `);
     return result.rows.map((row) => row.metrics);
   }

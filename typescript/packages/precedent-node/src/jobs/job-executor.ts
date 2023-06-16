@@ -11,9 +11,8 @@ import keyBy from "lodash/keyBy";
 
 import { AnalysisService } from "../analysis-service";
 import { AnalysisStore } from "../analysis-store";
-import { MiscOutputStore } from "../llm-outputs/metrics-store";
+import { InsertMiscValue, MiscOutputStore } from "../llm-outputs/metrics-store";
 import { QuestionStore } from "../llm-outputs/question-store";
-import { SummaryStore } from "../llm-outputs/summary-store";
 import { LOGGER } from "../logger";
 import { MLServiceClient } from "../ml/ml-service";
 import { ProcessedFileStore } from "../processed-file-store";
@@ -55,9 +54,8 @@ export class JobExecutorImpl implements JobExecutor {
     private readonly mlService: MLServiceClient,
     private readonly analysisService: AnalysisService,
     private readonly analysisStore: AnalysisStore,
-    private readonly summaryStore: SummaryStore,
     private readonly questionStore: QuestionStore,
-    private readonly metricsStore: MiscOutputStore
+    private readonly miscOutputStore: MiscOutputStore
   ) {}
 
   async run(options: RunOptions): Promise<ExecutionResult[]> {
@@ -249,17 +247,46 @@ export class JobExecutorImpl implements JobExecutor {
         const chunk = await this.textChunkStore.getTextChunkById(
           config.textChunkId
         );
-        const { summaries, questions } = await this.mlService.llmOutput({
-          text: chunk.chunkText,
-        });
+        const { summaries, questions, financialSummary, terms } =
+          await this.mlService.llmOutput({
+            text: chunk.chunkText,
+          });
 
-        await this.summaryStore.insertMany(
-          summaries.map((summary) => ({
+        const values: InsertMiscValue[] = [];
+        if (
+          financialSummary.financialSummaries.length > 0 ||
+          financialSummary.investmentMerits.length > 0 ||
+          financialSummary.investmentRisks.length > 0
+        ) {
+          values.push({
             ...config,
-            summary,
-            hash: ShaHash.forData(summary),
-          }))
-        );
+            value: {
+              type: "financial_summary",
+              value: financialSummary,
+            },
+          });
+        }
+        if (summaries.length > 0) {
+          values.push({
+            ...config,
+            value: {
+              type: "summary",
+              value: summaries,
+            },
+          });
+        }
+
+        if (terms.length > 0) {
+          values.push({
+            ...config,
+            value: {
+              type: "terms",
+              value: terms,
+            },
+          });
+        }
+
+        await this.miscOutputStore.insertMany(values);
 
         await this.questionStore.insertMany(
           questions.map((question) => ({
@@ -268,8 +295,6 @@ export class JobExecutorImpl implements JobExecutor {
             hash: ShaHash.forData(question),
           }))
         );
-
-        this.metricsStore;
 
         break;
       }
