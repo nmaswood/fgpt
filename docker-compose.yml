@@ -34,6 +34,12 @@ services:
     image: apache/tika:latest-full
     ports:
       - "9998:9998"
+  pubsub:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:latest
+    ports:
+      - "8085:8085"
+    container_name: gcloud-pubsub_test_node
+    entrypoint: gcloud beta emulators pubsub start --project fgpt --host-port 0.0.0.0:8085
 
 volumes:
   db:
