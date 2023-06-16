@@ -3,22 +3,12 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { isNotNull } from "@fgpt/precedent-iso";
 import {
-  AnalyisServiceImpl,
   dataBasePool,
-  GoogleCloudStorageService,
-  JobExecutorImpl,
-  MLServiceClientImpl,
-  PsqlAnalysisStore,
-  PsqlFileReferenceStore,
-  PsqlMiscOutputStore,
-  PsqlProcessedFileStore,
-  PsqlQuestionStore,
   PSqlTaskService,
-  PsqlTextChunkStore,
-  TikaHttpClient,
-  TikaTextExtractor,
+  TaskRunnerImpl,
 } from "@fgpt/precedent-node";
 
+import { getExecutor } from "./executor";
 import { LOGGER } from "./logger";
 import { SETTINGS, Settings } from "./settings";
 
@@ -26,50 +16,16 @@ LOGGER.info("Starting job runner...");
 
 async function start(settings: Settings) {
   const pool = await dataBasePool(settings.sql.uri);
+  const executor = await getExecutor(settings, pool);
 
-  const fileReferenceStore = new PsqlFileReferenceStore(pool);
-  const blobStorageService = new GoogleCloudStorageService();
-  const tikaClient = new TikaHttpClient(settings.tikaClient);
-  const textExtractor = new TikaTextExtractor(
-    fileReferenceStore,
-    settings.assetBucket,
-    blobStorageService,
-    tikaClient
-  );
   const taskService = new PSqlTaskService(pool);
 
-  const processedFileStore = new PsqlProcessedFileStore(pool);
-
-  const textChunkStore = new PsqlTextChunkStore(pool);
-
-  const mlServiceClient = new MLServiceClientImpl(settings.mlServiceUri);
-
-  const analysisStore = new PsqlAnalysisStore(pool);
-  const analysisService = new AnalyisServiceImpl(
-    analysisStore,
-    mlServiceClient,
-    textChunkStore
-  );
-
-  const questionStore = new PsqlQuestionStore(pool);
-  const metricsStore = new PsqlMiscOutputStore(pool);
-
-  const executor = new JobExecutorImpl(
-    textExtractor,
-    taskService,
-    processedFileStore,
-    textChunkStore,
-    mlServiceClient,
-    analysisService,
-    analysisStore,
-    questionStore,
-    metricsStore
-  );
+  const runner = new TaskRunnerImpl(taskService, executor);
 
   LOGGER.info("Running executor...");
   LOGGER.info(SETTINGS);
 
-  const results = await executor.run({
+  const results = await runner.run({
     limit: 1_000,
     retryLimit: 3,
     debugMode: SETTINGS.debugMode,

@@ -5,6 +5,7 @@ export * from "./chat-store";
 export { dataBasePool } from "./data-base-pool";
 export * from "./file-reference-store";
 export * from "./jobs/job-executor";
+export * from "./jobs/task-executor";
 export * from "./llm-outputs/metrics-store";
 export * from "./llm-outputs/question-store";
 export * from "./llm-outputs/report-service";
