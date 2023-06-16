@@ -15,9 +15,12 @@ import {
 } from "@fgpt/precedent-node";
 import { DatabasePool } from "slonik";
 
-import { Settings } from "./settings";
+import { CommonSettings } from "./settings";
 
-export async function getExecutor(settings: Settings, pool: DatabasePool) {
+export async function getExecutor(
+  settings: CommonSettings,
+  pool: DatabasePool
+) {
   const fileReferenceStore = new PsqlFileReferenceStore(pool);
   const blobStorageService = new GoogleCloudStorageService();
   const tikaClient = new TikaHttpClient(settings.tikaClient);

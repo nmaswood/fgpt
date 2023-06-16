@@ -10,11 +10,11 @@ import {
 
 import { getExecutor } from "./executor";
 import { LOGGER } from "./logger";
-import { SETTINGS, Settings } from "./settings";
+import { COMMON_SETTINGS, CommonSettings } from "./settings";
 
 LOGGER.info("Starting job runner...");
 
-async function start(settings: Settings) {
+async function start(settings: CommonSettings) {
   const pool = await dataBasePool(settings.sql.uri);
   const executor = await getExecutor(settings, pool);
 
@@ -23,12 +23,12 @@ async function start(settings: Settings) {
   const runner = new TaskRunnerImpl(taskService, executor);
 
   LOGGER.info("Running executor...");
-  LOGGER.info(SETTINGS);
+  LOGGER.info(COMMON_SETTINGS);
 
   const results = await runner.run({
     limit: 1_000,
     retryLimit: 3,
-    debugMode: SETTINGS.debugMode,
+    debugMode: COMMON_SETTINGS.debugMode,
   });
   const erroredTaskIds = results
     .filter((r) => r.status === "failed")
@@ -41,4 +41,4 @@ async function start(settings: Settings) {
   }
 }
 
-start(SETTINGS);
+start(COMMON_SETTINGS);
