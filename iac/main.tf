@@ -805,6 +805,9 @@ resource "google_cloud_run_service_iam_binding" "binding" {
 resource "google_pubsub_subscription" "subscription" {
   name  = "task_subscription"
   topic = google_pubsub_topic.default.name
+  # 300 seconds = 5 minutes
+  ack_deadline_seconds = 300
+
   push_config {
     push_endpoint = google_cloud_run_v2_service.job_runner_server.uri
     oidc_token {
