@@ -27,20 +27,15 @@ async function start({ port, host }: WebServerSettings) {
   app.post("/", (req, res) => {
     const rawMessage = req.body?.message;
     const parsed = ZRawMessage.safeParse(rawMessage);
-    console.log({ parsed, rawMessage });
+    LOGGER.info({ rawMessage, parseSuccess: parsed.success });
 
     if (!parsed.success) {
-      const formatted = parsed.error.format();
-      res.status(400).send(`Bad Request: ${formatted}`);
+      LOGGER.error("Could not parse message");
+      res.status(204).send(`Bad Request: Could not parse object`);
       return;
     }
 
-    if (!rawMessage) {
-      const msg = "no Pub/Sub message received";
-      console.error(`error: ${msg}`);
-      res.status(400).send(`Bad Request: ${msg}`);
-      return;
-    }
+    LOGGER.info({ parsed: parsed.data }, "Message parsed!");
 
     res.status(204).send();
   });
@@ -52,7 +47,6 @@ start(WEB_SERVER_SETTINGS);
 
 const ZRawMessage = z
   .object({
-    publishTime: z.string(),
     messageId: z.string().min(1),
     data: z.string().min(1),
   })

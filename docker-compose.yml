@@ -40,7 +40,30 @@ services:
       - "8085:8085"
     container_name: gcloud-pubsub_test_node
     entrypoint: gcloud beta emulators pubsub start --project fgpt --host-port 0.0.0.0:8085
+    volumes:
+      - "pubsub:/data"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085"]
+      interval: 5s
+      timeout: 10s
+      retries: 3
 
+  pubsub_config:
+    image: alpine/curl
+    restart: "no"
+    depends_on:
+      pubsub:
+        condition: service_healthy
+    links:
+      - pubsub
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        curl -s -X PUT 'http://pubsub:8085/v1/projects/fgpt/topics/task_queue'
+        curl -s -X PUT 'http://pubsub:8085/v1/projects/fgpt/subscriptions/task_subscription' -H 'Content-Type: application/json' --data '{"topic":"projects/fgpt/topics/task_queue","pushConfig":{"pushEndpoint":"http://host.docker.internal:8002"}}'
+        echo "-Finished configuring pubsub"
 volumes:
   db:
+    driver: local
+  pubsub:
     driver: local
