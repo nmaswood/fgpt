@@ -26,14 +26,14 @@ async function start({ port, host }: WebServerSettings) {
 
   app.post("/", (req, res) => {
     const rawMessage = req.body?.message;
-    //const parsed = ZMessage.safeParse(rawMessage);
     console.log({ rawMessage });
+    const parsed = ZRawMessage.safeParse(rawMessage);
 
-    //if (!parsed.success) {
-    //const formatted = parsed.error.format();
-    //res.status(400).send(`Bad Request: ${formatted}`);
-    //return;
-    //}
+    if (!parsed.success) {
+      const formatted = parsed.error.format();
+      res.status(400).send(`Bad Request: ${formatted}`);
+      return;
+    }
 
     if (!rawMessage) {
       const msg = "no Pub/Sub message received";
@@ -50,7 +50,13 @@ async function start({ port, host }: WebServerSettings) {
 
 start(WEB_SERVER_SETTINGS);
 
-export const ZMessage = z.object({
-  version: z.literal("1"),
-  taskId: z.string().min(1),
-});
+const ZRawMessage = z
+  .object({
+    publishTime: z.string(),
+    messageId: z.string().min(1),
+    data: z.string().min(1),
+  })
+  .transform((row) => ({
+    ...row,
+    data: Buffer.from(row.data, "base64").toString().trim(),
+  }));

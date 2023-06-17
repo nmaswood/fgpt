@@ -789,5 +789,33 @@ resource "google_pubsub_topic" "default" {
   name = "task_queue"
 }
 
+resource "google_service_account" "sa" {
+  account_id   = "cloud-run-pubsub-invoker"
+  display_name = "Cloud Run Pub/Sub Invoker"
+}
+
+resource "google_cloud_run_service_iam_binding" "binding" {
+  location = google_cloud_run_v2_service.job_runner_server.location
+  service  = google_cloud_run_v2_service.job_runner_server.name
+  role     = "roles/run.invoker"
+  members  = ["serviceAccount:${google_service_account.sa.email}"]
+}
+
+
+resource "google_pubsub_subscription" "subscription" {
+  name  = "task_subscription"
+  topic = google_pubsub_topic.default.name
+  push_config {
+    push_endpoint = google_cloud_run_v2_service.job_runner_server.uri
+    oidc_token {
+      service_account_email = google_service_account.sa.email
+    }
+    attributes = {
+      x-goog-version = "v1"
+    }
+  }
+  depends_on = [google_cloud_run_v2_service.job_runner_server]
+}
+
 
 
