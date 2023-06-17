@@ -112,7 +112,13 @@ variable "pinecone_env" {}
 variable "pinecone_index" {}
 variable "pinecone_namespace" {}
 
-// DB SERVICE
+// PUBSUB
+//
 
-// NODE SERVICES
+variable "pubsub_task_topic" {
+  default = "task_queue"
+}
 
+variable "pubsub_task_subscription" {
+  default = "task_subscription"
+}

@@ -15,6 +15,11 @@ const ZSettings = z.object({
   assetBucket: z.string(),
   tracingEnabled: z.boolean(),
   urlSigningServiceAccountPath: z.string().optional(),
+  pubsub: z.object({
+    projectId: z.string(),
+    topic: z.string(),
+    subscription: z.string(),
+  }),
 });
 
 export const SETTINGS = ZSettings.parse({
@@ -33,4 +38,10 @@ export const SETTINGS = ZSettings.parse({
   assetBucket: process.env["ASSET_BUCKET"],
   tracingEnabled: process.env["TRACING_ENABLED"]?.toLowerCase() === "true",
   urlSigningServiceAccountPath: process.env["URL_SIGNING_SERVICE_ACCOUNT_PATH"],
+
+  pubsub: {
+    projectId: process.env["PUBSUB_PROJECT_ID"],
+    topic: process.env["PUBSUB_TOPIC"],
+    subscription: process.env["PUBSUB_SUBSCRIPTION"],
+  },
 });

@@ -91,8 +91,9 @@ resource "google_cloud_run_v2_job" "db" {
   location = "us-central1"
 
   template {
-
     template {
+
+      service_account = google_service_account.cloud_run_service_account.email
 
 
       volumes {
@@ -136,8 +137,9 @@ resource "google_cloud_run_v2_job" "job_runner" {
   location = "us-central1"
 
   template {
-
     template {
+
+      service_account = google_service_account.cloud_run_service_account.email
 
 
       volumes {
@@ -369,6 +371,8 @@ resource "google_cloud_run_v2_service" "springtime" {
 
   template {
 
+    service_account = google_service_account.cloud_run_service_account.email
+
     scaling {
       max_instance_count = 2
     }
@@ -426,6 +430,7 @@ resource "google_cloud_run_v2_service" "tika" {
 
   template {
 
+    service_account = google_service_account.cloud_run_service_account.email
 
     scaling {
       max_instance_count = 4
@@ -461,12 +466,7 @@ resource "google_cloud_run_v2_service" "tika" {
   depends_on = [google_project_service.enable_services]
 }
 
-resource "google_cloud_run_service_iam_policy" "tika_public_access" {
-  location    = google_cloud_run_v2_service.tika.location
-  project     = google_cloud_run_v2_service.tika.project
-  service     = google_cloud_run_v2_service.tika.name
-  policy_data = data.google_iam_policy.no_auth.policy_data
-}
+
 
 
 resource "google_cloud_run_v2_service" "api" {
@@ -475,6 +475,8 @@ resource "google_cloud_run_v2_service" "api" {
 
 
   template {
+
+    service_account = google_service_account.cloud_run_service_account.email
 
     scaling {
       min_instance_count = 1
@@ -521,6 +523,21 @@ resource "google_cloud_run_v2_service" "api" {
         value = "true"
       }
 
+      env {
+        name  = "PUBSUB_PROJECT_ID"
+        value = var.project
+      }
+
+      env {
+        name  = "PUBSUB_TOPIC"
+        value = var.pubsub_task_topic
+      }
+
+      env {
+        name  = "PUBSUB_SUBSCRIPTION"
+        value = var.pubsub_task_subscription
+      }
+
 
       volume_mounts {
         name       = "cloudsql"
@@ -544,6 +561,8 @@ resource "google_cloud_run_v2_service" "job_runner_server" {
 
 
   template {
+
+    service_account = google_service_account.cloud_run_service_account.email
 
     scaling {
       min_instance_count = 1
@@ -607,17 +626,38 @@ data "google_iam_policy" "no_auth" {
   }
 }
 
-resource "google_cloud_run_service_iam_policy" "api_public_access" {
+#data "google_iam_policy" "private" {
+#binding {
+#role = "roles/run.invoker"
+#members = [
+#"serviceAccount:${google_service_account.cloud_run_service_account.email}",
+#]
+#}
+#}
+
+
+
+
+// policies
+
+resource "google_cloud_run_v2_service_iam_policy" "api_public_access" {
   location    = google_cloud_run_v2_service.api.location
   project     = google_cloud_run_v2_service.api.project
-  service     = google_cloud_run_v2_service.api.name
+  name        = google_cloud_run_v2_service.api.name
   policy_data = data.google_iam_policy.no_auth.policy_data
 }
 
-resource "google_cloud_run_service_iam_policy" "springtime_public_access" {
+resource "google_cloud_run_v2_service_iam_policy" "springtime_public_access" {
   location    = google_cloud_run_v2_service.springtime.location
   project     = google_cloud_run_v2_service.springtime.project
-  service     = google_cloud_run_v2_service.springtime.name
+  name        = google_cloud_run_v2_service.springtime.name
+  policy_data = data.google_iam_policy.no_auth.policy_data
+}
+
+resource "google_cloud_run_v2_service_iam_policy" "tika_public_access" {
+  location    = google_cloud_run_v2_service.tika.location
+  project     = google_cloud_run_v2_service.tika.project
+  name        = google_cloud_run_v2_service.tika.name
   policy_data = data.google_iam_policy.no_auth.policy_data
 }
 
@@ -786,7 +826,7 @@ resource "auth0_prompt_custom_text" "example" {
 
 
 resource "google_pubsub_topic" "default" {
-  name = "task_queue"
+  name = var.pubsub_task_topic
 }
 
 resource "google_service_account" "sa" {
@@ -803,7 +843,7 @@ resource "google_cloud_run_service_iam_binding" "binding" {
 
 
 resource "google_pubsub_subscription" "subscription" {
-  name  = "task_subscription"
+  name  = var.pubsub_task_subscription
   topic = google_pubsub_topic.default.name
   # 300 seconds = 5 minutes
   ack_deadline_seconds = 300
@@ -818,6 +858,42 @@ resource "google_pubsub_subscription" "subscription" {
     }
   }
   depends_on = [google_cloud_run_v2_service.job_runner_server]
+}
+
+
+
+## Service Accounts
+
+
+resource "google_service_account" "cloud_run_service_account" {
+  account_id   = "cloud-run-service-account"
+  display_name = "Cloud run service account"
+}
+
+
+resource "google_project_iam_member" "cloudrun_service_account_sql_role" {
+  project = var.project
+  role    = "roles/cloudsql.client"
+  member  = "serviceAccount:${google_service_account.cloud_run_service_account.email}"
+}
+
+resource "google_project_iam_member" "cloudrun_service_account_storage_role" {
+  project = var.project
+  role    = "roles/storage.objectAdmin"
+  member  = "serviceAccount:${google_service_account.cloud_run_service_account.email}"
+}
+
+
+resource "google_project_iam_member" "service_account_token_creator" {
+  project = var.project
+  role    = "roles/iam.serviceAccountTokenCreator"
+  member  = "serviceAccount:${google_service_account.cloud_run_service_account.email}"
+}
+
+resource "google_project_iam_member" "cloud_run_service_binding" {
+  project = var.project
+  role    = "roles/run.invoker"
+  member  = "serviceAccount:${google_service_account.cloud_run_service_account.email}"
 }
 
 
