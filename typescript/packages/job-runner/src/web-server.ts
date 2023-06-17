@@ -26,8 +26,8 @@ async function start({ port, host }: WebServerSettings) {
 
   app.post("/", (req, res) => {
     const rawMessage = req.body?.message;
-    console.log({ rawMessage });
     const parsed = ZRawMessage.safeParse(rawMessage);
+    console.log({ rawMessage });
 
     if (!parsed.success) {
       const formatted = parsed.error.format();
