@@ -4,7 +4,7 @@ dotenv.config();
 import { isNotNull } from "@fgpt/precedent-iso";
 import {
   dataBasePool,
-  PSqlTaskService,
+  PSqlTaskStore,
   TaskRunnerImpl,
 } from "@fgpt/precedent-node";
 
@@ -18,7 +18,7 @@ async function start(settings: CommonSettings) {
   const pool = await dataBasePool(settings.sql.uri);
   const executor = await getExecutor(settings, pool);
 
-  const taskService = new PSqlTaskService(pool);
+  const taskService = new PSqlTaskStore(pool);
 
   const runner = new TaskRunnerImpl(taskService, executor);
 

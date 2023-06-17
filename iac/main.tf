@@ -599,6 +599,21 @@ resource "google_cloud_run_v2_service" "job_runner_server" {
         value = "${google_cloud_run_v2_service.tika.uri}/tika"
       }
 
+      env {
+        name  = "PUBSUB_PROJECT_ID"
+        value = var.project
+      }
+
+      env {
+        name  = "PUBSUB_TOPIC"
+        value = var.pubsub_task_topic
+      }
+
+      env {
+        name  = "PUBSUB_SUBSCRIPTION"
+        value = var.pubsub_task_subscription
+      }
+
 
       volume_mounts {
         name       = "cloudsql"

@@ -1,5 +1,5 @@
 import { LOGGER } from "../logger";
-import { Task, TaskService } from "../task-service";
+import { Task, TaskStore } from "../task-store";
 import { TaskExecutor } from "./task-executor";
 
 export interface RunOptions {
@@ -26,7 +26,7 @@ export interface TaskRunner {
 
 export class TaskRunnerImpl implements TaskRunner {
   constructor(
-    private readonly taskService: TaskService,
+    private readonly taskService: TaskStore,
     private readonly taskExecutor: TaskExecutor
   ) {}
 

@@ -1,11 +1,11 @@
-import { ProjectStore, TaskService } from "@fgpt/precedent-node";
+import { ProjectStore, TaskStore } from "@fgpt/precedent-node";
 import express from "express";
 import { z } from "zod";
 
 export class ProjectRouter {
   constructor(
     private readonly projectStore: ProjectStore,
-    private readonly taskService: TaskService
+    private readonly taskService: TaskStore
   ) {}
   init() {
     const router = express.Router();

@@ -17,7 +17,7 @@ import { LOGGER } from "../logger";
 import { MLServiceClient } from "../ml/ml-service";
 import { ProcessedFileStore } from "../processed-file-store";
 import { ShaHash } from "../sha-hash";
-import { Task, TaskService } from "../task-service";
+import { Task, TaskStore } from "../task-store";
 import { TextChunkStore } from "../text-chunk-store";
 import { TextExtractor } from "../text-extractor";
 
@@ -30,7 +30,7 @@ export class TaskExecutorImpl implements TaskExecutor {
   CHUNKER = new GreedyTextChunker();
   constructor(
     private readonly textExtractor: TextExtractor,
-    private readonly taskService: TaskService,
+    private readonly taskService: TaskStore,
     private readonly processedFileStore: ProcessedFileStore,
     private readonly textChunkStore: TextChunkStore,
     private readonly mlService: MLServiceClient,

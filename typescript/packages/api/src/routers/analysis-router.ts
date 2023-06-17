@@ -1,7 +1,7 @@
 import {
   AnalysisStore,
   STANDARD_ANALYSIS,
-  TaskService,
+  TaskStore,
 } from "@fgpt/precedent-node";
 import express from "express";
 import { z } from "zod";
@@ -9,7 +9,7 @@ import { z } from "zod";
 export class AnalysisRouter {
   constructor(
     private readonly analysisStore: AnalysisStore,
-    private readonly taskService: TaskService
+    private readonly taskService: TaskStore
   ) {}
   init() {
     const router = express.Router();

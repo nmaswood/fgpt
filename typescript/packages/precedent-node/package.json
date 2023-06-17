@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "@fgpt/precedent-iso": "workspace:^",
+    "@google-cloud/pubsub": "^3.7.1",
     "@google-cloud/storage": "^6.11.0",
     "axios": "^1.4.0",
     "cheerio": "^1.0.0-rc.12",

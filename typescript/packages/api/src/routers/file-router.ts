@@ -4,7 +4,7 @@ import {
   InsertFileReference,
   LoadedFileStore,
   ShaHash,
-  TaskService,
+  TaskStore,
 } from "@fgpt/precedent-node";
 import crypto from "crypto";
 import express from "express";
@@ -26,7 +26,7 @@ export class FileRouter {
     private readonly fileReferenceStore: FileReferenceStore,
     private readonly blobStorageService: BlobStorageService,
     private readonly bucket: string,
-    private readonly taskService: TaskService,
+    private readonly taskService: TaskStore,
     private readonly loadedFileStore: LoadedFileStore
   ) {}
   init() {

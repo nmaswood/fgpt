@@ -3,7 +3,7 @@ import { beforeEach, expect, test } from "vitest";
 
 import { dataBasePool } from "../data-base-pool";
 import { PSqlProjectStore } from "../project-store";
-import { PSqlTaskService } from "../task-service";
+import { PSqlTaskStore } from "../task-store";
 import { PsqlUserOrgService } from "../user-org/user-org-service";
 import { TEST_SETTINGS } from "./test-settings";
 
@@ -12,7 +12,7 @@ async function setup() {
 
   const userOrgService = new PsqlUserOrgService(pool);
   const projectService = new PSqlProjectStore(pool);
-  const taskService = new PSqlTaskService(pool);
+  const taskService = new PSqlTaskStore(pool);
 
   const user = await userOrgService.upsert({
     sub: {

@@ -8,7 +8,7 @@ import {
   PsqlMiscOutputStore,
   PsqlProcessedFileStore,
   PsqlQuestionStore,
-  PSqlTaskService,
+  PSqlTaskStore,
   PsqlTextChunkStore,
   TikaHttpClient,
   TikaTextExtractor,
@@ -30,7 +30,7 @@ export async function getExecutor(
     blobStorageService,
     tikaClient
   );
-  const taskService = new PSqlTaskService(pool);
+  const taskService = new PSqlTaskStore(pool);
 
   const processedFileStore = new PsqlProcessedFileStore(pool);
 
