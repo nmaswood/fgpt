@@ -538,6 +538,65 @@ resource "google_cloud_run_v2_service" "api" {
   }
 }
 
+resource "google_cloud_run_v2_service" "job_runner_server" {
+  name     = "${var.project_slug}-job-runner-server"
+  location = var.region
+
+
+  template {
+
+    scaling {
+      min_instance_count = 1
+      max_instance_count = 2
+    }
+
+    containers {
+      image   = "${var.region}-docker.pkg.dev/${var.project}/fgpt/job-runner:latest"
+      command = ["yarn", "run-server"]
+
+      env {
+        name  = "HOST"
+        value = "0.0.0.0"
+      }
+
+      env {
+
+        name  = "SQL_URI"
+        value = "socket://${urlencode(var.database_user)}:${urlencode(var.database_password)}@${urlencode("/cloudsql/${google_sql_database_instance.instance.connection_name}")}/fgpt"
+      }
+
+      env {
+        name  = "ML_SERVICE_URI"
+        value = google_cloud_run_v2_service.springtime.uri
+      }
+
+      env {
+        name  = "ASSET_BUCKET"
+        value = local.asset_bucket
+      }
+
+      env {
+        name  = "TIKA_CLIENT"
+        value = "${google_cloud_run_v2_service.tika.uri}/tika"
+      }
+
+
+      volume_mounts {
+        name       = "cloudsql"
+        mount_path = "/cloudsql"
+      }
+
+    }
+
+    volumes {
+      name = "cloudsql"
+      cloud_sql_instance {
+        instances = [google_sql_database_instance.instance.connection_name]
+      }
+    }
+  }
+}
+
 data "google_iam_policy" "no_auth" {
   binding {
     role = "roles/run.invoker"
@@ -724,5 +783,11 @@ resource "auth0_prompt_custom_text" "example" {
     }
   )
 }
+
+
+resource "google_pubsub_topic" "default" {
+  name = "task_queue"
+}
+
 
 

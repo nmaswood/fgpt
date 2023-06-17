@@ -11,10 +11,13 @@ import { LOGGER } from "./logger";
 
 import { WebServerSettings, WEB_SERVER_SETTINGS } from "./web-server-settings";
 
-LOGGER.info("Server starting ...");
+LOGGER.info("Server starting...");
 
 async function start({ port, host }: WebServerSettings) {
   const app = express();
+
+  app.use(express.json());
+
   app.enable("trust proxy");
 
   app.get("/ping", (_, res) => {
