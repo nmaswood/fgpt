@@ -132,72 +132,6 @@ locals {
 
 
 
-resource "google_cloud_run_v2_job" "job_runner" {
-  name     = "${var.project_slug}-job-runner"
-  location = "us-central1"
-
-  template {
-    template {
-
-      service_account = google_service_account.cloud_run_service_account.email
-
-
-      volumes {
-        name = "cloudsql"
-        cloud_sql_instance {
-          instances = [google_sql_database_instance.instance.connection_name]
-        }
-      }
-
-      timeout = "3600s"
-
-      containers {
-        image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/job-runner:latest"
-
-        resources {
-          limits = {
-            cpu    = "1"
-            memory = "4Gi"
-          }
-        }
-
-        env {
-
-          name  = "SQL_URI"
-          value = "socket://${urlencode(var.database_user)}:${urlencode(var.database_password)}@${urlencode("/cloudsql/${google_sql_database_instance.instance.connection_name}")}/fgpt"
-        }
-
-        env {
-          name  = "ML_SERVICE_URI"
-          value = google_cloud_run_v2_service.springtime.uri
-        }
-
-
-        env {
-          name  = "ASSET_BUCKET"
-          value = local.asset_bucket
-        }
-
-        env {
-          name  = "TIKA_CLIENT"
-          value = "${google_cloud_run_v2_service.tika.uri}/tika"
-        }
-
-        env {
-          name  = "TRACING_ENABLED"
-          value = "true"
-        }
-
-        volume_mounts {
-          name       = "cloudsql"
-          mount_path = "/cloudsql"
-        }
-      }
-
-    }
-  }
-}
-
 # Cloud Run Invoker Service Account
 resource "google_service_account" "cloud_run_invoker_sa" {
   account_id   = "cloud-run-invoker"
@@ -217,50 +151,6 @@ resource "google_project_iam_binding" "token_creator_binding" {
   role    = "roles/iam.serviceAccountTokenCreator"
   members = ["serviceAccount:${google_service_account.cloud_run_invoker_sa.email}"]
 }
-
-
-resource "google_cloud_run_v2_job_iam_binding" "binding" {
-  project    = var.project
-  location   = google_cloud_run_v2_job.job_runner.location
-  name       = google_cloud_run_v2_job.job_runner.name
-  role       = "roles/viewer"
-  members    = ["serviceAccount:${google_service_account.cloud_run_invoker_sa.email}"]
-  depends_on = [resource.google_cloud_run_v2_job.job_runner]
-}
-
-
-resource "google_cloud_scheduler_job" "job" {
-  name             = "schedule-job"
-  description      = "test http job"
-  schedule         = "*/10 * * * *"
-  attempt_deadline = "320s"
-  region           = var.region
-  project          = var.project
-
-  retry_config {
-    retry_count = 3
-  }
-
-  http_target {
-    http_method = "POST"
-    uri         = "https://${google_cloud_run_v2_job.job_runner.location}-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/${392400263239}/jobs/${google_cloud_run_v2_job.job_runner.name}:run"
-
-    oauth_token {
-      service_account_email = google_service_account.cloud_run_invoker_sa.email
-    }
-
-  }
-
-
-  depends_on = [
-    google_project_service.enable_services,
-    resource.google_cloud_run_v2_job.job_runner,
-    resource.google_cloud_run_v2_job_iam_binding.binding
-
-  ]
-}
-
-
 
 resource "google_cloudbuild_trigger" "build-api" {
   location = var.region
