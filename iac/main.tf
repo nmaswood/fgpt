@@ -739,11 +739,29 @@ resource "google_service_account" "sa" {
   display_name = "Cloud Run Pub/Sub Invoker"
 }
 
+resource "google_project_iam_member" "pubsub_token_creator" {
+  project = var.project
+  role    = "roles/iam.serviceAccountTokenCreator"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}
+
 resource "google_cloud_run_service_iam_binding" "binding" {
   location = google_cloud_run_v2_service.job_runner_server.location
   service  = google_cloud_run_v2_service.job_runner_server.name
   role     = "roles/run.invoker"
   members  = ["serviceAccount:${google_service_account.sa.email}"]
+}
+
+resource "google_project_service_identity" "pubsub_agent" {
+  provider = google-beta
+  project  = var.project
+  service  = "pubsub.googleapis.com"
+}
+
+resource "google_project_iam_binding" "project_token_creator" {
+  project = var.project
+  role    = "roles/iam.serviceAccountTokenCreator"
+  members = ["serviceAccount:${google_project_service_identity.pubsub_agent.email}"]
 }
 
 
@@ -752,6 +770,12 @@ resource "google_pubsub_subscription" "subscription" {
   topic = google_pubsub_topic.default.name
   # 300 seconds = 5 minutes
   ack_deadline_seconds = 300
+
+
+  retry_policy {
+    minimum_backoff = "10s"
+    maximum_backoff = "300s"
+  }
 
   push_config {
     push_endpoint = google_cloud_run_v2_service.job_runner_server.uri
@@ -775,7 +799,6 @@ resource "google_service_account" "cloud_run_service_account" {
   display_name = "Cloud run service account"
 }
 
-
 resource "google_project_iam_member" "cloudrun_service_account_sql_role" {
   project = var.project
   role    = "roles/cloudsql.client"
@@ -798,6 +821,12 @@ resource "google_project_iam_member" "service_account_token_creator" {
 resource "google_project_iam_member" "cloud_run_service_binding" {
   project = var.project
   role    = "roles/run.invoker"
+  member  = "serviceAccount:${google_service_account.cloud_run_service_account.email}"
+}
+
+resource "google_project_iam_member" "pubsub_publisher" {
+  project = var.project
+  role    = "roles/pubsub.publisher"
   member  = "serviceAccount:${google_service_account.cloud_run_service_account.email}"
 }
 

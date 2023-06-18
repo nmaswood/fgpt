@@ -1,5 +1,10 @@
-import { LOGGER, TaskExecutor, TaskStore } from "@fgpt/precedent-node";
-import { ZMessage } from "@fgpt/precedent-node";
+import {
+  LOGGER,
+  Message,
+  TaskExecutor,
+  TaskStore,
+  ZMessage,
+} from "@fgpt/precedent-node";
 import express from "express";
 import { z } from "zod";
 
@@ -13,43 +18,50 @@ export class MainRouter {
 
     router.post("/", async (req: express.Request, res: express.Response) => {
       const rawMessage = req.body?.message;
-      const parsed = ZRawMessage.safeParse(rawMessage);
-      LOGGER.info({ rawMessage, parseSuccess: parsed.success });
 
-      if (!parsed.success) {
+      const message = tryParse(rawMessage);
+      if (!message) {
         LOGGER.error("Could not parse message");
         res.status(204).send(`Bad Request: Could not parse object`);
         return;
       }
 
-      const message = ZMessage.safeParse(JSON.parse(parsed.data.data));
-      if (!message.success) {
-        LOGGER.error("Could not parse message");
-        res.status(204).send(`Bad Request: Could not parse object`);
-        return;
-      }
-      const fullyParsed = message.data;
-      LOGGER.info({ fullyParsed }, "Message parsed!");
+      LOGGER.info({ message }, "Message parsed!");
 
       try {
-        await this.taskStore.setToInProgress(fullyParsed.taskId);
-        const task = await this.taskStore.get(fullyParsed.taskId);
+        await this.taskStore.setToInProgress(message.taskId);
+        const task = await this.taskStore.get(message.taskId);
         LOGGER.info({ task }, "Executing task");
         await this.taskExecutor.execute(task);
         await this.taskStore.setToSuceeded(task.id);
         LOGGER.info({ taskId: task.id }, "completed task");
         res.status(204).send();
+        return;
       } catch (e) {
         LOGGER.error("Could not execute task");
         LOGGER.error(e);
 
-        await this.taskStore.setToFailed(fullyParsed.taskId);
+        await this.taskStore.setToFailed(message.taskId);
         // TODO retry
         res.status(204).send();
+
+        return;
       }
     });
 
     return router;
+  }
+}
+
+function tryParse(rawMessage: unknown): Message | undefined {
+  try {
+    const message = ZRawMessage.parse(rawMessage);
+    const asJson = JSON.parse(message.data);
+    return ZMessage.parse(asJson);
+  } catch (e) {
+    LOGGER.error(e);
+    LOGGER.error({ rawMessage }, "Could not parse message");
+    return undefined;
   }
 }
 
