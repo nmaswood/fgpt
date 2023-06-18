@@ -734,22 +734,22 @@ resource "google_pubsub_topic" "default" {
   name = var.pubsub_task_topic
 }
 
-resource "google_service_account" "sa" {
-  account_id   = "cloud-run-pubsub-invoker"
+resource "google_service_account" "cloud_run_pubsub_invoker" {
+  account_id   = "cloud-run-pubsub-invoker-v2"
   display_name = "Cloud Run Pub/Sub Invoker"
 }
 
-resource "google_project_iam_member" "pubsub_token_creator" {
+resource "google_project_iam_member" "pubsub_token_creator_xxx" {
   project = var.project
   role    = "roles/iam.serviceAccountTokenCreator"
-  member  = "serviceAccount:${google_service_account.sa.email}"
+  member  = "serviceAccount:${google_service_account.cloud_run_pubsub_invoker.email}"
 }
 
 resource "google_cloud_run_service_iam_binding" "binding" {
   location = google_cloud_run_v2_service.job_runner_server.location
   service  = google_cloud_run_v2_service.job_runner_server.name
   role     = "roles/run.invoker"
-  members  = ["serviceAccount:${google_service_account.sa.email}"]
+  members  = ["serviceAccount:${google_service_account.cloud_run_pubsub_invoker.email}"]
 }
 
 resource "google_project_service_identity" "pubsub_agent" {
@@ -780,7 +780,7 @@ resource "google_pubsub_subscription" "subscription" {
   push_config {
     push_endpoint = google_cloud_run_v2_service.job_runner_server.uri
     oidc_token {
-      service_account_email = google_service_account.sa.email
+      service_account_email = google_service_account.cloud_run_pubsub_invoker.email
     }
     attributes = {
       x-goog-version = "v1"
@@ -795,7 +795,7 @@ resource "google_pubsub_subscription" "subscription" {
 
 
 resource "google_service_account" "cloud_run_service_account" {
-  account_id   = "cloud-run-service-account"
+  account_id   = "cloud-run-service-account-v2"
   display_name = "Cloud run service account"
 }
 
