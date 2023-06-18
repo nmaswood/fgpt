@@ -734,8 +734,12 @@ resource "google_pubsub_topic" "default" {
   name = var.pubsub_task_topic
 }
 
+resource "google_pubsub_topic" "task_queue_dead_letter" {
+  name = "${var.pubsub_task_topic}-dead-letter"
+}
+
 resource "google_service_account" "cloud_run_pubsub_invoker" {
-  account_id   = "cloud-run-pubsub-invoker-v2"
+  account_id   = "cloud-run-pubsub-invoker-v3"
   display_name = "Cloud Run Pub/Sub Invoker"
 }
 
@@ -772,6 +776,11 @@ resource "google_pubsub_subscription" "subscription" {
   ack_deadline_seconds = 300
 
 
+  dead_letter_policy {
+    dead_letter_topic     = google_pubsub_topic.task_queue_dead_letter.id
+    max_delivery_attempts = 10
+  }
+
   retry_policy {
     minimum_backoff = "10s"
     maximum_backoff = "300s"
@@ -790,12 +799,11 @@ resource "google_pubsub_subscription" "subscription" {
 }
 
 
-
 ## Service Accounts
 
 
 resource "google_service_account" "cloud_run_service_account" {
-  account_id   = "cloud-run-service-account-v2"
+  account_id   = "cloud-run-service-account-v3"
   display_name = "Cloud run service account"
 }
 
