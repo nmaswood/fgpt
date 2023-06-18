@@ -11,7 +11,8 @@ import { z } from "zod";
 export class MainRouter {
   constructor(
     private readonly taskStore: TaskStore,
-    private readonly taskExecutor: TaskExecutor
+    private readonly taskExecutor: TaskExecutor,
+    private readonly accTaskOnError: boolean
   ) {}
   init() {
     const router = express.Router();
@@ -43,8 +44,12 @@ export class MainRouter {
         LOGGER.error(e);
 
         await this.taskStore.setToFailed(message.taskId);
-        // TODO retry
-        res.status(204).send();
+        if (this.accTaskOnError) {
+          LOGGER.warn("Acking task even though error has occurred");
+          res.status(204).send();
+          return;
+        }
+        res.status(500).send();
 
         return;
       }

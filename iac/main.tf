@@ -131,27 +131,6 @@ locals {
 }
 
 
-
-# Cloud Run Invoker Service Account
-resource "google_service_account" "cloud_run_invoker_sa" {
-  account_id   = "cloud-run-invoker"
-  display_name = "Cloud Run Invoker"
-  project      = var.project
-}
-
-# Project IAM binding
-resource "google_project_iam_binding" "run_invoker_binding" {
-  project = var.project
-  role    = "roles/run.invoker"
-  members = ["serviceAccount:${google_service_account.cloud_run_invoker_sa.email}"]
-}
-
-resource "google_project_iam_binding" "token_creator_binding" {
-  project = var.project
-  role    = "roles/iam.serviceAccountTokenCreator"
-  members = ["serviceAccount:${google_service_account.cloud_run_invoker_sa.email}"]
-}
-
 resource "google_cloudbuild_trigger" "build-api" {
   location = var.region
   name     = "build-api-${var.project_slug}"
@@ -531,18 +510,6 @@ data "google_iam_policy" "no_auth" {
   }
 }
 
-#data "google_iam_policy" "private" {
-#binding {
-#role = "roles/run.invoker"
-#members = [
-#"serviceAccount:${google_service_account.cloud_run_service_account.email}",
-#]
-#}
-#}
-
-
-
-
 // policies
 
 resource "google_cloud_run_v2_service_iam_policy" "api_public_access" {
@@ -738,37 +705,6 @@ resource "google_pubsub_topic" "task_queue_dead_letter" {
   name = "${var.pubsub_task_topic}-dead-letter"
 }
 
-resource "google_service_account" "cloud_run_pubsub_invoker" {
-  account_id   = "cloud-run-pubsub-invoker-v3"
-  display_name = "Cloud Run Pub/Sub Invoker"
-}
-
-resource "google_project_iam_member" "pubsub_token_creator_xxx" {
-  project = var.project
-  role    = "roles/iam.serviceAccountTokenCreator"
-  member  = "serviceAccount:${google_service_account.cloud_run_pubsub_invoker.email}"
-}
-
-resource "google_cloud_run_service_iam_binding" "binding" {
-  location = google_cloud_run_v2_service.job_runner_server.location
-  service  = google_cloud_run_v2_service.job_runner_server.name
-  role     = "roles/run.invoker"
-  members  = ["serviceAccount:${google_service_account.cloud_run_pubsub_invoker.email}"]
-}
-
-resource "google_project_service_identity" "pubsub_agent" {
-  provider = google-beta
-  project  = var.project
-  service  = "pubsub.googleapis.com"
-}
-
-resource "google_project_iam_binding" "project_token_creator" {
-  project = var.project
-  role    = "roles/iam.serviceAccountTokenCreator"
-  members = ["serviceAccount:${google_project_service_identity.pubsub_agent.email}"]
-}
-
-
 resource "google_pubsub_subscription" "subscription" {
   name  = var.pubsub_task_subscription
   topic = google_pubsub_topic.default.name
@@ -789,7 +725,7 @@ resource "google_pubsub_subscription" "subscription" {
   push_config {
     push_endpoint = google_cloud_run_v2_service.job_runner_server.uri
     oidc_token {
-      service_account_email = google_service_account.cloud_run_pubsub_invoker.email
+      service_account_email = google_service_account.cloud_run_service_account.email
     }
     attributes = {
       x-goog-version = "v1"
@@ -798,12 +734,21 @@ resource "google_pubsub_subscription" "subscription" {
   depends_on = [google_cloud_run_v2_service.job_runner_server]
 }
 
+resource "google_pubsub_subscription" "dead_letter_subscription" {
+  name  = "${var.pubsub_task_subscription}-dead-letter"
+  topic = google_pubsub_topic.task_queue_dead_letter.name
+  # 300 seconds = 5 minutes
+  ack_deadline_seconds = 300
+
+  depends_on = [google_cloud_run_v2_service.job_runner_server]
+}
+
 
 ## Service Accounts
 
 
 resource "google_service_account" "cloud_run_service_account" {
-  account_id   = "cloud-run-service-account-v3"
+  account_id   = "cloud-run-service-account-v6"
   display_name = "Cloud run service account"
 }
 

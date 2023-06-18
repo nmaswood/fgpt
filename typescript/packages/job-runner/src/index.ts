@@ -89,7 +89,11 @@ async function start(settings: Settings) {
 
   const taskStore = new PSqlTaskStore(pool, messageBusService);
 
-  const mainRouter = new MainRouter(taskStore, taskExecutor);
+  const mainRouter = new MainRouter(
+    taskStore,
+    taskExecutor,
+    settings.ackTaskOnError
+  );
 
   app.use("/", mainRouter.init());
 
