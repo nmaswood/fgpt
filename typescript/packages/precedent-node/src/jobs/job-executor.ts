@@ -33,7 +33,7 @@ export class TaskRunnerImpl implements TaskRunner {
   async run(options: RunOptions): Promise<ExecutionResult[]> {
     const results: ExecutionResult[] = [];
     for (let i = 0; i < options.limit; i++) {
-      const task = await this.taskService.setToInProgress();
+      const task = await this.taskService.getAndSetToInProgress();
 
       const statusForTask = withTaskId(task?.id);
 

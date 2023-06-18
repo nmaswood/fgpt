@@ -37,7 +37,8 @@ export interface TaskStore {
   get(taskId: string): Promise<Task>;
   insert(config: CreateTask): Promise<Task>;
   insertMany(configs: CreateTask[]): Promise<Task[]>;
-  setToInProgress(): Promise<Task | undefined>;
+  getAndSetToInProgress(): Promise<Task | undefined>;
+  setToInProgress(taskId: string): Promise<Task | undefined>;
   setToSuceeded(taskId: string): Promise<Task | undefined>;
   setToFailed(taskId: string): Promise<Task | undefined>;
   setToQueued(taskId: string): Promise<Task | undefined>;
@@ -69,6 +70,22 @@ WHERE
     return task;
   }
 
+  async setToInProgress(taskId: string): Promise<Task> {
+    return this.pool.one(
+      sql.type(ZFromTaskRow)`
+UPDATE
+    task
+SET
+    status = 'in-progress',
+    status_updated_at = now()
+WHERE
+    task.id = ${taskId}
+RETURNING
+    ${FIELDS}
+`
+    );
+  }
+
   async setToQueued(taskId: string): Promise<Task> {
     return this.pool.one(
       sql.type(ZFromTaskRow)`
@@ -85,8 +102,8 @@ RETURNING
     );
   }
 
-  async setToInProgress(): Promise<Task | undefined> {
-    const [row] = await this.setManyToInProgress({ limit: 1 });
+  async getAndSetToInProgress(): Promise<Task | undefined> {
+    const [row] = await this.getAndSetManyToInProgress({ limit: 1 });
     return row;
   }
 
@@ -147,7 +164,7 @@ RETURNING
     return tasks;
   }
 
-  async setManyToInProgress({
+  async getAndSetManyToInProgress({
     limit,
   }: SetManyToInProgressArgs): Promise<Task[]> {
     if (limit <= 0) {

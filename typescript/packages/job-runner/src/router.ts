@@ -32,11 +32,12 @@ export class MainRouter {
       LOGGER.info({ fullyParsed }, "Message parsed!");
 
       try {
+        await this.taskStore.setToInProgress(fullyParsed.taskId);
         const task = await this.taskStore.get(fullyParsed.taskId);
         LOGGER.info({ task }, "Executing task");
         await this.taskExecutor.execute(task);
         await this.taskStore.setToSuceeded(task.id);
-        LOGGER.info("completed task");
+        LOGGER.info({ taskId: task.id }, "completed task");
         res.status(204).send();
       } catch (e) {
         LOGGER.error("Could not execute task");

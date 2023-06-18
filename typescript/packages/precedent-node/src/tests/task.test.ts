@@ -103,7 +103,7 @@ test("get", async () => {
   expect(task.config.type).toEqual("text-extraction");
 });
 
-test("setToInProgress", async () => {
+test("getAndSetToInProgress", async () => {
   const { user, project, taskService } = await setup();
   expect(await taskService.insertMany([])).toEqual([]);
   await taskService.insertMany([
@@ -131,7 +131,7 @@ test("setToInProgress", async () => {
     },
   ]);
 
-  const task = await taskService.setToInProgress();
+  const task = await taskService.getAndSetToInProgress();
   expect(task?.status).toEqual("in-progress");
 });
 
@@ -152,6 +152,27 @@ test("setToSuceeded", async () => {
 
   const completedTask = await taskService.setToSuceeded(task.id);
   expect(completedTask?.status).toEqual("succeeded");
+});
+
+test("setToInProgress", async () => {
+  const { user, project, taskService } = await setup();
+  expect(await taskService.insertMany([])).toEqual([]);
+  const task = await taskService.insert({
+    organizationId: user.organizationId,
+    projectId: project.id,
+    config: {
+      version: "1",
+      organizationId: user.organizationId,
+      projectId: project.id,
+      type: "text-extraction",
+      fileId: "123",
+    },
+  });
+
+  const completedTask = await taskService.setToSuceeded(task.id);
+  expect(completedTask?.status).toEqual("succeeded");
+  const inProgress = await taskService.setToInProgress(task.id);
+  expect(inProgress?.status).toEqual("in-progress");
 });
 
 test("setToFailed", async () => {
