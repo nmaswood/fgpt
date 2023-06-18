@@ -9,8 +9,6 @@ import {
 import lodashChunk from "lodash/chunk";
 import keyBy from "lodash/keyBy";
 
-import { AnalysisService } from "../analysis-service";
-import { AnalysisStore } from "../analysis-store";
 import { InsertMiscValue, MiscOutputStore } from "../llm-outputs/metrics-store";
 import { QuestionStore } from "../llm-outputs/question-store";
 import { LOGGER } from "../logger";
@@ -34,8 +32,7 @@ export class TaskExecutorImpl implements TaskExecutor {
     private readonly processedFileStore: ProcessedFileStore,
     private readonly textChunkStore: TextChunkStore,
     private readonly mlService: MLServiceClient,
-    private readonly analysisService: AnalysisService,
-    private readonly analysisStore: AnalysisStore,
+
     private readonly questionStore: QuestionStore,
     private readonly miscOutputStore: MiscOutputStore
   ) {}
@@ -161,13 +158,6 @@ export class TaskExecutorImpl implements TaskExecutor {
       }
 
       case "create-analysis": {
-        const output = await this.analysisService.analyze(config.analysisId);
-
-        await this.analysisStore.update({
-          id: config.analysisId,
-          output,
-        });
-
         LOGGER.warn("Create analysis not implemented");
         break;
       }

@@ -9,10 +9,8 @@ import { LOGGER } from "./logger";
 
 import {
   dataBasePool,
-  AnalyisServiceImpl,
   GoogleCloudStorageService,
   MLServiceClientImpl,
-  PsqlAnalysisStore,
   PsqlFileReferenceStore,
   PsqlMiscOutputStore,
   PsqlProcessedFileStore,
@@ -65,13 +63,6 @@ async function start(settings: Settings) {
 
   const mlServiceClient = new MLServiceClientImpl(settings.mlServiceUri);
 
-  const analysisStore = new PsqlAnalysisStore(pool);
-  const analysisService = new AnalyisServiceImpl(
-    analysisStore,
-    mlServiceClient,
-    textChunkStore
-  );
-
   const questionStore = new PsqlQuestionStore(pool);
   const metricsStore = new PsqlMiscOutputStore(pool);
 
@@ -81,8 +72,7 @@ async function start(settings: Settings) {
     processedFileStore,
     textChunkStore,
     mlServiceClient,
-    analysisService,
-    analysisStore,
+
     questionStore,
     metricsStore
   );

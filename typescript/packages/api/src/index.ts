@@ -25,7 +25,6 @@ import {
   PsqlTextChunkStore,
   PsqlUserOrgService,
   PsqlLoadedFileStore,
-  PsqlAnalysisStore,
   PsqlChatStore,
   PsqlQuestionStore,
   ReportServiceImpl,
@@ -37,7 +36,6 @@ import { UserOrgRouter } from "./routers/user-org-router";
 import { ProjectRouter } from "./routers/project-router";
 import { FileRouter } from "./routers/file-router";
 import { ChatRouter } from "./routers/chat-router";
-import { AnalysisRouter } from "./routers/analysis-router";
 import { TextGroupRouter } from "./routers/text-group-router";
 import { LLMOutputRouter } from "./routers/llm-output.router";
 
@@ -96,8 +94,6 @@ async function start() {
 
   const mlService = new MLServiceClientImpl(SETTINGS.mlServiceUri);
 
-  const analysisStore = new PsqlAnalysisStore(pool);
-
   const chatStore = new PsqlChatStore(pool);
 
   const questionStore = new PsqlQuestionStore(pool);
@@ -138,13 +134,6 @@ async function start() {
       chatStore,
       fileReferenceStore
     ).init()
-  );
-
-  app.use(
-    "/api/v1/analyses",
-    jwtCheck,
-    addUser,
-    new AnalysisRouter(analysisStore, taskStore).init()
   );
 
   app.use(

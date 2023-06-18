@@ -240,6 +240,8 @@ resource "google_cloud_run_v2_service" "springtime" {
 
   template {
 
+
+    timeout         = "900s"
     service_account = google_service_account.cloud_run_service_account.email
 
     scaling {
@@ -431,7 +433,9 @@ resource "google_cloud_run_v2_service" "job_runner_server" {
 
   template {
 
-    service_account = google_service_account.cloud_run_service_account.email
+    service_account                  = google_service_account.cloud_run_service_account.email
+    timeout                          = "900s"
+    max_instance_request_concurrency = 30
 
     scaling {
       min_instance_count = 1
@@ -739,6 +743,17 @@ resource "google_pubsub_subscription" "dead_letter_subscription" {
   topic = google_pubsub_topic.task_queue_dead_letter.name
   # 300 seconds = 5 minutes
   ack_deadline_seconds = 300
+
+  push_config {
+    push_endpoint = "${google_cloud_run_v2_service.job_runner_server.uri}/dead-letter"
+    oidc_token {
+      service_account_email = google_service_account.cloud_run_service_account.email
+    }
+    attributes = {
+      x-goog-version = "v1"
+    }
+  }
+
 
   depends_on = [google_cloud_run_v2_service.job_runner_server]
 }
