@@ -53,7 +53,10 @@ export class MainRouter {
     router.post(
       "/dead-letter",
       async (req: express.Request, res: express.Response) => {
-        LOGGER.info("Dead letter: Starting to process message");
+        LOGGER.info(
+          { body: req.body },
+          "Dead letter: Starting to process message"
+        );
         const rawMessage = req.body?.message;
 
         const message = tryParse(rawMessage);
