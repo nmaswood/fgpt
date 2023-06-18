@@ -10,17 +10,15 @@ import {
   PsqlQuestionStore,
   PSqlTaskStore,
   PsqlTextChunkStore,
+  PubsubMessageBusService,
   TikaHttpClient,
   TikaTextExtractor,
 } from "@fgpt/precedent-node";
 import { DatabasePool } from "slonik";
 
-import { CommonSettings } from "./settings";
+import { Settings } from "./settings";
 
-export async function getExecutor(
-  settings: CommonSettings,
-  pool: DatabasePool
-) {
+export async function getExecutor(settings: Settings, pool: DatabasePool) {
   const fileReferenceStore = new PsqlFileReferenceStore(pool);
   const blobStorageService = new GoogleCloudStorageService();
   const tikaClient = new TikaHttpClient(settings.tikaClient);
@@ -30,7 +28,14 @@ export async function getExecutor(
     blobStorageService,
     tikaClient
   );
-  const taskService = new PSqlTaskStore(pool);
+
+  const messageBusService = new PubsubMessageBusService(
+    settings.pubsub.projectId,
+    settings.pubsub.topic,
+    settings.pubsub.emulatorHost
+  );
+
+  const taskService = new PSqlTaskStore(pool, messageBusService);
 
   const processedFileStore = new PsqlProcessedFileStore(pool);
 

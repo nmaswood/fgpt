@@ -12,6 +12,7 @@ export * from "./llm-outputs/report-service";
 export * from "./llm-outputs/summary-store";
 export * from "./loaded-file-store";
 export * from "./logger";
+export * from "./message-bus-service";
 export * from "./ml/ml-service";
 export * from "./object-store/object-store";
 export * from "./processed-file-store";

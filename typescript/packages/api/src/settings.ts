@@ -18,7 +18,6 @@ const ZSettings = z.object({
   pubsub: z.object({
     projectId: z.string(),
     topic: z.string(),
-    subscription: z.string(),
     emulatorHost: z.string().optional(),
   }),
 });
@@ -43,7 +42,6 @@ export const SETTINGS = ZSettings.parse({
   pubsub: {
     projectId: process.env["PUBSUB_PROJECT_ID"],
     topic: process.env["PUBSUB_TOPIC"],
-    subscription: process.env["PUBSUB_SUBSCRIPTION"],
     emulatorHost: process.env["PUBSUB_EMULATOR_HOST"],
   },
 });

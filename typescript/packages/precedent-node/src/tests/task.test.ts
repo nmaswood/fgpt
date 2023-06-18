@@ -2,6 +2,7 @@ import { sql } from "slonik";
 import { beforeEach, expect, test } from "vitest";
 
 import { dataBasePool } from "../data-base-pool";
+import { NOOP_MESSAGE_BUS_SERVICE } from "../message-bus-service";
 import { PSqlProjectStore } from "../project-store";
 import { PSqlTaskStore } from "../task-store";
 import { PsqlUserOrgService } from "../user-org/user-org-service";
@@ -12,7 +13,7 @@ async function setup() {
 
   const userOrgService = new PsqlUserOrgService(pool);
   const projectService = new PSqlProjectStore(pool);
-  const taskService = new PSqlTaskStore(pool);
+  const taskStore = new PSqlTaskStore(pool, NOOP_MESSAGE_BUS_SERVICE);
 
   const user = await userOrgService.upsert({
     sub: {
@@ -31,7 +32,7 @@ async function setup() {
     user,
     project,
     pool,
-    taskService,
+    taskService: taskStore,
   };
 }
 
@@ -64,7 +65,45 @@ test("insertMany", async () => {
   expect(task.config.type).toEqual("text-extraction");
 });
 
-test("setAsPending", async () => {
+test("insert", async () => {
+  const { user, project, taskService } = await setup();
+  const task = await taskService.insert({
+    organizationId: user.organizationId,
+    projectId: project.id,
+    config: {
+      version: "1",
+      organizationId: user.organizationId,
+      projectId: project.id,
+      type: "text-extraction",
+      fileId: "123",
+    },
+  });
+
+  expect(task.projectId).toEqual(project.id);
+  expect(task.config.type).toEqual("text-extraction");
+});
+
+test("get", async () => {
+  const { user, project, taskService } = await setup();
+  const { id } = await taskService.insert({
+    organizationId: user.organizationId,
+    projectId: project.id,
+    config: {
+      version: "1",
+      organizationId: user.organizationId,
+      projectId: project.id,
+      type: "text-extraction",
+      fileId: "123",
+    },
+  });
+
+  const task = await taskService.get(id);
+
+  expect(task.projectId).toEqual(project.id);
+  expect(task.config.type).toEqual("text-extraction");
+});
+
+test("setToInProgress", async () => {
   const { user, project, taskService } = await setup();
   expect(await taskService.insertMany([])).toEqual([]);
   await taskService.insertMany([
@@ -92,33 +131,63 @@ test("setAsPending", async () => {
     },
   ]);
 
-  const [task] = await taskService.setAsPending({ limit: 1 });
-  expect(task.status).toEqual("in-progress");
+  const task = await taskService.setToInProgress();
+  expect(task?.status).toEqual("in-progress");
 });
 
-test("setAsPending", async () => {
+test("setToSuceeded", async () => {
   const { user, project, taskService } = await setup();
   expect(await taskService.insertMany([])).toEqual([]);
-  const [task] = await taskService.insertMany([
-    {
+  const task = await taskService.insert({
+    organizationId: user.organizationId,
+    projectId: project.id,
+    config: {
+      version: "1",
       organizationId: user.organizationId,
       projectId: project.id,
-      config: {
-        version: "1",
-        organizationId: user.organizationId,
-        projectId: project.id,
-        type: "text-extraction",
-        fileId: "123",
-      },
+      type: "text-extraction",
+      fileId: "123",
     },
-  ]);
+  });
 
-  const [completedTask] = await taskService.setAsCompleted([
-    {
-      taskId: task.id,
-      status: "succeeded",
-      output: {},
+  const completedTask = await taskService.setToSuceeded(task.id);
+  expect(completedTask?.status).toEqual("succeeded");
+});
+
+test("setToFailed", async () => {
+  const { user, project, taskService } = await setup();
+  expect(await taskService.insertMany([])).toEqual([]);
+  const task = await taskService.insert({
+    organizationId: user.organizationId,
+    projectId: project.id,
+    config: {
+      version: "1",
+      organizationId: user.organizationId,
+      projectId: project.id,
+      type: "text-extraction",
+      fileId: "123",
     },
-  ]);
-  expect(completedTask.status).toEqual("succeeded");
+  });
+
+  const completedTask = await taskService.setToSuceeded(task.id);
+  expect(completedTask?.status).toEqual("succeeded");
+});
+
+test("setToQueued", async () => {
+  const { user, project, taskService } = await setup();
+  expect(await taskService.insertMany([])).toEqual([]);
+  const task = await taskService.insert({
+    organizationId: user.organizationId,
+    projectId: project.id,
+    config: {
+      version: "1",
+      organizationId: user.organizationId,
+      projectId: project.id,
+      type: "text-extraction",
+      fileId: "123",
+    },
+  });
+
+  const queuedTask = await taskService.setToQueued(task.id);
+  expect(queuedTask?.status).toEqual("queued");
 });

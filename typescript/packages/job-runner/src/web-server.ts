@@ -3,17 +3,22 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import "express-async-errors"; // eslint-disable-line
 
-import { z } from "zod";
-
 import express from "express";
 
 import { LOGGER } from "./logger";
 
-import { WebServerSettings, WEB_SERVER_SETTINGS } from "./web-server-settings";
+import {
+  dataBasePool,
+  PSqlTaskStore,
+  PubsubMessageBusService,
+} from "@fgpt/precedent-node";
+import { getExecutor } from "./executor";
+import { SETTINGS, Settings } from "./settings";
+import { MainRouter } from "./router";
 
 LOGGER.info("Server starting...");
 
-async function start({ port, host }: WebServerSettings) {
+async function start(settings: Settings) {
   const app = express();
 
   app.use(express.json());
@@ -24,33 +29,21 @@ async function start({ port, host }: WebServerSettings) {
     res.json({ ping: "pong" });
   });
 
-  app.post("/", (req, res) => {
-    const rawMessage = req.body?.message;
-    const parsed = ZRawMessage.safeParse(rawMessage);
-    LOGGER.info({ rawMessage, parseSuccess: parsed.success });
+  const pool = await dataBasePool(settings.sql.uri);
+  const taskExecutor = await getExecutor(settings, pool);
+  const messageBusService = new PubsubMessageBusService(
+    settings.pubsub.projectId,
+    settings.pubsub.topic,
+    settings.pubsub.emulatorHost
+  );
 
-    if (!parsed.success) {
-      LOGGER.error("Could not parse message");
-      res.status(204).send(`Bad Request: Could not parse object`);
-      return;
-    }
+  const taskStore = new PSqlTaskStore(pool, messageBusService);
 
-    LOGGER.info({ parsed: parsed.data }, "Message parsed!");
+  const mainRouter = new MainRouter(taskStore, taskExecutor);
 
-    res.status(204).send();
-  });
+  app.use("/", mainRouter.init());
 
-  app.listen(port, host);
+  app.listen(settings.port, settings.host);
 }
 
-start(WEB_SERVER_SETTINGS);
-
-const ZRawMessage = z
-  .object({
-    messageId: z.string().min(1),
-    data: z.string().min(1),
-  })
-  .transform((row) => ({
-    ...row,
-    data: Buffer.from(row.data, "base64").toString().trim(),
-  }));
+start(SETTINGS);

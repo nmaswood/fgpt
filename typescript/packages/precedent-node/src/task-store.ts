@@ -1,6 +1,5 @@
 import {
   TaskConfig,
-  TaskOuput,
   TaskStatus,
   ZTaskConfig,
   ZTaskStatus,
@@ -8,6 +7,8 @@ import {
 import { ZTaskType } from "@fgpt/precedent-iso";
 import { DatabasePool, sql } from "slonik";
 import { z } from "zod";
+
+import { MessageBusService } from "./message-bus-service";
 
 export interface Task {
   id: string;
@@ -23,27 +24,42 @@ export interface CreateTask {
   config: TaskConfig;
 }
 
-export interface SetAsPendingConfig {
+export interface SetManyToInProgressArgs {
   limit: number;
 }
 
-export interface SetAsCompleted {
+interface SetAsCompleted {
   taskId: string;
   status: "succeeded" | "failed";
-  output: TaskOuput;
 }
 
 export interface TaskStore {
+  get(taskId: string): Promise<Task>;
   insert(config: CreateTask): Promise<Task>;
   insertMany(configs: CreateTask[]): Promise<Task[]>;
-  setAsPending(config: SetAsPendingConfig): Promise<Task[]>;
-  setAsCompleted(config: SetAsCompleted[]): Promise<Task[]>;
-  setAsQueued(taskId: string): Promise<Task>;
+  setToInProgress(): Promise<Task | undefined>;
+  setToSuceeded(taskId: string): Promise<Task | undefined>;
+  setToFailed(taskId: string): Promise<Task | undefined>;
+  setToQueued(taskId: string): Promise<Task | undefined>;
 }
 
 const FIELDS = sql.fragment`task.id, task.organization_id, task.project_id, task.task_type, task.status, task.config`;
 export class PSqlTaskStore implements TaskStore {
-  constructor(private readonly pool: DatabasePool) {}
+  constructor(
+    private readonly pool: DatabasePool,
+    private readonly messageBusService: MessageBusService
+  ) {}
+
+  async get(taskId: string): Promise<Task> {
+    return this.pool.one(sql.type(ZFromTaskRow)`
+SELECT
+    ${FIELDS}
+FROM
+    TASK
+WHERE
+    id = ${taskId}
+`);
+  }
 
   async insert(config: CreateTask): Promise<Task> {
     const [task] = await this.insertMany([config]);
@@ -53,14 +69,14 @@ export class PSqlTaskStore implements TaskStore {
     return task;
   }
 
-  async setAsQueued(taskId: string): Promise<Task> {
+  async setToQueued(taskId: string): Promise<Task> {
     return this.pool.one(
       sql.type(ZFromTaskRow)`
 UPDATE
     task
 SET
     status = 'queued',
-    status_updated_at = now(),
+    status_updated_at = now()
 WHERE
     task.id = ${taskId}
 RETURNING
@@ -69,13 +85,30 @@ RETURNING
     );
   }
 
-  async setAsCompleted(config: SetAsCompleted[]): Promise<Task[]> {
+  async setToInProgress(): Promise<Task | undefined> {
+    const [row] = await this.setManyToInProgress({ limit: 1 });
+    return row;
+  }
+
+  async setToFailed(taskId: string): Promise<Task | undefined> {
+    const [row] = await this.setManyToCompleted([{ taskId, status: "failed" }]);
+    return row;
+  }
+
+  async setToSuceeded(taskId: string): Promise<Task | undefined> {
+    const [row] = await this.setManyToCompleted([
+      { taskId, status: "succeeded" },
+    ]);
+    return row;
+  }
+
+  async setManyToCompleted(config: SetAsCompleted[]): Promise<Task[]> {
     if (config.length === 0) {
       return [];
     }
 
     const rows = config.map((c) => {
-      const j = sql.jsonb(JSON.stringify(c.output));
+      const j = sql.jsonb(JSON.stringify({}));
       const nullValue = sql.jsonb(null);
       return sql.fragment`
 (${c.taskId}::uuid,
@@ -114,7 +147,9 @@ RETURNING
     return tasks;
   }
 
-  async setAsPending({ limit }: SetAsPendingConfig): Promise<Task[]> {
+  async setManyToInProgress({
+    limit,
+  }: SetManyToInProgressArgs): Promise<Task[]> {
     if (limit <= 0) {
       throw new Error("limit must be greater than 0");
     }
@@ -154,7 +189,7 @@ RETURNING
 
     const inserts = args.map(toFragment);
 
-    const tasks = this.pool.connect(async (cnx) => {
+    const tasks = await this.pool.connect(async (cnx) => {
       const resp = await cnx.query(
         sql.type(ZFromTaskRow)`
 INSERT INTO task (organization_id, project_id, task_type, status, config)
@@ -167,6 +202,16 @@ INSERT INTO task (organization_id, project_id, task_type, status, config)
 
       return Array.from(resp.rows);
     });
+
+    await Promise.all(
+      tasks.map((task) =>
+        this.messageBusService.enqueue({
+          type: "task",
+          taskId: task.id,
+        })
+      )
+    );
+
     return tasks;
   }
 }

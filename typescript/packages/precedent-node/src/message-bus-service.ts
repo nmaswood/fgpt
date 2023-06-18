@@ -1,9 +1,14 @@
 import { PubSub } from "@google-cloud/pubsub";
+import { z } from "zod";
 
-interface Message {
-  type: "task";
-  taskId: string;
-}
+import { LOGGER } from "./logger";
+
+export const ZMessage = z.object({
+  type: z.literal("task"),
+  taskId: z.string(),
+});
+
+export type Message = z.infer<typeof ZMessage>;
 
 export interface MessageBusService {
   enqueue(message: Message): Promise<string>;
@@ -23,12 +28,22 @@ export class PubsubMessageBusService implements MessageBusService {
   }
 
   async enqueue(message: Message): Promise<string> {
+    LOGGER.info(`Enqueuing message ${JSON.stringify(message)}`);
     const data = Buffer.from(JSON.stringify(message));
 
+    LOGGER.info(`Publishing message ${JSON.stringify(message)}`);
+    LOGGER.info(this.topic);
     const messageId = await this.#client
       .topic(this.topic)
-      .publishMessage({ data: data });
+      .publishMessage({ data });
 
     return messageId;
   }
 }
+
+export class NoopMessageBusService implements MessageBusService {
+  async enqueue(_: Message): Promise<string> {
+    return "test";
+  }
+}
+export const NOOP_MESSAGE_BUS_SERVICE = new NoopMessageBusService();

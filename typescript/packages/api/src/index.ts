@@ -21,7 +21,7 @@ import {
   MLServiceClientImpl,
   PsqlFileReferenceStore,
   PSqlProjectStore,
-  PSqlTaskService,
+  PSqlTaskStore,
   PsqlTextChunkStore,
   PsqlUserOrgService,
   PsqlLoadedFileStore,
@@ -30,6 +30,7 @@ import {
   PsqlQuestionStore,
   ReportServiceImpl,
   PsqlMiscOutputStore,
+  PubsubMessageBusService,
 } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
 import { UserOrgRouter } from "./routers/user-org-router";
@@ -83,7 +84,13 @@ async function start() {
     SETTINGS.urlSigningServiceAccountPath
   );
 
-  const taskService = new PSqlTaskService(pool);
+  const messageBusService = new PubsubMessageBusService(
+    SETTINGS.pubsub.projectId,
+    SETTINGS.pubsub.topic,
+    SETTINGS.pubsub.emulatorHost
+  );
+
+  const taskStore = new PSqlTaskStore(pool, messageBusService);
 
   const textChunkStore = new PsqlTextChunkStore(pool);
 
@@ -105,7 +112,7 @@ async function start() {
     "/api/v1/projects",
     jwtCheck,
     addUser,
-    new ProjectRouter(projectStore, taskService).init()
+    new ProjectRouter(projectStore, taskStore).init()
   );
 
   app.use(
@@ -116,7 +123,7 @@ async function start() {
       fileReferenceStore,
       blobStorageService,
       SETTINGS.assetBucket,
-      taskService,
+      taskStore,
       loadedFileStore
     ).init()
   );
@@ -137,7 +144,7 @@ async function start() {
     "/api/v1/analyses",
     jwtCheck,
     addUser,
-    new AnalysisRouter(analysisStore, taskService).init()
+    new AnalysisRouter(analysisStore, taskStore).init()
   );
 
   app.use(

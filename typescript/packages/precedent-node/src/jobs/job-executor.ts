@@ -33,7 +33,7 @@ export class TaskRunnerImpl implements TaskRunner {
   async run(options: RunOptions): Promise<ExecutionResult[]> {
     const results: ExecutionResult[] = [];
     for (let i = 0; i < options.limit; i++) {
-      const [task] = await this.taskService.setAsPending({ limit: 1 });
+      const task = await this.taskService.setToInProgress();
 
       const statusForTask = withTaskId(task?.id);
 
@@ -45,19 +45,15 @@ export class TaskRunnerImpl implements TaskRunner {
       LOGGER.info({ task }, `Executing task ${task.config.type}`);
       try {
         await this.#executeWithRetry(options, task);
-        await this.taskService.setAsCompleted([
-          { taskId: task.id, status: "succeeded", output: {} },
-        ]);
+        await this.taskService.setToSuceeded(task.id);
 
         results.push(statusForTask("succeeded"));
       } catch (err) {
         LOGGER.error(err);
         if (options.debugMode) {
-          await this.taskService.setAsQueued(task.id);
+          await this.taskService.setToQueued(task.id);
         } else {
-          await this.taskService.setAsCompleted([
-            { taskId: task.id, status: "failed", output: {} },
-          ]);
+          await this.taskService.setToFailed(task.id);
         }
 
         results.push(statusForTask("failed"));

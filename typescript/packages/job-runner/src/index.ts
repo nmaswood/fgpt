@@ -5,30 +5,37 @@ import { isNotNull } from "@fgpt/precedent-iso";
 import {
   dataBasePool,
   PSqlTaskStore,
+  PubsubMessageBusService,
   TaskRunnerImpl,
 } from "@fgpt/precedent-node";
 
 import { getExecutor } from "./executor";
 import { LOGGER } from "./logger";
-import { COMMON_SETTINGS, CommonSettings } from "./settings";
+import { SETTINGS, Settings } from "./settings";
 
 LOGGER.info("Starting job runner...");
 
-async function start(settings: CommonSettings) {
+async function start(settings: Settings) {
   const pool = await dataBasePool(settings.sql.uri);
   const executor = await getExecutor(settings, pool);
 
-  const taskService = new PSqlTaskStore(pool);
+  const messageBusService = new PubsubMessageBusService(
+    settings.pubsub.projectId,
+    settings.pubsub.topic,
+    settings.pubsub.emulatorHost
+  );
+
+  const taskService = new PSqlTaskStore(pool, messageBusService);
 
   const runner = new TaskRunnerImpl(taskService, executor);
 
   LOGGER.info("Running executor...");
-  LOGGER.info(COMMON_SETTINGS);
+  LOGGER.info(SETTINGS);
 
   const results = await runner.run({
     limit: 1_000,
     retryLimit: 3,
-    debugMode: COMMON_SETTINGS.debugMode,
+    debugMode: SETTINGS.debugMode,
   });
   const erroredTaskIds = results
     .filter((r) => r.status === "failed")
@@ -41,4 +48,4 @@ async function start(settings: CommonSettings) {
   }
 }
 
-start(COMMON_SETTINGS);
+start(SETTINGS);

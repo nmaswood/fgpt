@@ -22,7 +22,7 @@ import { TextChunkStore } from "../text-chunk-store";
 import { TextExtractor } from "../text-extractor";
 
 export interface TaskExecutor {
-  execute(t: Task): Promise<void>;
+  execute(task: Task): Promise<void>;
 }
 
 export class TaskExecutorImpl implements TaskExecutor {
