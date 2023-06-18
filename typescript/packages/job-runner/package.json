@@ -17,10 +17,9 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -b -w",
-    "dev": "node dist/index.js | pino-pretty",
-    "run-job-runner": "node dist/index.js",
-    "run-server": "node dist/web-server.js",
-    "dev-s": "node --inspect=9332 --watch dist/web-server.js | pino-pretty",
+    "run-server": "node dist/index.js",
+    "run-server::develop": "node --inspect=9332 --watch dist/index.js | pino-pretty",
+    "dev": "concurrently -k --restart-tries -1  --names \"HTTP,WATCH\" -c \"bgBlue.bold,bgMagenta.bold\" --restart-tries 100 \"yarn run-server::develop\" \"yarn watch\"",
     "test:sql": "docker compose run --build db_test_migration",
     "test": "yarn vitest --threads=false src/tests",
     "lint": "eslint . --ext .ts",
