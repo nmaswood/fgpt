@@ -17,6 +17,7 @@ export class MainRouter {
     const router = express.Router();
 
     router.post("/", async (req: express.Request, res: express.Response) => {
+      LOGGER.info("Main Route: Starting to process message");
       const rawMessage = req.body?.message;
 
       const message = tryParse(rawMessage);
@@ -52,6 +53,7 @@ export class MainRouter {
     router.post(
       "/dead-letter",
       async (req: express.Request, res: express.Response) => {
+        LOGGER.info("Dead letter: Starting to process message");
         const rawMessage = req.body?.message;
 
         const message = tryParse(rawMessage);
