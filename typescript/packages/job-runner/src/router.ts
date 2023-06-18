@@ -49,6 +49,33 @@ export class MainRouter {
       }
     });
 
+    router.post(
+      "/dead-letter",
+      async (req: express.Request, res: express.Response) => {
+        const rawMessage = req.body?.message;
+
+        const message = tryParse(rawMessage);
+        if (!message) {
+          LOGGER.error("Could not parse message");
+          res.status(204).send(`Bad Request: Could not parse object`);
+          return;
+        }
+
+        LOGGER.info({ message }, "Message parsed!");
+        try {
+          const task = await this.taskStore.setToFailed(message.taskId);
+          LOGGER.info({ task }, "Failed task");
+          res.status(204).send();
+          return;
+        } catch (e) {
+          LOGGER.error("Could not fail task");
+          LOGGER.error("Could not fail task");
+          res.status(204).send();
+          return;
+        }
+      }
+    );
+
     return router;
   }
 }
