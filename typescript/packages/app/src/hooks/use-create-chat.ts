@@ -8,9 +8,9 @@ export const useCreateChat = (location: ChatLocation, id: string) => {
 
   const res = useSWRMutation<
     Chat,
-    { name: string },
+    { name: string | undefined },
     "/api/proxy/v1/chat/create-chat",
-    { name: string }
+    { name: string | undefined }
   >("/api/proxy/v1/chat/create-chat", async (url: string, args) => {
     const body = {
       id,

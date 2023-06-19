@@ -59,7 +59,7 @@ export const DisplayChat: React.FC<{
   chats: Chat[];
   chatsLoading: boolean;
   fileReferenceId?: string;
-  createChat: (args: { name: string }) => Promise<Chat | undefined>;
+  createChat: (args: { name: string | undefined }) => Promise<Chat | undefined>;
   deleteChat: (args: { id: string }) => Promise<string | undefined>;
   editChat: (args: { id: string; name: string }) => Promise<unknown>;
   isMutating: boolean;
@@ -154,7 +154,7 @@ export const DisplayChat: React.FC<{
         return selectedChatId;
       }
       const chat = await createChat({
-        name: "New chat",
+        name: undefined,
       });
 
       if (!chat) {
@@ -207,7 +207,7 @@ export const DisplayChat: React.FC<{
           selectedChatId={selectedChatId}
           setSelectedChatId={setSelectedChatId}
           selectedChatIdx={selectedChatIdx}
-          createChat={(name: string) => createChat({ name })}
+          createChat={(name?: string) => createChat({ name })}
           isMutating={isMutating}
           deleteChat={onDelete}
           editChat={editChat}

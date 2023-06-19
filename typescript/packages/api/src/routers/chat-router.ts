@@ -77,6 +77,39 @@ export class ChatRouter {
       }
     );
 
+    router.post(
+      "/generate-title",
+      async (req: express.Request, res: express.Response) => {
+        const body = ZGenerateTitleRequest.parse(req.body);
+        const { question, answer } = await this.chatStore.getChatEntry(
+          body.chatEntryId
+        );
+
+        res.set("Content-Type", "text/event-stream");
+        res.set("Cache-Control", "no-cache");
+        res.set("Connection", "keep-alive");
+
+        const buffer: string[] = [];
+        await this.mlClient.generateTitleStreaming({
+          question,
+          answer: answer ?? "",
+          onData: (resp) => {
+            const encoded = encoder.encode(resp);
+            res.write(encoded);
+            buffer.push(resp);
+          },
+          onEnd: async () => {
+            res.end();
+            const title = buffer.join("");
+            await this.chatStore.updateChat({
+              chatId: body.chatId,
+              name: title,
+            });
+          },
+        });
+      }
+    );
+
     router.delete(
       "/delete-chat/:chatId",
       async (req: express.Request, res: express.Response) => {
@@ -225,10 +258,15 @@ const ZGetChatEntryRequest = z.object({ chatId: z.string() });
 
 const ZChatLocation = z.enum(["project", "file"]);
 
+const ZGenerateTitleRequest = z.object({
+  chatId: z.string(),
+  chatEntryId: z.string(),
+});
+
 const ZCreateChatRequest = z.object({
   id: z.string(),
   location: ZChatLocation,
-  name: z.string(),
+  name: z.string().optional(),
 });
 
 const ZDeleteChatRequest = z.object({

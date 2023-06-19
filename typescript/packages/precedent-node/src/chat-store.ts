@@ -15,7 +15,7 @@ export interface InsertChat {
   projectId: string;
   creatorId: string;
   fileReferenceId?: string;
-  name?: string;
+  name: string | undefined;
 }
 
 export interface UpdateChat {
@@ -49,7 +49,10 @@ export interface ChatStore {
   updateChatEntry(chatEntry: UpdateChatEntry): Promise<ChatEntry>;
   listProjectChats(projectId: string): Promise<Chat[]>;
   listfileReferenceChats(fileReferenceId: string): Promise<Chat[]>;
+
+  getChatEntry(chatId: string): Promise<ChatEntry>;
   listChatEntries(chatId: string): Promise<ChatEntry[]>;
+
   deleteChat(chatId: string): Promise<void>;
   listChatHistory(chatId: string): Promise<ChatHistory[]>;
   getContext(chatEntryId: string): Promise<ChatContext[]>;
@@ -204,6 +207,18 @@ ORDER BY
     chat.created_at DESC
 `);
     return Array.from(resp.rows);
+  }
+
+  async getChatEntry(chatEntryId: string): Promise<ChatEntry> {
+    return this.pool.one(sql.type(ZChatEntryRow)`
+
+SELECT
+    ${CHAT_ENTRY_FIELDS}
+FROM
+    chat_entry
+WHERE
+    id = ${chatEntryId}
+`);
   }
 
   async listChatEntries(chatId: string): Promise<ChatEntry[]> {

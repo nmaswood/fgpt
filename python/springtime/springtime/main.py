@@ -1,6 +1,7 @@
 from typing import Any
 from loguru import logger
 from pydantic import BaseModel
+from springtime.llm.generate_title import generate_title_streaming, GenerateTitleRequest
 import uvicorn
 from starlette.responses import StreamingResponse
 
@@ -56,13 +57,23 @@ class LLMOutputResponse(BaseModel):
     summaries: list[str] = []
     questions: list[str] = []
     terms: list[Term] = []
-    financial_summary: FinancialSummary = []
+    financial_summary: FinancialSummary
 
 
 @app.post("/llm-output")
 async def llm_output_route(req: LLMOutputRequest):
     res = get_output(req.text)
     return res
+
+
+@app.post("/generate-title-streaming")
+async def generate_title_streaming_route(req: GenerateTitleRequest):
+    stream = generate_title_streaming(req)
+    response = StreamingResponse(
+        content=stream,
+        media_type='text/event-stream'
+    )
+    return response
 
 
 @app.post("/ask-question-streaming")

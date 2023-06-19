@@ -42,7 +42,7 @@ export const DisplayChatList: React.FC<{
       height="100%"
       maxHeight="100%"
       overflow="auto"
-      width="400px"
+      width="100%"
       padding={2}
     >
       <Button

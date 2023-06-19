@@ -75,14 +75,14 @@ WHERE
         gpt4TokenLength,
       }) =>
         sql.fragment`
+
 (${organizationId},
     ${projectId},
     ${fileReferenceId},
     ${text},
     ${hash},
     ${text.length},
-    ${gpt4TokenLength ?? null}
-)
+    ${gpt4TokenLength ?? null})
 `
     );
     const { rows } = await cnx.query(

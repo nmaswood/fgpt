@@ -178,6 +178,31 @@ test("updateChatEntry", async () => {
   expect(renamedChatEntry.answer).toEqual("blue");
 });
 
+test("listChatEntry", async () => {
+  const { creatorId, projectId, organizationId, chatStore } = await setup();
+
+  const chat = await chatStore.insertChat({
+    organizationId,
+    projectId,
+    creatorId,
+    name: "I love cows",
+  });
+
+  const chatEntry = await chatStore.insertChatEntry({
+    organizationId,
+    projectId,
+    creatorId,
+    chatId: chat.id,
+    question: "What is your favorite color?",
+    context: [],
+    answer: "answer",
+  });
+
+  const foo = await chatStore.getChatEntry(chatEntry.id);
+
+  expect(foo.id).toEqual(chatEntry.id);
+});
+
 test("listChatEntries", async () => {
   const { creatorId, projectId, organizationId, chatStore } = await setup();
 
