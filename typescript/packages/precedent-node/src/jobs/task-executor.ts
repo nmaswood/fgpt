@@ -42,12 +42,15 @@ export class TaskExecutorImpl implements TaskExecutor {
       case "text-extraction": {
         const { text } = await this.textExtractor.extract(config.fileId);
 
+        const tokenLength = await this.mlService.tokenLength(text);
+
         const processedFile = await this.processedFileStore.upsert({
           organizationId: config.organizationId,
           projectId: config.projectId,
           fileReferenceId: config.fileId,
           text,
           hash: ShaHash.forData(text),
+          gpt4TokenLength: tokenLength.length,
         });
 
         for (const strategy of this.STRATEGIES) {

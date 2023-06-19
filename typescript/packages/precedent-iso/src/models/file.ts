@@ -14,6 +14,7 @@ export interface LoadedFile {
   createdAt: Date;
   contentType: string;
   extractedTextLength: number | undefined;
+  gpt4TokenLength: number | undefined;
   fullyChunked: boolean;
   fullyEmbedded: boolean;
 }

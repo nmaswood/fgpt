@@ -1,3 +1,4 @@
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Box, IconButton, Paper, Tab, Tabs } from "@mui/material";
 import { useRouter } from "next/router";
@@ -9,6 +10,7 @@ import { ViewByChunk } from "../../src/components/file/view-by-chunk";
 import { useFetchFile } from "../../src/hooks/use-fetch-file";
 import { useFetchSignedUrl } from "../../src/hooks/use-fetch-signed-url";
 import { useFetchToken } from "../../src/hooks/use-fetch-token";
+
 export default function DisplayFile() {
   const router = useRouter();
 
@@ -38,6 +40,7 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
   const handleChange = (_: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
+  const router = useRouter();
 
   return (
     <Paper
@@ -50,15 +53,22 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
       }}
     >
       {url && showPdf && (
-        <object
-          data={url}
-          type="application/pdf"
-          style={{ width: "100%", height: "100%", minWidth: "50%" }}
-        >
-          <iframe
-            src={`https://docs.google.com/viewer?url=${url}&embedded=true`}
-          />
-        </object>
+        <Box display="flex" width="100%" height="100%" flexDirection="column">
+          <Box display="flex" width="100%" height="auto" padding={1}>
+            <IconButton onClick={() => router.back()}>
+              <ArrowBackIcon />
+            </IconButton>
+          </Box>
+          <object
+            data={url}
+            type="application/pdf"
+            style={{ width: "100%", height: "100%", minWidth: "50%" }}
+          >
+            <iframe
+              src={`https://docs.google.com/viewer?url=${url}&embedded=true`}
+            />
+          </object>
+        </Box>
       )}
       <Box
         height="100%"

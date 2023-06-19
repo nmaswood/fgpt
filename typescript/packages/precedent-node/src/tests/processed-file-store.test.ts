@@ -77,6 +77,7 @@ test("insertMany", async () => {
       fileReferenceId: fileReference.id,
       text: "hi",
       hash: ShaHash.forData("hi"),
+      gpt4TokenLength: 1000,
     },
   ]);
 

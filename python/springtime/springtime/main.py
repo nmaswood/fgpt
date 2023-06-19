@@ -9,6 +9,7 @@ from fastapi import FastAPI
 from springtime.llm.ml import FinancialSummary,  PlaygroundRequest, Term, ask_question_streaming, embeddings_for_documents, ask_question, call_function, get_output
 from springtime.llm.models import ChatHistory
 from springtime.llm.pinecone import UpsertVector, get_similar, upsert_vectors
+from springtime.llm.token import get_token_length
 from .settings import SETTINGS
 
 app = FastAPI()
@@ -19,6 +20,15 @@ logger.info("Starting server")
 @app.get("/ping")
 async def ping():
     return {"ping": "ping"}
+
+
+class TokenLengthRequest(BaseModel):
+    text: str
+
+
+@app.post("/token-length")
+async def token_length_route(req: TokenLengthRequest):
+    return get_token_length(req.text)
 
 
 class AskQuestionRequest(BaseModel):

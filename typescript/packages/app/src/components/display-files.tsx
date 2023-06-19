@@ -59,6 +59,11 @@ const columns: GridColDef<LoadedFile>[] = [
     width: 160,
   },
   {
+    field: "gpt4TokenLength",
+    headerName: "GPT-4 Token length",
+    width: 160,
+  },
+  {
     field: "fullyChunked",
     headerName: "Is fully chunked?",
     type: "boolean",

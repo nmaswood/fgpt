@@ -14,6 +14,7 @@ export interface UpsertProcessedFile {
   fileReferenceId: string;
   text: string;
   hash: string;
+  gpt4TokenLength?: number;
 }
 
 export interface ProcessedFileStore {
@@ -65,19 +66,28 @@ WHERE
     args: UpsertProcessedFile[]
   ): Promise<ProcessedFile[]> {
     const values = args.map(
-      ({ organizationId, projectId, fileReferenceId, text, hash }) =>
+      ({
+        organizationId,
+        projectId,
+        fileReferenceId,
+        text,
+        hash,
+        gpt4TokenLength,
+      }) =>
         sql.fragment`
 (${organizationId},
     ${projectId},
     ${fileReferenceId},
     ${text},
     ${hash},
-    ${text.length})
+    ${text.length},
+    ${gpt4TokenLength ?? null}
+)
 `
     );
     const { rows } = await cnx.query(
       sql.type(ZProcessedFileRow)`
-INSERT INTO processed_file (organization_id, project_id, file_reference_id, extracted_text, extracted_text_sha256, token_length)
+INSERT INTO processed_file (organization_id, project_id, file_reference_id, extracted_text, extracted_text_sha256, token_length, gpt4_token_length)
     VALUES
         ${sql.join(values, sql.fragment`, `)}
     ON CONFLICT (organization_id, project_id, file_reference_id)
