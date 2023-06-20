@@ -53,10 +53,6 @@ export const useUppy = (token: string, projectId: string) => {
     });
   }, [uppy, projectId]);
 
-  React.useEffect(() => {
-    return () => uppy.close();
-  }, [uppy]);
-
   return {
     uppy,
     openUppyModal,
