@@ -109,6 +109,7 @@ RETURNING
     await this.deleteMany([id]);
   }
 
+  // TODO
   async deleteMany(ids: string[]) {
     await this.pool.query(
       sql.unsafe`

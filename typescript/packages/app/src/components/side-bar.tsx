@@ -66,6 +66,7 @@ export const Sidebar: React.FC<{
       anchor="left"
     >
       <CreateProject
+        loading={projectsLoading}
         projects={projects ?? []}
         setSelectedProjectId={setSelectedProjectId}
         projectModalOpen={projectModalOpen}
@@ -148,11 +149,13 @@ const NAME_MIN_LENGTH = 3;
 const NAME_MAX_LENGTH = 255;
 
 const CreateProject: React.FC<{
+  loading: boolean;
   projects: Project[];
   setSelectedProjectId: (projectId: string) => void;
   projectModalOpen: boolean;
   setProjectModalOpen: (v: boolean) => void;
 }> = ({
+  loading,
   projects,
   setSelectedProjectId,
   projectModalOpen,
@@ -176,7 +179,7 @@ const CreateProject: React.FC<{
       >
         <LoadingButton
           variant="outlined"
-          loading={isMutating}
+          loading={isMutating || loading}
           onClick={() => {
             setProjectModalOpen(true);
           }}
@@ -308,7 +311,7 @@ const DisplayUser = () => {
   );
 };
 
-export const FormDialog: React.FC<{
+const FormDialog: React.FC<{
   onClose: () => void;
   projectNames: Set<string>;
   onCreate: (name: string) => Promise<void>;
