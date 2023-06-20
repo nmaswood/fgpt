@@ -1,3 +1,4 @@
+import { chunk } from "lodash";
 import { sql } from "slonik";
 import { afterEach, beforeEach, expect, test } from "vitest";
 
@@ -363,4 +364,76 @@ test("llmOutputChunkSeen", async () => {
   const two = await chunkStore.incrementLlmOutputChunkSeen(textChunkGroup.id);
 
   expect(two).toEqual({ value: 2, total: 2 });
+});
+
+test("getLlmOutputProgress", async () => {
+  const { processedFile, chunkStore } = await setup();
+
+  const textChunkGroup = await chunkStore.upsertTextChunkGroup({
+    organizationId: processedFile.organizationId,
+    projectId: processedFile.projectId,
+    fileReferenceId: processedFile.fileReferenceId,
+    processedFileId: processedFile.id,
+    numChunks: 2,
+    strategy: "greedy_v0",
+    embeddingsWillBeGenerated: false,
+  });
+
+  await chunkStore.upsertManyTextChunks(
+    {
+      organizationId: processedFile.organizationId,
+      projectId: processedFile.projectId,
+      fileReferenceId: processedFile.fileReferenceId,
+      processedFileId: processedFile.id,
+      textChunkGroupId: textChunkGroup.id,
+    },
+    [
+      {
+        chunkOrder: 0,
+        chunkText: "hi",
+        hash: ShaHash.forData("hi"),
+      },
+      {
+        chunkOrder: 1,
+        chunkText: "bye",
+        hash: ShaHash.forData("hi"),
+      },
+    ]
+  );
+  await chunkStore.incrementLlmOutputChunkSeen(textChunkGroup.id);
+
+  const progress = await chunkStore.getLlmOutputProgress(textChunkGroup.id);
+
+  expect(progress).toEqual({ value: 1, total: 2 });
+});
+
+test("getTextChunkGroupByStrategy", async () => {
+  const { processedFile, chunkStore } = await setup();
+
+  const v0 = await chunkStore.upsertTextChunkGroup({
+    organizationId: processedFile.organizationId,
+    projectId: processedFile.projectId,
+    fileReferenceId: processedFile.fileReferenceId,
+    processedFileId: processedFile.id,
+    numChunks: 2,
+    strategy: "greedy_v0",
+    embeddingsWillBeGenerated: false,
+  });
+
+  await chunkStore.upsertTextChunkGroup({
+    organizationId: processedFile.organizationId,
+    projectId: processedFile.projectId,
+    fileReferenceId: processedFile.fileReferenceId,
+    processedFileId: processedFile.id,
+    numChunks: 2,
+    strategy: "greedy_15k",
+    embeddingsWillBeGenerated: false,
+  });
+
+  const v0_2 = await chunkStore.getTextChunkGroupByStrategy(
+    processedFile.fileReferenceId,
+    "greedy_v0"
+  );
+
+  expect(v0).toEqual(v0_2);
 });

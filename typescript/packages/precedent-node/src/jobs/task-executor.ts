@@ -218,6 +218,10 @@ export class TaskExecutorImpl implements TaskExecutor {
           }))
         );
 
+        await this.textChunkStore.incrementLlmOutputChunkSeen(
+          config.textChunkGroupId
+        );
+
         break;
       }
 

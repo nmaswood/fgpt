@@ -1,9 +1,4 @@
-import {
-  ChunkStrategy,
-  Progress,
-  TextChunkGroup,
-  ZProgress,
-} from "@fgpt/precedent-iso";
+import { ChunkStrategy, Progress, TextChunkGroup } from "@fgpt/precedent-iso";
 import {
   DatabasePool,
   DatabasePoolConnection,
@@ -16,8 +11,6 @@ const EMBEDDING_INFO = {
   type: "ada-002",
   size: 1536,
 } as const;
-
-const LLM_OUTPUT_CHUNK_STRATEGY = "greedy_15k" as const;
 
 export interface TextChunk {
   id: string;
@@ -100,8 +93,14 @@ export interface TextChunkStore {
   getEmbedding(ids: string): Promise<EmbeddingResult>;
   getEmbeddings(ids: string[]): Promise<EmbeddingResult[]>;
   listWithNoEmbeddings(processedFileId: string): Promise<TextChunk[]>;
-  incrementLlmOutputChunkSeen(textGroupId: string): Promise<Progress>;
-  getLlmOutputProgress(textGroupId: string): Promise<Progress>;
+  incrementLlmOutputChunkSeen(
+    textGroupId: string
+  ): Promise<Progress | undefined>;
+  getTextChunkGroupByStrategy(
+    fileId: string,
+    strategy: ChunkStrategy
+  ): Promise<TextChunkGroup | undefined>;
+  getLlmOutputProgress(textGroupId: string): Promise<Progress | undefined>;
 }
 
 const TEXT_CHUNK_FIELDS = sql.fragment`text_chunk.id, text_chunk.organization_id, text_chunk.project_id, text_chunk.file_reference_id, text_chunk.processed_file_id, text_chunk.chunk_order, text_chunk.chunk_text, text_chunk.embedding IS NOT NULL AS has_embedding, text_chunk_group_id`;
@@ -110,7 +109,9 @@ const TEXT_CHUNK_GROUP_FIELDS = sql.fragment`text_chunk_group.id, organization_i
 
 export class PsqlTextChunkStore implements TextChunkStore {
   constructor(private readonly pool: DatabasePool) {}
-  async incrementLlmOutputChunkSeen(textGroupId: string): Promise<Progress> {
+  async incrementLlmOutputChunkSeen(
+    textGroupId: string
+  ): Promise<Progress | undefined> {
     return this.pool.one(sql.type(ZProgress)`
 UPDATE
     text_chunk_group
@@ -125,19 +126,35 @@ RETURNING
 `);
   }
 
-  async getLlmOutputProgress(fileReferenceId: string): Promise<Progress> {
+  async getLlmOutputProgress(
+    textChunkGroupId: string
+  ): Promise<Progress | undefined> {
     return this.pool.one(sql.type(ZProgress)`
-
 SELECT
     num_chunks as total,
     llm_output_chunks_seen as value
 FROM
     text_chunk_group
 WHERE
-    file_reference_id = ${fileReferenceId}
-    AND chunk_strategy = ${LLM_OUTPUT_CHUNK_STRATEGY}
+    id = ${textChunkGroupId}
+`);
+  }
+
+  async getTextChunkGroupByStrategy(
+    fileId: string,
+    strategy: ChunkStrategy
+  ): Promise<TextChunkGroup | undefined> {
+    const res = await this.pool.maybeOne(sql.type(ZTextChunkGroupRow)`
+SELECT
+    ${TEXT_CHUNK_GROUP_FIELDS}
+FROM
+    text_chunk_group
+WHERE
+    file_reference_id = ${fileId}
+    and chunk_strategy = ${strategy}
 LIMIT 1
 `);
+    return res ?? undefined;
   }
 
   async getTextChunkGroup(id: string): Promise<TextChunkGroup> {
@@ -521,3 +538,17 @@ const ZEmbeddingRow = z
     chunkId: row.id,
     embedding: JSON.parse(row.embedding),
   }));
+
+const ZProgress = z
+  .object({
+    value: z.number().nullable(),
+    total: z.number().min(0),
+  })
+  .transform((row) =>
+    row.value == null
+      ? undefined
+      : {
+          value: row.value,
+          total: row.total,
+        }
+  );

@@ -1,3 +1,5 @@
+import { Progress } from "./file";
+
 export interface Summary {
   id: string;
   organizationId: string;
@@ -68,3 +70,23 @@ export interface Report {
   financialSummary: FinancialSummary;
   terms: Term[];
 }
+
+export const EMPTY_REPORT = {
+  questions: [],
+  summaries: [],
+  terms: [],
+  financialSummary: {
+    investmentRisks: [],
+    investmentMerits: [],
+    financialSummaries: [],
+  },
+};
+
+export type ReportStatus =
+  | {
+      type: "not_started" | "already_exists" | "finished";
+    }
+  | {
+      type: "in_progress";
+      value: Progress;
+    };

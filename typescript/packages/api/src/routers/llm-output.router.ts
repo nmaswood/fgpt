@@ -80,7 +80,6 @@ export class LLMOutputRouter {
       "/report/:fileReferenceId",
       async (req: express.Request, res: express.Response) => {
         const body = ZSampleRequest.parse(req.params);
-
         const report = await this.reportService.forFileReferenceId(
           body.fileReferenceId
         );
