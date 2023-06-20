@@ -42,7 +42,7 @@ FROM
     LEFT JOIN text_chunk_group tcg on pf.id = tcg.processed_file_id
 WHERE
     file_reference.project_id = ${projectId}
-    AND tcg.embeddings_will_be_generated IS TRUE
+    AND COALESCE(tcg.embeddings_will_be_generated, TRUE) IS TRUE
 ORDER BY
     file_reference.uploaded_at DESC
 LIMIT ${HARD_CODED_LIMIT + 1}

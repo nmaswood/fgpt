@@ -1,4 +1,7 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import BoltIcon from "@mui/icons-material/Bolt";
+import ConstructionIcon from "@mui/icons-material/Construction";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Box, IconButton, Paper, Skeleton, Tab, Tabs } from "@mui/material";
 import { useRouter } from "next/router";
@@ -98,9 +101,18 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
             textColor="secondary"
             indicatorColor="secondary"
           >
-            <Tab label={"Report"} />
-            <Tab label={"Chat"} />
-            <Tab label={"Text chunks"} />
+            <Tab
+              icon={<AssessmentIcon />}
+              iconPosition="start"
+              label={"Report"}
+            />
+            <Tab icon={<BoltIcon />} iconPosition="start" label={"Chat"} />
+
+            <Tab
+              icon={<ConstructionIcon />}
+              iconPosition="start"
+              label={"Debug"}
+            />
           </Tabs>
         </Box>
         <Box
@@ -110,7 +122,6 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
           maxHeight="100%"
           maxWidth="100%"
           flexDirection="column"
-          padding={2}
         >
           {value === 0 && <DisplayFileReport fileReferenceId={fileId} />}
           {value === 1 && file && (

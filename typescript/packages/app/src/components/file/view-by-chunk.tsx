@@ -47,7 +47,7 @@ export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
   );
 
   return (
-    <Box display="flex" width="100%" height="100%">
+    <Box display="flex" width="100%" height="100%" padding={2}>
       {textChunkGroup && (
         <Box
           display="flex"
@@ -102,9 +102,13 @@ export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
               color="primary"
               value={view}
               exclusive
-              onChange={(_, value) => setView(value)}
+              onChange={(_, value) => {
+                if (value) {
+                  setView(value);
+                }
+              }}
             >
-              <ToggleButton value="view">See chunk text</ToggleButton>
+              <ToggleButton value="view">Text chunks</ToggleButton>
               <ToggleButton value="chat">Prompt playground</ToggleButton>
               <ToggleButton value="test_output">Trigger output</ToggleButton>
             </ToggleButtonGroup>

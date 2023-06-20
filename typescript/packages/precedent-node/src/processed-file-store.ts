@@ -75,7 +75,6 @@ WHERE
         gpt4TokenLength,
       }) =>
         sql.fragment`
-
 (${organizationId},
     ${projectId},
     ${fileReferenceId},

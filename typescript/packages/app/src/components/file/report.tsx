@@ -1,6 +1,7 @@
 import { Outputs } from "@fgpt/precedent-iso";
 import {
   Box,
+  LinearProgress,
   List,
   ListItem,
   ListItemText,
@@ -18,9 +19,21 @@ import { useFetchReport } from "../../hooks/use-fetch-output";
 export const DisplayFileReport: React.FC<{ fileReferenceId: string }> = ({
   fileReferenceId,
 }) => {
-  const { data } = useFetchReport(fileReferenceId);
+  const { data, isLoading } = useFetchReport(fileReferenceId);
   return (
-    <Box display="flex" maxWidth="100%" maxHeight="100%" overflow="auto">
+    <Box
+      display="flex"
+      width="100%"
+      height="100%"
+      maxWidth="100%"
+      maxHeight="100%"
+      overflow="auto"
+    >
+      {isLoading && (
+        <Box width="100%" paddingTop={1}>
+          <LinearProgress />
+        </Box>
+      )}
       {data && <DisplayReport report={data} />}
     </Box>
   );
@@ -30,7 +43,7 @@ const DisplayReport: React.FC<{ report: Outputs.Report }> = ({
   report: { summaries, financialSummary, terms },
 }) => {
   return (
-    <Box display="flex" flexDirection="column" gap={1}>
+    <Box display="flex" flexDirection="column" gap={1} padding={2}>
       {terms.length > 0 && (
         <Box display="flex" flexDirection="column">
           <Typography variant="h5">Terms</Typography>
