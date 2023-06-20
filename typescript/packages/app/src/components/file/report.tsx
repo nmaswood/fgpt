@@ -82,7 +82,7 @@ const DisplayReport: React.FC<{ report: Outputs.Report }> = ({
         </Box>
       )}
 
-      {summaries.length && (
+      {summaries.length > 0 && (
         <>
           <Typography variant="h5">Summary</Typography>
 

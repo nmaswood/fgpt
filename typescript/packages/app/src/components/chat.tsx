@@ -212,7 +212,7 @@ export const DisplayChat: React.FC<{
           deleteChat={onDelete}
           editChat={editChat}
         />
-        {questions.length && (
+        {questions.length > 0 && (
           <DisplayQuestions
             questions={questions}
             disabled={isMutating}
