@@ -17,6 +17,9 @@ const Home: React.FC = () => {
   >(undefined);
 
   React.useEffect(() => {
+    if (projectsLoading) {
+      return;
+    }
     const [project] = projects ?? [];
     if (project && !selectedProjectId) {
       setSelectedProjectId(project.id);
@@ -25,13 +28,7 @@ const Home: React.FC = () => {
     if (!selectedProjectId) {
       return;
     }
-
-    const projectExists =
-      projects?.find((p) => p.id === selectedProjectId) !== undefined;
-    if (!projectExists && project) {
-      setSelectedProjectId(project.id);
-    }
-  }, [projects, selectedProjectId]);
+  }, [projects, selectedProjectId, projectsLoading]);
 
   const [projectModalOpen, setProjectModalOpen] = React.useState(false);
 
@@ -85,6 +82,7 @@ const Home: React.FC = () => {
             token={token}
             project={selectedProject}
             projects={projects}
+            setSelectedProjectId={setSelectedProjectId}
           />
         )}
       </Box>

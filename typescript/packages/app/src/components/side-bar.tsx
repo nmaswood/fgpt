@@ -123,7 +123,15 @@ export const Sidebar: React.FC<{
                   </ListItemIcon>
 
                   <ListItem disablePadding>
-                    <ListItemText primary={project.name} />
+                    <ListItemText
+                      primary={project.name}
+                      primaryTypographyProps={{
+                        overflow: "wrap",
+                        sx: {
+                          wordBreak: "break-word",
+                        },
+                      }}
+                    />
                   </ListItem>
                 </ListItemButton>
               );

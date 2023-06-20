@@ -1,4 +1,4 @@
-import { LoadedFile } from "@fgpt/precedent-iso";
+import { humanReadableFileSize, LoadedFile } from "@fgpt/precedent-iso";
 import { Box, Link } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import NextLink from "next/link";
@@ -45,23 +45,28 @@ const columns: GridColDef<LoadedFile>[] = [
     headerName: "File size",
     type: "number",
     width: 110,
+    valueFormatter: ({ value }) => humanReadableFileSize(value, true),
   },
   {
     field: "createdAt",
     headerName: "Created at",
     type: "date",
-    width: 110,
+    width: 150,
     valueFormatter: ({ value }) => new Date(value as string).toLocaleString(),
   },
   {
     field: "extractedTextLength",
     headerName: "Token length",
     width: 160,
+    align: "right",
+    headerAlign: "right",
   },
   {
     field: "gpt4TokenLength",
     headerName: "GPT-4 Token length",
     width: 160,
+    align: "right",
+    headerAlign: "right",
   },
   {
     field: "fullyChunked",

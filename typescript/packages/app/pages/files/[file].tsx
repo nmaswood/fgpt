@@ -1,6 +1,6 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Box, IconButton, Paper, Tab, Tabs } from "@mui/material";
+import { Box, IconButton, Paper, Skeleton, Tab, Tabs } from "@mui/material";
 import { useRouter } from "next/router";
 import React from "react";
 
@@ -52,22 +52,32 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
         maxWidth: "100%",
       }}
     >
-      {url && showPdf && (
+      {showPdf && (
         <Box display="flex" width="100%" height="100%" flexDirection="column">
           <Box display="flex" width="100%" height="auto" padding={1}>
             <IconButton onClick={() => router.back()}>
               <ArrowBackIcon />
             </IconButton>
           </Box>
-          <object
-            data={url}
-            type="application/pdf"
-            style={{ width: "100%", height: "100%", minWidth: "50%" }}
-          >
-            <iframe
-              src={`https://docs.google.com/viewer?url=${url}&embedded=true`}
+
+          {url && showPdf ? (
+            <object
+              data={url}
+              type="application/pdf"
+              style={{ width: "100%", height: "100%", minWidth: "50%" }}
+            >
+              <iframe
+                src={`https://docs.google.com/viewer?url=${url}&embedded=true`}
+              />
+            </object>
+          ) : (
+            <Skeleton
+              variant="rectangular"
+              width="100%"
+              height="100%"
+              animation={false}
             />
-          </object>
+          )}
         </Box>
       )}
       <Box
@@ -88,9 +98,9 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
             textColor="secondary"
             indicatorColor="secondary"
           >
-            <Tab label={"Text chunks"} />
             <Tab label={"Report"} />
             <Tab label={"Chat"} />
+            <Tab label={"Text chunks"} />
           </Tabs>
         </Box>
         <Box
@@ -102,15 +112,16 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
           flexDirection="column"
           padding={2}
         >
-          {value === 0 && <ViewByChunk fileId={fileId} />}
-          {value === 1 && <DisplayFileReport fileReferenceId={fileId} />}
-          {value === 2 && file && (
+          {value === 0 && <DisplayFileReport fileReferenceId={fileId} />}
+          {value === 1 && file && (
             <DisplayFileChat
               fileReferenceId={file.id}
               projectId={file.projectId}
               token={token}
             />
           )}
+
+          {value === 2 && <ViewByChunk fileId={fileId} />}
         </Box>
       </Box>
     </Paper>

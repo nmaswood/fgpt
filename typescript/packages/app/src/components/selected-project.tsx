@@ -3,7 +3,6 @@ import "@uppy/dashboard/dist/style.min.css";
 
 import { Project } from "@fgpt/precedent-iso";
 import BoltIcon from "@mui/icons-material/Bolt";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CollectionsIcon from "@mui/icons-material/Collections";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
@@ -43,7 +42,8 @@ export const SelectedProject: React.FC<{
   project: Project;
   projects: Project[];
   token: string;
-}> = ({ token, project, projects }) => {
+  setSelectedProjectId: (projectId: string | undefined) => void;
+}> = ({ token, project, projects, setSelectedProjectId }) => {
   const [modal, setModal] = React.useState<"delete" | "edit" | undefined>(
     undefined
   );
@@ -178,18 +178,7 @@ export const SelectedProject: React.FC<{
                 width="100%"
                 height="100%"
               >
-                <Button
-                  variant="outlined"
-                  onClick={() => {
-                    setValue(0);
-                  }}
-                  color="secondary"
-                  size="large"
-                  startIcon={<CloudUploadIcon />}
-                  sx={{ width: "fit-content" }}
-                >
-                  Upload files to begin
-                </Button>
+                <UploadFilesButton token={token} projectId={project.id} />
               </Box>
             )}
             {files.length > 0 && <DisplayFiles files={files} />}
@@ -217,7 +206,14 @@ export const SelectedProject: React.FC<{
         )}
       </Box>
       {modal === "delete" && (
-        <DeleteProjectModal closeModal={closeModal} projectId={project.id} />
+        <DeleteProjectModal
+          closeModal={closeModal}
+          projectId={project.id}
+          resetSelectedProjectId={() => {
+            const newProjectId = projects.find((p) => p.id !== project.id)?.id;
+            setSelectedProjectId(newProjectId);
+          }}
+        />
       )}
       {modal === "edit" && (
         <EditProjectModal
@@ -234,7 +230,8 @@ export const SelectedProject: React.FC<{
 const DeleteProjectModal: React.FC<{
   projectId: string;
   closeModal: () => void;
-}> = ({ closeModal, projectId }) => {
+  resetSelectedProjectId: () => void;
+}> = ({ closeModal, projectId, resetSelectedProjectId }) => {
   const { trigger, isMutating } = useDeleteProject();
   const [text, setText] = React.useState("");
 
@@ -280,6 +277,7 @@ const DeleteProjectModal: React.FC<{
               disabled={text !== "DELETE"}
               onClick={async () => {
                 await trigger({ id: projectId });
+                resetSelectedProjectId();
                 closeModal();
               }}
             >
@@ -306,6 +304,12 @@ const EditProjectModal: React.FC<{
     () => new Set(projects.map((project) => project.name)),
     [projects]
   );
+
+  const isDisabled =
+    trimmed.length <= 3 ||
+    isMutating ||
+    trimmed === projectName ||
+    projectNames.has(trimmed);
   return (
     <Dialog
       open
@@ -334,6 +338,15 @@ const EditProjectModal: React.FC<{
             onChange={(e) => {
               setText(e.target.value);
             }}
+            onKeyDown={async (e) => {
+              if (e.key === "Enter" && !isDisabled) {
+                await trigger({
+                  id: projectId,
+                  name: trimmed,
+                });
+                closeModal();
+              }
+            }}
             autoFocus
           />
 
@@ -344,12 +357,7 @@ const EditProjectModal: React.FC<{
             <LoadingButton
               variant="contained"
               color="secondary"
-              disabled={
-                trimmed.length <= 3 ||
-                isMutating ||
-                trimmed === projectName ||
-                projectNames.has(trimmed)
-              }
+              disabled={isDisabled}
               onClick={async () => {
                 await trigger({
                   id: projectId,
