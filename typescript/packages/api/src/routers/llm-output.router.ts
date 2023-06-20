@@ -65,7 +65,7 @@ export class LLMOutputRouter {
     router.get(
       "/sample-file/:fileReferenceId",
       async (req: express.Request, res: express.Response) => {
-        const body = ZSampleRequest.parse(req.params);
+        const body = ZSampleFileRequest.parse(req.params);
 
         const questions = await this.questionStore.sampleForFile(
           body.fileReferenceId,
@@ -77,22 +77,47 @@ export class LLMOutputRouter {
     );
 
     router.get(
-      "/report/:fileReferenceId",
+      "/sample-project/:projectId",
       async (req: express.Request, res: express.Response) => {
-        const body = ZSampleRequest.parse(req.params);
-        const report = await this.reportService.forFileReferenceId(
-          body.fileReferenceId
+        const body = ZSampleProjectRequest.parse(req.params);
+
+        const questions = await this.questionStore.sampleForProject(
+          body.projectId,
+          10
         );
 
-        res.json({ report });
+        res.json({ questions });
+      }
+    );
+
+    router.get(
+      "/report/:fileReferenceId",
+      async (req: express.Request, res: express.Response) => {
+        const body = ZSampleFileRequest.parse(req.params);
+        const [report, textChunkGroup] = await Promise.all([
+          this.reportService.forFileReferenceId(body.fileReferenceId),
+          this.chunkStore.getTextChunkGroupByStrategy(
+            body.fileReferenceId,
+            "greedy_15k"
+          ),
+        ]);
+
+        const progress = textChunkGroup
+          ? await this.chunkStore.getLlmOutputProgress(textChunkGroup.id)
+          : undefined;
+
+        res.json({ report, progress });
       }
     );
 
     return router;
   }
 }
+const ZSampleProjectRequest = z.object({
+  projectId: z.string(),
+});
 
-const ZSampleRequest = z.object({
+const ZSampleFileRequest = z.object({
   fileReferenceId: z.string(),
 });
 

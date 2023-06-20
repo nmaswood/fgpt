@@ -138,5 +138,5 @@ async def playground_route(req: PlaygroundRequest):
 def start():
     uvicorn.run("springtime.main:app", host=SETTINGS.host,
                 port=SETTINGS.port,
-                reload=True,
+                reload=SETTINGS.reload,
                 )

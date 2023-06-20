@@ -1,6 +1,7 @@
-import { Outputs } from "@fgpt/precedent-iso";
+import { Outputs, Progess } from "@fgpt/precedent-iso";
 import {
   Box,
+  CircularProgress,
   LinearProgress,
   List,
   ListItem,
@@ -20,6 +21,10 @@ export const DisplayFileReport: React.FC<{ fileReferenceId: string }> = ({
   fileReferenceId,
 }) => {
   const { data, isLoading } = useFetchReport(fileReferenceId);
+  const progress = data?.progress;
+
+  const formattedProgress = formatProgress(progress);
+
   return (
     <Box
       display="flex"
@@ -34,10 +39,30 @@ export const DisplayFileReport: React.FC<{ fileReferenceId: string }> = ({
           <LinearProgress />
         </Box>
       )}
-      {data && <DisplayReport report={data} />}
+      {data && progress && progress.total === progress.value ? (
+        <DisplayReport report={data.report} />
+      ) : (
+        <Box display="flex" gap={2} padding={2}>
+          <CircularProgress size="1.5rem" />
+          <Typography>
+            Report is still generating.{" "}
+            {formattedProgress ? `${formattedProgress} complete` : ""}
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 };
+
+function formatProgress(progress: Progess | undefined): string | undefined {
+  if (!progress) {
+    return undefined;
+  }
+  if (progress.total === 0) {
+    return undefined;
+  }
+  return (progress.value / progress.total) * 100 + "%";
+}
 
 const DisplayReport: React.FC<{ report: Outputs.Report }> = ({
   report: { summaries, financialSummary, terms },

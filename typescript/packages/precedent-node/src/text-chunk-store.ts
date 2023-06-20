@@ -129,15 +129,16 @@ RETURNING
   async getLlmOutputProgress(
     textChunkGroupId: string
   ): Promise<Progress | undefined> {
-    return this.pool.one(sql.type(ZProgress)`
+    const res = await this.pool.maybeOne(sql.type(ZProgress)`
 SELECT
     num_chunks as total,
-    llm_output_chunks_seen as value
+    COALESCE(llm_output_chunks_seen, 0) as value
 FROM
     text_chunk_group
 WHERE
     id = ${textChunkGroupId}
 `);
+    return res ?? undefined;
   }
 
   async getTextChunkGroupByStrategy(
@@ -539,16 +540,7 @@ const ZEmbeddingRow = z
     embedding: JSON.parse(row.embedding),
   }));
 
-const ZProgress = z
-  .object({
-    value: z.number().nullable(),
-    total: z.number().min(0),
-  })
-  .transform((row) =>
-    row.value == null
-      ? undefined
-      : {
-          value: row.value,
-          total: row.total,
-        }
-  );
+const ZProgress = z.object({
+  value: z.number(),
+  total: z.number().min(0),
+});

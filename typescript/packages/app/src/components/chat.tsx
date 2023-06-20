@@ -544,7 +544,11 @@ const DisplayQuestions: React.FC<{
               onClick={() => askQuestion(question)}
             >
               <ListItem disablePadding>
-                <ListItemText primary={question}></ListItemText>
+                <ListItemText
+                  primary={question}
+                  color="white"
+                  primaryTypographyProps={{ color: "white" }}
+                ></ListItemText>
               </ListItem>
             </ListItemButton>
           );

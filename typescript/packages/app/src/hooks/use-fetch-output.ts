@@ -1,11 +1,25 @@
-import { Outputs } from "@fgpt/precedent-iso";
+import { Outputs, Progress } from "@fgpt/precedent-iso";
+import React from "react";
 import useSWR from "swr";
 
 export const useFetchReport = (fileReferenceId: string) => {
+  const [shouldPoll, setShouldPoll] = React.useState(true);
   const { data, isLoading, mutate } = useSWR<
-    Outputs.Report,
+    { report: Outputs.Report; progress: Progress | undefined },
     ["/api/proxy/v1/output/report", string]
-  >(["/api/proxy/v1/output/report", fileReferenceId], fileFetcher);
+  >(["/api/proxy/v1/output/report", fileReferenceId], fileFetcher, {
+    refreshInterval: shouldPoll ? 10_000 : 0,
+  });
+
+  const total = data?.progress?.total;
+  const value = data?.progress?.value;
+  const isComplete = total && value && total === value;
+
+  React.useEffect(() => {
+    if (isComplete) {
+      setShouldPoll(false);
+    }
+  }, [isComplete]);
 
   return { data, isLoading, mutate };
 };
@@ -13,9 +27,9 @@ export const useFetchReport = (fileReferenceId: string) => {
 async function fileFetcher([url, fileReferenceId]: [
   "/api/proxy/v1/output/report",
   string
-]): Promise<Outputs.Report> {
+]): Promise<{ report: Outputs.Report; progress: Progress | undefined }> {
   const response = await fetch(`${url}/${fileReferenceId}`);
   const data = await response.json();
 
-  return data.report;
+  return data;
 }

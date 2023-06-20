@@ -53,6 +53,15 @@ export const useUppy = (token: string, projectId: string) => {
     });
   }, [uppy, projectId]);
 
+  React.useEffect(() => {
+    return () => {
+      const dashboard = uppy.getPlugin("Dashboard");
+      if (dashboard) {
+        (dashboard as any).closeModal();
+      }
+    };
+  }, [uppy]);
+
   return {
     uppy,
     openUppyModal,

@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     pinecone_index: str = Field(env="PINECONE_INDEX")
     pinecone_namespace: str = Field(env="PINECONE_NAMESPACE")
     telemetry_enabled: bool = Field(env="TRACING_ENABLED", default=False)
+    reload:  bool = Field(env="RELOAD", default=False)
 
     class Config:
         env_file = '.env'

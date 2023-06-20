@@ -23,6 +23,8 @@ export interface TaskExecutor {
   execute(task: Task): Promise<void>;
 }
 
+const LLM_OUTPUT_CHUNK_SIZE = "greedy_15k" as const;
+
 export class TaskExecutorImpl implements TaskExecutor {
   STRATEGIES = ["greedy_v0", "greedy_5k", "greedy_15k"] as const;
   CHUNKER = new GreedyTextChunker();
@@ -145,6 +147,7 @@ export class TaskExecutorImpl implements TaskExecutor {
             id: chunkId,
             vector: embedding!,
             metadata: {
+              textChunkId: chunkId,
               organizationId: config.organizationId,
               projectId: config.projectId,
               fileId: config.fileId,
@@ -324,7 +327,7 @@ export class TaskExecutorImpl implements TaskExecutor {
             commonArgs,
             group
           );
-          if (strategy === "greedy_5k") {
+          if (strategy !== LLM_OUTPUT_CHUNK_SIZE) {
             LOGGER.info("Skipping LLM Generation");
             continue;
           }
