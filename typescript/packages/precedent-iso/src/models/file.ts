@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 export interface FileReference {
   id: string;
   fileName: string;
@@ -18,3 +20,10 @@ export interface LoadedFile {
   fullyChunked: boolean;
   fullyEmbedded: boolean;
 }
+
+export type Progress = z.infer<typeof ZProgress>;
+
+export const ZProgress = z.object({
+  value: z.number().min(0),
+  total: z.number(),
+});

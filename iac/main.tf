@@ -718,7 +718,7 @@ resource "google_pubsub_subscription" "subscription" {
 
   dead_letter_policy {
     dead_letter_topic     = google_pubsub_topic.task_queue_dead_letter.id
-    max_delivery_attempts = 10
+    max_delivery_attempts = 5
   }
 
   retry_policy {

@@ -26,9 +26,20 @@ export interface QuestionStore {
 export class PsqlQuestionStore implements QuestionStore {
   constructor(private readonly pool: DatabasePool) {}
 
-  async sampleForProject(_: string, __: number): Promise<string[]> {
-    // TODO
-    return [];
+  async sampleForProject(projectId: string, limit: number): Promise<string[]> {
+    const result = await this.pool.query(sql.type(ZGetForFile)`
+SELECT
+    question
+FROM
+    text_chunk_question
+WHERE
+    project_id = ${projectId}
+ORDER BY
+    random()
+LIMIT ${limit + 10}
+`);
+
+    return [...new Set(result.rows.map((row) => row.question))].slice(0, limit);
   }
 
   async sampleForFile(

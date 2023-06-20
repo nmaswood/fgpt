@@ -321,3 +321,46 @@ test("getEmbedding", async () => {
 
   expect(embedding.embedding).toEqual([1, 2, 3]);
 });
+
+test("llmOutputChunkSeen", async () => {
+  const { processedFile, chunkStore } = await setup();
+
+  const textChunkGroup = await chunkStore.upsertTextChunkGroup({
+    organizationId: processedFile.organizationId,
+    projectId: processedFile.projectId,
+    fileReferenceId: processedFile.fileReferenceId,
+    processedFileId: processedFile.id,
+    numChunks: 2,
+    strategy: "greedy_v0",
+    embeddingsWillBeGenerated: false,
+  });
+
+  await chunkStore.upsertManyTextChunks(
+    {
+      organizationId: processedFile.organizationId,
+      projectId: processedFile.projectId,
+      fileReferenceId: processedFile.fileReferenceId,
+      processedFileId: processedFile.id,
+      textChunkGroupId: textChunkGroup.id,
+    },
+    [
+      {
+        chunkOrder: 0,
+        chunkText: "hi",
+        hash: ShaHash.forData("hi"),
+      },
+      {
+        chunkOrder: 1,
+        chunkText: "bye",
+        hash: ShaHash.forData("hi"),
+      },
+    ]
+  );
+  const one = await chunkStore.incrementLlmOutputChunkSeen(textChunkGroup.id);
+
+  expect(one).toEqual({ value: 1, total: 2 });
+
+  const two = await chunkStore.incrementLlmOutputChunkSeen(textChunkGroup.id);
+
+  expect(two).toEqual({ value: 2, total: 2 });
+});
