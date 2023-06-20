@@ -57,7 +57,7 @@ export const SelectedProject: React.FC<{
     project.id
   );
 
-  const [value, setValue] = React.useState(2);
+  const [value, setValue] = React.useState(0);
 
   const handleChange = (_: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
