@@ -16,6 +16,7 @@ export interface InsertQuestion {
 const FIELDS = sql.fragment`id, organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, text_chunk_id, question`;
 
 export interface QuestionStore {
+  sampleForProject(projectId: string, limit: number): Promise<string[]>;
   sampleForFile(fileReferenceId: string, limit: number): Promise<string[]>;
   getForFile(fileReferenceId: string): Promise<string[]>;
   getForChunk(chunkId: string): Promise<string[]>;
@@ -25,12 +26,16 @@ export interface QuestionStore {
 export class PsqlQuestionStore implements QuestionStore {
   constructor(private readonly pool: DatabasePool) {}
 
+  async sampleForProject(_: string, __: number): Promise<string[]> {
+    // TODO
+    return [];
+  }
+
   async sampleForFile(
     fileReferenceId: string,
     limit: number
   ): Promise<string[]> {
     const result = await this.pool.query(sql.type(ZGetForFile)`
-
 SELECT
     question
 FROM
@@ -46,7 +51,6 @@ LIMIT ${limit}
 
   async getForFile(fileReferenceId: string): Promise<string[]> {
     const result = await this.pool.query(sql.type(ZGetForFile)`
-
 SELECT
     question
 FROM

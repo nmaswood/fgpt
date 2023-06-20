@@ -15,6 +15,7 @@ import {
   DialogActions,
   DialogTitle,
   IconButton,
+  LinearProgress,
   ListItemIcon,
   ListItemText,
   Menu,
@@ -39,25 +40,16 @@ import { DisplayFiles } from "./display-files";
 import { UploadFilesButton } from "./upload-files-button";
 
 export const SelectedProject: React.FC<{
-  project: Project;
+  project: Project | undefined;
   projects: Project[];
-  token: string;
+  token: string | undefined;
   setSelectedProjectId: (projectId: string | undefined) => void;
-}> = ({ token, project, projects, setSelectedProjectId }) => {
+  loading: boolean;
+}> = ({ token, project, projects, setSelectedProjectId, loading }) => {
+  const [value, setValue] = React.useState(0);
   const [modal, setModal] = React.useState<"delete" | "edit" | undefined>(
     undefined
   );
-
-  const closeModal = () => setModal(undefined);
-
-  const { data: files, isLoading: filesLoading } = useFetchFiles(project.id);
-
-  const { data: chats, isLoading: chatsLoading } = useFetchChats(
-    "project",
-    project.id
-  );
-
-  const [value, setValue] = React.useState(0);
 
   const handleChange = (_: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -74,44 +66,33 @@ export const SelectedProject: React.FC<{
 
   const isLargeScreen = useMediaQuery("(min-width:750px)");
 
-  const { trigger: createChat, isMutating: createChatIsLoading } =
-    useCreateChat("project", project.id);
-
-  const { trigger: deleteChat, isMutating: isDeleteChatMutating } =
-    useDeleteChat("project", project.id);
-
-  const { trigger: editChat, isMutating: isEditingChatMutating } = useEditChat(
-    "project",
-    project.id
-  );
-
   return (
-    <>
-      <Box display="flex" flexDirection="column" height="100%" width="100%">
-        <Box
-          display="flex"
-          paddingX={2}
-          paddingTop={1}
-          marginBottom={1 / 2}
-          justifyContent="space-between"
+    <Box display="flex" flexDirection="column" height="100%" width="100%">
+      <Box
+        display="flex"
+        paddingX={2}
+        paddingTop={1}
+        marginBottom={1 / 2}
+        justifyContent="space-between"
+      >
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          textColor="secondary"
+          indicatorColor="secondary"
         >
-          <Tabs
-            value={value}
-            onChange={handleChange}
-            textColor="secondary"
-            indicatorColor="secondary"
-          >
-            <Tab
-              icon={<CollectionsIcon />}
-              iconPosition="start"
-              label={isLargeScreen ? "Data room" : undefined}
-            />
-            <Tab
-              icon={<BoltIcon />}
-              iconPosition="start"
-              label={isLargeScreen ? "Chat" : undefined}
-            />
-          </Tabs>
+          <Tab
+            icon={<CollectionsIcon />}
+            iconPosition="start"
+            label={isLargeScreen ? "Data room" : undefined}
+          />
+          <Tab
+            icon={<BoltIcon />}
+            iconPosition="start"
+            label={isLargeScreen ? "Chat" : undefined}
+          />
+        </Tabs>
+        {token && project && (
           <Box display="flex" alignItems="center" gap={1}>
             <UploadFilesButton token={token} projectId={project.id} />
 
@@ -166,64 +147,21 @@ export const SelectedProject: React.FC<{
               </MenuList>
             </Menu>
           </Box>
-        </Box>
-
-        {value === 0 && (
-          <>
-            {!filesLoading && files.length === 0 && (
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                width="100%"
-                height="100%"
-              >
-                <UploadFilesButton token={token} projectId={project.id} />
-              </Box>
-            )}
-            {files.length > 0 && <DisplayFiles files={files} />}
-          </>
-        )}
-
-        {value === 1 && (
-          <Box display="flex" width="100%" height="100%">
-            <DisplayChat
-              projectId={project.id}
-              token={token}
-              chats={chats}
-              chatsLoading={chatsLoading}
-              createChat={createChat}
-              deleteChat={deleteChat}
-              editChat={editChat}
-              isMutating={
-                createChatIsLoading ||
-                isDeleteChatMutating ||
-                isEditingChatMutating
-              }
-              questions={[]}
-            />
-          </Box>
         )}
       </Box>
-      {modal === "delete" && (
-        <DeleteProjectModal
-          closeModal={closeModal}
-          projectId={project.id}
-          resetSelectedProjectId={() => {
-            const newProjectId = projects.find((p) => p.id !== project.id)?.id;
-            setSelectedProjectId(newProjectId);
-          }}
-        />
-      )}
-      {modal === "edit" && (
-        <EditProjectModal
-          closeModal={closeModal}
-          projectId={project.id}
-          projectName={project.name}
+      {loading && <LinearProgress />}
+      {project && token && (
+        <SelectedProjectInner
+          project={project}
           projects={projects}
+          token={token}
+          setSelectedProjectId={setSelectedProjectId}
+          value={value}
+          modal={modal}
+          setModal={setModal}
         />
       )}
-    </>
+    </Box>
   );
 };
 
@@ -372,5 +310,99 @@ const EditProjectModal: React.FC<{
         </Box>
       </DialogActions>
     </Dialog>
+  );
+};
+
+const SelectedProjectInner: React.FC<{
+  project: Project;
+  projects: Project[];
+  token: string;
+  setSelectedProjectId: (projectId: string | undefined) => void;
+  value: number;
+  modal: "delete" | "edit" | undefined;
+  setModal: (v: "delete" | "edit" | undefined) => void;
+}> = ({
+  token,
+  project,
+  projects,
+  setSelectedProjectId,
+  value,
+  modal,
+  setModal,
+}) => {
+  const closeModal = () => setModal(undefined);
+  const { data: files, isLoading: filesLoading } = useFetchFiles(project.id);
+
+  const { data: chats, isLoading: chatsLoading } = useFetchChats(
+    "project",
+    project.id
+  );
+  const { trigger: createChat, isMutating: createChatIsLoading } =
+    useCreateChat("project", project.id);
+
+  const { trigger: deleteChat, isMutating: isDeleteChatMutating } =
+    useDeleteChat("project", project.id);
+
+  const { trigger: editChat, isMutating: isEditingChatMutating } = useEditChat(
+    "project",
+    project.id
+  );
+
+  return (
+    <>
+      {value === 0 && (
+        <>
+          {!filesLoading && files.length === 0 && (
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              width="100%"
+              height="100%"
+            >
+              <UploadFilesButton token={token} projectId={project.id} />
+            </Box>
+          )}
+          {files.length > 0 && <DisplayFiles files={files} />}
+        </>
+      )}
+      {value === 1 && (
+        <Box display="flex" width="100%" height="100%">
+          <DisplayChat
+            projectId={project.id}
+            token={token}
+            chats={chats}
+            chatsLoading={chatsLoading}
+            createChat={createChat}
+            deleteChat={deleteChat}
+            editChat={editChat}
+            isMutating={
+              createChatIsLoading ||
+              isDeleteChatMutating ||
+              isEditingChatMutating
+            }
+            questions={[]}
+          />
+        </Box>
+      )}
+      {modal === "delete" && (
+        <DeleteProjectModal
+          closeModal={closeModal}
+          projectId={project.id}
+          resetSelectedProjectId={() => {
+            const newProjectId = projects.find((p) => p.id !== project.id)?.id;
+            setSelectedProjectId(newProjectId);
+          }}
+        />
+      )}
+      {modal === "edit" && (
+        <EditProjectModal
+          closeModal={closeModal}
+          projectId={project.id}
+          projectName={project.name}
+          projects={projects}
+        />
+      )}
+    </>
   );
 };

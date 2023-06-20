@@ -221,3 +221,42 @@ test("sampleForFile", async () => {
 
   expect(question).toEqual("hi");
 });
+
+test("sampleForProjectId", async () => {
+  const {
+    organizationId,
+    projectId,
+    fileReferenceId,
+    processedFileId,
+    textChunkGroupId,
+    textChunkId,
+    questionStore,
+  } = await setup();
+
+  await questionStore.insertMany([
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      processedFileId,
+      textChunkGroupId,
+      textChunkId,
+      question: "hi",
+      hash: "foo",
+    },
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      processedFileId,
+      textChunkGroupId,
+      textChunkId,
+      question: "hi",
+      hash: "foo",
+    },
+  ]);
+
+  const questions = await questionStore.sampleForProject(projectId, 10);
+
+  expect(questions.length).toEqual(1);
+});

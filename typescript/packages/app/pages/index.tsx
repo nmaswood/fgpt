@@ -9,7 +9,7 @@ import { useFetchProjects } from "../src/hooks/use-fetch-projects";
 import { useFetchToken } from "../src/hooks/use-fetch-token";
 
 const Home: React.FC = () => {
-  const { data: token } = useFetchToken();
+  const { data: token, isLoading: isTokenLoading } = useFetchToken();
   const { data: projects, isLoading: projectsLoading } = useFetchProjects();
 
   const [selectedProjectId, setSelectedProjectId] = React.useState<
@@ -77,14 +77,13 @@ const Home: React.FC = () => {
             </Box>
           )}
 
-        {token && selectedProject !== undefined && (
-          <SelectedProject
-            token={token}
-            project={selectedProject}
-            projects={projects}
-            setSelectedProjectId={setSelectedProjectId}
-          />
-        )}
+        <SelectedProject
+          token={token}
+          loading={isTokenLoading || projectsLoading}
+          project={selectedProject}
+          projects={projects}
+          setSelectedProjectId={setSelectedProjectId}
+        />
       </Box>
     </Box>
   );
