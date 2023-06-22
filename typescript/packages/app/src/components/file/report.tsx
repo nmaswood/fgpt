@@ -1,4 +1,4 @@
-import { Outputs, Progess } from "@fgpt/precedent-iso";
+import { Outputs, Progress } from "@fgpt/precedent-iso";
 import {
   Box,
   CircularProgress,
@@ -54,7 +54,7 @@ export const DisplayFileReport: React.FC<{ fileReferenceId: string }> = ({
   );
 };
 
-function formatProgress(progress: Progess | undefined): string | undefined {
+function formatProgress(progress: Progress | undefined): string | undefined {
   if (!progress) {
     return undefined;
   }

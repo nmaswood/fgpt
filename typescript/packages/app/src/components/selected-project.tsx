@@ -35,10 +35,7 @@ import { useEditChat } from "../hooks/use-edit-chat";
 import { useEditProject } from "../hooks/use-edit-project";
 import { useFetchFiles } from "../hooks/use-fetch-files";
 import { useFetchChats } from "../hooks/use-list-chats";
-import {
-  useSampleForFile,
-  useSampleForProject,
-} from "../hooks/use-sample-questions";
+import { useSampleForProject } from "../hooks/use-sample-questions";
 import { DisplayChat } from "./chat";
 import { DisplayFiles } from "./display-files";
 import { UploadFilesButton } from "./upload-files-button";
