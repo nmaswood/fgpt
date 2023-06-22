@@ -34,14 +34,6 @@ provider "google" {
 }
 
 
-resource "google_document_ai_processor" "processor" {
-  location     = "us"
-  display_name = "text-processor"
-  type         = "OCR_PROCESSOR"
-  depends_on = [
-  google_project_service.enable_services]
-}
-
 resource "google_project_service" "enable_services" {
   for_each                   = toset(var.gcp_service_list)
   project                    = var.project
@@ -66,7 +58,7 @@ resource "google_sql_database_instance" "instance" {
 
 
 resource "google_storage_bucket" "asset_store" {
-  name     = "fgpt-asset-store"
+  name     = "${var.project_slug}-asset-store"
   location = "US"
 
   cors {
@@ -105,7 +97,7 @@ resource "google_cloud_run_v2_job" "db" {
 
 
       containers {
-        image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/db:latest"
+        image = "${var.region}-docker.pkg.dev/${var.project}/${var.project_slug}/db:latest"
 
 
         env {
@@ -223,7 +215,7 @@ resource "google_cloudbuild_trigger" "build_db" {
 
 
 resource "google_sql_database" "database" {
-  name     = "fgpt"
+  name     = var.project_slug
   instance = google_sql_database_instance.instance.name
 }
 
@@ -248,7 +240,7 @@ resource "google_cloud_run_v2_service" "springtime" {
       max_instance_count = 2
     }
     containers {
-      image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/springtime:latest"
+      image = "${var.region}-docker.pkg.dev/${var.project}/${var.project_slug}/springtime:latest"
 
       env {
         name  = "HOST"
@@ -356,7 +348,7 @@ resource "google_cloud_run_v2_service" "api" {
 
 
     containers {
-      image = "${var.region}-docker.pkg.dev/${var.project}/fgpt/api:latest"
+      image = "${var.region}-docker.pkg.dev/${var.project}/${var.project_slug}/api:latest"
 
       env {
         name  = "HOST"
@@ -370,7 +362,7 @@ resource "google_cloud_run_v2_service" "api" {
 
       env {
         name  = "SQL_URI"
-        value = "socket://${urlencode(var.database_user)}:${urlencode(var.database_password)}@${urlencode("/cloudsql/${google_sql_database_instance.instance.connection_name}")}/fgpt"
+        value = "socket://${urlencode(var.database_user)}:${urlencode(var.database_password)}@${urlencode("/cloudsql/${google_sql_database_instance.instance.connection_name}")}/${var.project_slug}"
       }
 
       env {
@@ -443,7 +435,7 @@ resource "google_cloud_run_v2_service" "job_runner_server" {
     }
 
     containers {
-      image   = "${var.region}-docker.pkg.dev/${var.project}/fgpt/job-runner:latest"
+      image   = "${var.region}-docker.pkg.dev/${var.project}/${var.project_slug}/job-runner:latest"
       command = ["yarn", "run-server"]
 
       env {
@@ -454,7 +446,7 @@ resource "google_cloud_run_v2_service" "job_runner_server" {
       env {
 
         name  = "SQL_URI"
-        value = "socket://${urlencode(var.database_user)}:${urlencode(var.database_password)}@${urlencode("/cloudsql/${google_sql_database_instance.instance.connection_name}")}/fgpt"
+        value = "socket://${urlencode(var.database_user)}:${urlencode(var.database_password)}@${urlencode("/cloudsql/${google_sql_database_instance.instance.connection_name}")}/${var.project_slug}"
       }
 
       env {
@@ -504,6 +496,9 @@ resource "google_cloud_run_v2_service" "job_runner_server" {
   }
 }
 
+
+// policies
+
 data "google_iam_policy" "no_auth" {
   binding {
     role = "roles/run.invoker"
@@ -513,8 +508,6 @@ data "google_iam_policy" "no_auth" {
     ]
   }
 }
-
-// policies
 
 resource "google_cloud_run_v2_service_iam_policy" "api_public_access" {
   location    = google_cloud_run_v2_service.api.location
@@ -539,11 +532,11 @@ resource "google_cloud_run_v2_service_iam_policy" "tika_public_access" {
 
 
 resource "vercel_project" "front_end" {
-  name      = "fgpt"
+  name      = var.project_slug
   framework = "nextjs"
   git_repository = {
     type              = "github"
-    repo              = "nmaswood/fgpt"
+    repo              = "${var.repo_owner}/${var.github_repo}"
     production_branch = "main"
   }
 
@@ -592,12 +585,12 @@ resource "vercel_project" "front_end" {
     {
       key    = "PUBLIC_API_ENDPOINT"
       target = ["production", "preview"]
-      value  = var.public_api_endpoint
+      value  = google_cloud_run_v2_service.api.uri
     },
     {
       key    = "NEXT_PUBLIC_API_ENDPOINT"
       target = ["production", "preview"]
-      value  = var.public_api_endpoint
+      value  = google_cloud_run_v2_service.api.uri
     },
     {
       key    = "AUTH0_ISSUER_BASE_URL"
@@ -637,17 +630,17 @@ provider "auth0" {
 }
 
 resource "auth0_client" "frontend" {
-  name        = "FGPT Next.js"
+  name        = var.project_slug
   description = "Frontend app"
   app_type    = "spa"
   callbacks = [
     "https://www.${var.vercel_domain}/api/auth/callback",
-    "https://${var.vercel_domain}/api/auth/callback",
+    "https://${var.vercel_domain}/api/auth/callback"
   ]
 
   allowed_logout_urls = [
     "https://www.${var.vercel_domain}",
-    "https://${var.vercel_domain}",
+    "https://${var.vercel_domain}"
   ]
 
   oidc_conformant = true
@@ -677,9 +670,8 @@ resource "auth0_connection" "google" {
 
 
 resource "auth0_resource_server" "backend" {
-  name       = "fgpt-backend"
-  identifier = var.auth0_api_identifier
-
+  name                                            = "${var.project_slug}-backend"
+  identifier                                      = "${var.project_slug}-api"
   enforce_policies                                = true
   allow_offline_access                            = true
   skip_consent_for_verifiable_first_party_clients = true
@@ -687,13 +679,13 @@ resource "auth0_resource_server" "backend" {
 }
 
 
-resource "auth0_prompt_custom_text" "example" {
+resource "auth0_prompt_custom_text" "auth0_custom_copy" {
   prompt   = "login"
   language = "en"
   body = jsonencode(
     {
       "login" : {
-        "buttonText" : "Sign into FGPT",
+        "buttonText" : "Sign in",
         "title" : "Welcome",
       }
     }
@@ -797,6 +789,4 @@ resource "google_project_iam_member" "pubsub_publisher" {
   role    = "roles/pubsub.publisher"
   member  = "serviceAccount:${google_service_account.cloud_run_service_account.email}"
 }
-
-
 

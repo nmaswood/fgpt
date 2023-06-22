@@ -57,10 +57,6 @@ variable "github_repo" {
   default = "fgpt"
 }
 
-variable "github_uri" {
-  default = "https://github.com/nmaswood/fgpt.git"
-}
-
 variable "database_password" {
 }
 
@@ -78,16 +74,11 @@ variable "pinecone_environment" {
 // vercel
 
 variable "vercel_domain" {
-  default = "getfgpt.com"
+  default = "app.getparedo.com"
 }
 
 variable "vercel_team_id" {
   default = "team_3yoDXafHgvtzEAOO2hUyZeSK"
-}
-
-// need this to prevent a circular dependency
-variable "public_api_endpoint" {
-  default = "https://api.getfgpt.com"
 }
 
 // AUTH0
@@ -98,6 +89,7 @@ variable "auth0_client_secret" {}
 variable "auth0_api_identifier" {
   default = "fgpt-api"
 }
+
 
 variable "auth0_secret" {}
 
