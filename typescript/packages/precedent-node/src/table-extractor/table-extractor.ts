@@ -1,5 +1,4 @@
 import axios, { AxiosInstance } from "axios";
-
 import z from "zod";
 
 export interface ExtractArguments {
