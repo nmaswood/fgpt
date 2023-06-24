@@ -1,12 +1,22 @@
 from springtime.llm.pinecone import UpsertVector, get_similar, upsert_vectors
 from springtime.llm.models import ChatHistory
-from springtime.llm.ml import FinancialSummary,  PlaygroundRequest, Term, ask_question_streaming, embeddings_for_documents, ask_question, call_function, get_output
+from springtime.llm.ml import (
+    FinancialSummary,
+    PlaygroundRequest,
+    Term,
+    ask_question_streaming,
+    embeddings_for_documents,
+    ask_question,
+    call_function,
+    get_output,
+)
 from starlette.responses import StreamingResponse
 from springtime.llm.generate_title import generate_title_streaming, GenerateTitleRequest
 from typing import Any
 from fastapi import APIRouter
 from pydantic import BaseModel
-BaseModel
+
+from springtime.llm.token import get_token_length
 
 
 class TokenLengthRequest(BaseModel):
@@ -17,6 +27,10 @@ class AskQuestionRequest(BaseModel):
     context: str
     question: str
     history: list[ChatHistory]
+
+
+class TokenLengthRequest(BaseModel):
+    text: str
 
 
 class AskQuestionResponse(BaseModel):
@@ -55,13 +69,11 @@ class PlaygroundResponse(BaseModel):
     raw: dict[str, Any]
 
 
-class MLRouter():
-
+class MLRouter:
     def __init__(self):
         pass
 
     def get_router(self):
-
         router = APIRouter()
 
         @router.put("/upsert-vectors")
@@ -93,12 +105,8 @@ class MLRouter():
 
         @router.post("/ask-question-streaming")
         async def ask_question_streaming_route(req: AskQuestionRequest):
-            stream = ask_question_streaming(
-                req.context, req.question, req.history)
-            response = StreamingResponse(
-                content=stream,
-                media_type='text/event-stream'
-            )
+            stream = ask_question_streaming(req.context, req.question, req.history)
+            response = StreamingResponse(content=stream, media_type="text/event-stream")
             return response
 
         @router.post("/llm-output")
@@ -109,10 +117,12 @@ class MLRouter():
         @router.post("/generate-title-streaming")
         async def generate_title_streaming_route(req: GenerateTitleRequest):
             stream = generate_title_streaming(req)
-            response = StreamingResponse(
-                content=stream,
-                media_type='text/event-stream'
-            )
+            response = StreamingResponse(content=stream, media_type="text/event-stream")
+
             return response
+
+        @router.post("/token-length")
+        async def token_length_route(req: TokenLengthRequest):
+            return get_token_length(req.text)
 
         return router

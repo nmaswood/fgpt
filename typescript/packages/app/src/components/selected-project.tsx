@@ -1,6 +1,7 @@
 import "@uppy/core/dist/style.min.css";
 import "@uppy/dashboard/dist/style.min.css";
 
+import { MAX_FILE_SIZE_BYTES } from "@fgpt/precedent-iso";
 import { Project } from "@fgpt/precedent-iso";
 import BoltIcon from "@mui/icons-material/Bolt";
 import CollectionsIcon from "@mui/icons-material/Collections";
@@ -26,8 +27,12 @@ import {
   TextField,
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import Uppy from "@uppy/core";
+import Dashboard from "@uppy/dashboard";
+import XHRUpload from "@uppy/xhr-upload";
 import React from "react";
 
+import { CLIENT_SETTINGS } from "../client-settings";
 import { useCreateChat } from "../hooks/use-create-chat";
 import { useDeleteChat } from "../hooks/use-delete-chat";
 import { useDeleteProject } from "../hooks/use-delete-project";
@@ -67,6 +72,64 @@ export const SelectedProject: React.FC<{
 
   const isLargeScreen = useMediaQuery("(min-width:750px)");
 
+  const uppy = React.useMemo(() => {
+    return new Uppy({
+      restrictions: {
+        allowedFileTypes: [".pdf"],
+        minFileSize: 1,
+        maxFileSize: MAX_FILE_SIZE_BYTES,
+      },
+    })
+      .use(XHRUpload, {
+        endpoint: `${CLIENT_SETTINGS.publicApiEndpoint}/api/v1/files/upload`,
+      })
+      .use(Dashboard, {
+        inline: false,
+        proudlyDisplayPoweredByUppy: false,
+        height: 470,
+        browserBackButtonClose: false,
+        theme: "dark",
+      });
+  }, []);
+
+  React.useEffect(() => {
+    if (!token) {
+      return;
+    }
+    const plugin = uppy.getPlugin("XHRUpload");
+    if (!plugin) {
+      return;
+    }
+
+    plugin!.setOptions({
+      endpoint: `${CLIENT_SETTINGS.publicApiEndpoint}/api/v1/files/upload`,
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+    });
+  }, [uppy, token]);
+
+  const projectId = project?.id;
+  React.useEffect(() => {
+    if (!projectId) {
+      return;
+    }
+    uppy.cancelAll();
+
+    uppy.on("file-added", (file) => {
+      uppy.setFileMeta(file.id, {
+        projectId,
+      });
+    });
+  }, [uppy, projectId]);
+
+  const openUppyModal = () => {
+    const dashboard = uppy.getPlugin("Dashboard");
+    if (dashboard) {
+      (dashboard as any).openModal();
+    }
+  };
+
   return (
     <Box display="flex" flexDirection="column" height="100%" width="100%">
       <Box
@@ -95,7 +158,11 @@ export const SelectedProject: React.FC<{
         </Tabs>
         {token && project && (
           <Box display="flex" alignItems="center" gap={1}>
-            <UploadFilesButton token={token} projectId={project.id} />
+            <UploadFilesButton
+              uppy={uppy}
+              openModal={openUppyModal}
+              projectId={project.id}
+            />
 
             {isLargeScreen ? (
               <Button
@@ -160,6 +227,8 @@ export const SelectedProject: React.FC<{
           value={value}
           modal={modal}
           setModal={setModal}
+          uppy={uppy}
+          openUppyModal={openUppyModal}
         />
       )}
     </Box>
@@ -322,6 +391,8 @@ const SelectedProjectInner: React.FC<{
   value: number;
   modal: "delete" | "edit" | undefined;
   setModal: (v: "delete" | "edit" | undefined) => void;
+  uppy: Uppy;
+  openUppyModal: () => void;
 }> = ({
   token,
   project,
@@ -330,6 +401,8 @@ const SelectedProjectInner: React.FC<{
   value,
   modal,
   setModal,
+  uppy,
+  openUppyModal,
 }) => {
   const closeModal = () => setModal(undefined);
   const { data: files, isLoading: filesLoading } = useFetchFiles(project.id);
@@ -362,7 +435,11 @@ const SelectedProjectInner: React.FC<{
               width="100%"
               height="100%"
             >
-              <UploadFilesButton token={token} projectId={project.id} />
+              <UploadFilesButton
+                uppy={uppy}
+                openModal={openUppyModal}
+                projectId={project.id}
+              />
             </Box>
           )}
           {files.length > 0 && <DisplayFiles files={files} />}

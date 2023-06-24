@@ -3,6 +3,7 @@ import {
   Box,
   CircularProgress,
   LinearProgress,
+  Link,
   List,
   ListItem,
   ListItemText,
@@ -14,6 +15,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import NextLink from "next/link";
 
 import { useExcelAssets } from "../../hooks/use-fetch-excel";
 import { useFetchReport } from "../../hooks/use-fetch-output";
@@ -35,10 +37,20 @@ export const DisplayFileReport: React.FC<{ fileReferenceId: string }> = ({
       maxWidth="100%"
       maxHeight="100%"
       overflow="auto"
+      flexDirection="column"
     >
       {isLoading && (
         <Box width="100%" paddingTop={1}>
           <LinearProgress />
+        </Box>
+      )}
+      {urls.length > 0 && (
+        <Box width="100%" paddingTop={1}>
+          {urls.map((url, i) => (
+            <Link key={url} component={NextLink} href={url}>
+              Document Tables {i + 1}
+            </Link>
+          ))}
         </Box>
       )}
       {data && progress && progress.total === progress.value ? (
