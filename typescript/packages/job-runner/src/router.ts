@@ -1,6 +1,5 @@
 import {
   LOGGER,
-  Message,
   TaskExecutor,
   TaskStore,
   ZMessage,
@@ -11,8 +10,7 @@ import { z } from "zod";
 export class MainRouter {
   constructor(
     private readonly taskStore: TaskStore,
-    private readonly taskExecutor: TaskExecutor,
-    private readonly accTaskOnError: boolean
+    private readonly taskExecutor: TaskExecutor
   ) {}
   init() {
     const router = express.Router();
@@ -21,34 +19,33 @@ export class MainRouter {
       LOGGER.info("Main Route: Starting to process message");
       const rawMessage = req.body?.message;
 
-      const message = tryParse(rawMessage);
-      if (!message) {
+      const parsedMessage = tryParse(rawMessage);
+      if (!parsedMessage) {
         LOGGER.error("Could not parse message");
         res.status(204).send(`Bad Request: Could not parse object`);
         return;
       }
 
-      LOGGER.info({ message }, "Message parsed!");
+      const { taskId, messageId } = parsedMessage;
+      LOGGER.info({ taskId, messageId }, "Message parsed!");
 
       try {
-        await this.taskStore.setToInProgress(message.taskId);
-        const task = await this.taskStore.get(message.taskId);
+        await this.taskStore.setToInProgress(taskId);
+        const task = await this.taskStore.get(taskId);
         LOGGER.info({ task }, "Executing task");
+        this.taskExecutor;
         await this.taskExecutor.execute(task);
         await this.taskStore.setToSuceeded(task.id);
         LOGGER.info({ taskId: task.id }, "completed task");
         res.status(204).send();
+        LOGGER.info("Just sent a 204");
         return;
       } catch (e) {
         LOGGER.error("Could not execute task");
         LOGGER.error(e);
 
-        await this.taskStore.setToFailed(message.taskId);
-        if (this.accTaskOnError) {
-          LOGGER.warn("Acking task even though error has occurred");
-          res.status(204).send();
-          return;
-        }
+        await this.taskStore.setToFailed(taskId);
+
         res.status(500).send();
 
         return;
@@ -64,16 +61,17 @@ export class MainRouter {
         );
         const rawMessage = req.body?.message;
 
-        const message = tryParse(rawMessage);
-        if (!message) {
+        const parsedMessage = tryParse(rawMessage);
+        if (!parsedMessage) {
           LOGGER.error("Could not parse message");
           res.status(204).send(`Bad Request: Could not parse object`);
           return;
         }
+        const { taskId, messageId } = parsedMessage;
 
-        LOGGER.info({ message }, "Message parsed!");
+        LOGGER.info({ taskId, messageId }, "Message parsed!");
         try {
-          const task = await this.taskStore.setToFailed(message.taskId);
+          const task = await this.taskStore.setToFailed(taskId);
           LOGGER.info({ task }, "Failed task");
           res.status(204).send();
           return;
@@ -90,11 +88,14 @@ export class MainRouter {
   }
 }
 
-function tryParse(rawMessage: unknown): Message | undefined {
+function tryParse(rawMessage: unknown) {
   try {
     const message = ZRawMessage.parse(rawMessage);
     const asJson = JSON.parse(message.data);
-    return ZMessage.parse(asJson);
+    return {
+      taskId: ZMessage.parse(asJson).taskId,
+      messageId: message.messageId,
+    };
   } catch (e) {
     LOGGER.error(e);
     LOGGER.error({ rawMessage }, "Could not parse message");

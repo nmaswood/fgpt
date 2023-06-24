@@ -5,6 +5,7 @@ export interface FileReference {
   projectId: string;
   contentType: string;
   path: string;
+  bucketName: string;
 }
 
 export interface LoadedFile {

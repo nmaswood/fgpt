@@ -8,6 +8,7 @@ import {
 } from "@fgpt/precedent-iso";
 import lodashChunk from "lodash/chunk";
 import keyBy from "lodash/keyBy";
+import { FileReferenceStore } from "../file-reference-store";
 
 import { InsertMiscValue, MiscOutputStore } from "../llm-outputs/metrics-store";
 import { QuestionStore } from "../llm-outputs/question-store";
@@ -15,15 +16,19 @@ import { LOGGER } from "../logger";
 import { MLServiceClient } from "../ml/ml-service";
 import { ProcessedFileStore } from "../processed-file-store";
 import { ShaHash } from "../sha-hash";
+import { TableExtractor } from "../table-extractor/table-extractor";
 import { Task, TaskStore } from "../task-store";
 import { TextChunkStore } from "../text-chunk-store";
 import { TextExtractor } from "../text-extractor";
+
+import path from "path";
 
 export interface TaskExecutor {
   execute(task: Task): Promise<void>;
 }
 
 const LLM_OUTPUT_CHUNK_SIZE = "greedy_15k" as const;
+const EXCEL_PATH_SUFFIX = "excel-uploads";
 
 export class TaskExecutorImpl implements TaskExecutor {
   STRATEGIES = ["greedy_v0", "greedy_5k", "greedy_15k"] as const;
@@ -34,9 +39,10 @@ export class TaskExecutorImpl implements TaskExecutor {
     private readonly processedFileStore: ProcessedFileStore,
     private readonly textChunkStore: TextChunkStore,
     private readonly mlService: MLServiceClient,
-
     private readonly questionStore: QuestionStore,
-    private readonly miscOutputStore: MiscOutputStore
+    private readonly miscOutputStore: MiscOutputStore,
+    private readonly fileReferenceStore: FileReferenceStore,
+    private readonly tableExtractor: TableExtractor
   ) {}
 
   async execute({ config }: Task) {
@@ -225,6 +231,25 @@ export class TaskExecutorImpl implements TaskExecutor {
           config.textChunkGroupId
         );
 
+        break;
+      }
+      case "extract-table": {
+        const file = await this.fileReferenceStore.get(config.fileReferenceId);
+
+        const extracted = await this.tableExtractor.extract({
+          bucket: file.bucketName,
+          objectPath: file.path,
+          title: file.fileName,
+          outputPrefix: path.join(
+            EXCEL_PATH_SUFFIX,
+            file.organizationId,
+            file.projectId,
+            file.id
+          ),
+        });
+
+        console.log({ file, extracted });
+        LOGGER.info("Extract table");
         break;
       }
 

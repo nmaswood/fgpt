@@ -10,6 +10,7 @@ export const ZTaskType = z.enum([
   "delete-project",
   "create-analysis",
   "llm-outputs",
+  "extract-table",
 ]);
 
 export const ZTaskStatus = z.enum([
@@ -85,6 +86,16 @@ export const ZLLMOutputsConfig = z.object({
   textChunkId: z.string(),
 });
 
+export const ZExtractTableConfig = z.object({
+  type: z.literal("extract-table"),
+  version: z.literal("1"),
+  organizationId: z.string(),
+  projectId: z.string(),
+  fileReferenceId: z.string(),
+});
+
+export type ExtractTableConfig = z.infer<typeof ZExtractTableConfig>;
+
 export type LLMOutputsConfig = z.infer<typeof ZLLMOutputsConfig>;
 
 export const ZTaskConfig = z.discriminatedUnion("type", [
@@ -95,6 +106,7 @@ export const ZTaskConfig = z.discriminatedUnion("type", [
   ZDeleteProjectConfig,
   ZCreateAnalysisConfig,
   ZLLMOutputsConfig,
+  ZExtractTableConfig,
 ]);
 
 export type TaskType = z.infer<typeof ZTaskType>;

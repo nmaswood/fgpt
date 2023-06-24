@@ -21,6 +21,7 @@ import {
   TikaHttpClient,
   TikaTextExtractor,
   TaskExecutorImpl,
+  HttpTableExtractor,
 } from "@fgpt/precedent-node";
 import { SETTINGS, Settings } from "./settings";
 import { MainRouter } from "./router";
@@ -66,24 +67,23 @@ async function start(settings: Settings) {
   const questionStore = new PsqlQuestionStore(pool);
   const metricsStore = new PsqlMiscOutputStore(pool);
 
+  const tableExtractor = new HttpTableExtractor(settings.mlServiceUri);
+
   const taskExecutor = new TaskExecutorImpl(
     textExtractor,
     taskService,
     processedFileStore,
     textChunkStore,
     mlServiceClient,
-
     questionStore,
-    metricsStore
+    metricsStore,
+    fileReferenceStore,
+    tableExtractor
   );
 
   const taskStore = new PSqlTaskStore(pool, messageBusService);
 
-  const mainRouter = new MainRouter(
-    taskStore,
-    taskExecutor,
-    settings.ackTaskOnError
-  );
+  const mainRouter = new MainRouter(taskStore, taskExecutor);
 
   app.use("/", mainRouter.init());
 

@@ -20,6 +20,9 @@ const ZSettings = z.object({
     topic: z.string(),
     emulatorHost: z.string().optional(),
   }),
+  debug: z.object({
+    includeRouter: z.boolean().optional(),
+  }),
 });
 
 export const SETTINGS = ZSettings.parse({
@@ -43,5 +46,9 @@ export const SETTINGS = ZSettings.parse({
     projectId: process.env["PUBSUB_PROJECT_ID"],
     topic: process.env["PUBSUB_TOPIC"],
     emulatorHost: process.env["PUBSUB_EMULATOR_HOST"],
+  },
+  debug: {
+    includeRouter:
+      process.env["DEBUG_INCLUDE_ROUTER"]?.toLowerCase() === "true",
   },
 });

@@ -38,6 +38,7 @@ import { FileRouter } from "./routers/file-router";
 import { ChatRouter } from "./routers/chat-router";
 import { TextGroupRouter } from "./routers/text-group-router";
 import { LLMOutputRouter } from "./routers/llm-output.router";
+import { DebugRouter } from "./routers/debug-router";
 
 LOGGER.info("Server starting ...");
 
@@ -154,6 +155,13 @@ async function start() {
       reportService
     ).init()
   );
+
+  if (SETTINGS.debug.includeRouter) {
+    app.use(
+      "/api/v1/debug",
+      new DebugRouter(taskStore, fileReferenceStore).init()
+    );
+  }
 
   app.use("/ping", (_, res) => {
     res.json({ ping: "pong" });

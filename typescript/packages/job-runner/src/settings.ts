@@ -15,7 +15,6 @@ const ZSettings = z.object({
     topic: z.string(),
     emulatorHost: z.string().optional(),
   }),
-  ackTaskOnError: z.boolean(),
 });
 
 export type Settings = z.infer<typeof ZSettings>;
@@ -38,5 +37,4 @@ export const SETTINGS = ZSettings.parse({
     topic: process.env["PUBSUB_TOPIC"],
     emulatorHost: process.env["PUBSUB_EMULATOR_HOST"],
   },
-  ackTaskOnError: process.env["ACK_TASK_ON_ERROR"] === "true" ?? false,
 });
