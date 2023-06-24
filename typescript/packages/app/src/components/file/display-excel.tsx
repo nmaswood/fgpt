@@ -1,26 +1,31 @@
 import NextLink from "next/link";
-import { Box, Link, Typography, TextField } from "@mui/material";
+import {
+  Box,
+  Link,
+  Typography,
+  TextField,
+  LinearProgress,
+} from "@mui/material";
 import { read, utils } from "xlsx";
 import React from "react";
+import { useFetchWorkbook } from "../../hooks/use-load-workbook";
 
-export const DisplayExcel: React.FC<{ urls: string[] }> = ({ urls }) => {
-  const [url] = urls;
+export const DisplayExcel: React.FC<{
+  url: string | undefined;
+  isLoading: boolean;
+}> = ({ url }) => {
   const [__html, setHtml] = React.useState("");
 
-  const [sheetIndex, setSheetIndex] = React.useState(0);
+  const [sheetIndex, setSheetIndex] = React.useState(1);
 
-  if (url === undefined) {
-    throw new Error("illegal state");
-  }
-
-  const wb = useLoadWorkbook(url);
+  const { data: wb, isLoading } = useFetchWorkbook(url);
 
   React.useEffect(() => {
     (async () => {
       if (!wb) {
         return;
       }
-      const sheetName = wb.SheetNames[sheetIndex];
+      const sheetName = wb.SheetNames[sheetIndex - 1];
       if (!sheetName) {
         return;
       }
@@ -43,9 +48,11 @@ export const DisplayExcel: React.FC<{ urls: string[] }> = ({ urls }) => {
       gap={2}
     >
       <Box display="flex" marginY={3}>
-        <Link key={url} component={NextLink} href={url}>
-          <Typography>Tables</Typography>
-        </Link>
+        {url && (
+          <Link key={url} component={NextLink} href={url}>
+            <Typography>Download XLSX</Typography>
+          </Link>
+        )}
       </Box>
 
       <TextField
@@ -65,6 +72,7 @@ export const DisplayExcel: React.FC<{ urls: string[] }> = ({ urls }) => {
         }}
         InputProps={{ inputProps: { min: 0, max: 20 } }}
       />
+      {isLoading && <LinearProgress />}
       <Box
         display="flex"
         width="100%"
@@ -77,17 +85,4 @@ export const DisplayExcel: React.FC<{ urls: string[] }> = ({ urls }) => {
       />
     </Box>
   );
-};
-
-const useLoadWorkbook = (url: string) => {
-  const [wb, setWb] = React.useState<ReturnType<typeof read> | null>(null);
-
-  React.useEffect(() => {
-    (async () => {
-      const f = await (await fetch(url)).arrayBuffer();
-      const wb = read(f); // parse the array buffer
-      setWb(wb);
-    })();
-  }, [url]);
-  return wb;
 };

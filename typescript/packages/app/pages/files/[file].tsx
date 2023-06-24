@@ -1,6 +1,9 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AssessmentIcon from "@mui/icons-material/Assessment";
+import { z } from "zod";
 import BoltIcon from "@mui/icons-material/Bolt";
+import Router from "next/router";
+
 import ConstructionIcon from "@mui/icons-material/Construction";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Box, IconButton, Paper, Skeleton, Tab, Tabs } from "@mui/material";
@@ -42,14 +45,14 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
   const { data: file } = useFetchFile(fileId);
   const { data: url } = useFetchSignedUrl(fileId);
 
-  const { data: urls } = useExcelAssets(fileId);
+  // hack to get to load faster
+  const { data: urls, isLoading } = useExcelAssets(fileId);
+  const [tableUrl] = urls;
 
   const [showPdf, setShowPdf] = React.useState(true);
 
-  const [value, setValue] = React.useState(0);
-  const handleChange = (_: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
-  };
+  const [tab, setTab] = useTabState();
+
   const router = useRouter();
 
   return (
@@ -103,26 +106,34 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
             <MenuIcon />
           </IconButton>
           <Tabs
-            value={value}
-            onChange={handleChange}
+            value={tab}
+            onChange={(e, newValue) => setTab(newValue)}
             textColor="secondary"
             indicatorColor="secondary"
           >
             <Tab
+              value="report"
               icon={<AssessmentIcon />}
               iconPosition="start"
               label={"Report"}
             />
-            <Tab icon={<BoltIcon />} iconPosition="start" label={"Chat"} />
+            <Tab
+              value="chat"
+              icon={<BoltIcon />}
+              iconPosition="start"
+              label={"Chat"}
+            />
 
             <Tab
+              value="debug"
               icon={<ConstructionIcon />}
               iconPosition="start"
               label={"Debug"}
             />
 
-            {urls.length > 0 && (
+            {(isLoading || tableUrl) && (
               <Tab
+                value="tables"
                 icon={<GridOnIcon />}
                 iconPosition="start"
                 label={"Tables"}
@@ -138,8 +149,8 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
           maxWidth="100%"
           flexDirection="column"
         >
-          {value === 0 && <DisplayFileReport fileReferenceId={fileId} />}
-          {value === 1 && file && (
+          {tab === "report" && <DisplayFileReport fileReferenceId={fileId} />}
+          {tab === "chat" && file && (
             <DisplayFileChat
               fileReferenceId={file.id}
               projectId={file.projectId}
@@ -147,10 +158,34 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
             />
           )}
 
-          {value === 2 && <ViewByChunk fileId={fileId} />}
-          {value === 3 && <DisplayExcel urls={urls} />}
+          {tab === "debug" && <ViewByChunk fileId={fileId} />}
+          {tab === "tables" && (
+            <DisplayExcel isLoading={isLoading} url={tableUrl} />
+          )}
         </Box>
       </Box>
     </Paper>
   );
+};
+
+const ZFileTab = z.enum(["report", "chat", "debug", "tables"]);
+type FileTab = z.infer<typeof ZFileTab>;
+
+const useTabState = () => {
+  const router = useRouter();
+  console.log(router.query);
+  const [tab, setTab] = React.useState<FileTab>(() => {
+    const fileTab = ZFileTab.safeParse(router.query.fileTab);
+    if (fileTab.success) {
+      return fileTab.data;
+    }
+    return "report";
+  });
+
+  React.useEffect(() => {
+    router.query.fileTab = tab;
+    router.push(router);
+  }, [router, tab]);
+
+  return [tab, setTab] as const;
 };
