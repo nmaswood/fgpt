@@ -31,6 +31,7 @@ import Uppy from "@uppy/core";
 import Dashboard from "@uppy/dashboard";
 import XHRUpload from "@uppy/xhr-upload";
 import React from "react";
+import { z } from "zod";
 
 import { CLIENT_SETTINGS } from "../client-settings";
 import { useCreateChat } from "../hooks/use-create-chat";
@@ -45,6 +46,9 @@ import { DisplayChat } from "./chat";
 import { DisplayFiles } from "./display-files";
 import { UploadFilesButton } from "./upload-files-button";
 
+const ZTab = z.enum(["data", "chat"]);
+type Tab = z.infer<typeof ZTab>;
+
 export const SelectedProject: React.FC<{
   project: Project | undefined;
   projects: Project[];
@@ -52,14 +56,12 @@ export const SelectedProject: React.FC<{
   setSelectedProjectId: (projectId: string | undefined) => void;
   loading: boolean;
 }> = ({ token, project, projects, setSelectedProjectId, loading }) => {
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = React.useState<Tab>(() => {
+    return "data";
+  });
   const [modal, setModal] = React.useState<"delete" | "edit" | undefined>(
     undefined
   );
-
-  const handleChange = (_: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
-  };
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -141,16 +143,18 @@ export const SelectedProject: React.FC<{
       >
         <Tabs
           value={value}
-          onChange={handleChange}
+          onChange={(_, newValue) => setValue(newValue)}
           textColor="secondary"
           indicatorColor="secondary"
         >
           <Tab
+            value="data"
             icon={<CollectionsIcon />}
             iconPosition="start"
             label={isLargeScreen ? "Data room" : undefined}
           />
           <Tab
+            value="chat"
             icon={<BoltIcon />}
             iconPosition="start"
             label={isLargeScreen ? "Chat" : undefined}
@@ -388,7 +392,7 @@ const SelectedProjectInner: React.FC<{
   projects: Project[];
   token: string;
   setSelectedProjectId: (projectId: string | undefined) => void;
-  value: number;
+  value: Tab;
   modal: "delete" | "edit" | undefined;
   setModal: (v: "delete" | "edit" | undefined) => void;
   uppy: Uppy;
@@ -425,7 +429,7 @@ const SelectedProjectInner: React.FC<{
 
   return (
     <>
-      {value === 0 && (
+      {value === "data" && (
         <>
           {!filesLoading && files.length === 0 && (
             <Box
@@ -445,7 +449,7 @@ const SelectedProjectInner: React.FC<{
           {files.length > 0 && <DisplayFiles files={files} />}
         </>
       )}
-      {value === 1 && (
+      {value === "chat" && (
         <Box display="flex" width="100%" height="100%">
           <DisplayChat
             projectId={project.id}
