@@ -6,12 +6,17 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { Box, IconButton, Paper, Skeleton, Tab, Tabs } from "@mui/material";
 import { useRouter } from "next/router";
 import React from "react";
+import { DisplayExcel } from "../../src/components/file/display-excel";
 
 import { DisplayFileChat } from "../../src/components/file/display-file-chat";
 import { DisplayFileReport } from "../../src/components/file/report";
 import { ViewByChunk } from "../../src/components/file/view-by-chunk";
+import { useExcelAssets } from "../../src/hooks/use-fetch-excel";
 import { useFetchFile } from "../../src/hooks/use-fetch-file";
 import { useFetchSignedUrl } from "../../src/hooks/use-fetch-signed-url";
+
+import GridOnIcon from "@mui/icons-material/GridOn";
+
 import { useFetchToken } from "../../src/hooks/use-fetch-token";
 
 export default function DisplayFile() {
@@ -36,6 +41,8 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
 }) => {
   const { data: file } = useFetchFile(fileId);
   const { data: url } = useFetchSignedUrl(fileId);
+
+  const { data: urls } = useExcelAssets(fileId);
 
   const [showPdf, setShowPdf] = React.useState(true);
 
@@ -113,6 +120,14 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
               iconPosition="start"
               label={"Debug"}
             />
+
+            {urls.length > 0 && (
+              <Tab
+                icon={<GridOnIcon />}
+                iconPosition="start"
+                label={"Tables"}
+              />
+            )}
           </Tabs>
         </Box>
         <Box
@@ -133,6 +148,7 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
           )}
 
           {value === 2 && <ViewByChunk fileId={fileId} />}
+          {value === 3 && <DisplayExcel urls={urls} />}
         </Box>
       </Box>
     </Paper>
