@@ -1,8 +1,8 @@
 import {
-  BlobStorageService,
   FileReferenceStore,
   InsertFileReference,
   LoadedFileStore,
+  ObjectStorageService,
   ShaHash,
   TaskStore,
 } from "@fgpt/precedent-node";
@@ -24,7 +24,7 @@ const upload = multer({
 export class FileRouter {
   constructor(
     private readonly fileReferenceStore: FileReferenceStore,
-    private readonly blobStorageService: BlobStorageService,
+    private readonly blobStorageService: ObjectStorageService,
     private readonly bucket: string,
     private readonly taskService: TaskStore,
     private readonly loadedFileStore: LoadedFileStore

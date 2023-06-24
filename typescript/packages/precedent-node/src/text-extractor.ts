@@ -1,7 +1,7 @@
 import * as cheerio from "cheerio";
 
 import { FileReferenceStore } from "./file-reference-store";
-import { BlobStorageService } from "./object-store/object-store";
+import { ObjectStorageService } from "./object-store/object-store";
 import { TikaClient } from "./tika/tika-client";
 
 export interface TextExtractor {
@@ -16,7 +16,7 @@ export class TikaTextExtractor implements TextExtractor {
   constructor(
     private readonly fileReferenceStore: FileReferenceStore,
     private readonly bucketName: string,
-    private readonly blobStore: BlobStorageService,
+    private readonly blobStore: ObjectStorageService,
     private readonly tikaClient: TikaClient
   ) {}
 

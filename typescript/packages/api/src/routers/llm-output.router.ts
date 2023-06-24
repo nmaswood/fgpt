@@ -1,5 +1,7 @@
 import {
+  ExcelAssetStore,
   MLServiceClient,
+  ObjectStorageService,
   QuestionStore,
   ReportService,
   TextChunkStore,
@@ -12,7 +14,9 @@ export class LLMOutputRouter {
     private readonly questionStore: QuestionStore,
     private readonly mlService: MLServiceClient,
     private readonly chunkStore: TextChunkStore,
-    private readonly reportService: ReportService
+    private readonly reportService: ReportService,
+    private readonly excelAssetStore: ExcelAssetStore,
+    private readonly objectStore: ObjectStorageService
   ) {}
   init() {
     const router = express.Router();
@@ -107,6 +111,21 @@ export class LLMOutputRouter {
           : undefined;
 
         res.json({ report, progress });
+      }
+    );
+
+    router.get(
+      "/excel/:fileReferenceId",
+      async (req: express.Request, res: express.Response) => {
+        const body = ZSampleFileRequest.parse(req.params);
+        const files = await this.excelAssetStore.list(body.fileReferenceId);
+        const urls = await Promise.all(
+          files.map((file) =>
+            this.objectStore.getSignedUrl(file.bucketName, file.path)
+          )
+        );
+
+        res.json({ urls });
       }
     );
 

@@ -22,6 +22,7 @@ import {
   TikaTextExtractor,
   TaskExecutorImpl,
   HttpTableExtractor,
+  PsqlExcelAssetStore,
 } from "@fgpt/precedent-node";
 import { SETTINGS, Settings } from "./settings";
 import { MainRouter } from "./router";
@@ -69,6 +70,8 @@ async function start(settings: Settings) {
 
   const tableExtractor = new HttpTableExtractor(settings.mlServiceUri);
 
+  const excelAssetStore = new PsqlExcelAssetStore(pool);
+
   const taskExecutor = new TaskExecutorImpl(
     textExtractor,
     taskService,
@@ -78,7 +81,8 @@ async function start(settings: Settings) {
     questionStore,
     metricsStore,
     fileReferenceStore,
-    tableExtractor
+    tableExtractor,
+    excelAssetStore
   );
 
   const taskStore = new PSqlTaskStore(pool, messageBusService);

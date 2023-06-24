@@ -15,12 +15,14 @@ import {
   Typography,
 } from "@mui/material";
 
+import { useExcelAssets } from "../../hooks/use-fetch-excel";
 import { useFetchReport } from "../../hooks/use-fetch-output";
 
 export const DisplayFileReport: React.FC<{ fileReferenceId: string }> = ({
   fileReferenceId,
 }) => {
   const { data, isLoading } = useFetchReport(fileReferenceId);
+  const { data: urls } = useExcelAssets(fileReferenceId);
   const progress = data?.progress;
 
   const formattedProgress = formatProgress(progress);

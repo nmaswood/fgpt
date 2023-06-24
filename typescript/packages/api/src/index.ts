@@ -30,6 +30,7 @@ import {
   ReportServiceImpl,
   PsqlMiscOutputStore,
   PubsubMessageBusService,
+  PsqlExcelAssetStore,
 } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
 import { UserOrgRouter } from "./routers/user-org-router";
@@ -79,9 +80,10 @@ async function start() {
 
   const fileReferenceStore = new PsqlFileReferenceStore(pool);
   const loadedFileStore = new PsqlLoadedFileStore(pool);
-  const blobStorageService = new GoogleCloudStorageService(
+  const objectStoreService = new GoogleCloudStorageService(
     SETTINGS.urlSigningServiceAccountPath
   );
+  const excelAssetStore = new PsqlExcelAssetStore(pool);
 
   const messageBusService = new PubsubMessageBusService(
     SETTINGS.pubsub.projectId,
@@ -118,7 +120,7 @@ async function start() {
     addUser,
     new FileRouter(
       fileReferenceStore,
-      blobStorageService,
+      objectStoreService,
       SETTINGS.assetBucket,
       taskStore,
       loadedFileStore
@@ -152,7 +154,9 @@ async function start() {
       questionStore,
       mlService,
       textChunkStore,
-      reportService
+      reportService,
+      excelAssetStore,
+      objectStoreService
     ).init()
   );
 

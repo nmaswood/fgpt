@@ -1,5 +1,6 @@
 export * from "./chat-store";
 export { dataBasePool } from "./data-base-pool";
+export * from "./excel-asset-store";
 export * from "./file-reference-store";
 export * from "./jobs/task-executor";
 export * from "./llm-outputs/metrics-store";

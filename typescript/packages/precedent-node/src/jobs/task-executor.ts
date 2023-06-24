@@ -8,8 +8,10 @@ import {
 } from "@fgpt/precedent-iso";
 import lodashChunk from "lodash/chunk";
 import keyBy from "lodash/keyBy";
-import { FileReferenceStore } from "../file-reference-store";
+import path from "path";
 
+import { ExcelAssetStore } from "../excel-asset-store";
+import { FileReferenceStore } from "../file-reference-store";
 import { InsertMiscValue, MiscOutputStore } from "../llm-outputs/metrics-store";
 import { QuestionStore } from "../llm-outputs/question-store";
 import { LOGGER } from "../logger";
@@ -20,8 +22,6 @@ import { TableExtractor } from "../table-extractor/table-extractor";
 import { Task, TaskStore } from "../task-store";
 import { TextChunkStore } from "../text-chunk-store";
 import { TextExtractor } from "../text-extractor";
-
-import path from "path";
 
 export interface TaskExecutor {
   execute(task: Task): Promise<void>;
@@ -42,7 +42,8 @@ export class TaskExecutorImpl implements TaskExecutor {
     private readonly questionStore: QuestionStore,
     private readonly miscOutputStore: MiscOutputStore,
     private readonly fileReferenceStore: FileReferenceStore,
-    private readonly tableExtractor: TableExtractor
+    private readonly tableExtractor: TableExtractor,
+    private readonly excelAssetStore: ExcelAssetStore
   ) {}
 
   async execute({ config }: Task) {
@@ -246,6 +247,19 @@ export class TaskExecutorImpl implements TaskExecutor {
             file.projectId,
             file.id
           ),
+        });
+        if (extracted.type === "empty") {
+          LOGGER.info("No tables extracted");
+          return;
+        }
+
+        await this.excelAssetStore.insert({
+          organizationId: file.organizationId,
+          projectId: file.projectId,
+          fileReferenceId: file.id,
+          numSheets: extracted.numberOfSheets,
+          bucketName: file.bucketName,
+          path: extracted.path,
         });
 
         console.log({ file, extracted });

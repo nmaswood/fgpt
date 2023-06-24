@@ -1,6 +1,6 @@
 import { Storage } from "@google-cloud/storage";
 
-export interface BlobStorageService {
+export interface ObjectStorageService {
   upload(bucketName: string, fileName: string, data: Buffer): Promise<void>;
   download(bucketName: string, fileName: string): Promise<Buffer>;
   listFiles(bucketName: string, prefix: string): Promise<CloudFile[]>;
@@ -12,7 +12,7 @@ export interface CloudFile {
   download: () => Promise<Buffer>;
 }
 
-export class GoogleCloudStorageService implements BlobStorageService {
+export class GoogleCloudStorageService implements ObjectStorageService {
   #storage: Storage;
 
   constructor(serviceAccountPath?: string) {
