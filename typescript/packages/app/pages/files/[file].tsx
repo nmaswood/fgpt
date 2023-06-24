@@ -103,7 +103,7 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
           </IconButton>
           <Tabs
             value={tab}
-            onChange={(e, newValue) => setTab(newValue)}
+            onChange={(_, newValue) => setTab(newValue)}
             textColor="secondary"
             indicatorColor="secondary"
           >
