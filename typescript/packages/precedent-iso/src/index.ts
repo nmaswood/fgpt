@@ -14,3 +14,4 @@ export * from "./models/task";
 export * from "./models/text-group";
 export { IdentitySub, User } from "./models/user";
 export * from "./text-chunker/text-chunker";
+export * from "./models/excel";

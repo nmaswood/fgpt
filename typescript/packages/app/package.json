@@ -35,12 +35,12 @@
     "@uppy/progress-bar": "^3.0.2",
     "@uppy/react": "^3.1.2",
     "@uppy/xhr-upload": "^3.3.0",
+    "lodash.uniqby": "^4.7.0",
     "next": "^13.4.7",
     "next-http-proxy-middleware": "^1.2.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "swr": "^2.2.0",
-    "use-debounce": "^9.0.4",
     "xlsx": "^0.18.5",
     "zod": "^3.21.4"
   },

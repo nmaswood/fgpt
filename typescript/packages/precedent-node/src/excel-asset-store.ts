@@ -8,6 +8,7 @@ export interface ExcelAsset {
   fileReferenceId: string;
   bucketName: string;
   path: string;
+  numSheets: number;
 }
 
 export interface InsertExcelAsset {
@@ -24,7 +25,7 @@ export interface ExcelAssetStore {
   list(fileReferenceId: string): Promise<ExcelAsset[]>;
 }
 
-const FIELDS = sql.fragment` id, organization_id, project_id, file_reference_id, bucket_name, path`;
+const FIELDS = sql.fragment` id, organization_id, project_id, file_reference_id, bucket_name, path, num_sheets`;
 
 export class PsqlExcelAssetStore implements ExcelAssetStore {
   constructor(private readonly pool: DatabasePool) {}
@@ -48,7 +49,6 @@ export class PsqlExcelAssetStore implements ExcelAssetStore {
         numSheets,
       }) =>
         sql.fragment`
-
 (${organizationId},
     ${projectId},
     ${fileReferenceId},
@@ -59,7 +59,6 @@ export class PsqlExcelAssetStore implements ExcelAssetStore {
     );
     const { rows } = await this.pool.query(
       sql.type(ZExcelAssetRow)`
-
 INSERT INTO excel_asset (organization_id, project_id, file_reference_id, bucket_name, path, num_sheets)
     VALUES
         ${sql.join(values, sql.fragment`, `)}
@@ -74,7 +73,6 @@ INSERT INTO excel_asset (organization_id, project_id, file_reference_id, bucket_
   async list(fileReferenceId: string): Promise<ExcelAsset[]> {
     const { rows } = await this.pool.query(
       sql.type(ZExcelAssetRow)`
-
 SELECT
     ${FIELDS}
 FROM
@@ -96,6 +94,7 @@ const ZExcelAssetRow = z
     file_reference_id: z.string(),
     bucket_name: z.string(),
     path: z.string(),
+    num_sheets: z.number(),
   })
   .transform(
     (row): ExcelAsset => ({
@@ -105,5 +104,6 @@ const ZExcelAssetRow = z
       fileReferenceId: row.file_reference_id,
       bucketName: row.bucket_name,
       path: row.path,
+      numSheets: row.num_sheets,
     })
   );

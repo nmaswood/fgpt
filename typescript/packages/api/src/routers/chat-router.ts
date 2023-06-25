@@ -6,7 +6,7 @@ import {
   TextChunkStore,
 } from "@fgpt/precedent-node";
 import express from "express";
-import { keyBy } from "lodash";
+import { keyBy, uniqBy } from "lodash";
 import { z } from "zod";
 
 import { LOGGER } from "../logger";
@@ -158,7 +158,8 @@ export class ChatRouter {
             metadata,
           });
 
-          return docs.map(({ id, score, metadata }) => ({
+          const uniqDocs = uniqBy(docs, (doc) => doc.id);
+          return uniqDocs.map(({ id, score, metadata }) => ({
             id,
             score,
             metadata: ZVectorMetadata.parse(metadata),

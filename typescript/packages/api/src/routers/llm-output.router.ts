@@ -1,3 +1,4 @@
+import { ExcelFileToDisplay } from "@fgpt/precedent-iso";
 import {
   ExcelAssetStore,
   MLServiceClient,
@@ -119,13 +120,19 @@ export class LLMOutputRouter {
       async (req: express.Request, res: express.Response) => {
         const body = ZSampleFileRequest.parse(req.params);
         const files = await this.excelAssetStore.list(body.fileReferenceId);
-        const urls = await Promise.all(
-          files.map((file) =>
-            this.objectStore.getSignedUrl(file.bucketName, file.path)
+        const [url] = await Promise.all(
+          files.map(
+            async (file): Promise<ExcelFileToDisplay> => ({
+              signedUrl: await this.objectStore.getSignedUrl(
+                file.bucketName,
+                file.path
+              ),
+              numSheets: file.numSheets,
+            })
           )
         );
 
-        res.json({ urls });
+        res.json({ url });
       }
     );
 
