@@ -1,7 +1,9 @@
 import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 import AddIcon from "@mui/icons-material/Add";
 import { Box, Button } from "@mui/material";
+import { useRouter } from "next/router";
 import * as React from "react";
+import { z } from "zod";
 
 import { SelectedProject } from "../src/components/selected-project";
 import { Sidebar } from "../src/components/side-bar";
@@ -12,9 +14,27 @@ const Home: React.FC = () => {
   const { data: token, isLoading: isTokenLoading } = useFetchToken();
   const { data: projects, isLoading: projectsLoading } = useFetchProjects();
 
+  const router = useRouter();
+
   const [selectedProjectId, setSelectedProjectId] = React.useState<
     string | undefined
-  >(undefined);
+  >(() => {
+    const projectId = z.string().safeParse(router.query.projectId);
+    if (projectId.success) {
+      return projectId.data;
+    }
+    return undefined;
+  });
+
+  React.useEffect(() => {
+    if (selectedProjectId) {
+      router.query.projectId = selectedProjectId;
+    } else {
+      delete router.query.projectId;
+    }
+
+    router.replace(router);
+  }, [selectedProjectId]);
 
   React.useEffect(() => {
     if (projectsLoading) {
@@ -40,7 +60,13 @@ const Home: React.FC = () => {
     selectedProjectIdx === -1 ? undefined : projects[selectedProjectIdx];
 
   return (
-    <Box display="flex" height="100%" width="100%">
+    <Box
+      display="flex"
+      height="100%"
+      width="100%"
+      maxHeight="100%"
+      overflow="auto"
+    >
       <Sidebar
         projectsLoading={projectsLoading}
         projects={projects}
@@ -51,7 +77,14 @@ const Home: React.FC = () => {
         setProjectModalOpen={setProjectModalOpen}
       />
 
-      <Box display="flex" width="100%" height="100%" bgcolor="background.paper">
+      <Box
+        display="flex"
+        width="100%"
+        height="100%"
+        bgcolor="background.paper"
+        maxHeight="100%"
+        overflow="auto"
+      >
         {!projectsLoading &&
           projects !== undefined &&
           projects.length === 0 && (

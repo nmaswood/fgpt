@@ -12,11 +12,11 @@ import { LoadingButton } from "@mui/lab";
 import {
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogTitle,
   IconButton,
-  LinearProgress,
   ListItemIcon,
   ListItemText,
   Menu,
@@ -30,6 +30,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import Uppy from "@uppy/core";
 import Dashboard from "@uppy/dashboard";
 import XHRUpload from "@uppy/xhr-upload";
+import { useRouter } from "next/router";
 import React from "react";
 import { z } from "zod";
 
@@ -49,6 +50,31 @@ import { UploadFilesButton } from "./upload-files-button";
 const ZTab = z.enum(["data", "chat"]);
 type Tab = z.infer<typeof ZTab>;
 
+const useTabState = () => {
+  const router = useRouter();
+  const [tab, setTab] = React.useState<Tab>(() => {
+    const action = ZTab.safeParse(router.query.action);
+    if (action.success) {
+      return action.data;
+    }
+    return "data";
+  });
+
+  React.useEffect(() => {
+    if (
+      router.query.action === tab ||
+      (router.query.action === undefined && tab === "data")
+    ) {
+      return;
+    }
+    router.query.action = tab;
+    router.replace(router);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab]);
+
+  return [tab, setTab] as const;
+};
+
 export const SelectedProject: React.FC<{
   project: Project | undefined;
   projects: Project[];
@@ -56,9 +82,7 @@ export const SelectedProject: React.FC<{
   setSelectedProjectId: (projectId: string | undefined) => void;
   loading: boolean;
 }> = ({ token, project, projects, setSelectedProjectId, loading }) => {
-  const [value, setValue] = React.useState<Tab>(() => {
-    return "data";
-  });
+  const [tab, setTab] = useTabState();
   const [modal, setModal] = React.useState<"delete" | "edit" | undefined>(
     undefined
   );
@@ -133,7 +157,14 @@ export const SelectedProject: React.FC<{
   };
 
   return (
-    <Box display="flex" flexDirection="column" height="100%" width="100%">
+    <Box
+      display="flex"
+      flexDirection="column"
+      height="100%"
+      width="100%"
+      maxHeight="100%"
+      overflow="auto"
+    >
       <Box
         display="flex"
         paddingX={2}
@@ -142,8 +173,8 @@ export const SelectedProject: React.FC<{
         justifyContent="space-between"
       >
         <Tabs
-          value={value}
-          onChange={(_, newValue) => setValue(newValue)}
+          value={tab}
+          onChange={(_, newValue) => setTab(newValue)}
           textColor="secondary"
           indicatorColor="secondary"
         >
@@ -221,14 +252,24 @@ export const SelectedProject: React.FC<{
           </Box>
         )}
       </Box>
-      {loading && <LinearProgress />}
+      {loading && (
+        <Box
+          display="flex"
+          width="100%"
+          height="100%"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <CircularProgress />
+        </Box>
+      )}
       {project && token && (
         <SelectedProjectInner
           project={project}
           projects={projects}
           token={token}
           setSelectedProjectId={setSelectedProjectId}
-          value={value}
+          value={tab}
           modal={modal}
           setModal={setModal}
           uppy={uppy}
@@ -438,6 +479,8 @@ const SelectedProjectInner: React.FC<{
               justifyContent="center"
               width="100%"
               height="100%"
+              maxHeight="100%"
+              overflow="auto"
             >
               <UploadFilesButton
                 uppy={uppy}
@@ -450,7 +493,13 @@ const SelectedProjectInner: React.FC<{
         </>
       )}
       {value === "chat" && (
-        <Box display="flex" width="100%" height="100%">
+        <Box
+          display="flex"
+          width="100%"
+          height="100%"
+          maxHeight="100%"
+          overflow="auto"
+        >
           <DisplayChat
             projectId={project.id}
             token={token}
