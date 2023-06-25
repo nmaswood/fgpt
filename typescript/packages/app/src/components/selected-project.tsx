@@ -156,6 +156,16 @@ export const SelectedProject: React.FC<{
     }
   };
 
+  React.useEffect(() => {
+    return () => {
+      // dumb hack to get around uppy bug
+      // I hope this works
+      if (window.location.pathname.includes("files")) {
+        uppy.close();
+      }
+    };
+  }, [uppy]);
+
   return (
     <Box
       display="flex"
