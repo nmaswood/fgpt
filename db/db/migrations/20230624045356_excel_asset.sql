@@ -9,6 +9,7 @@ CREATE TABLE
     bucket_name text NOT NULL,
     path text CHECK (char_length(path) > 0) NOT NULL,
     num_sheets integer NOT NULL CHECK (num_sheets > 0)
-  )
-  -- migrate:down
+  );
+
+-- migrate:down
 DROP TABLE IF EXISTS excel_asset;
