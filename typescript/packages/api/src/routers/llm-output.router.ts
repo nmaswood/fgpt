@@ -1,6 +1,7 @@
 import { ExcelFileToDisplay } from "@fgpt/precedent-iso";
 import {
   ExcelAssetStore,
+  ExcelOutputStore,
   MLServiceClient,
   ObjectStorageService,
   QuestionStore,
@@ -17,7 +18,8 @@ export class LLMOutputRouter {
     private readonly chunkStore: TextChunkStore,
     private readonly reportService: ReportService,
     private readonly excelAssetStore: ExcelAssetStore,
-    private readonly objectStore: ObjectStorageService
+    private readonly objectStore: ObjectStorageService,
+    private readonly excelOutputStore: ExcelOutputStore
   ) {}
   init() {
     const router = express.Router();
@@ -120,7 +122,7 @@ export class LLMOutputRouter {
       async (req: express.Request, res: express.Response) => {
         const body = ZSampleFileRequest.parse(req.params);
         const files = await this.excelAssetStore.list(body.fileReferenceId);
-        const [url] = await Promise.all(
+        const [excel] = await Promise.all(
           files.map(
             async (file): Promise<ExcelFileToDisplay> => ({
               signedUrl: await this.objectStore.getSignedUrl(
@@ -132,7 +134,11 @@ export class LLMOutputRouter {
           )
         );
 
-        res.json({ url });
+        const output = await this.excelOutputStore.forFileReference(
+          body.fileReferenceId
+        );
+
+        res.json({ excel, forSheets: output?.outputs ?? {} });
       }
     );
 

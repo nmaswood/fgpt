@@ -3,6 +3,7 @@ import { afterEach, beforeEach, expect, test } from "vitest";
 
 import { dataBasePool } from "../data-base-pool";
 import { PsqlExcelAssetStore } from "../excel-asset-store";
+import { PsqlExcelOutputStore } from "../excel-output-store";
 import { PsqlFileReferenceStore } from "../file-reference-store";
 import { PSqlProjectStore } from "../project-store";
 import { PsqlUserOrgService } from "../user-org/user-org-service";
@@ -14,8 +15,8 @@ async function setup() {
   const userOrgService = new PsqlUserOrgService(pool);
   const projectService = new PSqlProjectStore(pool);
   const fileReferenceStore = new PsqlFileReferenceStore(pool);
-
   const excelStore = new PsqlExcelAssetStore(pool);
+  const excelOutputStore = new PsqlExcelOutputStore(pool);
 
   const user = await userOrgService.upsert({
     sub: {
@@ -40,13 +41,23 @@ async function setup() {
     path: "my-path/foo",
   });
 
+  const excelAsset = await excelStore.insert({
+    organizationId: project.organizationId,
+    projectId: project.id,
+    fileReferenceId: fileReference.id,
+    bucketName: "hi",
+    path: "hi",
+    numSheets: 1,
+  });
+
   return {
     pool,
     userId: user.id,
     projectId: project.id,
     organizationId: project.organizationId,
     fileReferenceId: fileReference.id,
-    excelStore,
+    excelAssetId: excelAsset.id,
+    excelOutputStore,
   };
 }
 
@@ -66,52 +77,54 @@ afterEach(async () => {
   );
 });
 
-test("insert", async () => {
-  const { excelStore, fileReferenceId, organizationId, projectId } =
-    await setup();
-
-  const res = await excelStore.insert({
+test("insertMany", async () => {
+  const {
+    fileReferenceId,
     organizationId,
     projectId,
-    fileReferenceId,
-    bucketName: "hi",
-    path: "hi",
-    numSheets: 1,
-  });
+    excelAssetId,
+    excelOutputStore,
+  } = await setup();
 
-  expect(res.id).toBeDefined();
+  await excelOutputStore.insertMany(
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      excelAssetId,
+    },
+
+    {
+      0: { foo: "bar" },
+    }
+  );
 });
 
-test("list", async () => {
-  const { excelStore, fileReferenceId, organizationId, projectId } =
-    await setup();
-
-  await excelStore.insert({
+test("forFileReference", async () => {
+  const {
+    fileReferenceId,
     organizationId,
     projectId,
-    fileReferenceId,
-    bucketName: "hi",
-    path: "hi",
-    numSheets: 1,
+    excelAssetId,
+    excelOutputStore,
+  } = await setup();
+
+  await excelOutputStore.insertMany(
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      excelAssetId,
+    },
+
+    {
+      0: { foo: "bar" },
+    }
+  );
+
+  const result = await excelOutputStore.forFileReference(fileReferenceId);
+
+  expect(result?.outputs).toEqual({
+    0: { foo: "bar" },
   });
-  const [res] = await excelStore.list(fileReferenceId);
-
-  expect(res.id).toBeDefined();
-});
-
-test("get", async () => {
-  const { excelStore, fileReferenceId, organizationId, projectId } =
-    await setup();
-
-  const { id } = await excelStore.insert({
-    organizationId,
-    projectId,
-    fileReferenceId,
-    bucketName: "hi",
-    path: "hi",
-    numSheets: 1,
-  });
-  const res = await excelStore.get(id);
-
-  expect(res.id).toEqual(id);
 });

@@ -9,6 +9,7 @@ import {
   Avatar,
   Box,
   Button,
+  Collapse,
   Dialog,
   DialogActions,
   DialogContent,
@@ -29,6 +30,7 @@ import {
   TextField,
 } from "@mui/material";
 import React from "react";
+import { TransitionGroup } from "react-transition-group";
 
 import { useCreateProject } from "../hooks/use-create-project";
 
@@ -109,34 +111,37 @@ export const Sidebar: React.FC<{
               }
             }}
           >
-            {projects.map((project) => {
-              return (
-                <ListItemButton
-                  key={project.id}
-                  selected={project.id === selectedProjectId}
-                  onClick={() => setSelectedProjectId(project.id)}
-                  sx={{
-                    width: SIDE_BAR_WIDTH,
-                  }}
-                >
-                  <ListItemIcon>
-                    <FolderIcon color="primary" />
-                  </ListItemIcon>
-
-                  <ListItem disablePadding>
-                    <ListItemText
-                      primary={project.name}
-                      primaryTypographyProps={{
-                        overflow: "wrap",
-                        sx: {
-                          wordBreak: "break-word",
-                        },
+            <TransitionGroup>
+              {projects.map((project) => {
+                return (
+                  <Collapse key={project.id}>
+                    <ListItemButton
+                      selected={project.id === selectedProjectId}
+                      onClick={() => setSelectedProjectId(project.id)}
+                      sx={{
+                        width: SIDE_BAR_WIDTH,
                       }}
-                    />
-                  </ListItem>
-                </ListItemButton>
-              );
-            })}
+                    >
+                      <ListItemIcon>
+                        <FolderIcon color="primary" />
+                      </ListItemIcon>
+
+                      <ListItem disablePadding>
+                        <ListItemText
+                          primary={project.name}
+                          primaryTypographyProps={{
+                            overflow: "wrap",
+                            sx: {
+                              wordBreak: "break-word",
+                            },
+                          }}
+                        />
+                      </ListItem>
+                    </ListItemButton>
+                  </Collapse>
+                );
+              })}
+            </TransitionGroup>
           </List>
         )}
       </Box>

@@ -21,6 +21,7 @@ export interface InsertExcelAsset {
 }
 
 export interface ExcelAssetStore {
+  get(id: string): Promise<ExcelAsset>;
   insert(args: InsertExcelAsset): Promise<ExcelAsset>;
   list(fileReferenceId: string): Promise<ExcelAsset[]>;
 }
@@ -29,6 +30,18 @@ const FIELDS = sql.fragment` id, organization_id, project_id, file_reference_id,
 
 export class PsqlExcelAssetStore implements ExcelAssetStore {
   constructor(private readonly pool: DatabasePool) {}
+
+  async get(id: string): Promise<ExcelAsset> {
+    return this.pool.one(sql.type(ZExcelAssetRow)`
+
+SELECT
+    ${FIELDS}
+FROM
+    excel_asset
+WHERE
+    id = ${id}
+`);
+  }
 
   async insert(args: InsertExcelAsset): Promise<ExcelAsset> {
     const [res] = await this.#insertMany([args]);

@@ -53,6 +53,7 @@ export class ProjectRouter {
         await this.taskService.insert({
           organizationId: user.organizationId,
           projectId: project.id,
+          fileReferenceId: undefined,
           config: {
             type: "delete-project",
             version: "1",

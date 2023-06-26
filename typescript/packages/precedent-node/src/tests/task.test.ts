@@ -51,6 +51,7 @@ test("insertMany", async () => {
     {
       organizationId: user.organizationId,
       projectId: project.id,
+      fileReferenceId: undefined,
       config: {
         version: "1",
         organizationId: user.organizationId,
@@ -70,6 +71,7 @@ test("insert", async () => {
   const task = await taskService.insert({
     organizationId: user.organizationId,
     projectId: project.id,
+    fileReferenceId: undefined,
     config: {
       version: "1",
       organizationId: user.organizationId,
@@ -88,6 +90,7 @@ test("get", async () => {
   const { id } = await taskService.insert({
     organizationId: user.organizationId,
     projectId: project.id,
+    fileReferenceId: undefined,
     config: {
       version: "1",
       organizationId: user.organizationId,
@@ -110,6 +113,7 @@ test("getAndSetToInProgress", async () => {
     {
       organizationId: user.organizationId,
       projectId: project.id,
+      fileReferenceId: undefined,
       config: {
         version: "1",
         organizationId: user.organizationId,
@@ -121,6 +125,7 @@ test("getAndSetToInProgress", async () => {
     {
       organizationId: user.organizationId,
       projectId: project.id,
+      fileReferenceId: undefined,
       config: {
         version: "1",
         organizationId: user.organizationId,
@@ -141,6 +146,8 @@ test("setToSuceeded", async () => {
   const task = await taskService.insert({
     organizationId: user.organizationId,
     projectId: project.id,
+
+    fileReferenceId: undefined,
     config: {
       version: "1",
       organizationId: user.organizationId,
@@ -160,6 +167,8 @@ test("setToInProgress", async () => {
   const task = await taskService.insert({
     organizationId: user.organizationId,
     projectId: project.id,
+
+    fileReferenceId: undefined,
     config: {
       version: "1",
       organizationId: user.organizationId,
@@ -181,6 +190,8 @@ test("setToFailed", async () => {
   const task = await taskService.insert({
     organizationId: user.organizationId,
     projectId: project.id,
+
+    fileReferenceId: undefined,
     config: {
       version: "1",
       organizationId: user.organizationId,
@@ -200,6 +211,8 @@ test("setToQueued", async () => {
   const task = await taskService.insert({
     organizationId: user.organizationId,
     projectId: project.id,
+
+    fileReferenceId: undefined,
     config: {
       version: "1",
       organizationId: user.organizationId,

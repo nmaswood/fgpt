@@ -13,8 +13,11 @@ import {
   ListItemButton,
   ListItemText,
   TextField,
+  Collapse,
 } from "@mui/material";
 import React from "react";
+
+import { TransitionGroup } from "react-transition-group";
 
 export const DisplayChatList: React.FC<{
   chats: Chat[];
@@ -87,18 +90,20 @@ export const DisplayChatList: React.FC<{
           }
         }}
       >
-        {chats.map((chat) => (
-          <ListItemEntry
-            key={chat.id}
-            chat={chat}
-            selectedChatId={selectedChatId}
-            setSelectedChatId={setSelectedChatId}
-            isLoading={isMutating}
-            onDelete={deleteChat}
-            editChat={editChat}
-            isMutating={isMutating}
-          />
-        ))}
+        <TransitionGroup>
+          {chats.map((chat) => (
+            <ListItemEntry
+              key={chat.id}
+              chat={chat}
+              selectedChatId={selectedChatId}
+              setSelectedChatId={setSelectedChatId}
+              isLoading={isMutating}
+              onDelete={deleteChat}
+              editChat={editChat}
+              isMutating={isMutating}
+            />
+          ))}
+        </TransitionGroup>
       </List>
     </Box>
   );

@@ -11,6 +11,7 @@ export const ZTaskType = z.enum([
   "create-analysis",
   "llm-outputs",
   "extract-table",
+  "analyze-table",
 ]);
 
 export const ZTaskStatus = z.enum([
@@ -94,6 +95,16 @@ export const ZExtractTableConfig = z.object({
   fileReferenceId: z.string(),
 });
 
+export const ZAnalyzeTableConfig = z.object({
+  type: z.literal("analyze-table"),
+  version: z.literal("1"),
+  organizationId: z.string(),
+  projectId: z.string(),
+  fileReferenceId: z.string(),
+  excelAssetId: z.string(),
+  sheetNumbers: z.number().array(),
+});
+
 export type ExtractTableConfig = z.infer<typeof ZExtractTableConfig>;
 
 export type LLMOutputsConfig = z.infer<typeof ZLLMOutputsConfig>;
@@ -107,10 +118,10 @@ export const ZTaskConfig = z.discriminatedUnion("type", [
   ZCreateAnalysisConfig,
   ZLLMOutputsConfig,
   ZExtractTableConfig,
+  ZAnalyzeTableConfig,
 ]);
 
 export type TaskType = z.infer<typeof ZTaskType>;
 export type TaskStatus = z.infer<typeof ZTaskStatus>;
 export type TaskConfig = z.infer<typeof ZTaskConfig>;
-
 export type TaskOuput = Record<string, unknown>;

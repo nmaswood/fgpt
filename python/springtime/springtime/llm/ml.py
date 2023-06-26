@@ -10,7 +10,12 @@ from langchain.embeddings import OpenAIEmbeddings
 from springtime.llm.models import ChatHistory
 
 from springtime.llm.prompt import create_prompt
-from springtime.llm.prompts import questions_schema, summaries_schema, terms_schema, financial_summary_schema
+from springtime.llm.prompts import (
+    questions_schema,
+    summaries_schema,
+    terms_schema,
+    financial_summary_schema,
+)
 
 
 embeddings = OpenAIEmbeddings()
@@ -24,24 +29,20 @@ def embedding_for_query(query: str) -> list[float]:
     return embeddings.embed_query(query)
 
 
-def ask_question_streaming(context: str, question: str,
-                           history: list[ChatHistory]
-                           ):
+def ask_question_streaming(context: str, question: str, history: list[ChatHistory]):
     prompt = create_prompt(context, question, history)
     response = openai.ChatCompletion.create(
-        model='gpt-3.5-turbo',
-        messages=[
-            {'role': 'user', 'content': prompt}
-        ],
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}],
         temperature=0,
-        stream=True
+        stream=True,
     )
     for resp in response:
-        choices = resp['choices']
-        delta = choices[0].get('delta')
+        choices = resp["choices"]
+        delta = choices[0].get("delta")
         if not delta:
             continue
-        content = delta.get('content')
+        content = delta.get("content")
         if content:
             yield content
 
@@ -49,15 +50,12 @@ def ask_question_streaming(context: str, question: str,
 @retry(tries=3, delay=1, backoff=2)
 def ask_question(context: str, question: str):
     prompt = create_prompt(context, question, [])
-    formatted_message = prompt.format(
-        context=context[:5000], question=question)
+    formatted_message = prompt.format(context=context, question=question)
 
     response = openai.ChatCompletion.create(
         # model='gpt-4',
-        model='gpt-3.5-turbo',
-        messages=[
-            {'role': 'user', 'content': formatted_message}
-        ],
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": formatted_message}],
         temperature=0,
     )
     choices = response["choices"]
@@ -113,7 +111,7 @@ def get_questions(text: str) -> list[str]:
         text=text,
         prompt="You are an expert financial analyst. Parse the document for the requested information.",
         json_schema=questions_schema,
-        function_name='parse_questions'
+        function_name="parse_questions",
     )
     response = call_function(req)
     questions = Questions(**response)
@@ -125,7 +123,7 @@ def get_fin_summary(text: str) -> FinancialSummary:
         text=text,
         prompt="You are an expert financial analyst. Parse the document for the requested information. If the information is not available, do not return anything.",
         json_schema=financial_summary_schema,
-        function_name='parse_financial_summary'
+        function_name="parse_financial_summary",
     )
     response = call_function(req)
     try:
@@ -140,12 +138,13 @@ def get_terms(text: str) -> list[Term]:
         text=text,
         prompt="You are an expert financial analyst. Parse the document for the requested information. If the information is not available, return 'Not Available'",
         json_schema=terms_schema,
-        function_name='parse_terms'
+        function_name="parse_terms",
     )
     response = call_function(req)
     terms_from_model = Terms(**response)
     terms = [
-        term for term in terms_from_model.terms if term.term_value != 'Not Available']
+        term for term in terms_from_model.terms if term.term_value != "Not Available"
+    ]
     return terms
 
 
@@ -154,7 +153,7 @@ def get_summaries(text: str) -> list[str]:
         text=text,
         prompt="You are an expert financial analyst. Parse the document for the requested information",
         json_schema=summaries_schema,
-        function_name='parse_summaries'
+        function_name="parse_summaries",
     )
     response = call_function(req)
     summaries = Summaries(**response)
@@ -171,21 +170,18 @@ def get_output(text: str) -> Output:
         summaries=summaries,
         questions=questions,
         terms=terms,
-        financial_summary=fin_summary
+        financial_summary=fin_summary,
     )
 
 
 def call_function(req: PlaygroundRequest) -> dict[str, Any]:
-
     print("Running request")
     completion = openai.ChatCompletion.create(
         model="gpt-4-0613",
         # model='gpt-3.5-turbo-16k-0613'
         messages=[
-            {"role": "system",
-                "content": req.prompt
-             },
-            {"role": "user", "content": "Document: {}".format(req.text)}
+            {"role": "system", "content": req.prompt},
+            {"role": "user", "content": "Document: {}".format(req.text)},
         ],
         functions=[{"name": req.function_name, "parameters": req.json_schema}],
         function_call={"name": req.function_name},

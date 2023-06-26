@@ -12,8 +12,19 @@ export type ExtractionResponse =
   | { type: "empty" }
   | { type: "table"; path: string; numberOfSheets: number };
 
+export interface AnalyzeArguments {
+  sheetNumbers: number[];
+  bucket: string;
+  objectPath: string;
+}
+
+export interface AnalyzeResponse {
+  responses: Record<number, Record<string, unknown>>;
+}
+
 export interface TableExtractor {
   extract(args: ExtractArguments): Promise<ExtractionResponse>;
+  analyze(args: AnalyzeArguments): Promise<AnalyzeResponse>;
 }
 
 export class HttpTableExtractor {
@@ -40,6 +51,20 @@ export class HttpTableExtractor {
     });
     return ZExtractResponse.parse(response.data);
   }
+
+  async analyze({
+    sheetNumbers,
+    bucket,
+    objectPath,
+  }: AnalyzeArguments): Promise<AnalyzeResponse> {
+    const response = await this.#client.post<unknown>("/excel/analyze", {
+      bucket,
+      object_path: objectPath,
+      sheet_numbers: sheetNumbers,
+    });
+
+    return { responses: ZAnalyzeResponse.parse(response.data) };
+  }
 }
 
 const ZExtractResponse = z
@@ -57,3 +82,15 @@ const ZExtractResponse = z
           }
         : { type: "empty" }
   );
+
+const ZAnalyzeResponse = z
+  .object({
+    resp: z.record(z.record(z.unknown())),
+  })
+  .transform((row) => {
+    const result: Record<number, Record<string, unknown>> = {};
+    for (const [key, value] of Object.entries(row.resp)) {
+      result[Number(key)] = value;
+    }
+    return result;
+  });

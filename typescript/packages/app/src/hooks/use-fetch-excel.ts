@@ -1,9 +1,14 @@
 import { ExcelFileToDisplay } from "@fgpt/precedent-iso";
 import useSWR from "swr";
 
-export const useExcelAsset = (fileReferenceId: string) => {
+export interface ExcelInfo {
+  excel: ExcelFileToDisplay | undefined;
+  forSheets: Record<number, Record<string, unknown>>;
+}
+
+export const useExcelInfo = (fileReferenceId: string) => {
   const { data, isLoading, mutate } = useSWR<
-    ExcelFileToDisplay | undefined,
+    ExcelInfo | undefined,
     ["/api/proxy/v1/output/excel", string]
   >(["/api/proxy/v1/output/excel", fileReferenceId], fileFetcher, {});
 
@@ -13,9 +18,9 @@ export const useExcelAsset = (fileReferenceId: string) => {
 async function fileFetcher([url, fileReferenceId]: [
   "/api/proxy/v1/output/excel",
   string
-]): Promise<ExcelFileToDisplay | undefined> {
+]): Promise<ExcelInfo | undefined> {
   const response = await fetch(`${url}/${fileReferenceId}`);
   const data = await response.json();
 
-  return data.url;
+  return data;
 }

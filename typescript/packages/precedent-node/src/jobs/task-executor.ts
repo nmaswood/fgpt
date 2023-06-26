@@ -6,11 +6,13 @@ import {
   isNotNull,
   TextChunkConfig,
 } from "@fgpt/precedent-iso";
+import chunk from "lodash/chunk";
 import lodashChunk from "lodash/chunk";
 import keyBy from "lodash/keyBy";
 import path from "path";
 
 import { ExcelAssetStore } from "../excel-asset-store";
+import { ExcelOutputStore } from "../excel-output-store";
 import { FileReferenceStore } from "../file-reference-store";
 import { InsertMiscValue, MiscOutputStore } from "../llm-outputs/metrics-store";
 import { QuestionStore } from "../llm-outputs/question-store";
@@ -29,6 +31,7 @@ export interface TaskExecutor {
 
 const LLM_OUTPUT_CHUNK_SIZE = "greedy_15k" as const;
 const EXCEL_PATH_SUFFIX = "excel-uploads";
+const ANALYSIS_CHUNK_SIZE = 5;
 
 export class TaskExecutorImpl implements TaskExecutor {
   STRATEGIES = ["greedy_v0", "greedy_5k", "greedy_15k"] as const;
@@ -43,7 +46,8 @@ export class TaskExecutorImpl implements TaskExecutor {
     private readonly miscOutputStore: MiscOutputStore,
     private readonly fileReferenceStore: FileReferenceStore,
     private readonly tableExtractor: TableExtractor,
-    private readonly excelAssetStore: ExcelAssetStore
+    private readonly excelAssetStore: ExcelAssetStore,
+    private readonly excelOutputStore: ExcelOutputStore
   ) {}
 
   async execute({ config }: Task) {
@@ -66,6 +70,7 @@ export class TaskExecutorImpl implements TaskExecutor {
           await this.taskService.insert({
             organizationId: config.organizationId,
             projectId: config.projectId,
+            fileReferenceId: config.fileId,
             config: {
               type: "text-chunk",
               version: "1",
@@ -118,6 +123,7 @@ export class TaskExecutorImpl implements TaskExecutor {
           await this.taskService.insert({
             organizationId: config.organizationId,
             projectId: config.projectId,
+            fileReferenceId: config.fileId,
             config: {
               type: "upsert-embeddings",
               version: "1",
@@ -253,7 +259,7 @@ export class TaskExecutorImpl implements TaskExecutor {
           return;
         }
 
-        await this.excelAssetStore.insert({
+        const excelAssetStore = await this.excelAssetStore.insert({
           organizationId: file.organizationId,
           projectId: file.projectId,
           fileReferenceId: file.id,
@@ -262,8 +268,51 @@ export class TaskExecutorImpl implements TaskExecutor {
           path: extracted.path,
         });
 
-        console.log({ file, extracted });
-        LOGGER.info("Extract table");
+        const chunks = chunk(
+          new Array(extracted.numberOfSheets).fill(0).map((_, i) => i),
+          ANALYSIS_CHUNK_SIZE
+        );
+        for (const sheetNumbers of chunks) {
+          await this.taskService.insert({
+            organizationId: file.organizationId,
+            projectId: file.projectId,
+            fileReferenceId: file.id,
+            config: {
+              type: "analyze-table",
+              version: "1",
+              organizationId: file.organizationId,
+              projectId: file.projectId,
+              fileReferenceId: file.id,
+              excelAssetId: excelAssetStore.id,
+              sheetNumbers,
+            },
+          });
+        }
+
+        break;
+      }
+
+      case "analyze-table": {
+        const asset = await this.excelAssetStore.get(config.excelAssetId);
+        LOGGER.info({ assetId: asset.id }, "Analyzing table");
+        const { responses } = await this.tableExtractor.analyze({
+          bucket: asset.bucketName,
+          objectPath: asset.path,
+          sheetNumbers: config.sheetNumbers,
+        });
+        if (Object.keys(responses).length === 0) {
+          return;
+        }
+
+        await this.excelOutputStore.insertMany(
+          {
+            organizationId: config.organizationId,
+            projectId: config.projectId,
+            fileReferenceId: config.fileReferenceId,
+            excelAssetId: config.excelAssetId,
+          },
+          responses
+        );
         break;
       }
 
@@ -324,6 +373,7 @@ export class TaskExecutorImpl implements TaskExecutor {
         await this.taskService.insert({
           organizationId: config.organizationId,
           projectId: config.projectId,
+          fileReferenceId: config.fileId,
           config: {
             type: "gen-embeddings",
             version: "1",
@@ -375,6 +425,7 @@ export class TaskExecutorImpl implements TaskExecutor {
             chunks.map((chunk) => ({
               organizationId: config.organizationId,
               projectId: config.projectId,
+              fileReferenceId: config.fileId,
               config: {
                 type: "llm-outputs",
                 version: "1",

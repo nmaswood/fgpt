@@ -13,6 +13,8 @@ import multer from "multer";
 import path from "path";
 import { z } from "zod";
 
+import { LOGGER } from "../logger";
+
 const upload = multer({
   dest: "/var/tmp/api-upload",
 
@@ -26,7 +28,7 @@ export class FileRouter {
     private readonly fileReferenceStore: FileReferenceStore,
     private readonly blobStorageService: ObjectStorageService,
     private readonly bucket: string,
-    private readonly taskService: TaskStore,
+    private readonly taskStore: TaskStore,
     private readonly loadedFileStore: LoadedFileStore
   ) {}
   init() {
@@ -90,17 +92,30 @@ export class FileRouter {
           throw new Error("failed to insert file reference");
         }
 
-        await this.taskService.insert({
-          organizationId,
-          projectId,
-          config: {
-            version: "1",
-            organizationId: req.user.organizationId,
-            projectId: req.body.projectId,
-            type: "text-extraction",
-            fileId: fileRef.id,
-          },
-        });
+        switch (file.mimetype) {
+          case "application/pdf": {
+            await this.taskStore.insert({
+              organizationId,
+              projectId,
+              fileReferenceId: fileRef.id,
+              config: {
+                version: "1",
+                organizationId: req.user.organizationId,
+                projectId: req.body.projectId,
+                type: "text-extraction",
+                fileId: fileRef.id,
+              },
+            });
+            break;
+          }
+          case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+            LOGGER.info({ mimetype: file.mimetype }, "Excel file detected");
+            break;
+          }
+          default:
+            LOGGER.info({ mimetype: file.mimetype }, "no task for mimetype");
+            break;
+        }
 
         await F.unlink(file.path);
 

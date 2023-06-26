@@ -13,7 +13,7 @@ import { DisplayExcel } from "../../src/components/file/display-excel";
 import { DisplayFileChat } from "../../src/components/file/display-file-chat";
 import { DisplayFileReport } from "../../src/components/file/report";
 import { ViewByChunk } from "../../src/components/file/view-by-chunk";
-import { useExcelAsset } from "../../src/hooks/use-fetch-excel";
+import { useExcelInfo } from "../../src/hooks/use-fetch-excel";
 import { useFetchFile } from "../../src/hooks/use-fetch-file";
 import { useFetchSignedUrl } from "../../src/hooks/use-fetch-signed-url";
 import { useFetchToken } from "../../src/hooks/use-fetch-token";
@@ -42,7 +42,8 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
   const { data: url } = useFetchSignedUrl(fileId);
 
   // hack to get to load faster
-  const { data: excelAsset, isLoading } = useExcelAsset(fileId);
+  const { data: excelAsset, isLoading } = useExcelInfo(fileId);
+  console.log({ excelAsset });
 
   const [showPdf, setShowPdf] = React.useState(true);
 
@@ -126,7 +127,7 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
               label={"Debug"}
             />
 
-            {(isLoading || excelAsset) && (
+            {(isLoading || excelAsset?.excel?.signedUrl) && (
               <Tab
                 value="tables"
                 icon={<GridOnIcon />}
@@ -155,7 +156,7 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
 
           {tab === "debug" && <ViewByChunk fileId={fileId} />}
           {tab === "tables" && (
-            <DisplayExcel isLoading={isLoading} excelAsset={excelAsset} />
+            <DisplayExcel isLoading={isLoading} excelInfo={excelAsset} />
           )}
         </Box>
       </Box>

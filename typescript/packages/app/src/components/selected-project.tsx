@@ -101,7 +101,7 @@ export const SelectedProject: React.FC<{
   const uppy = React.useMemo(() => {
     return new Uppy({
       restrictions: {
-        allowedFileTypes: [".pdf"],
+        allowedFileTypes: [".pdf", ".xlsx"],
         minFileSize: 1,
         maxFileSize: MAX_FILE_SIZE_BYTES,
       },

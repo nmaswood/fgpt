@@ -1,4 +1,3 @@
-import { ExcelFileToDisplay } from "@fgpt/precedent-iso";
 import {
   Box,
   LinearProgress,
@@ -10,17 +9,21 @@ import NextLink from "next/link";
 import React from "react";
 import { utils } from "xlsx";
 
+import { ExcelInfo } from "../../hooks/use-fetch-excel";
 import { useFetchWorkbook } from "../../hooks/use-load-workbook";
 
 export const DisplayExcel: React.FC<{
-  excelAsset: ExcelFileToDisplay | undefined;
+  excelInfo: ExcelInfo | undefined;
   isLoading: boolean;
-}> = ({ excelAsset }) => {
+}> = ({ excelInfo }) => {
   const [__html, setHtml] = React.useState("");
 
   const [sheetIndex, setSheetIndex] = React.useState(1);
 
-  const { data: wb, isLoading } = useFetchWorkbook(excelAsset?.signedUrl);
+  const signedUrl = excelInfo?.excel?.signedUrl;
+  const numSheets = excelInfo?.excel?.numSheets;
+
+  const { data: wb, isLoading } = useFetchWorkbook(signedUrl);
 
   React.useEffect(() => {
     (async () => {
@@ -50,8 +53,8 @@ export const DisplayExcel: React.FC<{
       gap={2}
     >
       <Box display="flex" marginY={3}>
-        {excelAsset && (
-          <Link component={NextLink} href={excelAsset.signedUrl}>
+        {signedUrl && (
+          <Link component={NextLink} href={signedUrl}>
             <Typography>Download XLSX</Typography>
           </Link>
         )}
@@ -67,13 +70,13 @@ export const DisplayExcel: React.FC<{
             setSheetIndex(parsed);
           }
         }}
-        disabled={!excelAsset}
+        disabled={!excelInfo}
         variant="outlined"
         label="Sheet index"
         sx={{
           width: "100px",
         }}
-        InputProps={{ inputProps: { min: 1, max: excelAsset?.numSheets ?? 1 } }}
+        InputProps={{ inputProps: { min: 1, max: numSheets ?? 1 } }}
       />
       {isLoading && <LinearProgress />}
       <Box

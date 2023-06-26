@@ -10,14 +10,12 @@ class ExtractTablesRequest(BaseModel):
     title: str
 
 
-class PdfRouter():
-
+class PdfRouter:
     def __init__(self, table_extractor: TableExtractor):
         self.table_extractor = table_extractor
 
     def get_router(self):
-
-        router = APIRouter(prefix='/pdf')
+        router = APIRouter(prefix="/pdf")
 
         @router.post("/extract-tables")
         async def extract_tables(req: ExtractTablesRequest):

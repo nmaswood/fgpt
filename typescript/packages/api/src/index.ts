@@ -31,6 +31,7 @@ import {
   PsqlMiscOutputStore,
   PubsubMessageBusService,
   PsqlExcelAssetStore,
+  PsqlExcelOutputStore,
 } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
 import { UserOrgRouter } from "./routers/user-org-router";
@@ -84,6 +85,7 @@ async function start() {
     SETTINGS.urlSigningServiceAccountPath
   );
   const excelAssetStore = new PsqlExcelAssetStore(pool);
+  const excelOutputStore = new PsqlExcelOutputStore(pool);
 
   const messageBusService = new PubsubMessageBusService(
     SETTINGS.pubsub.projectId,
@@ -103,7 +105,7 @@ async function start() {
   const metricsStore = new PsqlMiscOutputStore(pool);
   const reportService = new ReportServiceImpl(questionStore, metricsStore);
 
-  app.use(cors({ origin: "*" }));
+  app.use(cors({ origin: SETTINGS.corsOrigin }));
 
   app.use("/api/v1/user-org", jwtCheck, addUser, new UserOrgRouter().init());
 
@@ -156,26 +158,37 @@ async function start() {
       textChunkStore,
       reportService,
       excelAssetStore,
-      objectStoreService
+      objectStoreService,
+      excelOutputStore
     ).init()
   );
 
   if (SETTINGS.debug.includeRouter) {
     app.use(
       "/api/v1/debug",
-      new DebugRouter(taskStore, fileReferenceStore).init()
+      new DebugRouter(taskStore, fileReferenceStore, messageBusService).init()
     );
   }
 
   app.use("/ping", (_, res) => {
     res.json({ ping: "pong" });
   });
+  app.use("/healthz", (_, res) => {
+    res.send("OK");
+  });
 
   app.use(errorLogger);
   app.use(errorResponder);
   app.use(invalidPathHandler);
 
-  app.listen(SETTINGS.port, SETTINGS.host);
+  const server = app.listen(SETTINGS.port, SETTINGS.host);
+  process.on("SIGTERM", () => {
+    LOGGER.info("SIGTERM signal received. Closing HTTP Server");
+    server.close(() => {
+      LOGGER.info("Http server closed.");
+      process.exit(0);
+    });
+  });
 }
 
 start();

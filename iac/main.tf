@@ -401,6 +401,11 @@ resource "google_cloud_run_v2_service" "api" {
         value = var.pubsub_task_subscription
       }
 
+      env {
+        name  = "CORS_DOMAIN"
+        value = var.vercel_domain
+      }
+
 
       volume_mounts {
         name       = "cloudsql"

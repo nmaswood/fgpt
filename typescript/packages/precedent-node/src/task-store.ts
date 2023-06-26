@@ -16,11 +16,13 @@ export interface Task {
   status: TaskStatus;
   organizationId: string;
   projectId: string;
+  fileReferenceId: string | undefined;
 }
 
 export interface CreateTask {
   organizationId: string;
   projectId: string;
+  fileReferenceId: string | undefined;
   config: TaskConfig;
 }
 
@@ -44,7 +46,7 @@ export interface TaskStore {
   setToQueued(taskId: string): Promise<Task | undefined>;
 }
 
-const FIELDS = sql.fragment`task.id, task.organization_id, task.project_id, task.task_type, task.status, task.config`;
+const FIELDS = sql.fragment`task.id, task.organization_id, task.project_id, task.task_type, task.status, task.config, task.file_reference_id`;
 export class PSqlTaskStore implements TaskStore {
   constructor(
     private readonly pool: DatabasePool,
@@ -209,7 +211,7 @@ RETURNING
     const tasks = await this.pool.connect(async (cnx) => {
       const resp = await cnx.query(
         sql.type(ZFromTaskRow)`
-INSERT INTO task (organization_id, project_id, task_type, status, config)
+INSERT INTO task (organization_id, project_id, task_type, status, config, file_reference_id)
     VALUES
         ${sql.join(inserts, sql.fragment`, `)}
     RETURNING
@@ -238,6 +240,7 @@ const ZFromTaskRow = z
     id: z.string().uuid(),
     organization_id: z.string().uuid(),
     project_id: z.string().uuid(),
+    file_reference_id: z.string().uuid().nullable(),
     task_type: ZTaskType,
     status: ZTaskStatus,
     config: ZTaskConfig,
@@ -247,13 +250,19 @@ const ZFromTaskRow = z
       id: row.id,
       organizationId: row.organization_id,
       projectId: row.project_id,
+      fileReferenceId: row.file_reference_id ?? undefined,
       status: row.status,
       config: ZTaskConfig.parse(row.config),
     })
   );
 
-function toFragment({ organizationId, projectId, config }: CreateTask) {
+function toFragment({
+  organizationId,
+  projectId,
+  config,
+  fileReferenceId,
+}: CreateTask) {
   return sql.fragment`(${organizationId}, ${projectId}, ${
     config.type
-  }, 'queued', ${JSON.stringify(config)})`;
+  }, 'queued', ${JSON.stringify(config)}, ${fileReferenceId ?? null})`;
 }

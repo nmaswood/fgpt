@@ -28,11 +28,8 @@ export class PubsubMessageBusService implements MessageBusService {
   }
 
   async enqueue(message: Message): Promise<string> {
-    LOGGER.info(`Enqueuing message ${JSON.stringify(message)}`);
+    LOGGER.info(`Enqueuing message ${this.topic}:${message.taskId}`);
     const data = Buffer.from(JSON.stringify(message));
-
-    LOGGER.info(`Publishing message ${JSON.stringify(message)}`);
-    LOGGER.info(this.topic);
     const messageId = await this.#client
       .topic(this.topic)
       .publishMessage({ data });

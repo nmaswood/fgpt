@@ -23,8 +23,10 @@ const ZSettings = z.object({
   debug: z.object({
     includeRouter: z.boolean().optional(),
   }),
+  corsOrigin: z.string().array(),
 });
 
+const corsDomain = process.env["CORS_DOMAIN"];
 export const SETTINGS = ZSettings.parse({
   host: process.env["HOST"] ?? "0.0.0.0",
   port: Number(process.env["PORT"] ?? "8080"),
@@ -51,4 +53,7 @@ export const SETTINGS = ZSettings.parse({
     includeRouter:
       process.env["DEBUG_INCLUDE_ROUTER"]?.toLowerCase() === "true",
   },
+  corsOrigin: corsDomain
+    ? [`https://www.${corsDomain}`, `https://${corsDomain}`]
+    : ["http://localhost:3000"],
 });

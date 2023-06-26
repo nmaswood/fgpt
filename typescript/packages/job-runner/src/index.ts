@@ -23,6 +23,7 @@ import {
   TaskExecutorImpl,
   HttpTableExtractor,
   PsqlExcelAssetStore,
+  PsqlExcelOutputStore,
 } from "@fgpt/precedent-node";
 import { SETTINGS, Settings } from "./settings";
 import { MainRouter } from "./router";
@@ -71,6 +72,7 @@ async function start(settings: Settings) {
   const tableExtractor = new HttpTableExtractor(settings.mlServiceUri);
 
   const excelAssetStore = new PsqlExcelAssetStore(pool);
+  const excelOutputStore = new PsqlExcelOutputStore(pool);
 
   const taskExecutor = new TaskExecutorImpl(
     textExtractor,
@@ -82,7 +84,8 @@ async function start(settings: Settings) {
     metricsStore,
     fileReferenceStore,
     tableExtractor,
-    excelAssetStore
+    excelAssetStore,
+    excelOutputStore
   );
 
   const taskStore = new PSqlTaskStore(pool, messageBusService);
@@ -91,7 +94,18 @@ async function start(settings: Settings) {
 
   app.use("/", mainRouter.init());
 
-  app.listen(settings.port, settings.host);
+  app.use("/healthz", (_, res) => {
+    res.send("OK");
+  });
+
+  const server = app.listen(settings.port, settings.host);
+  process.on("SIGTERM", () => {
+    LOGGER.info("SIGTERM signal received. Closing HTTP Server");
+    server.close(() => {
+      LOGGER.info("Http server closed.");
+      process.exit(0);
+    });
+  });
 }
 
 start(SETTINGS);
