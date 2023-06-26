@@ -41,6 +41,7 @@ FROM
     project
 WHERE
     organization_id = ${organizationId}
+AND STATUS != 'pending_deletion'
 `
       );
 
@@ -113,8 +114,8 @@ RETURNING
   async deleteMany(ids: string[]) {
     await this.pool.query(
       sql.unsafe`
-DELETE FROM project CASCADE
-where id IN (${sql.join(ids, sql.fragment`, `)})
+  UPDATE PROJECT SET status = 'pending_deletion'
+  where id IN (${sql.join(ids, sql.fragment`, `)})
 `
     );
   }
