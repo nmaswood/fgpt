@@ -34,6 +34,7 @@ const Home: React.FC = () => {
     }
 
     router.replace(router);
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProjectId]);
 
   React.useEffect(() => {

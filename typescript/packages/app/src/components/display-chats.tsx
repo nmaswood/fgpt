@@ -13,10 +13,8 @@ import {
   ListItemButton,
   ListItemText,
   TextField,
-  Collapse,
 } from "@mui/material";
 import React from "react";
-
 import { TransitionGroup } from "react-transition-group";
 
 export const DisplayChatList: React.FC<{
