@@ -14,7 +14,7 @@ ENV PYTHONFAULTHANDLER=1 \
 
 
 # System deps:
-RUN apt-get update && apt-get install -y build-essential unzip wget python-dev dumb-init openjdk-11-jre-headless && apt-get clean;
+RUN apt-get update && apt-get install -y build-essential unzip wget python-dev dumb-init openjdk-17-jre-headless && apt-get clean;
 
 
 RUN pip install poetry
