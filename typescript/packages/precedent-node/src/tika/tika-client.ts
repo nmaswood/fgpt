@@ -13,7 +13,7 @@ export class TikaHttpClient implements TikaClient {
   #client: AxiosInstance;
   #origin: string;
 
-  constructor(private readonly baseURL: string) {
+  constructor(baseURL: string) {
     const url = new URL(baseURL);
     this.#origin = url.origin;
 
@@ -27,8 +27,11 @@ export class TikaHttpClient implements TikaClient {
   async init() {
     LOGGER.info("Running tika client init");
     const token = await this.#getToken();
+    console.log({ token });
     if (token) {
+      console.log("Setting header");
       this.#client.defaults.headers.common["Authorization"] = token;
+      console.log(this.#client.defaults.headers);
     }
   }
 
@@ -37,18 +40,13 @@ export class TikaHttpClient implements TikaClient {
       return undefined;
     }
     const auth = new GoogleAuth();
-    console.log({ origin: this.#origin, baseURL: this.baseURL });
     const client = await auth.getIdTokenClient(this.#origin);
     const headers = await client.getRequestHeaders();
-    const token = headers.Authorization;
-    console.log({ token });
-
-    return token;
+    return headers.Authorization;
   }
 
   async detectFromFilename(filename: string): Promise<string> {
-    const token = await this.#getToken();
-    console.log({ token });
+    console.log("About to fail fuck");
 
     const response = await this.#client({
       method: "PUT",
