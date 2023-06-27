@@ -30,7 +30,9 @@ export class TikaHttpClient implements TikaClient {
     }
     console.log({ origin: this.#origin, baseURL: this.baseURL });
     const client = await auth.getIdTokenClient(this.#origin);
+    console.log("fetch headers");
     const headers = await client.getRequestHeaders();
+    console.log("fetched headers");
     console.log({ headers });
     return undefined;
   }
