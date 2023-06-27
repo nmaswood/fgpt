@@ -35,13 +35,14 @@ export class PSqlProjectStore implements ProjectStore {
     return this.pool.connect(async (cnx) => {
       const values = await cnx.query(
         sql.type(ZProjectRow)`
+
 SELECT
     ${PROJECT_FIELDS}
 FROM
     project
 WHERE
     organization_id = ${organizationId}
-AND STATUS != 'pending_deletion'
+    AND STATUS != 'pending_deletion'
 `
       );
 
@@ -114,8 +115,13 @@ RETURNING
   async deleteMany(ids: string[]) {
     await this.pool.query(
       sql.unsafe`
-  UPDATE PROJECT SET status = 'pending_deletion'
-  where id IN (${sql.join(ids, sql.fragment`, `)})
+
+UPDATE
+    PROJECT
+SET
+    status = 'pending_deletion'
+where
+    id IN (${sql.join(ids, sql.fragment`, `)})
 `
     );
   }

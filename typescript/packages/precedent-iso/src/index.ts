@@ -2,6 +2,8 @@ export * from "./assert-never";
 export * from "./collect";
 export * from "./constants";
 export * from "./cursor";
+export * from "./excel-tools";
+export * from "./file-type";
 export * from "./human-readable-file-size";
 export * from "./is-not-null";
 export * from "./models/chat";

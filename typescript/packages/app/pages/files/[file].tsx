@@ -1,3 +1,4 @@
+import { getFileType } from "@fgpt/precedent-iso";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import BoltIcon from "@mui/icons-material/Bolt";
@@ -9,6 +10,7 @@ import { useRouter } from "next/router";
 import React from "react";
 import { z } from "zod";
 
+import { DisplayAsset } from "../../src/components/file/display-asset";
 import { DisplayExcel } from "../../src/components/file/display-excel";
 import { DisplayFileChat } from "../../src/components/file/display-file-chat";
 import { DisplayFileReport } from "../../src/components/file/report";
@@ -43,9 +45,10 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
 
   // hack to get to load faster
   const { data: excelAsset, isLoading } = useExcelInfo(fileId);
-  console.log({ excelAsset });
 
-  const [showPdf, setShowPdf] = React.useState(true);
+  const fileType = getFileType(file?.contentType ?? "");
+
+  const [showAsset, setShowAsset] = React.useState(true);
 
   const [tab, setTab] = useTabState();
 
@@ -61,7 +64,7 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
         maxWidth: "100%",
       }}
     >
-      {showPdf && (
+      {showAsset && (
         <Box display="flex" width="100%" height="100%" flexDirection="column">
           <Box display="flex" width="100%" height="auto" padding={1}>
             <IconButton onClick={() => router.back()}>
@@ -69,16 +72,8 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
             </IconButton>
           </Box>
 
-          {url && showPdf ? (
-            <object
-              data={url}
-              type="application/pdf"
-              style={{ width: "100%", height: "100%", minWidth: "50%" }}
-            >
-              <iframe
-                src={`https://docs.google.com/viewer?url=${url}&embedded=true`}
-              />
-            </object>
+          {url && showAsset && fileType ? (
+            <DisplayAsset signedUrl={url} assetType={fileType} />
           ) : (
             <Skeleton
               variant="rectangular"
@@ -98,7 +93,7 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
         flexDirection="column"
       >
         <Box display="flex" gap={3} paddingLeft={1}>
-          <IconButton onClick={() => setShowPdf((prev) => !prev)}>
+          <IconButton onClick={() => setShowAsset((prev) => !prev)}>
             <MenuIcon />
           </IconButton>
           <Tabs
