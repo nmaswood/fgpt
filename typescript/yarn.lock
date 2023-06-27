@@ -625,6 +625,7 @@ __metadata:
     eslint: ^8.43.0
     eslint-plugin-simple-import-sort: ^10.0.0
     eslint-plugin-sql: ^2.3.2
+    google-auth-library: ^8.8.0
     lodash.chunk: ^4.2.0
     lodash.keyby: ^4.6.0
     pino: ^8.14.1
@@ -4299,7 +4300,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"google-auth-library@npm:^8.0.1, google-auth-library@npm:^8.0.2":
+"google-auth-library@npm:^8.0.1, google-auth-library@npm:^8.0.2, google-auth-library@npm:^8.8.0":
   version: 8.8.0
   resolution: "google-auth-library@npm:8.8.0"
   dependencies:

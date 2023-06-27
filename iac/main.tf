@@ -272,6 +272,11 @@ resource "google_cloud_run_v2_service" "springtime" {
 
   template {
 
+    vpc_access {
+      connector = google_vpc_access_connector.connector.id
+      egress    = "PRIVATE_RANGES_ONLY"
+    }
+
 
     timeout         = "900s"
     service_account = google_service_account.cloud_run_service_account.email
@@ -334,6 +339,10 @@ resource "google_cloud_run_v2_service" "tika" {
 
 
   template {
+    vpc_access {
+      connector = google_vpc_access_connector.connector.id
+      egress    = "PRIVATE_RANGES_ONLY"
+    }
 
     service_account = google_service_account.cloud_run_service_account.email
 
@@ -380,6 +389,11 @@ resource "google_cloud_run_v2_service" "api" {
 
 
   template {
+
+    vpc_access {
+      connector = google_vpc_access_connector.connector.id
+      egress    = "PRIVATE_RANGES_ONLY"
+    }
 
     service_account = google_service_account.cloud_run_service_account.email
 
@@ -471,6 +485,11 @@ resource "google_cloud_run_v2_service" "job_runner_server" {
 
 
   template {
+    vpc_access {
+      connector = google_vpc_access_connector.connector.id
+      egress    = "PRIVATE_RANGES_ONLY"
+    }
+
 
     service_account                  = google_service_account.cloud_run_service_account.email
     timeout                          = "900s"
@@ -563,19 +582,19 @@ resource "google_cloud_run_v2_service_iam_policy" "api_public_access" {
   policy_data = data.google_iam_policy.no_auth.policy_data
 }
 
-resource "google_cloud_run_v2_service_iam_policy" "springtime_public_access" {
-  location    = google_cloud_run_v2_service.springtime.location
-  project     = google_cloud_run_v2_service.springtime.project
-  name        = google_cloud_run_v2_service.springtime.name
-  policy_data = data.google_iam_policy.no_auth.policy_data
-}
+#resource "google_cloud_run_v2_service_iam_policy" "springtime_public_access" {
+#location    = google_cloud_run_v2_service.springtime.location
+#project     = google_cloud_run_v2_service.springtime.project
+#name        = google_cloud_run_v2_service.springtime.name
+#policy_data = data.google_iam_policy.no_auth.policy_data
+#}
 
-resource "google_cloud_run_v2_service_iam_policy" "tika_public_access" {
-  location    = google_cloud_run_v2_service.tika.location
-  project     = google_cloud_run_v2_service.tika.project
-  name        = google_cloud_run_v2_service.tika.name
-  policy_data = data.google_iam_policy.no_auth.policy_data
-}
+#resource "google_cloud_run_v2_service_iam_policy" "tika_public_access" {
+#location    = google_cloud_run_v2_service.tika.location
+#project     = google_cloud_run_v2_service.tika.project
+#name        = google_cloud_run_v2_service.tika.name
+#policy_data = data.google_iam_policy.no_auth.policy_data
+#}
 
 
 resource "vercel_project" "front_end" {
