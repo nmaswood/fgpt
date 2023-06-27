@@ -41,6 +41,7 @@ async function start(settings: Settings) {
   const fileReferenceStore = new PsqlFileReferenceStore(pool);
   const blobStorageService = new GoogleCloudStorageService();
   const tikaClient = new TikaHttpClient(settings.tikaClient);
+  await tikaClient.init();
   const textExtractor = new TikaTextExtractor(
     fileReferenceStore,
     settings.assetBucket,

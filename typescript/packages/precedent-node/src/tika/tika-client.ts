@@ -24,13 +24,13 @@ export class TikaHttpClient implements TikaClient {
   }
 
   async init() {
-    const token = await this.getToken();
+    const token = await this.#getToken();
     if (token) {
       this.#client.defaults.headers.common["Authorization"] = token;
     }
   }
 
-  async getToken(): Promise<string | undefined> {
+  async #getToken(): Promise<string | undefined> {
     const auth = new GoogleAuth();
     if (this.#origin.startsWith("http://localhost")) {
       return undefined;
@@ -45,7 +45,7 @@ export class TikaHttpClient implements TikaClient {
   }
 
   async detectFromFilename(filename: string): Promise<string> {
-    const token = await this.getToken();
+    const token = await this.#getToken();
     console.log({ token });
 
     const response = await this.#client({
@@ -69,7 +69,7 @@ export class TikaHttpClient implements TikaClient {
   }
 
   async extract(filename: string, data: Buffer): Promise<string> {
-    const token = await this.getToken();
+    const token = await this.#getToken();
     console.log({ token });
     const mimeType =
       "application/pdf" ?? (await this.detectFromFilename(filename));
