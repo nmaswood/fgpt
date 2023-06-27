@@ -482,6 +482,20 @@ const SelectedProjectInner: React.FC<{
     <>
       {value === "data" && (
         <>
+          {filesLoading && (
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              width="100%"
+              height="100%"
+              maxHeight="100%"
+              overflow="auto"
+            >
+              <CircularProgress />
+            </Box>
+          )}
+
           {!filesLoading && files.length === 0 && (
             <Box
               display="flex"

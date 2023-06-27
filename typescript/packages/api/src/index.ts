@@ -15,6 +15,7 @@ import { errorResponder } from "./middleware/error-responder";
 import { invalidPathHandler } from "./middleware/invalid-path-handler";
 import { SETTINGS } from "./settings";
 import { dataBasePool } from "./sql";
+import helmet from "helmet";
 
 import {
   GoogleCloudStorageService,
@@ -60,6 +61,8 @@ const jwtCheck = expressjwt({
 async function start() {
   const app = express();
   app.enable("trust proxy");
+  app.use(helmet());
+  app.disable("x-powered-by");
 
   app.use(
     express.json({

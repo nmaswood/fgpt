@@ -496,6 +496,7 @@ __metadata:
     express: ^4.18.2
     express-async-errors: ^3.1.1
     express-jwt: ^8.4.1
+    helmet: ^7.0.0
     jwks-rsa: ^3.0.1
     lodash: ^4.17.21
     multer: ^1.4.5-lts.1
@@ -4466,6 +4467,13 @@ __metadata:
   version: 2.3.0
   resolution: "heap-js@npm:2.3.0"
   checksum: 04ba26c68ab6f5f8ef8726b806648bd433a5db1eba95510b09ddb46c4c915da944078582f2c136b6aafaf1b07e69a1d9fad5b8e24143aba00b6fd403876a1b46
+  languageName: node
+  linkType: hard
+
+"helmet@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "helmet@npm:7.0.0"
+  checksum: 3622b8b68b7ac4736369fe7717adb5b87ddcdcda7c11c13277d79fb5670acab032e8c971835565b1d2144d234f3e0dbcd327a44249b9e61f0f64c0c753faf1bc
   languageName: node
   linkType: hard
 
