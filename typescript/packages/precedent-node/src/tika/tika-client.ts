@@ -1,7 +1,5 @@
 import axios, { AxiosInstance } from "axios";
 import * as FS from "fs/promises";
-import { GoogleAuth } from "google-auth-library";
-import { LOGGER } from "../logger";
 
 export interface TikaClient {
   detectFromFilename(fileName: string): Promise<string>;
@@ -11,38 +9,13 @@ export interface TikaClient {
 
 export class TikaHttpClient implements TikaClient {
   #client: AxiosInstance;
-  #origin: string;
 
   constructor(baseURL: string) {
-    const url = new URL(baseURL);
-    this.#origin = url.origin;
-
     this.#client = axios.create({
       baseURL,
       // 15 minutes
       timeout: 15 * 60 * 1000,
     });
-  }
-
-  async init() {
-    LOGGER.info("Running tika client init");
-    const token = await this.#getToken();
-    console.log({ token });
-    if (token) {
-      console.log("Setting header");
-      this.#client.defaults.headers.common["Authorization"] = token;
-      console.log(this.#client.defaults.headers);
-    }
-  }
-
-  async #getToken(): Promise<string | undefined> {
-    if (this.#origin.startsWith("http://localhost")) {
-      return undefined;
-    }
-    const auth = new GoogleAuth();
-    const client = await auth.getIdTokenClient(this.#origin);
-    const headers = await client.getRequestHeaders();
-    return headers.Authorization;
   }
 
   async detectFromFilename(filename: string): Promise<string> {
@@ -69,8 +42,6 @@ export class TikaHttpClient implements TikaClient {
   }
 
   async extract(filename: string, data: Buffer): Promise<string> {
-    const token = await this.#getToken();
-    console.log({ token });
     const mimeType =
       "application/pdf" ?? (await this.detectFromFilename(filename));
 

@@ -582,19 +582,19 @@ resource "google_cloud_run_v2_service_iam_policy" "api_public_access" {
   policy_data = data.google_iam_policy.no_auth.policy_data
 }
 
-#resource "google_cloud_run_v2_service_iam_policy" "springtime_public_access" {
-#location    = google_cloud_run_v2_service.springtime.location
-#project     = google_cloud_run_v2_service.springtime.project
-#name        = google_cloud_run_v2_service.springtime.name
-#policy_data = data.google_iam_policy.no_auth.policy_data
-#}
+resource "google_cloud_run_v2_service_iam_policy" "springtime_public_access" {
+  location    = google_cloud_run_v2_service.springtime.location
+  project     = google_cloud_run_v2_service.springtime.project
+  name        = google_cloud_run_v2_service.springtime.name
+  policy_data = data.google_iam_policy.no_auth.policy_data
+}
 
-#resource "google_cloud_run_v2_service_iam_policy" "tika_public_access" {
-#location    = google_cloud_run_v2_service.tika.location
-#project     = google_cloud_run_v2_service.tika.project
-#name        = google_cloud_run_v2_service.tika.name
-#policy_data = data.google_iam_policy.no_auth.policy_data
-#}
+resource "google_cloud_run_v2_service_iam_policy" "tika_public_access" {
+  location    = google_cloud_run_v2_service.tika.location
+  project     = google_cloud_run_v2_service.tika.project
+  name        = google_cloud_run_v2_service.tika.name
+  policy_data = data.google_iam_policy.no_auth.policy_data
+}
 
 
 resource "vercel_project" "front_end" {
