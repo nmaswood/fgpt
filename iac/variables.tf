@@ -62,6 +62,9 @@ variable "github_repo" {
 variable "database_password" {
 }
 
+variable "service_to_service_secret" {
+}
+
 variable "vercel_api_key" {
 }
 

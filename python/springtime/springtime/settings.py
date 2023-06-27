@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     pinecone_namespace: str = Field(env="PINECONE_NAMESPACE")
     telemetry_enabled: bool = Field(env="TRACING_ENABLED", default=False)
     reload:  bool = Field(env="RELOAD", default=False)
+    service_to_service_secret:  str = Field(env="SERVICE_TO_SERVICE_SECRET")
 
     class Config:
         env_file = '.env'

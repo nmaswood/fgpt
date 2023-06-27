@@ -102,9 +102,6 @@ resource "google_sql_database_instance" "instance" {
 }
 
 
-
-
-
 resource "google_storage_bucket" "asset_store" {
   name     = "${var.project_slug}-asset-store"
   location = "US"
@@ -324,6 +321,11 @@ resource "google_cloud_run_v2_service" "springtime" {
         name  = "TRACING_ENABLED"
         value = "true"
       }
+
+      env {
+        name  = "SERVICE_TO_SERVICE_SECRET"
+        value = var.service_to_service_secret
+      }
     }
   }
 
@@ -462,6 +464,10 @@ resource "google_cloud_run_v2_service" "api" {
         value = var.vercel_domain
       }
 
+      env {
+        name  = "SERVICE_TO_SERVICE_SECRET"
+        value = var.service_to_service_secret
+      }
 
       volume_mounts {
         name       = "cloudsql"
@@ -543,6 +549,11 @@ resource "google_cloud_run_v2_service" "job_runner_server" {
       env {
         name  = "PUBSUB_SUBSCRIPTION"
         value = var.pubsub_task_subscription
+      }
+
+      env {
+        name  = "SERVICE_TO_SERVICE_SECRET"
+        value = var.service_to_service_secret
       }
 
 

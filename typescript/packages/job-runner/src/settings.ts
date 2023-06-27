@@ -15,6 +15,8 @@ const ZSettings = z.object({
     topic: z.string(),
     emulatorHost: z.string().optional(),
   }),
+
+  serviceToServiceSecret: z.string(),
 });
 
 export type Settings = z.infer<typeof ZSettings>;
@@ -37,4 +39,5 @@ export const SETTINGS = ZSettings.parse({
     topic: process.env["PUBSUB_TOPIC"],
     emulatorHost: process.env["PUBSUB_EMULATOR_HOST"],
   },
+  serviceToServiceSecret: process.env["SERVICE_TO_SERVICE_SECRET"],
 });
