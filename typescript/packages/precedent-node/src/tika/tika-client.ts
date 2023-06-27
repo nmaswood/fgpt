@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 import * as FS from "fs/promises";
 import { GoogleAuth } from "google-auth-library";
+import { LOGGER } from "../logger";
 
 export interface TikaClient {
   detectFromFilename(fileName: string): Promise<string>;
@@ -24,6 +25,7 @@ export class TikaHttpClient implements TikaClient {
   }
 
   async init() {
+    LOGGER.info("Running tika client init");
     const token = await this.#getToken();
     if (token) {
       this.#client.defaults.headers.common["Authorization"] = token;
@@ -31,10 +33,10 @@ export class TikaHttpClient implements TikaClient {
   }
 
   async #getToken(): Promise<string | undefined> {
-    const auth = new GoogleAuth();
     if (this.#origin.startsWith("http://localhost")) {
       return undefined;
     }
+    const auth = new GoogleAuth();
     console.log({ origin: this.#origin, baseURL: this.baseURL });
     const client = await auth.getIdTokenClient(this.#origin);
     const headers = await client.getRequestHeaders();
