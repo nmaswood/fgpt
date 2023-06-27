@@ -31,9 +31,12 @@ export class HttpTableExtractor {
   #client: AxiosInstance;
   OUTPUT_PREFIX = "excel_artefacts";
 
-  constructor(baseURL: string) {
+  constructor(baseURL: string, serviceToServiceSecret: string) {
     this.#client = axios.create({
       baseURL,
+      headers: {
+        "X-Service-To-Service-Secret": serviceToServiceSecret,
+      },
     });
   }
 

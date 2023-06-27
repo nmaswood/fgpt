@@ -100,7 +100,10 @@ async function start() {
 
   const textChunkStore = new PsqlTextChunkStore(pool);
 
-  const mlService = new MLServiceClientImpl(SETTINGS.mlServiceUri);
+  const mlService = new MLServiceClientImpl(
+    SETTINGS.mlServiceUri,
+    SETTINGS.serviceToServiceSecret
+  );
 
   const chatStore = new PsqlChatStore(pool);
 

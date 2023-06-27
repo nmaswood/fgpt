@@ -110,9 +110,12 @@ export interface MLServiceClient {
 export class MLServiceClientImpl implements MLServiceClient {
   #client: AxiosInstance;
 
-  constructor(baseURL: string) {
+  constructor(baseURL: string, serviceToServiceSecret: string) {
     this.#client = axios.create({
       baseURL,
+      headers: {
+        "X-Service-To-Service-Secret": serviceToServiceSecret,
+      },
     });
   }
 

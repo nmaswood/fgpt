@@ -60,12 +60,18 @@ async function start(settings: Settings) {
 
   const textChunkStore = new PsqlTextChunkStore(pool);
 
-  const mlServiceClient = new MLServiceClientImpl(settings.mlServiceUri);
+  const mlServiceClient = new MLServiceClientImpl(
+    settings.mlServiceUri,
+    settings.serviceToServiceSecret
+  );
 
   const questionStore = new PsqlQuestionStore(pool);
   const metricsStore = new PsqlMiscOutputStore(pool);
 
-  const tableExtractor = new HttpTableExtractor(settings.mlServiceUri);
+  const tableExtractor = new HttpTableExtractor(
+    settings.mlServiceUri,
+    settings.serviceToServiceSecret
+  );
 
   const excelAssetStore = new PsqlExcelAssetStore(pool);
   const excelOutputStore = new PsqlExcelOutputStore(pool);
