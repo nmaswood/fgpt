@@ -28,8 +28,9 @@ export class TikaHttpClient implements TikaClient {
     if (this.#origin.startsWith("http://localhost")) {
       return undefined;
     }
-    console.log({ origin: this.#origin });
+    console.log({ origin: this.#origin, baseURL: this.baseURL });
     const client = await auth.getIdTokenClient(this.#origin);
+    console.log({ msg: "didnt make it sso far" });
     const response = await client.request({
       url: this.baseURL,
     });
