@@ -7,7 +7,9 @@ from springtime.routers.ml_router import MLRouter
 from springtime.routers.pdf_router import PdfRouter
 import uvicorn
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request 
+from fastapi.responses import JSONResponse
+
 
 from springtime.routers.table_router import TableRouter
 
@@ -26,9 +28,11 @@ TABLE_ANALYZER = TableAnalyzerImpl()
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
     response = await call_next(request)
+    secret = request.headers.get('x-service-to-service-secret')
 
-    if (request.headers['x-service-to-service-secret'] != SETTINGS.service_to_service_secret):
-        raise HTTPException(status_code=401, detail="Not Authorized")
+    if (secret != SETTINGS.service_to_service_secret):
+        return JSONResponse(status_code=401, content='Not authorized')
+
     return response
 
 
