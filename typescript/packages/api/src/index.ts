@@ -182,6 +182,10 @@ async function start() {
   app.use("/healthz", (_, res) => {
     res.send("OK");
   });
+  app.use("/ping-ml", async (_, res) => {
+    await mlService.ping();
+    res.send("OK");
+  });
 
   app.use(errorLogger);
   app.use(errorResponder);
