@@ -32,7 +32,7 @@ export class TikaHttpClient implements TikaClient {
     const client = await auth.getIdTokenClient(this.#origin);
     console.log({ msg: "didnt make it sso far" });
     const response = await client.request({
-      url: this.baseURL,
+      url: this.baseURL.replace("/tika", ""),
     });
     console.log({ response });
     console.log({ data: response.data });
