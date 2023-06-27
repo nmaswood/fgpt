@@ -31,6 +31,11 @@ async def ping():
     return {"ping": "ping"}
 
 
+@app.get("/healthz")
+async def healthz():
+    return "OK"
+
+
 # todo disable reload in prod
 
 

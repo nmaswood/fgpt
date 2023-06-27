@@ -37,10 +37,6 @@ async function start(settings: Settings) {
 
   app.enable("trust proxy");
 
-  app.get("/ping", (_, res) => {
-    res.json({ ping: "pong" });
-  });
-
   const pool = await dataBasePool(settings.sql.uri);
   const fileReferenceStore = new PsqlFileReferenceStore(pool);
   const blobStorageService = new GoogleCloudStorageService();
@@ -93,6 +89,10 @@ async function start(settings: Settings) {
   const mainRouter = new MainRouter(taskStore, taskExecutor);
 
   app.use("/", mainRouter.init());
+
+  app.get("/ping", (_, res) => {
+    res.json({ ping: "pong" });
+  });
 
   app.use("/healthz", (_, res) => {
     res.send("OK");
