@@ -23,6 +23,13 @@ export class TikaHttpClient implements TikaClient {
     });
   }
 
+  async init() {
+    const token = await this.getToken();
+    if (token) {
+      this.#client.defaults.headers.common["Authorization"] = token;
+    }
+  }
+
   async getToken(): Promise<string | undefined> {
     const auth = new GoogleAuth();
     if (this.#origin.startsWith("http://localhost")) {
@@ -30,11 +37,11 @@ export class TikaHttpClient implements TikaClient {
     }
     console.log({ origin: this.#origin, baseURL: this.baseURL });
     const client = await auth.getIdTokenClient(this.#origin);
-    console.log("fetch headers");
     const headers = await client.getRequestHeaders();
-    console.log("fetched headers");
-    console.log({ headers });
-    return undefined;
+    const token = headers.Authorization;
+    console.log({ token });
+
+    return token;
   }
 
   async detectFromFilename(filename: string): Promise<string> {
