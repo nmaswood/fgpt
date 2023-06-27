@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     telemetry_enabled: bool = Field(env="TRACING_ENABLED", default=False)
     reload:  bool = Field(env="RELOAD", default=False)
     service_to_service_secret:  str = Field(env="SERVICE_TO_SERVICE_SECRET")
+    skip_auth: bool = Field(env="SKIP_AUTH", default=False)
 
     class Config:
         env_file = '.env'
