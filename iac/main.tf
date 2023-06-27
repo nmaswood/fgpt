@@ -25,12 +25,47 @@ provider "vercel" {
 }
 
 
+resource "google_project" "project" {
+  name       = var.project
+  project_id = var.project
+}
+
+
 provider "google" {
   project     = var.project
   region      = var.region
   zone        = var.zone
   credentials = file(var.credentials_file)
+}
 
+resource "google_compute_network" "vpc_network" {
+  name                    = "vpc-network"
+  auto_create_subnetworks = "true"
+}
+
+resource "google_compute_global_address" "vpc_access_connector_ip" {
+  name          = "connector-ip"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = google_compute_network.vpc_network.self_link
+}
+
+
+resource "google_service_networking_connection" "private_vpc_connection" {
+  provider = google-beta
+
+  network                 = google_compute_network.vpc_network.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.vpc_access_connector_ip.name]
+}
+
+
+resource "google_vpc_access_connector" "connector" {
+  name          = "connector"
+  region        = var.region
+  ip_cidr_range = "10.8.0.0/28"
+  network       = google_compute_network.vpc_network.name
 }
 
 
@@ -44,17 +79,30 @@ resource "google_project_service" "enable_services" {
 
 
 resource "google_sql_database_instance" "instance" {
+  provider         = google-beta
   name             = "${var.project_slug}-db"
-  database_version = "POSTGRES_14"
+  database_version = "POSTGRES_15"
   region           = var.region
 
-  settings {
 
+
+  depends_on = [google_service_networking_connection.private_vpc_connection]
+
+
+  settings {
     tier = "db-f1-micro"
+    ip_configuration {
+      ipv4_enabled                                  = true
+      private_network                               = google_compute_network.vpc_network.id
+      enable_private_path_for_google_cloud_services = true
+    }
   }
   deletion_protection = "false"
 
 }
+
+
+
 
 
 resource "google_storage_bucket" "asset_store" {
@@ -110,10 +158,8 @@ resource "google_cloud_run_v2_job" "db" {
           mount_path = "/cloudsql"
         }
       }
-
     }
   }
-
 }
 
 
@@ -213,15 +259,9 @@ resource "google_cloudbuild_trigger" "build_db" {
   included_files = ["db/**"]
 }
 
-
-resource "google_sql_database" "database" {
-  name     = var.project_slug
+resource "google_sql_user" "pgwriter" {
   instance = google_sql_database_instance.instance.name
-}
-
-resource "google_sql_user" "database-user" {
   name     = var.database_user
-  instance = google_sql_database_instance.instance.name
   password = var.database_password
 }
 
@@ -239,6 +279,8 @@ resource "google_cloud_run_v2_service" "springtime" {
     scaling {
       max_instance_count = 2
     }
+
+
     containers {
       image = "${var.region}-docker.pkg.dev/${var.project}/${var.project_slug}/springtime:latest"
 
@@ -794,4 +836,13 @@ resource "google_project_iam_member" "pubsub_publisher" {
   role    = "roles/pubsub.publisher"
   member  = "serviceAccount:${google_service_account.cloud_run_service_account.email}"
 }
+
+
+resource "google_project_iam_member" "project" {
+  project = google_project.project.project_id
+  role    = "roles/editor"
+  member  = "serviceAccount:${google_project.project.number}@cloudservices.gserviceaccount.com"
+}
+
+
 
