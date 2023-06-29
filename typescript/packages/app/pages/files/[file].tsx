@@ -17,6 +17,7 @@ import { DisplayFileReport } from "../../src/components/file/report";
 import { ViewByChunk } from "../../src/components/file/view-by-chunk";
 import { useExcelInfo } from "../../src/hooks/use-fetch-excel";
 import { useFetchFile } from "../../src/hooks/use-fetch-file";
+import { useFetchFileToRender } from "../../src/hooks/use-fetch-file-to-render";
 import { useFetchSignedUrl } from "../../src/hooks/use-fetch-signed-url";
 import { useFetchToken } from "../../src/hooks/use-fetch-token";
 
@@ -40,13 +41,10 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
   fileId,
   token,
 }) => {
-  const { data: file } = useFetchFile(fileId);
-  const { data: url } = useFetchSignedUrl(fileId);
+  const { data: file } = useFetchFileToRender(fileId);
 
   // hack to get to load faster
   const { data: excelAsset, isLoading } = useExcelInfo(fileId);
-
-  const fileType = getFileType(file?.contentType ?? "");
 
   const [showAsset, setShowAsset] = React.useState(true);
 
@@ -72,8 +70,8 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
             </IconButton>
           </Box>
 
-          {url && showAsset && fileType ? (
-            <DisplayAsset signedUrl={url} assetType={fileType} />
+          {file ? (
+            <DisplayAsset signedUrl={file.signedUrl} assetType={file.type} />
           ) : (
             <Skeleton
               variant="rectangular"

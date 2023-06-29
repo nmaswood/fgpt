@@ -2,39 +2,17 @@ import "@fortune-sheet/react/dist/index.css";
 
 import { Sheet } from "@fortune-sheet/core";
 import { Workbook, WorkbookInstance } from "@fortune-sheet/react";
-import {
-  Box,
-  LinearProgress,
-  Link,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Link, Typography } from "@mui/material";
 import NextLink from "next/link";
 import React from "react";
 
-import { ExcelInfo } from "../../hooks/use-fetch-excel";
-import { useFetchWorkbook } from "../../hooks/use-load-workbook";
-import { processWorkBook } from "./process-work-book";
-
 export const DisplayExcel: React.FC<{
-  excelInfo: ExcelInfo | undefined;
+  signedUrl: string;
   isLoading: boolean;
-}> = ({ excelInfo }) => {
-  const [sheetIndex, setSheetIndex] = React.useState(1);
-
-  const signedUrl = excelInfo?.excel?.signedUrl;
-  const numSheets = excelInfo?.excel?.numSheets;
-
-  const { data: wb, isLoading } = useFetchWorkbook(signedUrl);
-
+}> = ({ signedUrl }) => {
   const ref = React.useRef<WorkbookInstance>(null);
 
-  const sheets = React.useMemo<Sheet[]>(
-    () => processWorkBook(wb?.Sheets ?? {}),
-    [wb]
-  );
-
-  const forSheet = excelInfo?.forSheets[sheetIndex - 1] ?? {};
+  const sheets: Sheet[] = [];
 
   return (
     <Box
@@ -55,30 +33,7 @@ export const DisplayExcel: React.FC<{
           </Link>
         )}
       </Box>
-      <Box display="flex" width="100%">
-        <TextField
-          type="number"
-          value={sheetIndex}
-          onChange={(event) => {
-            const newValue = event.target.value;
-            const parsed = parseInt(newValue);
-            if (newValue === "" || (parsed >= 0 && parsed <= 100)) {
-              setSheetIndex(parsed);
-              if (ref.current) {
-                ref.current.activateSheet({ index: parsed - 1 });
-              }
-            }
-          }}
-          disabled={!excelInfo}
-          variant="outlined"
-          label="Sheet index"
-          sx={{
-            width: "100px",
-          }}
-          InputProps={{ inputProps: { min: 1, max: numSheets ?? 1 } }}
-        />
-      </Box>
-      {isLoading && <LinearProgress />}
+
       <Box
         display="flex"
         width="100%"
@@ -97,28 +52,6 @@ export const DisplayExcel: React.FC<{
           />
         )}
       </Box>
-      {forSheet && (
-        <Box
-          display="flex"
-          gap={2}
-          height="400px"
-          width="100%"
-          maxWidth={"100%"}
-          maxHeight="100%"
-          overflow="auto"
-        >
-          <pre
-            style={{
-              maxWidth: "100%",
-              maxHeight: "100%",
-              overflow: "auto",
-              whiteSpace: "pre-wrap",
-            }}
-          >
-            {JSON.stringify(forSheet, null, 2)}
-          </pre>
-        </Box>
-      )}
     </Box>
   );
 };

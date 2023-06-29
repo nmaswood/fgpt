@@ -5,11 +5,12 @@ import { AnalyzeOutput } from "./excel";
 import { Report } from "./llm-outputs";
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
-export namespace Render {
+export namespace FileToRender {
   export interface PDFFile {
     type: "pdf";
     signedUrl: string;
     report: Report | undefined;
+    projectId: string;
     derived:
       | {
           parsed: WorkBook;
@@ -23,7 +24,9 @@ export namespace Render {
 
   export interface ExcelFile {
     type: "excel";
+    projectId: string;
     parsed: WorkBook;
+    signedUrl: string;
     sheets: ISOSheet<any>[];
     output: AnalyzeOutput | undefined;
   }

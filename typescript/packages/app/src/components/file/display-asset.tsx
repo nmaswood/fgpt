@@ -3,9 +3,6 @@ import { Sheet } from "@fortune-sheet/core";
 import { Workbook } from "@fortune-sheet/react";
 import React from "react";
 
-import { useFetchWorkbook } from "../../hooks/use-load-workbook";
-import { processWorkBook } from "./process-work-book";
-
 export const DisplayAsset: React.FC<{
   signedUrl: string;
   assetType: FileType;
@@ -26,13 +23,9 @@ export const DisplayAsset: React.FC<{
   }
 };
 
-const DisplayExcelFile: React.FC<{ signedUrl: string }> = ({ signedUrl }) => {
-  const { data: wb, isLoading } = useFetchWorkbook(signedUrl);
-  const sheets = React.useMemo<Sheet[]>(
-    () => processWorkBook(wb?.Sheets ?? {}),
-    [wb]
-  );
-  if (sheets.length === 0 || isLoading) {
+const DisplayExcelFile: React.FC<{ signedUrl: string }> = ({}) => {
+  const sheets: Sheet[] = [];
+  if (sheets.length === 0) {
     return null;
   }
 

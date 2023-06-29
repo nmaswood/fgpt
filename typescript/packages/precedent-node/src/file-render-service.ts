@@ -3,7 +3,7 @@ import {
   FileReference,
   getFileType,
   processWorkBook,
-  Render,
+  FileToRender,
 } from "@fgpt/precedent-iso";
 import { read } from "xlsx";
 
@@ -14,7 +14,7 @@ import { ReportService } from "./llm-outputs/report-service";
 import { ObjectStorageService } from "./object-store/object-store";
 
 export interface FileRenderService {
-  forFile(fileReferenceId: string): Promise<Render.File>;
+  forFile(fileReferenceId: string): Promise<FileToRender.File>;
 }
 
 export class FileToRenderServiceImpl implements FileRenderService {
@@ -26,7 +26,7 @@ export class FileToRenderServiceImpl implements FileRenderService {
     private readonly excelAssetStore: ExcelAssetStore
   ) {}
 
-  async forFile(fileReferenceId: string): Promise<Render.File> {
+  async forFile(fileReferenceId: string): Promise<FileToRender.File> {
     const file = await this.fileReferenceStore.get(fileReferenceId);
     const fileType = getFileType(file.contentType);
 
@@ -42,18 +42,25 @@ export class FileToRenderServiceImpl implements FileRenderService {
     }
   }
 
-  async #forExcel(file: FileReference): Promise<Render.File> {
+  async #forExcel(file: FileReference): Promise<FileToRender.File> {
     const output = await this.excelOutputStore.forDirectUpload(file.id);
     const parsed = await this.#fetchExcel(file.bucketName, file.path);
+
+    const signedUrl = await this.objectStorageService.getSignedUrl(
+      file.bucketName,
+      file.path
+    );
     return {
       type: "excel",
+      signedUrl,
+      projectId: file.projectId,
       parsed,
       sheets: processWorkBook(parsed.Sheets),
       output: output?.output,
     };
   }
 
-  async #forPDF(file: FileReference): Promise<Render.File> {
+  async #forPDF(file: FileReference): Promise<FileToRender.File> {
     const [signedUrl, [derived], report, output] = await Promise.all([
       this.objectStorageService.getSignedUrl(file.bucketName, file.path),
       this.excelAssetStore.list(file.id),
@@ -64,6 +71,7 @@ export class FileToRenderServiceImpl implements FileRenderService {
     return {
       type: "pdf",
       signedUrl,
+      projectId: file.projectId,
       report,
       derived: derived
         ? await (async () => {
