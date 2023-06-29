@@ -3,7 +3,7 @@ import { afterEach, beforeEach, expect, test } from "vitest";
 
 import { dataBasePool } from "../data-base-pool";
 import { PsqlFileReferenceStore } from "../file-reference-store";
-import { PsqlMiscOutputStore } from "../llm-outputs/metrics-store";
+import { PsqlMiscOutputStore } from "../llm-outputs/misc-output-store";
 import { PsqlProcessedFileStore } from "../processed-file-store";
 import { PSqlProjectStore } from "../project-store";
 import { ShaHash } from "../sha-hash";

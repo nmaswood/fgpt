@@ -1,3 +1,4 @@
+import { AnalyzeResponseChunk } from "@fgpt/precedent-iso";
 import axios, { AxiosInstance } from "axios";
 import z from "zod";
 
@@ -13,21 +14,20 @@ export type ExtractionResponse =
   | { type: "table"; path: string; numberOfSheets: number };
 
 export interface AnalyzeArguments {
-  sheetNumbers: number[];
   bucket: string;
   objectPath: string;
 }
 
 export interface AnalyzeResponse {
-  responses: Record<number, Record<string, unknown>>;
+  responses: AnalyzeResponseChunk[];
 }
 
-export interface TableExtractor {
+export interface TabularDataService {
   extract(args: ExtractArguments): Promise<ExtractionResponse>;
   analyze(args: AnalyzeArguments): Promise<AnalyzeResponse>;
 }
 
-export class HttpTableExtractor {
+export class HttpTabularDataService implements TabularDataService {
   #client: AxiosInstance;
   OUTPUT_PREFIX = "excel_artefacts";
 
@@ -56,19 +56,31 @@ export class HttpTableExtractor {
   }
 
   async analyze({
-    sheetNumbers,
     bucket,
     objectPath,
   }: AnalyzeArguments): Promise<AnalyzeResponse> {
     const response = await this.#client.post<unknown>("/excel/analyze", {
       bucket,
       object_path: objectPath,
-      sheet_numbers: sheetNumbers,
     });
 
-    return { responses: ZAnalyzeResponse.parse(response.data) };
+    return { responses: ZAnalyzeResponse.parse(response.data).chunks };
   }
 }
+
+const ZAnalyzeResponseChunk = z
+  .object({
+    sheet_names: z.string().array(),
+    content: z.string(),
+  })
+  .transform((row) => ({
+    sheetNames: row.sheet_names,
+    content: row.content,
+  }));
+
+const ZAnalyzeResponse = z.object({
+  chunks: ZAnalyzeResponseChunk.array(),
+});
 
 const ZExtractResponse = z
   .object({
@@ -85,15 +97,3 @@ const ZExtractResponse = z
           }
         : { type: "empty" }
   );
-
-const ZAnalyzeResponse = z
-  .object({
-    resp: z.record(z.record(z.unknown())),
-  })
-  .transform((row) => {
-    const result: Record<number, Record<string, unknown>> = {};
-    for (const [key, value] of Object.entries(row.resp)) {
-      result[Number(key)] = value;
-    }
-    return result;
-  });

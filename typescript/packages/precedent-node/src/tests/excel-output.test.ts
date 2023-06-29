@@ -65,13 +65,12 @@ beforeEach(async () => {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
 
   await pool.query(
-    sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference, processed_file CASCADE`
+    sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference, processed_file, excel_analysis, excel_asset  CASCADE`
   );
 });
 
 afterEach(async () => {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
-
   await pool.query(
     sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference CASCADE`
   );
@@ -86,21 +85,21 @@ test("insertMany", async () => {
     excelOutputStore,
   } = await setup();
 
-  await excelOutputStore.insertMany(
-    {
-      organizationId,
-      projectId,
-      fileReferenceId,
-      excelAssetId,
+  const resp = await excelOutputStore.insert({
+    organizationId,
+    projectId,
+    fileReferenceId,
+    excelAssetId,
+    output: {
+      type: "v0_chunks",
+      value: [{ content: "hi hi hi", sheetNames: ["sheet1"] }],
     },
+  });
 
-    {
-      0: { foo: "bar" },
-    }
-  );
+  expect(resp.output.value[0].content).toEqual("hi hi hi");
 });
 
-test("forFileReference", async () => {
+test("forDerived", async () => {
   const {
     fileReferenceId,
     organizationId,
@@ -109,22 +108,42 @@ test("forFileReference", async () => {
     excelOutputStore,
   } = await setup();
 
-  await excelOutputStore.insertMany(
-    {
-      organizationId,
-      projectId,
-      fileReferenceId,
-      excelAssetId,
+  await excelOutputStore.insert({
+    organizationId,
+    projectId,
+    fileReferenceId,
+    excelAssetId,
+    output: {
+      type: "v0_chunks",
+      value: [{ content: "hi hi hi", sheetNames: ["sheet1"] }],
     },
-
-    {
-      0: { foo: "bar" },
-    }
-  );
-
-  const result = await excelOutputStore.forFileReference(fileReferenceId);
-
-  expect(result?.outputs).toEqual({
-    0: { foo: "bar" },
   });
+
+  const derived = await excelOutputStore.forDerived(fileReferenceId);
+  const directUpload = await excelOutputStore.forDirectUpload(fileReferenceId);
+
+  expect(derived).toBeDefined();
+  expect(directUpload).toBeUndefined();
+});
+
+test("forDirectUpload", async () => {
+  const { fileReferenceId, organizationId, projectId, excelOutputStore } =
+    await setup();
+
+  await excelOutputStore.insert({
+    organizationId,
+    projectId,
+    fileReferenceId,
+    excelAssetId: undefined,
+    output: {
+      type: "v0_chunks",
+      value: [{ content: "hi hi hi", sheetNames: ["sheet1"] }],
+    },
+  });
+
+  const derived = await excelOutputStore.forDerived(fileReferenceId);
+  const directUpload = await excelOutputStore.forDirectUpload(fileReferenceId);
+
+  expect(derived).toBeUndefined();
+  expect(directUpload).toBeDefined();
 });

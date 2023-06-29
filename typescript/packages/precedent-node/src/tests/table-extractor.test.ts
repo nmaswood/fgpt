@@ -1,10 +1,13 @@
 import { expect, test } from "vitest";
 
-import { HttpTableExtractor } from "../table-extractor/table-extractor";
+import { HttpTabularDataService } from "../table-extractor/table-extractor";
 import { TEST_SETTINGS } from "./test-settings";
 
 async function setup() {
-  const tableExtractor = new HttpTableExtractor(TEST_SETTINGS.springtimeUri);
+  const tableExtractor = new HttpTabularDataService(
+    TEST_SETTINGS.springtimeUri,
+    "test"
+  );
   return { tableExtractor };
 }
 

@@ -7,7 +7,7 @@ from springtime.routers.ml_router import MLRouter
 from springtime.routers.pdf_router import PdfRouter
 import uvicorn
 
-from fastapi import FastAPI, Request 
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 
@@ -17,21 +17,20 @@ from .settings import SETTINGS
 
 app = FastAPI()
 
-logger.info("Starting server plz")
+logger.info("Starting server")
 
 OBJECT_STORE = GCSObjectStore()
 TABLE_EXTRACTOR = TabulaTableExtractor(OBJECT_STORE)
 TABLE_ANALYZER = TableAnalyzerImpl()
 
 
-
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
     response = await call_next(request)
-    secret = request.headers.get('x-service-to-service-secret')
+    secret = request.headers.get("x-service-to-service-secret")
 
-    if (secret != SETTINGS.service_to_service_secret):
-        return JSONResponse(status_code=401, content='Not authorized')
+    if secret is not None and (secret != SETTINGS.service_to_service_secret):
+        return JSONResponse(status_code=401, content="Not authorized")
 
     return response
 
@@ -49,9 +48,6 @@ async def ping():
 @app.get("/healthz")
 async def healthz():
     return "OK"
-
-
-
 
 
 # todo disable reload in prod

@@ -1,4 +1,5 @@
 import {
+  AnalyzeTableConfig,
   assertNever,
   CHUNK_STRATEGY_TO_CHUNK_SIZE,
   GREEDY_VO_CHUNK_SIZE,
@@ -6,7 +7,6 @@ import {
   isNotNull,
   TextChunkConfig,
 } from "@fgpt/precedent-iso";
-import chunk from "lodash/chunk";
 import lodashChunk from "lodash/chunk";
 import keyBy from "lodash/keyBy";
 import path from "path";
@@ -14,13 +14,16 @@ import path from "path";
 import { ExcelAssetStore } from "../excel-asset-store";
 import { ExcelOutputStore } from "../excel-output-store";
 import { FileReferenceStore } from "../file-reference-store";
-import { InsertMiscValue, MiscOutputStore } from "../llm-outputs/metrics-store";
+import {
+  InsertMiscValue,
+  MiscOutputStore,
+} from "../llm-outputs/misc-output-store";
 import { QuestionStore } from "../llm-outputs/question-store";
 import { LOGGER } from "../logger";
 import { MLServiceClient } from "../ml/ml-service";
 import { ProcessedFileStore } from "../processed-file-store";
 import { ShaHash } from "../sha-hash";
-import { TableExtractor } from "../table-extractor/table-extractor";
+import { TabularDataService } from "../table-extractor/table-extractor";
 import { Task, TaskStore } from "../task-store";
 import { TextChunkStore } from "../text-chunk-store";
 import { TextExtractor } from "../text-extractor";
@@ -31,7 +34,6 @@ export interface TaskExecutor {
 
 const LLM_OUTPUT_CHUNK_SIZE = "greedy_15k" as const;
 const EXCEL_PATH_SUFFIX = "excel-uploads";
-const ANALYSIS_CHUNK_SIZE = 5;
 
 export class TaskExecutorImpl implements TaskExecutor {
   STRATEGIES = ["greedy_v0", "greedy_5k", "greedy_15k"] as const;
@@ -45,7 +47,7 @@ export class TaskExecutorImpl implements TaskExecutor {
     private readonly questionStore: QuestionStore,
     private readonly miscOutputStore: MiscOutputStore,
     private readonly fileReferenceStore: FileReferenceStore,
-    private readonly tableExtractor: TableExtractor,
+    private readonly tableExtractor: TabularDataService,
     private readonly excelAssetStore: ExcelAssetStore,
     private readonly excelOutputStore: ExcelOutputStore
   ) {}
@@ -268,51 +270,51 @@ export class TaskExecutorImpl implements TaskExecutor {
           path: extracted.path,
         });
 
-        const chunks = chunk(
-          new Array(extracted.numberOfSheets).fill(0).map((_, i) => i),
-          ANALYSIS_CHUNK_SIZE
-        );
-        for (const sheetNumbers of chunks) {
-          await this.taskService.insert({
+        await this.taskService.insert({
+          organizationId: file.organizationId,
+          projectId: file.projectId,
+          fileReferenceId: file.id,
+          config: {
+            type: "analyze-table",
+            version: "1",
             organizationId: file.organizationId,
             projectId: file.projectId,
             fileReferenceId: file.id,
-            config: {
-              type: "analyze-table",
-              version: "1",
-              organizationId: file.organizationId,
-              projectId: file.projectId,
-              fileReferenceId: file.id,
+            source: {
+              type: "derived",
               excelAssetId: excelAssetStore.id,
-              sheetNumbers,
             },
-          });
-        }
+          },
+        });
 
         break;
       }
 
       case "analyze-table": {
-        const asset = await this.excelAssetStore.get(config.excelAssetId);
-        LOGGER.info({ assetId: asset.id }, "Analyzing table");
+        const { bucketName, path } = await this.#pathForExcel(config);
+        LOGGER.info({ bucketName, path }, "Analyzing excel file");
         const { responses } = await this.tableExtractor.analyze({
-          bucket: asset.bucketName,
-          objectPath: asset.path,
-          sheetNumbers: config.sheetNumbers,
+          bucket: bucketName,
+          objectPath: path,
         });
-        if (Object.keys(responses).length === 0) {
+
+        if (responses.length === 0) {
           return;
         }
 
-        await this.excelOutputStore.insertMany(
-          {
-            organizationId: config.organizationId,
-            projectId: config.projectId,
-            fileReferenceId: config.fileReferenceId,
-            excelAssetId: config.excelAssetId,
+        await this.excelOutputStore.insert({
+          organizationId: config.organizationId,
+          projectId: config.projectId,
+          fileReferenceId: config.fileReferenceId,
+          excelAssetId:
+            config.source.type === "derived"
+              ? config.source.excelAssetId
+              : undefined,
+          output: {
+            type: "v0_chunks",
+            value: responses,
           },
-          responses
-        );
+        });
         break;
       }
 
@@ -320,6 +322,30 @@ export class TaskExecutorImpl implements TaskExecutor {
         assertNever(config);
     }
   }
+
+  async #pathForExcel(config: AnalyzeTableConfig) {
+    switch (config.source.type) {
+      case "derived": {
+        const asset = await this.excelAssetStore.get(
+          config.source.excelAssetId
+        );
+        return {
+          bucketName: asset.bucketName,
+          path: asset.path,
+        };
+      }
+      case "direct-upload": {
+        const file = await this.fileReferenceStore.get(config.fileReferenceId);
+        return {
+          bucketName: file.bucketName,
+          path: file.path,
+        };
+      }
+      default:
+        assertNever(config.source);
+    }
+  }
+
   async #chunkText(config: TextChunkConfig) {
     const text = await this.processedFileStore.getText(config.processedFileId);
     if (text.length === 0) {

@@ -1,19 +1,19 @@
 from fastapi import APIRouter
-from pydantic import BaseModel, NonNegativeInt
-from springtime.llm.table_analyzer import TableAnalyzer, Table
+from loguru import logger
+from pydantic import BaseModel
+from springtime.llm.table_analyzer import AnalyzeResponseChunk, TableAnalyzer
 from springtime.object_store.object_store import ObjectStore
 import tempfile
 import pandas as pd
 
 
 class AnalyzeTableRequest(BaseModel):
-    sheet_numbers: list[NonNegativeInt]
     bucket: str
     object_path: str
 
 
 class AnalyzeTableResponse(BaseModel):
-    resp: dict[NonNegativeInt, Table]
+    chunks: list[AnalyzeResponseChunk]
 
 
 class TableRouter:
@@ -26,8 +26,7 @@ class TableRouter:
 
         @router.post("/analyze")
         async def analyze_tables(req: AnalyzeTableRequest) -> AnalyzeTableResponse:
-            results: dict[NonNegativeInt, Table] = {}
-
+            logger.info(f"Analyzing {req.bucket}/{req.object_path}")
             with tempfile.TemporaryDirectory() as tmpdirname:
                 file_name = f"{tmpdirname}/file.xlsx"
                 self.object_store.download_to_filename(
@@ -36,10 +35,8 @@ class TableRouter:
 
                 excel_file = pd.ExcelFile(file_name)
 
-                for sheet_number in req.sheet_numbers:
-                    results[sheet_number] = self.table_analyzer.analyze(
-                        excel_file=excel_file, sheet_number=sheet_number
-                    ).table
-            return AnalyzeTableResponse(resp=results)
+                resp = self.table_analyzer.analyze(excel_file=excel_file)
+
+                return AnalyzeTableResponse(chunks=resp.chunks)
 
         return router

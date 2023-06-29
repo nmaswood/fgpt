@@ -134,11 +134,11 @@ export class LLMOutputRouter {
           )
         );
 
-        const output = await this.excelOutputStore.forFileReference(
+        const output = await this.excelOutputStore.forDerived(
           body.fileReferenceId
         );
 
-        res.json({ excel, forSheets: output?.outputs ?? {} });
+        res.json({ excel, forSheets: output?.output ?? {} });
       }
     );
 

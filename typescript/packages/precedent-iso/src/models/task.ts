@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { ZChunkStrategy } from "../text-chunker/text-chunker";
+import { ZExcelSource } from "./excel";
 
 export const ZTaskType = z.enum([
   "text-extraction",
@@ -101,9 +102,10 @@ export const ZAnalyzeTableConfig = z.object({
   organizationId: z.string(),
   projectId: z.string(),
   fileReferenceId: z.string(),
-  excelAssetId: z.string(),
-  sheetNumbers: z.number().array(),
+  source: ZExcelSource,
 });
+
+export type AnalyzeTableConfig = z.infer<typeof ZAnalyzeTableConfig>;
 
 export type ExtractTableConfig = z.infer<typeof ZExtractTableConfig>;
 

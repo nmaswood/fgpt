@@ -1,64 +1,40 @@
 import abc
 
 import pandas as pd
+
+from springtime.utils.chunks import chunks
 import openai
-from pydantic.types import NonNegativeInt
-import json
-from typing import Optional
-from pydantic import BaseModel, Field
-from enum import Enum
+from pydantic import BaseModel
+from springtime.llm.open_ai_types import CompletionResponse
 
 
-fileF = "/Users/nasrmaswood/Downloads/a67dcd5a9291725043156526b2ad89f7.xlsx"
-
-
-class DataType(str, Enum):
-    string = "string"
-    integer = "integer"
-    monetary_amount = "monetary_amount"
-    unknown = "unknown"
-    other = "other"
-
-
-class Column(BaseModel):
-    type: DataType = Field(
-        description='The type of the column. One of "string", "integer", "monetary_amount", "other" or "unknown".'
-    )
-    description: Optional[str] = Field(description="A description of the column.")
-    name: Optional[str] = Field(description="The name of the column header.")
-
-
-class Table(BaseModel):
-    """
-    This is the description of the main model
-    """
-
-    columns: list[Column] = Field(description="The columns of the table, in order.")
-    description: Optional[str] = Field(description="A description of the table.")
+from springtime.llm.prompts import EXCEL_SYSTEM_CONTEXT
 
 
 class AnalyzeArguments(BaseModel):
     excel_file: pd.ExcelFile
-    sheet_number: NonNegativeInt
 
     class Config:
         arbitrary_types_allowed = True
 
 
+class AnalyzeResponseChunk(BaseModel):
+    content: str
+    sheet_names: list[str]
+
+
+class InputChunk(BaseModel):
+    prompt: str
+    sheet_names: list[str]
+
+
 class AnalyzeResponse(BaseModel):
-    table: Table
-
-
-TABLE_SCHEMA = Table.schema()
+    chunks: list[AnalyzeResponseChunk]
 
 
 class TableAnalyzer(abc.ABC):
     @abc.abstractmethod
-    def analyze(
-        self, *, excel_file: pd.ExcelFile, sheet_number: int
-    ) -> AnalyzeResponse:
-        pass
-
+    def analyze(self, *, excel_file: pd.ExcelFile) -> AnalyzeResponse:
         return None
 
 
@@ -66,29 +42,43 @@ class TableAnalyzerImpl(TableAnalyzer):
     def __init__(self):
         pass
 
-    def analyze(
-        self, *, excel_file: pd.ExcelFile, sheet_number: int
-    ) -> AnalyzeResponse:
-        xl = pd.ExcelFile(fileF)
-        sheet = xl.sheet_names[sheet_number]
-        parsed_sheet = xl.parse(sheet)
-        as_string = parsed_sheet.to_string()
-        return AnalyzeResponse(table=self._execute(as_string))
+    def analyze(self, *, excel_file: pd.ExcelFile) -> AnalyzeResponse:
+        acc: list[AnalyzeResponseChunk] = []
 
-    def _execute(self, table: str):
+        xl = pd.ExcelFile(excel_file)
+        for sheet_chunk in chunks(xl.sheet_names, 5):
+            input_chunk = self._input_chunk_from_sheets(xl, sheet_chunk)
+            resp = self._chat_completion(input_chunk.prompt)
+            content = resp.choices[0].message.content
+
+            acc.append(
+                AnalyzeResponseChunk(
+                    sheet_names=input_chunk.sheet_names, content=content
+                )
+            )
+        return AnalyzeResponse(chunks=acc)
+
+    def _chat_completion(self, table: str) -> CompletionResponse:
         completion = openai.ChatCompletion.create(
             model="gpt-4-0613",
             messages=[
                 {
                     "role": "system",
-                    "content": "You are an expert financial analyst. You are being given a tabular data from a financial document. Try your best to answer the questions provided",
+                    "content": EXCEL_SYSTEM_CONTEXT,
                 },
-                {"role": "user", "content": "Table: {}".format(table)},
+                {"role": "user", "content": table},
             ],
-            functions=[{"name": "parse_table", "parameters": TABLE_SCHEMA}],
-            function_call={"name": "parse_table"},
             temperature=0,
         )
-        res = completion.choices[0].message.function_call.arguments
+        return CompletionResponse(**completion)
 
-        return Table(**json.loads(res))
+    def _input_chunk_from_sheets(
+        self, excel_file: pd.ExcelFile, sheet_names: list[str]
+    ) -> InputChunk:
+        acc: list[str] = []
+
+        for sheet_name in sheet_names:
+            parsed_sheet = excel_file.parse(sheet_name)
+            acc.append(f"{sheet_name}:{parsed_sheet.to_string()}")
+
+        return InputChunk(prompt="\n".join(acc), sheet_names=sheet_names)

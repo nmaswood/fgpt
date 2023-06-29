@@ -4,7 +4,7 @@ export * from "./excel-asset-store";
 export * from "./excel-output-store";
 export * from "./file-reference-store";
 export * from "./jobs/task-executor";
-export * from "./llm-outputs/metrics-store";
+export * from "./llm-outputs/misc-output-store";
 export * from "./llm-outputs/question-store";
 export * from "./llm-outputs/report-service";
 export * from "./llm-outputs/summary-store";

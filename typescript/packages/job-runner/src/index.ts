@@ -21,7 +21,7 @@ import {
   TikaHttpClient,
   TikaTextExtractor,
   TaskExecutorImpl,
-  HttpTableExtractor,
+  HttpTabularDataService,
   PsqlExcelAssetStore,
   PsqlExcelOutputStore,
 } from "@fgpt/precedent-node";
@@ -68,7 +68,7 @@ async function start(settings: Settings) {
   const questionStore = new PsqlQuestionStore(pool);
   const metricsStore = new PsqlMiscOutputStore(pool);
 
-  const tableExtractor = new HttpTableExtractor(
+  const tabularDataService = new HttpTabularDataService(
     settings.mlServiceUri,
     settings.serviceToServiceSecret
   );
@@ -85,7 +85,7 @@ async function start(settings: Settings) {
     questionStore,
     metricsStore,
     fileReferenceStore,
-    tableExtractor,
+    tabularDataService,
     excelAssetStore,
     excelOutputStore
   );

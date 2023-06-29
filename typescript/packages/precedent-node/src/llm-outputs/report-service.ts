@@ -1,6 +1,6 @@
 import { assertNever, Outputs } from "@fgpt/precedent-iso";
 
-import { MiscOutputStore } from "./metrics-store";
+import { MiscOutputStore } from "./misc-output-store";
 import { QuestionStore } from "./question-store";
 
 export interface ReportService {

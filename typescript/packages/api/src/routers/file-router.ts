@@ -1,3 +1,4 @@
+import { assertNever, getFileType } from "@fgpt/precedent-iso";
 import {
   FileReferenceStore,
   InsertFileReference,
@@ -88,12 +89,17 @@ export class FileRouter {
 
         const [fileRef] = await this.fileReferenceStore.insertMany([ref]);
 
+        const fileType = getFileType(file.mimetype);
+
         if (fileRef === undefined) {
           throw new Error("failed to insert file reference");
         }
+        if (fileType === undefined) {
+          throw new Error("Unrecognized file type");
+        }
 
-        switch (file.mimetype) {
-          case "application/pdf": {
+        switch (fileType) {
+          case "pdf": {
             await this.taskStore.insert({
               organizationId,
               projectId,
@@ -108,13 +114,28 @@ export class FileRouter {
             });
             break;
           }
-          case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+          case "excel": {
             LOGGER.info({ mimetype: file.mimetype }, "Excel file detected");
+            await this.taskStore.insert({
+              organizationId,
+              projectId,
+              fileReferenceId: fileRef.id,
+              config: {
+                version: "1",
+                type: "analyze-table",
+                organizationId: req.user.organizationId,
+                projectId: req.body.projectId,
+                fileReferenceId: fileRef.id,
+                source: {
+                  type: "direct-upload",
+                },
+              },
+            });
+
             break;
           }
           default:
-            LOGGER.info({ mimetype: file.mimetype }, "no task for mimetype");
-            break;
+            assertNever(fileType);
         }
 
         await F.unlink(file.path);

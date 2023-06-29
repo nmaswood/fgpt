@@ -1,3 +1,4 @@
+import { AnalyzeOutput, ExcelSource } from "@fgpt/precedent-iso";
 import { DatabasePool, sql } from "slonik";
 import { z } from "zod";
 
@@ -6,104 +7,89 @@ export interface ExcelOutput {
   organizationId: string;
   projectId: string;
   fileReferenceId: string;
-  excelAssetId: string;
-  sheetNumber: number;
-  output: Record<string, unknown>;
+  source: ExcelSource;
+  output: AnalyzeOutput;
 }
 
 export interface InsertExcelOutput {
   organizationId: string;
   projectId: string;
   fileReferenceId: string;
-  excelAssetId: string;
-}
-
-export interface ForFileReference {
-  organizationId: string;
-  projectId: string;
-  fileReferenceId: string;
-  excelAssetId: string;
-  outputs: Record<number, Record<string, unknown>>;
+  excelAssetId: string | undefined;
+  output: AnalyzeOutput;
 }
 
 export interface ExcelOutputStore {
-  insertMany(
-    foreignKeys: InsertExcelOutput,
-    outputs: Record<number, Record<string, unknown>>
-  ): Promise<void>;
-  forFileReference(
-    fileReferenceId: string
-  ): Promise<ForFileReference | undefined>;
+  insert(args: InsertExcelOutput): Promise<ExcelOutput>;
+  forDirectUpload(fileReferenceId: string): Promise<ExcelOutput | undefined>;
+  forDerived(fileReferenceId: string): Promise<ExcelOutput | undefined>;
 }
 
-const FIELDS = sql.fragment` id, organization_id, project_id, file_reference_id, excel_asset_id, sheet_number, output`;
+const FIELDS = sql.fragment` id, organization_id, project_id, file_reference_id, excel_asset_id, output`;
 
 export class PsqlExcelOutputStore implements ExcelOutputStore {
   constructor(private readonly pool: DatabasePool) {}
 
-  async insertMany(
-    {
-      organizationId,
-      projectId,
-      fileReferenceId,
-      excelAssetId,
-    }: InsertExcelOutput,
-    outputs: Record<number, Record<string, unknown>>
-  ): Promise<void> {
-    const values = Object.entries(outputs).map(
-      ([sheetNumber, output]) =>
-        sql.fragment`
-(${organizationId},
-    ${projectId},
-    ${fileReferenceId},
-    ${excelAssetId},
-    ${Number(sheetNumber)},
-    ${JSON.stringify(output)})
+  async insert({
+    organizationId,
+    projectId,
+    fileReferenceId,
+    excelAssetId,
+    output,
+  }: InsertExcelOutput): Promise<ExcelOutput> {
+    const value = await this.pool.one(
+      sql.type(ZExcelOutputRow)`
+INSERT INTO excel_analysis (organization_id, project_id, file_reference_id, excel_asset_id, output)
+    VALUES (${organizationId}, ${projectId}, ${fileReferenceId}, ${
+        excelAssetId ?? null
+      }, ${JSON.stringify(output)})
+RETURNING
+    ${FIELDS}
 `
     );
-
-    await this.pool.query(
-      sql.unsafe`
-INSERT INTO excel_analysis (organization_id, project_id, file_reference_id, excel_asset_id, sheet_number, output)
-    VALUES
-        ${sql.join(values, sql.fragment`, `)}
-`
-    );
+    return value ?? undefined;
   }
 
-  async forFileReference(
+  async forDirectUpload(
     fileReferenceId: string
-  ): Promise<ForFileReference | undefined> {
-    const { rows } = await this.pool.query(
-      sql.type(ZExcelOutputRow)`
+  ): Promise<ExcelOutput | undefined> {
+    return this.#forFileReference(fileReferenceId, "direct-upload");
+  }
 
+  async forDerived(fileReferenceId: string): Promise<ExcelOutput | undefined> {
+    return this.#forFileReference(fileReferenceId, "derived");
+  }
+
+  async #forFileReference(
+    fileReferenceId: string,
+    source: "direct-upload" | "derived"
+  ): Promise<ExcelOutput | undefined> {
+    const value = await this.pool.maybeOne(
+      sql.type(ZExcelOutputRow)`
 SELECT
     ${FIELDS}
 FROM
     excel_analysis
 WHERE
     file_reference_id = ${fileReferenceId}
+    AND excel_asset_id IS ${
+      source === "direct-upload" ? sql.fragment`NULL` : sql.fragment`NOT NULL`
+    }
 `
     );
-    const [row] = rows;
-    if (!row) {
-      return undefined;
-    }
-
-    const output: Record<number, Record<string, unknown>> = {};
-    for (const { sheetNumber, output: sheetOutput } of rows) {
-      output[sheetNumber] = sheetOutput;
-    }
-
-    return {
-      organizationId: row.organizationId,
-      projectId: row.projectId,
-      fileReferenceId: row.fileReferenceId,
-      excelAssetId: row.excelAssetId,
-      outputs: output,
-    };
+    return value ?? undefined;
   }
 }
+
+const ZAnalyzeOutput = z.object({
+  type: z.literal("v0_chunks"),
+  value: z
+    .object({
+      sheetNames: z.array(z.string()),
+      content: z.string(),
+    })
+    .array(),
+});
 
 const ZExcelOutputRow = z
   .object({
@@ -111,9 +97,8 @@ const ZExcelOutputRow = z
     project_id: z.string(),
     organization_id: z.string(),
     file_reference_id: z.string(),
-    excel_asset_id: z.string(),
-    sheet_number: z.number(),
-    output: z.record(z.unknown()),
+    excel_asset_id: z.string().nullable(),
+    output: ZAnalyzeOutput,
   })
   .transform(
     (row): ExcelOutput => ({
@@ -121,8 +106,14 @@ const ZExcelOutputRow = z
       organizationId: row.organization_id,
       projectId: row.project_id,
       fileReferenceId: row.file_reference_id,
-      excelAssetId: row.excel_asset_id,
-      sheetNumber: row.sheet_number,
+      source: row.excel_asset_id
+        ? {
+            type: "derived",
+            excelAssetId: row.excel_asset_id,
+          }
+        : {
+            type: "direct-upload",
+          },
       output: row.output,
     })
   );

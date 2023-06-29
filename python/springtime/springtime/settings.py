@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseSettings, Field
 
 
@@ -10,13 +11,14 @@ class Settings(BaseSettings):
     pinecone_index: str = Field(env="PINECONE_INDEX")
     pinecone_namespace: str = Field(env="PINECONE_NAMESPACE")
     telemetry_enabled: bool = Field(env="TRACING_ENABLED", default=False)
-    reload:  bool = Field(env="RELOAD", default=False)
-    service_to_service_secret:  str = Field(env="SERVICE_TO_SERVICE_SECRET")
-    skip_auth: bool = Field(env="SKIP_AUTH", default=False)
+    reload: bool = Field(env="RELOAD", default=False)
+    service_to_service_secret: Optional[str] = Field(
+        env="SERVICE_TO_SERVICE_SECRET",
+    )
 
     class Config:
-        env_file = '.env'
-        env_file_encoding = 'utf-8'
+        env_file = ".env"
+        env_file_encoding = "utf-8"
 
 
 SETTINGS = Settings()
