@@ -1,4 +1,3 @@
-import { getFileType } from "@fgpt/precedent-iso";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import BoltIcon from "@mui/icons-material/Bolt";
@@ -8,17 +7,13 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { Box, IconButton, Paper, Skeleton, Tab, Tabs } from "@mui/material";
 import { useRouter } from "next/router";
 import React from "react";
-import { z } from "zod";
 
 import { DisplayAsset } from "../../src/components/file/display-asset";
-import { DisplayExcel } from "../../src/components/file/display-excel";
 import { DisplayFileChat } from "../../src/components/file/display-file-chat";
 import { DisplayFileReport } from "../../src/components/file/report";
+import { useTabState } from "../../src/components/file/use-tab-state";
 import { ViewByChunk } from "../../src/components/file/view-by-chunk";
-import { useExcelInfo } from "../../src/hooks/use-fetch-excel";
-import { useFetchFile } from "../../src/hooks/use-fetch-file";
 import { useFetchFileToRender } from "../../src/hooks/use-fetch-file-to-render";
-import { useFetchSignedUrl } from "../../src/hooks/use-fetch-signed-url";
 import { useFetchToken } from "../../src/hooks/use-fetch-token";
 
 export default function DisplayFile() {
@@ -43,9 +38,6 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
 }) => {
   const { data: file } = useFetchFileToRender(fileId);
 
-  // hack to get to load faster
-  const { data: excelAsset, isLoading } = useExcelInfo(fileId);
-
   const [showAsset, setShowAsset] = React.useState(true);
 
   const [tab, setTab] = useTabState();
@@ -60,6 +52,7 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
         height: "100%",
         maxHeight: "100%",
         maxWidth: "100%",
+        overflow: "auto",
       }}
     >
       {showAsset && (
@@ -71,7 +64,7 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
           </Box>
 
           {file ? (
-            <DisplayAsset signedUrl={file.signedUrl} assetType={file.type} />
+            <DisplayAsset fileToRender={file} />
           ) : (
             <Skeleton
               variant="rectangular"
@@ -106,21 +99,25 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
               iconPosition="start"
               label={"Report"}
             />
-            <Tab
-              value="chat"
-              icon={<BoltIcon />}
-              iconPosition="start"
-              label={"Chat"}
-            />
+            {file && file.type === "pdf" && (
+              <Tab
+                value="chat"
+                icon={<BoltIcon />}
+                iconPosition="start"
+                label={"Chat"}
+              />
+            )}
 
-            <Tab
-              value="debug"
-              icon={<ConstructionIcon />}
-              iconPosition="start"
-              label={"Debug"}
-            />
+            {file && file.type === "pdf" && (
+              <Tab
+                value="debug"
+                icon={<ConstructionIcon />}
+                iconPosition="start"
+                label={"Debug"}
+              />
+            )}
 
-            {(isLoading || excelAsset?.excel?.signedUrl) && (
+            {false && (
               <Tab
                 value="tables"
                 icon={<GridOnIcon />}
@@ -138,49 +135,18 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
           maxWidth="100%"
           flexDirection="column"
         >
-          {tab === "report" && <DisplayFileReport fileReferenceId={fileId} />}
+          {tab === "report" && file && <DisplayFileReport file={file} />}
           {tab === "chat" && file && (
             <DisplayFileChat
-              fileReferenceId={file.id}
+              fileReferenceId={fileId}
               projectId={file.projectId}
               token={token}
             />
           )}
 
           {tab === "debug" && <ViewByChunk fileId={fileId} />}
-          {tab === "tables" && (
-            <DisplayExcel isLoading={isLoading} excelInfo={excelAsset} />
-          )}
         </Box>
       </Box>
     </Paper>
   );
-};
-
-const ZFileTab = z.enum(["report", "chat", "debug", "tables"]);
-type FileTab = z.infer<typeof ZFileTab>;
-
-const useTabState = () => {
-  const router = useRouter();
-  const [tab, setTab] = React.useState<FileTab>(() => {
-    const fileTab = ZFileTab.safeParse(router.query.fileTab);
-    if (fileTab.success) {
-      return fileTab.data;
-    }
-    return "report";
-  });
-
-  React.useEffect(() => {
-    if (
-      router.query.fileTab === tab ||
-      (router.query.fileTab === undefined && tab === "report")
-    ) {
-      return;
-    }
-    router.query.fileTab = tab;
-    router.replace(router);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab]);
-
-  return [tab, setTab] as const;
 };

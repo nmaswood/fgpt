@@ -1,34 +1,34 @@
-import { assertNever, FileType } from "@fgpt/precedent-iso";
+import "@fortune-sheet/react/dist/index.css";
+
+import { assertNever, FileToRender } from "@fgpt/precedent-iso";
 import { Sheet } from "@fortune-sheet/core";
 import { Workbook } from "@fortune-sheet/react";
 import React from "react";
 
 export const DisplayAsset: React.FC<{
-  signedUrl: string;
-  assetType: FileType;
-}> = ({ signedUrl, assetType }) => {
-  switch (assetType) {
+  fileToRender: FileToRender.File;
+}> = ({ fileToRender }) => {
+  switch (fileToRender.type) {
     case "excel":
-      return <DisplayExcelFile signedUrl={signedUrl} />;
+      return <DisplayExcelFile sheets={fileToRender.sheets} />;
     case "pdf":
       return (
         <object
-          data={signedUrl}
+          data={fileToRender.signedUrl}
           type="application/pdf"
           style={{ width: "100%", height: "100%", minWidth: "50%" }}
         />
       );
+    case undefined:
+      throw new Error("illegal state");
     default:
-      assertNever(assetType);
+      assertNever(fileToRender);
   }
 };
 
-const DisplayExcelFile: React.FC<{ signedUrl: string }> = ({}) => {
-  const sheets: Sheet[] = [];
-  if (sheets.length === 0) {
-    return null;
-  }
-
+const DisplayExcelFile: React.FC<{
+  sheets: Sheet[];
+}> = ({ sheets }) => {
   return (
     <Workbook
       showToolbar={false}

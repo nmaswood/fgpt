@@ -1,9 +1,9 @@
 import {
   assertNever,
   FileReference,
+  FileToRender,
   getFileType,
   processWorkBook,
-  FileToRender,
 } from "@fgpt/precedent-iso";
 import { read } from "xlsx";
 

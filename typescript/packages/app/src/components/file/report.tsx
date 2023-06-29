@@ -1,8 +1,12 @@
-import { Outputs, Progress } from "@fgpt/precedent-iso";
+import {
+  AnalyzeOutput,
+  AnalyzeResponseChunk,
+  assertNever,
+  FileToRender,
+  Outputs,
+} from "@fgpt/precedent-iso";
 import {
   Box,
-  CircularProgress,
-  LinearProgress,
   List,
   ListItem,
   ListItemText,
@@ -15,16 +19,9 @@ import {
   Typography,
 } from "@mui/material";
 
-import { useFetchReport } from "../../hooks/use-fetch-output";
-
-export const DisplayFileReport: React.FC<{ fileReferenceId: string }> = ({
-  fileReferenceId,
-}) => {
-  const { data, isLoading } = useFetchReport(fileReferenceId);
-  const progress = data?.progress;
-
-  const formattedProgress = formatProgress(progress);
-
+export const DisplayFileReport: React.FC<{
+  file: FileToRender.File;
+}> = ({ file }) => {
   return (
     <Box
       display="flex"
@@ -35,40 +32,63 @@ export const DisplayFileReport: React.FC<{ fileReferenceId: string }> = ({
       overflow="auto"
       flexDirection="column"
     >
-      {isLoading && (
-        <Box width="100%" paddingTop={1}>
-          <LinearProgress />
-        </Box>
-      )}
-
-      {data && progress && progress.total === progress.value ? (
-        <DisplayReport report={data.report} />
-      ) : (
-        <Box display="flex" gap={2} padding={2}>
-          <CircularProgress size="1.5rem" />
-          <Typography>
-            Report is still generating.{" "}
-            {formattedProgress ? `${formattedProgress} complete` : ""}
-          </Typography>
-        </Box>
-      )}
+      <Dispatch file={file} />;
     </Box>
   );
 };
 
-function formatProgress(progress: Progress | undefined): string | undefined {
-  if (!progress) {
-    return undefined;
+const Dispatch: React.FC<{ file: FileToRender.File }> = ({ file }) => {
+  switch (file.type) {
+    case "pdf":
+      return <ForPDF report={file.report} />;
+    case "excel":
+      return <ForExcel output={file.output} />;
+    default:
+      assertNever(file);
   }
-  if (progress.total === 0) {
-    return undefined;
-  }
-  return (progress.value / progress.total) * 100 + "%";
-}
+};
 
-const DisplayReport: React.FC<{ report: Outputs.Report }> = ({
-  report: { summaries, financialSummary, terms },
+const ForExcel: React.FC<{ output: AnalyzeOutput | undefined }> = ({
+  output,
 }) => {
+  const chunks = output?.value ?? [];
+
+  return (
+    <>
+      {chunks.map((chunk, i) => (
+        <ForExcelValue key={i} chunk={chunk} />
+      ))}
+    </>
+  );
+};
+
+const ForExcelValue: React.FC<{ chunk: AnalyzeResponseChunk }> = ({
+  chunk,
+}) => {
+  return (
+    <Box
+      display="flex"
+      flexDirection="column"
+      gap={3}
+      maxWidth="100%"
+      maxHeight="100%"
+      overflow="auto"
+      padding={2}
+    >
+      <Typography variant="h6" sx={{ textDecoration: "underline" }}>
+        {formatSheetNames(chunk.sheetNames)}
+      </Typography>
+      <Typography>{chunk.content}</Typography>
+    </Box>
+  );
+};
+const ForPDF: React.FC<{ report: Outputs.Report | undefined }> = ({
+  report,
+}) => {
+  if (!report) {
+    return null;
+  }
+  const { summaries, financialSummary, terms } = report;
   return (
     <Box display="flex" flexDirection="column" gap={1} padding={2}>
       {terms.length > 0 && (
@@ -164,3 +184,16 @@ const DisplayReport: React.FC<{ report: Outputs.Report }> = ({
     </Box>
   );
 };
+
+function formatSheetNames(sheetNames: string[]): string {
+  if (sheetNames.length === 0) {
+    return "";
+  } else if (sheetNames.length === 1) {
+    return sheetNames[0]!;
+  }
+
+  const [first] = sheetNames;
+  const last = sheetNames.at(-1);
+
+  return `${first} to ${last}`;
+}

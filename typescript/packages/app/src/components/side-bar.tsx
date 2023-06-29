@@ -7,8 +7,6 @@ import { LoadingButton } from "@mui/lab";
 import {
   Alert,
   Avatar,
-  Box,
-  Button,
   Collapse,
   Dialog,
   DialogActions,
@@ -29,6 +27,9 @@ import {
   Snackbar,
   TextField,
 } from "@mui/material";
+
+import { Box, Button } from "@mui/joy";
+
 import React from "react";
 import { TransitionGroup } from "react-transition-group";
 
@@ -376,14 +377,9 @@ const FormDialog: React.FC<{
         <Button disabled={loading} onClick={onClose} color="primary">
           Cancel
         </Button>
-        <LoadingButton
-          loading={loading}
-          onClick={onSubmit}
-          variant="contained"
-          color="primary"
-        >
+        <Button loading={loading} onClick={onSubmit} color="primary">
           Create project
-        </LoadingButton>
+        </Button>
       </DialogActions>
       {error && (
         <Snackbar

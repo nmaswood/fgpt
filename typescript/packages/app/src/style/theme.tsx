@@ -1,12 +1,12 @@
-import { createTheme } from "@mui/material/styles";
-
 import { FGPT_BLUE, FGPT_RED } from "./colors";
 
 const HEADER_FONT = `Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif;`;
 
 export const NON_HEADER_FONT = `Bahnschrift, 'DIN Alternate', 'Franklin Gothic Medium', 'Nimbus Sans Narrow', sans-serif-condensed, sans-serif;`;
 
-export const THEME = createTheme({
+import { experimental_extendTheme as materialExtendTheme } from "@mui/material/styles";
+
+export const THEME = materialExtendTheme({
   components: {
     MuiListItemIcon: {
       styleOverrides: {

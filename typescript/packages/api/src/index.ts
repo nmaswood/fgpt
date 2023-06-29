@@ -106,6 +106,10 @@ async function start() {
     SETTINGS.serviceToServiceSecret
   );
 
+  // hack to wake up ml service
+  // when api request is made
+  mlService.ping();
+
   const chatStore = new PsqlChatStore(pool);
 
   const questionStore = new PsqlQuestionStore(pool);

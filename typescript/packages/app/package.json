@@ -26,6 +26,7 @@
     "@fgpt/precedent-iso": "workspace:^",
     "@fortune-sheet/react": "^0.18.3",
     "@mui/icons-material": "^5.11.16",
+    "@mui/joy": "^5.0.0-alpha.85",
     "@mui/lab": "^5.0.0-alpha.134",
     "@mui/material": "^5.13.6",
     "@mui/x-data-grid": "^6.9.0",

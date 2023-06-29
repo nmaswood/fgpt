@@ -1,5 +1,4 @@
 import { FileToRender } from "@fgpt/precedent-iso";
-
 import useSWR from "swr";
 
 export const useFetchFileToRender = (fileReferenceId: string) => {

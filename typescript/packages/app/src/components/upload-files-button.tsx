@@ -1,5 +1,6 @@
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { Button, IconButton, useMediaQuery } from "@mui/material";
+import { useMediaQuery } from "@mui/material";
+import { IconButton, Button } from "@mui/joy";
 import Uppy from "@uppy/core";
 import React from "react";
 
@@ -21,7 +22,7 @@ export const UploadFilesButton: React.FC<{
 
   return isLargeScreen ? (
     <Button
-      startIcon={<CloudUploadIcon />}
+      startDecorator={<CloudUploadIcon />}
       onClick={openModal}
       variant="outlined"
       sx={{ height: "40px", whiteSpace: "nowrap" }}

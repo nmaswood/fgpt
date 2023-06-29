@@ -522,6 +522,7 @@ __metadata:
     "@fgpt/precedent-iso": "workspace:^"
     "@fortune-sheet/react": ^0.18.3
     "@mui/icons-material": ^5.11.16
+    "@mui/joy": ^5.0.0-alpha.85
     "@mui/lab": ^5.0.0-alpha.134
     "@mui/material": ^5.13.6
     "@mui/x-data-grid": ^6.9.0
@@ -938,6 +939,37 @@ __metadata:
     "@types/react":
       optional: true
   checksum: db70426b6ede049307b951fc622c6ab3b156a24589242bebbc7effd4b0df2d3c7aca93796ed8dfdf20776248778a798724c7a112f8f687c3b4a1ae813f98fb17
+  languageName: node
+  linkType: hard
+
+"@mui/joy@npm:^5.0.0-alpha.85":
+  version: 5.0.0-alpha.85
+  resolution: "@mui/joy@npm:5.0.0-alpha.85"
+  dependencies:
+    "@babel/runtime": ^7.22.5
+    "@mui/base": 5.0.0-beta.5
+    "@mui/core-downloads-tracker": ^5.13.4
+    "@mui/system": ^5.13.6
+    "@mui/types": ^7.2.4
+    "@mui/utils": ^5.13.6
+    clsx: ^1.2.1
+    csstype: ^3.1.2
+    prop-types: ^15.8.1
+    react-is: ^18.2.0
+  peerDependencies:
+    "@emotion/react": ^11.5.0
+    "@emotion/styled": ^11.3.0
+    "@types/react": ^17.0.0 || ^18.0.0
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+  peerDependenciesMeta:
+    "@emotion/react":
+      optional: true
+    "@emotion/styled":
+      optional: true
+    "@types/react":
+      optional: true
+  checksum: 25c1db2fb6ba59d1c3a21c469b64847f71a3eed13db4e55a176f49610184534be387712008da07d73f93c35cef1ecbbce74a8dbd4244bf9f306537787e43e5de
   languageName: node
   linkType: hard
 
