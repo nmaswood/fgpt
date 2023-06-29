@@ -23,7 +23,7 @@ export interface FileReferenceStore {
   insertMany(args: InsertFileReference[]): Promise<FileReference[]>;
 }
 
-const FIELDS = sql.fragment` id, file_name, organization_id, project_id, content_type, path, bucket_name`;
+const FIELDS = sql.fragment` id, file_name, organization_id, project_id, content_type, path, bucket_name, uploaded_at`;
 
 export class PsqlFileReferenceStore implements FileReferenceStore {
   constructor(private readonly pool: DatabasePool) {}
@@ -157,6 +157,7 @@ const ZFileReferenceRow = z
     content_type: z.string(),
     path: z.string(),
     bucket_name: z.string(),
+    uploaded_at: z.number(),
   })
   .transform((row) => ({
     id: row.id,
@@ -166,4 +167,5 @@ const ZFileReferenceRow = z
     contentType: row.content_type,
     path: row.path,
     bucketName: row.bucket_name,
+    createdAt: new Date(row.uploaded_at),
   }));

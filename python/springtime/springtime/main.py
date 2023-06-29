@@ -26,13 +26,15 @@ TABLE_ANALYZER = TableAnalyzerImpl()
 
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
-    response = await call_next(request)
     secret = request.headers.get("x-service-to-service-secret")
 
-    if secret is not None and (secret != SETTINGS.service_to_service_secret):
+    if (
+        SETTINGS.service_to_service_secret
+        and SETTINGS.service_to_service_secret != secret
+    ):
         return JSONResponse(status_code=401, content="Not authorized")
 
-    return response
+    return await call_next(request)
 
 
 app.include_router(MLRouter().get_router())

@@ -23,7 +23,7 @@ import { LOGGER } from "../logger";
 import { MLServiceClient } from "../ml/ml-service";
 import { ProcessedFileStore } from "../processed-file-store";
 import { ShaHash } from "../sha-hash";
-import { TabularDataService } from "../table-extractor/table-extractor";
+import { TabularDataService } from "../tabular-data-service/tabular-data-service";
 import { Task, TaskStore } from "../task-store";
 import { TextChunkStore } from "../text-chunk-store";
 import { TextExtractor } from "../text-extractor";

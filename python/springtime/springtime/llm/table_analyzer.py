@@ -1,4 +1,5 @@
 import abc
+from loguru import logger
 
 import pandas as pd
 
@@ -20,6 +21,7 @@ class AnalyzeArguments(BaseModel):
 
 class AnalyzeResponseChunk(BaseModel):
     content: str
+    prompt: str
     sheet_names: list[str]
 
 
@@ -46,16 +48,22 @@ class TableAnalyzerImpl(TableAnalyzer):
         acc: list[AnalyzeResponseChunk] = []
 
         xl = pd.ExcelFile(excel_file)
-        for sheet_chunk in chunks(xl.sheet_names, 5):
+        for sheet_chunk in chunks(xl.sheet_names, 10):
+            logger.info(f"Starting to analyze Analyzing sheet chunk: {sheet_chunk}")
             input_chunk = self._input_chunk_from_sheets(xl, sheet_chunk)
             resp = self._chat_completion(input_chunk.prompt)
             content = resp.choices[0].message.content
 
             acc.append(
                 AnalyzeResponseChunk(
-                    sheet_names=input_chunk.sheet_names, content=content
+                    sheet_names=input_chunk.sheet_names,
+                    content=content,
+                    prompt=input_chunk.prompt,
                 )
             )
+
+            logger.info(f"Finished analyzing sheet chunk: {sheet_chunk}")
+
         return AnalyzeResponse(chunks=acc)
 
     def _chat_completion(self, table: str) -> CompletionResponse:
@@ -79,6 +87,10 @@ class TableAnalyzerImpl(TableAnalyzer):
 
         for sheet_name in sheet_names:
             parsed_sheet = excel_file.parse(sheet_name)
+            sheet_as_String = parsed_sheet.to_string(
+                show_dimensions=False, index_names=False, index=False, na_rep=""
+            )
+
             acc.append(f"{sheet_name}:{parsed_sheet.to_string()}")
 
         return InputChunk(prompt="\n".join(acc), sheet_names=sheet_names)

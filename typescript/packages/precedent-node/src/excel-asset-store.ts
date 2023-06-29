@@ -33,7 +33,6 @@ export class PsqlExcelAssetStore implements ExcelAssetStore {
 
   async get(id: string): Promise<ExcelAsset> {
     return this.pool.one(sql.type(ZExcelAssetRow)`
-
 SELECT
     ${FIELDS}
 FROM

@@ -6,6 +6,7 @@ export interface FileReference {
   contentType: string;
   path: string;
   bucketName: string;
+  createdAt: Date;
 }
 
 export interface LoadedFile {
