@@ -1,11 +1,7 @@
-import { ExcelFileToDisplay } from "@fgpt/precedent-iso";
 import {
-  ExcelAssetStore,
-  ExcelOutputStore,
+  FileRenderService,
   MLServiceClient,
-  ObjectStorageService,
   QuestionStore,
-  ReportService,
   TextChunkStore,
 } from "@fgpt/precedent-node";
 import express from "express";
@@ -16,10 +12,7 @@ export class LLMOutputRouter {
     private readonly questionStore: QuestionStore,
     private readonly mlService: MLServiceClient,
     private readonly chunkStore: TextChunkStore,
-    private readonly reportService: ReportService,
-    private readonly excelAssetStore: ExcelAssetStore,
-    private readonly objectStore: ObjectStorageService,
-    private readonly excelOutputStore: ExcelOutputStore
+    private readonly fileToRenderService: FileRenderService
   ) {}
   init() {
     const router = express.Router();
@@ -98,47 +91,14 @@ export class LLMOutputRouter {
     );
 
     router.get(
-      "/report/:fileReferenceId",
+      "/render-file/:fileReferenceId",
       async (req: express.Request, res: express.Response) => {
-        const body = ZSampleFileRequest.parse(req.params);
-        const [report, textChunkGroup] = await Promise.all([
-          this.reportService.forFileReferenceId(body.fileReferenceId),
-          this.chunkStore.getTextChunkGroupByStrategy(
-            body.fileReferenceId,
-            "greedy_15k"
-          ),
-        ]);
-
-        const progress = textChunkGroup
-          ? await this.chunkStore.getLlmOutputProgress(textChunkGroup.id)
-          : undefined;
-
-        res.json({ report, progress });
-      }
-    );
-
-    router.get(
-      "/excel/:fileReferenceId",
-      async (req: express.Request, res: express.Response) => {
-        const body = ZSampleFileRequest.parse(req.params);
-        const files = await this.excelAssetStore.list(body.fileReferenceId);
-        const [excel] = await Promise.all(
-          files.map(
-            async (file): Promise<ExcelFileToDisplay> => ({
-              signedUrl: await this.objectStore.getSignedUrl(
-                file.bucketName,
-                file.path
-              ),
-              numSheets: file.numSheets,
-            })
-          )
-        );
-
-        const output = await this.excelOutputStore.forDerived(
+        const body = ZFileToRenderRequest.parse(req.params);
+        const file = await this.fileToRenderService.forFile(
           body.fileReferenceId
         );
 
-        res.json({ excel, forSheets: output?.output ?? {} });
+        res.json({ file });
       }
     );
 
@@ -147,6 +107,10 @@ export class LLMOutputRouter {
 }
 const ZSampleProjectRequest = z.object({
   projectId: z.string(),
+});
+
+const ZFileToRenderRequest = z.object({
+  fileReferenceId: z.string(),
 });
 
 const ZSampleFileRequest = z.object({

@@ -1,12 +1,10 @@
 import {
-  AnalyzeOutput,
   assertNever,
   FileReference,
   getFileType,
-  Outputs,
+  processWorkBook,
   Render,
 } from "@fgpt/precedent-iso";
-import { WorkBook } from "xlsx";
 import { read } from "xlsx";
 
 import { ExcelAssetStore } from "./excel-asset-store";
@@ -16,9 +14,7 @@ import { ReportService } from "./llm-outputs/report-service";
 import { ObjectStorageService } from "./object-store/object-store";
 
 export interface FileRenderService {
-  forFile(
-    fileReferenceId: string
-  ): Promise<Render.File<WorkBook, AnalyzeOutput, Outputs.Report>>;
+  forFile(fileReferenceId: string): Promise<Render.File>;
 }
 
 export class FileToRenderServiceImpl implements FileRenderService {
@@ -30,9 +26,7 @@ export class FileToRenderServiceImpl implements FileRenderService {
     private readonly excelAssetStore: ExcelAssetStore
   ) {}
 
-  async forFile(
-    fileReferenceId: string
-  ): Promise<Render.File<WorkBook, AnalyzeOutput, Outputs.Report>> {
+  async forFile(fileReferenceId: string): Promise<Render.File> {
     const file = await this.fileReferenceStore.get(fileReferenceId);
     const fileType = getFileType(file.contentType);
 
@@ -48,20 +42,18 @@ export class FileToRenderServiceImpl implements FileRenderService {
     }
   }
 
-  async #forExcel(
-    file: FileReference
-  ): Promise<Render.File<WorkBook, AnalyzeOutput, Outputs.Report>> {
+  async #forExcel(file: FileReference): Promise<Render.File> {
     const output = await this.excelOutputStore.forDirectUpload(file.id);
+    const parsed = await this.#fetchExcel(file.bucketName, file.path);
     return {
       type: "excel",
-      parsed: await this.#fetchExcel(file.bucketName, file.path),
+      parsed,
+      sheets: processWorkBook(parsed.Sheets),
       output: output?.output,
     };
   }
 
-  async #forPDF(
-    file: FileReference
-  ): Promise<Render.File<WorkBook, AnalyzeOutput, Outputs.Report>> {
+  async #forPDF(file: FileReference): Promise<Render.File> {
     const [signedUrl, [derived], report, output] = await Promise.all([
       this.objectStorageService.getSignedUrl(file.bucketName, file.path),
       this.excelAssetStore.list(file.id),
@@ -74,10 +66,17 @@ export class FileToRenderServiceImpl implements FileRenderService {
       signedUrl,
       report,
       derived: derived
-        ? {
-            parsed: await this.#fetchExcel(derived.bucketName, derived.path),
-            output: output?.output,
-          }
+        ? await (async () => {
+            const parsed = await this.#fetchExcel(
+              derived.bucketName,
+              derived.path
+            );
+            return {
+              parsed,
+              sheets: processWorkBook(parsed.Sheets),
+              output: output?.output,
+            };
+          })()
         : undefined,
     };
   }

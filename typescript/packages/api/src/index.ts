@@ -33,6 +33,7 @@ import {
   PubsubMessageBusService,
   PsqlExcelAssetStore,
   PsqlExcelOutputStore,
+  FileToRenderServiceImpl,
 } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
 import { UserOrgRouter } from "./routers/user-org-router";
@@ -111,6 +112,14 @@ async function start() {
   const metricsStore = new PsqlMiscOutputStore(pool);
   const reportService = new ReportServiceImpl(questionStore, metricsStore);
 
+  const fileRenderService = new FileToRenderServiceImpl(
+    fileReferenceStore,
+    reportService,
+    objectStoreService,
+    excelOutputStore,
+    excelAssetStore
+  );
+
   app.use(cors({ origin: SETTINGS.corsOrigin }));
 
   app.use("/api/v1/user-org", jwtCheck, addUser, new UserOrgRouter().init());
@@ -162,10 +171,7 @@ async function start() {
       questionStore,
       mlService,
       textChunkStore,
-      reportService,
-      excelAssetStore,
-      objectStoreService,
-      excelOutputStore
+      fileRenderService
     ).init()
   );
 

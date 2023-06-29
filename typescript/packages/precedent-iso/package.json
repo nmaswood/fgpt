@@ -30,6 +30,7 @@
     "clean::dist": "rm -rf tsconfig.tsbuildinfo dist"
   },
   "dependencies": {
+    "xlsx": "^0.18.5",
     "zod": "^3.21.4"
   }
 }

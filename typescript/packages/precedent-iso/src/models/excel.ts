@@ -1,10 +1,5 @@
 import { z } from "zod";
 
-export interface ExcelFileToDisplay {
-  signedUrl: string;
-  numSheets: number;
-}
-
 export const ZDirectUpload = z.object({
   type: z.literal("direct-upload"),
 });

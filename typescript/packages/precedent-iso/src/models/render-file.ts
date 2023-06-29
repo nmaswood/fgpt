@@ -1,29 +1,30 @@
+import { WorkBook } from "xlsx";
+
+import { ISOSheet } from "../process-work-book";
+import { AnalyzeOutput } from "./excel";
+import { Report } from "./llm-outputs";
+
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Render {
-  export interface PDFFile<WorkBook, ExcelAnalysis, ReportForPDF> {
+  export interface PDFFile {
     type: "pdf";
     signedUrl: string;
-    report: ReportForPDF | undefined;
+    report: Report | undefined;
     derived:
       | {
           parsed: WorkBook;
-          output: ExcelAnalysis | undefined;
+          sheets: ISOSheet<any>[];
+          output: AnalyzeOutput | undefined;
         }
       | undefined;
   }
 
-  export type File<WorkBook, ExcelAnalysis, ReportForPDF> =
-    | PDFFile<WorkBook, ExcelAnalysis, ReportForPDF>
-    | ExcelFile<WorkBook, ExcelAnalysis>;
+  export type File = PDFFile | ExcelFile;
 
-  export interface ExcelFile<WorkBook, ExcelAnalysis> {
+  export interface ExcelFile {
     type: "excel";
     parsed: WorkBook;
-    output: ExcelAnalysis | undefined;
-  }
-
-  export interface Data<WorkBook, ExcelAnalysis, ReportForPDF> {
-    status: "maybeLoading" | "timed" | "complete";
-    file: File<WorkBook, ExcelAnalysis, ReportForPDF>;
+    sheets: ISOSheet<any>[];
+    output: AnalyzeOutput | undefined;
   }
 }

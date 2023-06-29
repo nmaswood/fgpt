@@ -3,6 +3,7 @@ export { dataBasePool } from "./data-base-pool";
 export * from "./excel-asset-store";
 export * from "./excel-output-store";
 export * from "./file-reference-store";
+export * from "./file-render-service";
 export * from "./jobs/task-executor";
 export * from "./llm-outputs/misc-output-store";
 export * from "./llm-outputs/question-store";
