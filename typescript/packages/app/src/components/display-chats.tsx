@@ -4,10 +4,8 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
+import { Box, Button, IconButton } from "@mui/joy";
 import {
-  Box,
-  Button,
-  IconButton,
   List,
   ListItem,
   ListItemButton,
@@ -47,8 +45,8 @@ export const DisplayChatList: React.FC<{
       padding={2}
     >
       <Button
-        startIcon={<AddIcon />}
-        variant="contained"
+        loading={isMutating}
+        startDecorator={<AddIcon />}
         onClick={async () => {
           if (!selectedChatId) {
             return;

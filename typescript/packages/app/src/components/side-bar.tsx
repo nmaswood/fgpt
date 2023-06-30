@@ -3,10 +3,20 @@ import { assertNever, Project } from "@fgpt/precedent-iso";
 import AddIcon from "@mui/icons-material/Add";
 import FolderIcon from "@mui/icons-material/Folder";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { LoadingButton } from "@mui/lab";
 import {
   Alert,
   Avatar,
+  Box,
+  Button,
+  LinearProgress,
+  Link,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemContent,
+  ListItemDecorator,
+} from "@mui/joy";
+import {
   Collapse,
   Dialog,
   DialogActions,
@@ -14,22 +24,12 @@ import {
   DialogTitle,
   Divider,
   Drawer,
-  LinearProgress,
-  Link,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
   Menu,
   MenuItem,
   MenuList,
   Snackbar,
   TextField,
 } from "@mui/material";
-
-import { Box, Button } from "@mui/joy";
-
 import React from "react";
 import { TransitionGroup } from "react-transition-group";
 
@@ -56,7 +56,7 @@ export const Sidebar: React.FC<{
   setProjectModalOpen,
 }) => {
   return (
-    <Drawer
+    <Box
       sx={{
         width: SIDE_BAR_WIDTH,
         flexShrink: 0,
@@ -65,8 +65,6 @@ export const Sidebar: React.FC<{
           boxSizing: "border-box",
         },
       }}
-      variant="permanent"
-      anchor="left"
     >
       <CreateProject
         loading={projectsLoading}
@@ -87,7 +85,6 @@ export const Sidebar: React.FC<{
       <Box display="flex" height="100%" maxHeight="100%" overflow="auto">
         {projects && projects.length > 0 && (
           <List
-            disablePadding
             sx={{ height: "100%" }}
             onKeyDown={(e) => {
               switch (e.key) {
@@ -116,29 +113,21 @@ export const Sidebar: React.FC<{
               {projects.map((project) => {
                 return (
                   <Collapse key={project.id}>
-                    <ListItemButton
-                      selected={project.id === selectedProjectId}
-                      onClick={() => setSelectedProjectId(project.id)}
-                      sx={{
-                        width: SIDE_BAR_WIDTH,
-                      }}
-                    >
-                      <ListItemIcon>
-                        <FolderIcon color="primary" />
-                      </ListItemIcon>
+                    <ListItem>
+                      <ListItemButton
+                        selected={project.id === selectedProjectId}
+                        onClick={() => setSelectedProjectId(project.id)}
+                        sx={{
+                          width: SIDE_BAR_WIDTH,
+                        }}
+                      >
+                        <ListItemDecorator>
+                          <FolderIcon color="primary" />
+                        </ListItemDecorator>
 
-                      <ListItem disablePadding>
-                        <ListItemText
-                          primary={project.name}
-                          primaryTypographyProps={{
-                            overflow: "wrap",
-                            sx: {
-                              wordBreak: "break-word",
-                            },
-                          }}
-                        />
-                      </ListItem>
-                    </ListItemButton>
+                        <ListItemContent>{project.name}</ListItemContent>
+                      </ListItemButton>
+                    </ListItem>
                   </Collapse>
                 );
               })}
@@ -148,7 +137,7 @@ export const Sidebar: React.FC<{
       </Box>
 
       <DisplayUser />
-    </Drawer>
+    </Box>
   );
 };
 const NAME_MIN_LENGTH = 3;
@@ -183,19 +172,18 @@ const CreateProject: React.FC<{
         paddingRight={3}
         justifyContent="center"
       >
-        <LoadingButton
+        <Button
           variant="outlined"
           loading={isMutating || loading}
           onClick={() => {
             setProjectModalOpen(true);
           }}
-          size="medium"
-          startIcon={<AddIcon />}
+          startDecorator={<AddIcon />}
           sx={{ width: "100%", whiteSpace: "nowrap" }}
           color="primary"
         >
           Create project
-        </LoadingButton>
+        </Button>
 
         {projectModalOpen && (
           <FormDialog
@@ -267,7 +255,7 @@ const DisplayUser = () => {
               setAnchorEl(event.currentTarget);
             }}
           >
-            <ListItemIcon>
+            <ListItemDecorator>
               {user.picture && (
                 <Avatar
                   sx={{
@@ -278,10 +266,8 @@ const DisplayUser = () => {
                   src={user.picture}
                 />
               )}
-            </ListItemIcon>
-            <ListItemText primaryTypographyProps={{ color: "primary" }}>
-              {user.name ?? user.email}
-            </ListItemText>
+            </ListItemDecorator>
+            <ListItemContent>{user.name ?? user.email}</ListItemContent>
           </MenuItem>
           <Menu
             id="basic-menu"
@@ -304,10 +290,10 @@ const DisplayUser = () => {
           >
             <MenuList dense disablePadding>
               <MenuItem component={Link} href="/api/auth/logout">
-                <ListItemIcon>
+                <ListItemDecorator>
                   <LogoutIcon />
-                </ListItemIcon>
-                <ListItemText primary="Logout" />
+                </ListItemDecorator>
+                <ListItemContent>Logout</ListItemContent>
               </MenuItem>
             </MenuList>
           </Menu>
@@ -389,9 +375,7 @@ const FormDialog: React.FC<{
           message={errorDisplayName(error)}
           anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
-          <Alert severity="error" sx={{ width: "100%" }}>
-            {errorDisplayName(error)}
-          </Alert>
+          <Alert sx={{ width: "100%" }}>{errorDisplayName(error)}</Alert>
         </Snackbar>
       )}
     </Dialog>

@@ -1,5 +1,5 @@
 import { humanReadableFileSize, LoadedFile } from "@fgpt/precedent-iso";
-import { Box, Link } from "@mui/material";
+import { Box, Link } from "@mui/joy";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import NextLink from "next/link";
 import React from "react";

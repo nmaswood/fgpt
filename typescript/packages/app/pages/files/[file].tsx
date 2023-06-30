@@ -2,9 +2,16 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import BoltIcon from "@mui/icons-material/Bolt";
 import ConstructionIcon from "@mui/icons-material/Construction";
-import GridOnIcon from "@mui/icons-material/GridOn";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Box, IconButton, Paper, Skeleton, Tab, Tabs } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  ListItemDecorator,
+  Tab,
+  TabList,
+  Tabs,
+} from "@mui/joy";
+import { Skeleton } from "@mui/material";
 import { useRouter } from "next/router";
 import React from "react";
 
@@ -45,7 +52,7 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
   const router = useRouter();
 
   return (
-    <Paper
+    <Box
       sx={{
         display: "flex",
         width: "100%",
@@ -87,44 +94,31 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
           <IconButton onClick={() => setShowAsset((prev) => !prev)}>
             <MenuIcon />
           </IconButton>
-          <Tabs
-            value={tab}
-            onChange={(_, newValue) => setTab(newValue)}
-            textColor="secondary"
-            indicatorColor="secondary"
-          >
-            <Tab
-              value="report"
-              icon={<AssessmentIcon />}
-              iconPosition="start"
-              label={"Report"}
-            />
-            {file && file.type === "pdf" && (
-              <Tab
-                value="chat"
-                icon={<BoltIcon />}
-                iconPosition="start"
-                label={"Chat"}
-              />
-            )}
-
-            {file && file.type === "pdf" && (
-              <Tab
-                value="debug"
-                icon={<ConstructionIcon />}
-                iconPosition="start"
-                label={"Debug"}
-              />
-            )}
-
-            {false && (
-              <Tab
-                value="tables"
-                icon={<GridOnIcon />}
-                iconPosition="start"
-                label={"Tables"}
-              />
-            )}
+          <Tabs value={tab} onChange={(_, newValue) => setTab(newValue as any)}>
+            <TabList>
+              <Tab value="report">
+                <ListItemDecorator>
+                  <AssessmentIcon />
+                </ListItemDecorator>
+                Report
+              </Tab>
+              {file && file.type === "pdf" && (
+                <Tab value="chat">
+                  <ListItemDecorator>
+                    <BoltIcon />
+                  </ListItemDecorator>
+                  Chat
+                </Tab>
+              )}
+              {file && file.type === "pdf" && (
+                <Tab value="debug">
+                  <ListItemDecorator>
+                    <ConstructionIcon />
+                  </ListItemDecorator>
+                  Chat
+                </Tab>
+              )}
+            </TabList>
           </Tabs>
         </Box>
         <Box
@@ -147,6 +141,6 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
           {tab === "debug" && <ViewByChunk fileId={fileId} />}
         </Box>
       </Box>
-    </Paper>
+    </Box>
   );
 };

@@ -1,6 +1,7 @@
 import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 import AddIcon from "@mui/icons-material/Add";
-import { Box, Button } from "@mui/material";
+import { Button } from "@mui/joy";
+import { Box } from "@mui/material";
 import { useRouter } from "next/router";
 import * as React from "react";
 import { z } from "zod";
@@ -101,8 +102,7 @@ const Home: React.FC = () => {
                 onClick={() => {
                   setProjectModalOpen(true);
                 }}
-                size="large"
-                startIcon={<AddIcon />}
+                startDecorator={<AddIcon />}
                 sx={{ width: "fit-content" }}
                 color="primary"
               >

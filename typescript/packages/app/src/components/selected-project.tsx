@@ -8,22 +8,26 @@ import CollectionsIcon from "@mui/icons-material/Collections";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import SettingsIcon from "@mui/icons-material/Settings";
-import { LoadingButton } from "@mui/lab";
 import {
   Box,
   Button,
   CircularProgress,
+  IconButton,
+  ListItemDecorator,
+  Tab,
+  TabList,
+  Tabs,
+} from "@mui/joy";
+import { LoadingButton } from "@mui/lab";
+import {
   Dialog,
   DialogActions,
   DialogTitle,
-  IconButton,
   ListItemIcon,
   ListItemText,
   Menu,
   MenuItem,
   MenuList,
-  Tab,
-  Tabs,
   TextField,
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -182,24 +186,21 @@ export const SelectedProject: React.FC<{
         marginBottom={1 / 2}
         justifyContent="space-between"
       >
-        <Tabs
-          value={tab}
-          onChange={(_, newValue) => setTab(newValue)}
-          textColor="secondary"
-          indicatorColor="secondary"
-        >
-          <Tab
-            value="data"
-            icon={<CollectionsIcon />}
-            iconPosition="start"
-            label={isLargeScreen ? "Data room" : undefined}
-          />
-          <Tab
-            value="chat"
-            icon={<BoltIcon />}
-            iconPosition="start"
-            label={isLargeScreen ? "Chat" : undefined}
-          />
+        <Tabs value={tab} onChange={(_, newValue) => setTab(newValue as any)}>
+          <TabList>
+            <Tab value="data">
+              <ListItemDecorator>
+                <CollectionsIcon />
+              </ListItemDecorator>
+              Data
+            </Tab>
+            <Tab value="chat">
+              <ListItemDecorator>
+                <BoltIcon />
+              </ListItemDecorator>
+              Chat
+            </Tab>
+          </TabList>
         </Tabs>
         {token && project && (
           <Box display="flex" alignItems="center" gap={1}>
@@ -211,7 +212,7 @@ export const SelectedProject: React.FC<{
 
             {isLargeScreen ? (
               <Button
-                startIcon={<SettingsIcon />}
+                startDecorator={<SettingsIcon />}
                 onClick={handleClick}
                 variant="outlined"
                 sx={{ height: "40px", whiteSpace: "nowrap" }}

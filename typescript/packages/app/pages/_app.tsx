@@ -1,8 +1,8 @@
 import "../styles/globals.css";
 
 import { UserProvider } from "@auth0/nextjs-auth0/client";
-import { CssVarsProvider as JoyCssVarsProvider } from "@mui/joy/styles";
 import { Box } from "@mui/joy";
+import { CssVarsProvider as JoyCssVarsProvider } from "@mui/joy/styles";
 import {
   Experimental_CssVarsProvider as MaterialCssVarsProvider,
   THEME_ID as MATERIAL_THEME_ID,

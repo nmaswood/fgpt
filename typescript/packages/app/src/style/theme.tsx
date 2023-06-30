@@ -1,5 +1,3 @@
-import { FGPT_BLUE, FGPT_RED } from "./colors";
-
 const HEADER_FONT = `Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif;`;
 
 export const NON_HEADER_FONT = `Bahnschrift, 'DIN Alternate', 'Franklin Gothic Medium', 'Nimbus Sans Narrow', sans-serif-condensed, sans-serif;`;
@@ -40,19 +38,6 @@ export const THEME = materialExtendTheme({
     },
     caption: { fontFamily: NON_HEADER_FONT },
     overline: { fontFamily: NON_HEADER_FONT },
-  },
-  palette: {
-    mode: "dark",
-    primary: {
-      main: FGPT_BLUE,
-    },
-    secondary: {
-      main: FGPT_RED,
-    },
-
-    background: {
-      default: "#121212",
-    },
   },
 });
 
