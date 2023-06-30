@@ -1,7 +1,7 @@
 import { ChunkStrategy } from "@fgpt/precedent-iso";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { Box, Button, ButtonGroup, Select,Typography } from "@mui/joy";
+import { Box, Button, ButtonGroup, Select, Typography } from "@mui/joy";
 import {
   Card,
   FormControl,
@@ -78,14 +78,14 @@ export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
                   <Button
                     disabled={order === 0}
                     onClick={() => setOrder((order) => order - 1)}
-                    startIcon={<ArrowBackIcon />}
+                    startDecorator={<ArrowBackIcon />}
                   >
                     Prev
                   </Button>
                   <Button
                     disabled={order + 1 === textChunkGroup.numChunks}
                     onClick={() => setOrder((order) => order + 1)}
-                    endIcon={<ArrowForwardIcon />}
+                    endDecorator={<ArrowForwardIcon />}
                   >
                     Next
                   </Button>
