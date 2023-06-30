@@ -83,7 +83,6 @@ const Home: React.FC = () => {
         display="flex"
         width="100%"
         height="100%"
-        bgcolor="background.paper"
         maxHeight="100%"
         overflow="auto"
       >

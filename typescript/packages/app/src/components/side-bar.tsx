@@ -8,6 +8,7 @@ import {
   Avatar,
   Box,
   Button,
+  Divider,
   LinearProgress,
   Link,
   List,
@@ -22,8 +23,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
-  Drawer,
   Menu,
   MenuItem,
   MenuList,
@@ -259,7 +258,6 @@ const DisplayUser = () => {
               {user.picture && (
                 <Avatar
                   sx={{
-                    bgcolor: "primary.main",
                     width: 30,
                     height: 30,
                   }}

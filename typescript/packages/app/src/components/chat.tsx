@@ -315,10 +315,7 @@ const RenderChatEntryFromServer: React.FC<{
             <Avatar src={picture} variant="rounded" />
           </ListItemAvatar>
         )}
-        <ListItemText
-          primary={chatEntry.question}
-          primaryTypographyProps={{ color: "white" }}
-        />
+        <ListItemText primary={chatEntry.question} />
       </ListItem>
       <ListItem
         sx={{
@@ -335,7 +332,7 @@ const RenderChatEntryFromServer: React.FC<{
             <Box display="flex" width="56" height="40" marginRight={2}>
               <ResponseAvatar state={"data"} />
             </Box>
-            <Typography color="white">{chatEntry.answer}</Typography>
+            <Typography>{chatEntry.answer}</Typography>
             <IconButton
               onClick={() => setOpen((prev) => !prev)}
               sx={{
@@ -464,16 +461,12 @@ const RenderChatEntryFromClient: React.FC<{
             <Avatar src={picture} variant="rounded" />
           </ListItemAvatar>
         )}
-        <ListItemText
-          primary={q.question}
-          primaryTypographyProps={{ color: "white" }}
-        />
+        <ListItemText primary={q.question} />
       </ListItem>
       <ListItem
         sx={{
           paddingY: 3,
           paddingX: 20,
-          background: "#343541",
           display: "flex",
           position: "relative",
           flexDirection: "column",
@@ -484,11 +477,9 @@ const RenderChatEntryFromClient: React.FC<{
             <ResponseAvatar state={"data"} />
           </Box>
           {q.state.type === "rendered" && (
-            <Typography color="white">{q.state.value}</Typography>
+            <Typography>{q.state.value}</Typography>
           )}
-          {q.state.type === "rendering" && (
-            <Typography color="white">{text}</Typography>
-          )}
+          {q.state.type === "rendering" && <Typography>{text}</Typography>}
           {q.state.type === "rendering" && text.length === 0 && (
             <CircularProgress />
           )}
@@ -544,11 +535,7 @@ const DisplayQuestions: React.FC<{
               onClick={() => askQuestion(question)}
             >
               <ListItem disablePadding>
-                <ListItemText
-                  primary={question}
-                  color="white"
-                  primaryTypographyProps={{ color: "white" }}
-                ></ListItemText>
+                <ListItemText primary={question}></ListItemText>
               </ListItem>
             </ListItemButton>
           );

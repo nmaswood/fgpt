@@ -1,10 +1,9 @@
 import { ChunkStrategy } from "@fgpt/precedent-iso";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { Box, Button, ButtonGroup, Typography } from "@mui/joy";
 import { LoadingButton } from "@mui/lab";
 import {
-  Button,
-  ButtonGroup,
   Card,
   FormControl,
   InputLabel,
@@ -13,9 +12,7 @@ import {
   TextField,
   ToggleButton,
   ToggleButtonGroup,
-  Typography,
 } from "@mui/material";
-import { Box } from "@mui/system";
 import React from "react";
 
 import { useFetchPlayground } from "../../hooks/use-fetch-playground";
