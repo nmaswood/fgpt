@@ -118,7 +118,6 @@ export const SelectedProject: React.FC<{
         proudlyDisplayPoweredByUppy: false,
         height: 470,
         browserBackButtonClose: false,
-        theme: "dark",
       });
   }, []);
 
