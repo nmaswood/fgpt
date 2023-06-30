@@ -1,6 +1,5 @@
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { Button,IconButton } from "@mui/joy";
-import { useMediaQuery } from "@mui/material";
+import { Button } from "@mui/joy";
 import Uppy from "@uppy/core";
 import React from "react";
 
@@ -11,7 +10,6 @@ export const UploadFilesButton: React.FC<{
   projectId: string;
   openModal: () => void;
 }> = ({ uppy, projectId, openModal }) => {
-  const isLargeScreen = useMediaQuery("(min-width:750px)");
   const { mutate } = useFetchFiles(projectId);
 
   React.useEffect(() => {
@@ -20,7 +18,7 @@ export const UploadFilesButton: React.FC<{
     });
   }, [uppy, mutate]);
 
-  return isLargeScreen ? (
+  return (
     <Button
       startDecorator={<CloudUploadIcon />}
       onClick={openModal}
@@ -29,9 +27,5 @@ export const UploadFilesButton: React.FC<{
     >
       Upload files
     </Button>
-  ) : (
-    <IconButton onClick={openModal} color="primary">
-      <CloudUploadIcon />
-    </IconButton>
   );
 };

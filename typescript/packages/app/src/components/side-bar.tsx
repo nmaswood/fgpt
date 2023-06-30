@@ -8,7 +8,9 @@ import {
   Avatar,
   Box,
   Button,
+  ButtonGroup,
   Divider,
+  Input,
   LinearProgress,
   Link,
   List,
@@ -16,19 +18,13 @@ import {
   ListItemButton,
   ListItemContent,
   ListItemDecorator,
-} from "@mui/joy";
-import {
-  Collapse,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Menu,
   MenuItem,
-  MenuList,
-  Snackbar,
-  TextField,
-} from "@mui/material";
+  Modal,
+  ModalDialog,
+  Typography,
+} from "@mui/joy";
+import { Collapse, Snackbar } from "@mui/material";
 import React from "react";
 import { TransitionGroup } from "react-transition-group";
 
@@ -233,10 +229,10 @@ type InputError = "too_long" | "too_short" | "already_exists";
 const DisplayUser = () => {
   const { user } = useUser();
 
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
+  const [open, setOpen] = React.useState(false);
 
-  const handleClose = () => setAnchorEl(null);
+  const handleClose = () => setOpen(false);
+  const buttonRef = React.useRef(null);
 
   return (
     <Box
@@ -248,52 +244,37 @@ const DisplayUser = () => {
     >
       {user && (
         <>
-          <MenuItem
-            sx={{ width: "100%" }}
-            onClick={(event) => {
-              setAnchorEl(event.currentTarget);
-            }}
-          >
-            <ListItemDecorator>
-              {user.picture && (
-                <Avatar
-                  sx={{
-                    width: 30,
-                    height: 30,
-                  }}
-                  src={user.picture}
-                />
-              )}
-            </ListItemDecorator>
-            <ListItemContent>{user.name ?? user.email}</ListItemContent>
-          </MenuItem>
+          <List ref={buttonRef}>
+            <ListItem>
+              <ListItemButton onClick={() => setOpen(true)}>
+                <ListItemDecorator>
+                  {user.picture && (
+                    <Avatar
+                      sx={{
+                        width: 30,
+                        height: 30,
+                      }}
+                      src={user.picture}
+                    />
+                  )}
+                </ListItemDecorator>
+                {user.name ?? user.email}
+              </ListItemButton>
+            </ListItem>
+          </List>
+
           <Menu
             id="basic-menu"
-            anchorEl={anchorEl}
+            anchorEl={buttonRef.current}
             open={open}
             onClose={handleClose}
-            anchorOrigin={{
-              vertical: -5,
-              horizontal: "center",
-            }}
-            transformOrigin={{
-              vertical: "bottom",
-              horizontal: "center",
-            }}
-            PaperProps={{
-              sx: {
-                width: `${SIDE_BAR_PIXELS - 32}px`,
-              },
-            }}
           >
-            <MenuList dense disablePadding>
-              <MenuItem component={Link} href="/api/auth/logout">
-                <ListItemDecorator>
-                  <LogoutIcon />
-                </ListItemDecorator>
-                <ListItemContent>Logout</ListItemContent>
-              </MenuItem>
-            </MenuList>
+            <MenuItem component={Link} href="/api/auth/logout">
+              <ListItemDecorator>
+                <LogoutIcon />
+              </ListItemDecorator>
+              Logout
+            </MenuItem>
           </Menu>
         </>
       )}
@@ -323,24 +304,12 @@ const FormDialog: React.FC<{
   };
 
   return (
-    <Dialog
-      open
-      onClose={onClose}
-      keepMounted
-      PaperProps={{
-        sx: {
-          width: "100%",
-          maxWidth: "350px !important",
-        },
-      }}
-    >
-      <DialogTitle>Create a project</DialogTitle>
-      <DialogContent>
-        <TextField
+    <Modal open onClose={onClose} keepMounted>
+      <ModalDialog>
+        <Typography>Create a project</Typography>
+        <Input
           autoFocus
-          margin="dense"
           id="name"
-          label="Project name"
           type="text"
           color="primary"
           value={name}
@@ -352,30 +321,27 @@ const FormDialog: React.FC<{
             }
           }}
           fullWidth
-          InputProps={{
-            autoFocus: true,
-          }}
         />
-      </DialogContent>
-      <DialogActions>
-        <Button disabled={loading} onClick={onClose} color="primary">
-          Cancel
-        </Button>
-        <Button loading={loading} onClick={onSubmit} color="primary">
-          Create project
-        </Button>
-      </DialogActions>
-      {error && (
-        <Snackbar
-          open={true}
-          autoHideDuration={5_000}
-          onClose={() => setError(undefined)}
-          message={errorDisplayName(error)}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert sx={{ width: "100%" }}>{errorDisplayName(error)}</Alert>
-        </Snackbar>
-      )}
-    </Dialog>
+        <ButtonGroup spacing={1}>
+          <Button disabled={loading} onClick={onClose} color="primary">
+            Cancel
+          </Button>
+          <Button loading={loading} onClick={onSubmit} color="primary">
+            Create project
+          </Button>
+        </ButtonGroup>
+        {error && (
+          <Snackbar
+            open={true}
+            autoHideDuration={5_000}
+            onClose={() => setError(undefined)}
+            message={errorDisplayName(error)}
+            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          >
+            <Alert sx={{ width: "100%" }}>{errorDisplayName(error)}</Alert>
+          </Snackbar>
+        )}
+      </ModalDialog>
+    </Modal>
   );
 };

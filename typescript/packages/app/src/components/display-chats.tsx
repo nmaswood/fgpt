@@ -4,14 +4,17 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
-import { Box, Button, IconButton } from "@mui/joy";
 import {
+  Box,
+  Button,
+  ButtonGroup,
+  IconButton,
+  Input,
   List,
   ListItem,
   ListItemButton,
-  ListItemText,
-  TextField,
-} from "@mui/material";
+  ListItemContent,
+} from "@mui/joy";
 import React from "react";
 import { TransitionGroup } from "react-transition-group";
 
@@ -61,7 +64,6 @@ export const DisplayChatList: React.FC<{
       </Button>
 
       <List
-        disablePadding
         sx={{ height: "100%" }}
         onKeyDown={(e) => {
           switch (e.key) {
@@ -153,9 +155,9 @@ const ListItemEntry: React.FC<{
       selected={isSelected}
       onClick={() => setSelectedChatId(chat.id)}
     >
-      <ListItem disablePadding>
+      <ListItem>
         {isEditing && (
-          <TextField
+          <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => {
@@ -165,19 +167,14 @@ const ListItemEntry: React.FC<{
               }
             }}
             autoFocus
-            InputProps={{ sx: { padding: 0 } }}
           />
         )}
         {!isEditing && (
-          <ListItemText
-            primary={chat.name ?? "no name"}
-            primaryTypographyProps={{ color: "white" }}
-          />
+          <ListItemContent>{chat.name ?? "no name"}</ListItemContent>
         )}
-        <>
+        <ButtonGroup>
           {isSelected && !isEditing && (
             <IconButton
-              size="small"
               disabled={isLoading}
               onClick={(e) => {
                 e.stopPropagation();
@@ -190,7 +187,6 @@ const ListItemEntry: React.FC<{
 
           {isSelected && !isEditing && (
             <IconButton
-              size="small"
               disabled={isLoading}
               onClick={(e) => {
                 e.stopPropagation();
@@ -202,7 +198,6 @@ const ListItemEntry: React.FC<{
           )}
           {isEditing && (
             <IconButton
-              size="small"
               disabled={isLoading}
               onClick={(e) => {
                 e.stopPropagation();
@@ -215,7 +210,6 @@ const ListItemEntry: React.FC<{
 
           {isEditing && (
             <IconButton
-              size="small"
               disabled={isLoading}
               onClick={(e) => {
                 e.stopPropagation();
@@ -226,7 +220,7 @@ const ListItemEntry: React.FC<{
               <CloseIcon />
             </IconButton>
           )}
-        </>
+        </ButtonGroup>
       </ListItem>
     </ListItemButton>
   );

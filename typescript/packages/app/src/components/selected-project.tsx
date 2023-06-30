@@ -11,26 +11,19 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import {
   Box,
   Button,
+  ButtonGroup,
   CircularProgress,
-  IconButton,
+  Input,
   ListItemDecorator,
+  Menu,
+  MenuItem,
+  Modal,
+  ModalDialog,
   Tab,
   TabList,
   Tabs,
+  Typography,
 } from "@mui/joy";
-import { LoadingButton } from "@mui/lab";
-import {
-  Dialog,
-  DialogActions,
-  DialogTitle,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-  MenuList,
-  TextField,
-} from "@mui/material";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import Uppy from "@uppy/core";
 import Dashboard from "@uppy/dashboard";
 import XHRUpload from "@uppy/xhr-upload";
@@ -91,16 +84,9 @@ export const SelectedProject: React.FC<{
     undefined
   );
 
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const buttonRef = React.useRef(null);
 
-  const isLargeScreen = useMediaQuery("(min-width:750px)");
+  const [open, setOpen] = React.useState(false);
 
   const uppy = React.useMemo(() => {
     return new Uppy({
@@ -209,55 +195,43 @@ export const SelectedProject: React.FC<{
               projectId={project.id}
             />
 
-            {isLargeScreen ? (
-              <Button
-                startDecorator={<SettingsIcon />}
-                onClick={handleClick}
-                variant="outlined"
-                sx={{ height: "40px", whiteSpace: "nowrap" }}
-              >
-                Project settings
-              </Button>
-            ) : (
-              <IconButton onClick={handleClick} color="primary">
-                <SettingsIcon />
-              </IconButton>
-            )}
+            <Button
+              ref={buttonRef}
+              startDecorator={<SettingsIcon />}
+              onClick={() => setOpen(true)}
+              variant="outlined"
+              sx={{ height: "40px", whiteSpace: "nowrap" }}
+            >
+              Project settings
+            </Button>
 
             <Menu
-              id="basic-menu"
-              anchorEl={anchorEl}
+              anchorEl={buttonRef.current}
               open={open}
-              onClose={handleClose}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "center",
-              }}
+              onClose={() => setOpen(false)}
             >
-              <MenuList dense disablePadding>
-                <MenuItem
-                  onClick={() => {
-                    setModal("delete");
-                    handleClose();
-                  }}
-                >
-                  <ListItemIcon>
-                    <DeleteIcon fontSize="small" color="secondary" />
-                  </ListItemIcon>
-                  <ListItemText>Delete project</ListItemText>
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    setModal("edit");
-                    handleClose();
-                  }}
-                >
-                  <ListItemIcon>
-                    <ModeEditIcon fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText>Edit project name</ListItemText>
-                </MenuItem>
-              </MenuList>
+              <MenuItem
+                onClick={() => {
+                  setModal("delete");
+                  setOpen(false);
+                }}
+              >
+                <ListItemDecorator>
+                  <DeleteIcon fontSize="small" color="secondary" />
+                </ListItemDecorator>
+                Delete project
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setModal("edit");
+                  setOpen(false);
+                }}
+              >
+                <ListItemDecorator>
+                  <ModeEditIcon fontSize="small" />
+                </ListItemDecorator>
+                Edit project name
+              </MenuItem>
             </Menu>
           </Box>
         )}
@@ -299,19 +273,9 @@ const DeleteProjectModal: React.FC<{
   const [text, setText] = React.useState("");
 
   return (
-    <Dialog
-      open
-      onClose={closeModal}
-      keepMounted
-      PaperProps={{
-        sx: {
-          width: "100%",
-          maxWidth: "350px !important",
-        },
-      }}
-    >
-      <DialogTitle>Delete project</DialogTitle>
-      <DialogActions>
+    <Modal open onClose={closeModal}>
+      <ModalDialog>
+        <Typography>Delete project</Typography>
         <Box
           display="flex"
           width="100%"
@@ -319,23 +283,19 @@ const DeleteProjectModal: React.FC<{
           flexDirection="column"
           gap={3}
         >
-          <TextField
-            label="Confirmation"
+          <Input
             placeholder="Type DELETE to confirm"
             value={text}
-            variant="outlined"
             onChange={(e) => {
               setText(e.target.value);
             }}
             autoFocus
           />
-          <Box display="flex" width="100%" justifyContent="flex-end">
+          <ButtonGroup spacing={1}>
             <Button onClick={closeModal} color="primary">
               Cancel
             </Button>
-            <LoadingButton
-              variant="contained"
-              color="secondary"
+            <Button
               loading={isMutating}
               disabled={text !== "DELETE"}
               onClick={async () => {
@@ -345,11 +305,11 @@ const DeleteProjectModal: React.FC<{
               }}
             >
               Delete project
-            </LoadingButton>
-          </Box>
+            </Button>
+          </ButtonGroup>
         </Box>
-      </DialogActions>
-    </Dialog>
+      </ModalDialog>
+    </Modal>
   );
 };
 
@@ -374,19 +334,9 @@ const EditProjectModal: React.FC<{
     trimmed === projectName ||
     projectNames.has(trimmed);
   return (
-    <Dialog
-      open
-      onClose={closeModal}
-      keepMounted
-      PaperProps={{
-        sx: {
-          width: "100%",
-          maxWidth: "350px !important",
-        },
-      }}
-    >
-      <DialogTitle>Edit project name</DialogTitle>
-      <DialogActions>
+    <Modal open onClose={closeModal} keepMounted>
+      <ModalDialog>
+        <Typography>Edit project name</Typography>
         <Box
           display="flex"
           width="100%"
@@ -394,9 +344,7 @@ const EditProjectModal: React.FC<{
           flexDirection="column"
           gap={3}
         >
-          <TextField
-            label="New name"
-            variant="outlined"
+          <Input
             value={text}
             onChange={(e) => {
               setText(e.target.value);
@@ -413,13 +361,11 @@ const EditProjectModal: React.FC<{
             autoFocus
           />
 
-          <Box display="flex" justifyContent="flex-end">
+          <ButtonGroup spacing={1}>
             <Button onClick={closeModal} color="primary">
               Cancel
             </Button>
-            <LoadingButton
-              variant="contained"
-              color="secondary"
+            <Button
               disabled={isDisabled}
               onClick={async () => {
                 await trigger({
@@ -430,11 +376,11 @@ const EditProjectModal: React.FC<{
               }}
             >
               Change name
-            </LoadingButton>
-          </Box>
+            </Button>
+          </ButtonGroup>
         </Box>
-      </DialogActions>
-    </Dialog>
+      </ModalDialog>
+    </Modal>
   );
 };
 

@@ -1,14 +1,12 @@
 import { ChunkStrategy } from "@fgpt/precedent-iso";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { Box, Button, ButtonGroup, Typography } from "@mui/joy";
-import { LoadingButton } from "@mui/lab";
+import { Box, Button, ButtonGroup, Select,Typography } from "@mui/joy";
 import {
   Card,
   FormControl,
   InputLabel,
   MenuItem,
-  Select,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
@@ -58,9 +56,8 @@ export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
               <InputLabel>Chunk strategy</InputLabel>
               <Select
                 value={chunkStrategy}
-                label="Chunk strategy"
-                onChange={(e) =>
-                  setChunkStrategyAndResetOrder(e.target.value as ChunkStrategy)
+                onChange={(_, value) =>
+                  setChunkStrategyAndResetOrder(value as ChunkStrategy)
                 }
               >
                 <MenuItem value="greedy_v0">Greedy 500</MenuItem>
@@ -198,7 +195,7 @@ const DisplayChat: React.FC<{ textChunkId: string }> = ({ textChunkId }) => {
         fullWidth
       />
 
-      <LoadingButton
+      <Button
         disabled={
           trimmed.length === 0 ||
           functionName.length === 0 ||
@@ -224,7 +221,7 @@ const DisplayChat: React.FC<{ textChunkId: string }> = ({ textChunkId }) => {
         }}
       >
         Submit
-      </LoadingButton>
+      </Button>
       <Box display="flex" flexDirection="column" maxWidth="100%">
         <>
           {data && (
@@ -262,13 +259,9 @@ const TestOutput: React.FC<{ textChunkId: string }> = ({ textChunkId }) => {
       overflow="auto"
       gap={2}
     >
-      <LoadingButton
-        loading={isMutating}
-        onClick={() => trigger({ textChunkId })}
-        variant="outlined"
-      >
+      <Button loading={isMutating} onClick={() => trigger({ textChunkId })}>
         Generate output
-      </LoadingButton>
+      </Button>
 
       {data && (
         <pre

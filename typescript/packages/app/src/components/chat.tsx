@@ -8,25 +8,18 @@ import {
   Avatar,
   Box,
   CircularProgress,
-  Collapse,
   IconButton,
-  InputAdornment,
+  Input,
   Link,
   List,
   ListItem,
-  ListItemAvatar,
   ListItemButton,
-  ListItemText,
-  Paper,
+  ListItemContent,
+  ListItemDecorator,
   Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
   Typography,
-} from "@mui/material";
+} from "@mui/joy";
+import { Collapse } from "@mui/material";
 import NextLink from "next/link";
 import React from "react";
 
@@ -256,7 +249,7 @@ export const DisplayChat: React.FC<{
           position="sticky"
           bottom={0}
         >
-          <TextField
+          <Input
             placeholder="Send a message..."
             fullWidth
             value={input}
@@ -269,23 +262,19 @@ export const DisplayChat: React.FC<{
                 ev.preventDefault();
               }
             }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    disabled={trimmed.length === 0 || loading || isMutating}
-                    onClick={() => submit()}
-                  >
-                    <SendIcon
-                      sx={{
-                        transform: "rotate(-45deg) scale(0.8)",
-                        paddingBottom: 1,
-                      }}
-                    />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
+            endDecorator={
+              <IconButton
+                disabled={trimmed.length === 0 || loading || isMutating}
+                onClick={() => submit()}
+              >
+                <SendIcon
+                  sx={{
+                    transform: "rotate(-45deg) scale(0.8)",
+                    paddingBottom: 1,
+                  }}
+                />
+              </IconButton>
+            }
           />
         </Box>
       </Box>
@@ -311,17 +300,16 @@ const RenderChatEntryFromServer: React.FC<{
         }}
       >
         {picture && (
-          <ListItemAvatar>
-            <Avatar src={picture} variant="rounded" />
-          </ListItemAvatar>
+          <ListItemDecorator>
+            <Avatar src={picture} />
+          </ListItemDecorator>
         )}
-        <ListItemText primary={chatEntry.question} />
+        <ListItemContent>{chatEntry.question}</ListItemContent>
       </ListItem>
       <ListItem
         sx={{
           paddingY: 3,
           paddingX: 20,
-          background: "#343541",
           display: "flex",
           position: "relative",
           flexDirection: "column",
@@ -367,55 +355,28 @@ const DisplayContextForId: React.FC<{ id: string }> = ({ id }) => {
   return (
     <>
       {data.length > 0 && (
-        <TableContainer
-          component={Paper}
-          sx={{
-            maxWidth: "100%",
-            marginTop: 1,
-          }}
-        >
-          <Table aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell align="left">Filename</TableCell>
-                <TableCell align="right">Score</TableCell>
-                <TableCell
-                  align="left"
-                  sx={{
-                    wordWrap: "break-word",
-                    maxWidth: "350px",
-                  }}
-                >
-                  Content
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {data.map((row, idx) => (
-                <TableRow
-                  key={idx}
-                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                >
-                  <TableCell align="left">
-                    <Link component={NextLink} href={`files/${row.fileId}`}>
-                      <Typography>{row.filename}</Typography>
-                    </Link>
-                  </TableCell>
-                  <TableCell align="right">{row.score}</TableCell>
-                  <TableCell
-                    align="left"
-                    sx={{
-                      wordWrap: "break-word",
-                      maxWidth: "350px",
-                    }}
-                  >
-                    {row.text}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <Table aria-label="simple table">
+          <thead>
+            <tr>
+              <th align="left">Filename</th>
+              <th align="right">Score</th>
+              <th align="left">Content</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((row, idx) => (
+              <tr key={idx}>
+                <td align="left">
+                  <Link component={NextLink} href={`files/${row.fileId}`}>
+                    <Typography>{row.filename}</Typography>
+                  </Link>
+                </td>
+                <td align="right">{row.score}</td>
+                <td align="left">{row.text}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
       )}
     </>
   );
@@ -457,11 +418,11 @@ const RenderChatEntryFromClient: React.FC<{
         }}
       >
         {picture && (
-          <ListItemAvatar>
-            <Avatar src={picture} variant="rounded" />
-          </ListItemAvatar>
+          <ListItemDecorator>
+            <Avatar src={picture} />
+          </ListItemDecorator>
         )}
-        <ListItemText primary={q.question} />
+        <ListItemContent>{q.question}</ListItemContent>
       </ListItem>
       <ListItem
         sx={{
@@ -504,7 +465,7 @@ const ResponseAvatar: React.FC<{ state: "error" | "data" }> = ({ state }) => {
       );
     case "data":
       return (
-        <Avatar variant="rounded" color="primary">
+        <Avatar color="primary">
           <InsertCommentIcon color="primary" />
         </Avatar>
       );
@@ -526,7 +487,7 @@ const DisplayQuestions: React.FC<{
       maxHeight="100%"
       overflow="auto"
     >
-      <List disablePadding>
+      <List>
         {questions.map((question, idx) => {
           return (
             <ListItemButton
@@ -534,8 +495,8 @@ const DisplayQuestions: React.FC<{
               disabled={disabled}
               onClick={() => askQuestion(question)}
             >
-              <ListItem disablePadding>
-                <ListItemText primary={question}></ListItemText>
+              <ListItem>
+                <ListItemContent>{question}</ListItemContent>
               </ListItem>
             </ListItemButton>
           );

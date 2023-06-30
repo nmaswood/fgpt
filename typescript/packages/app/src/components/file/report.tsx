@@ -9,15 +9,10 @@ import {
   Box,
   List,
   ListItem,
-  ListItemText,
+  ListItemContent,
   Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Typography,
-} from "@mui/material";
+} from "@mui/joy";
 
 export const DisplayFileReport: React.FC<{
   file: FileToRender.File;
@@ -75,7 +70,7 @@ const ForExcelValue: React.FC<{ chunk: AnalyzeResponseChunk }> = ({
       overflow="auto"
       padding={2}
     >
-      <Typography variant="h6" sx={{ textDecoration: "underline" }}>
+      <Typography sx={{ textDecoration: "underline" }}>
         {formatSheetNames(chunk.sheetNames)}
       </Typography>
       <Typography>{chunk.content}</Typography>
@@ -93,50 +88,35 @@ const ForPDF: React.FC<{ report: Outputs.Report | undefined }> = ({
     <Box display="flex" flexDirection="column" gap={1} padding={2}>
       {terms.length > 0 && (
         <Box display="flex" flexDirection="column">
-          <Typography variant="h5">Terms</Typography>
+          <Typography>Terms</Typography>
 
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell
-                    sx={{
-                      minWidth: "250px",
-                    }}
-                  ></TableCell>
-                  <TableCell
-                    sx={{
-                      maxWidth: "400px",
-                    }}
-                  ></TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {terms.map((term, index) => (
-                  <TableRow
-                    key={index}
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <TableCell component="th" scope="row">
-                      {term.termName}
-                    </TableCell>
-                    <TableCell>{term.termValue}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <Table>
+            <thead>
+              <tr>
+                <td></td>
+                <td></td>
+              </tr>
+            </thead>
+            <tbody>
+              {terms.map((term, index) => (
+                <tr key={index}>
+                  <th scope="row">{term.termName}</th>
+                  <td>{term.termValue}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
         </Box>
       )}
 
       {summaries.length > 0 && (
         <>
-          <Typography variant="h5">Summary</Typography>
+          <Typography>Summary</Typography>
 
           <List sx={{ listStyleType: "disc" }}>
             {summaries.map((summary, idx) => (
               <ListItem key={idx}>
-                <ListItemText>{summary}</ListItemText>
+                <ListItemContent>{summary}</ListItemContent>
               </ListItem>
             ))}
           </List>
@@ -145,11 +125,11 @@ const ForPDF: React.FC<{ report: Outputs.Report | undefined }> = ({
 
       {financialSummary.financialSummaries.length > 0 && (
         <>
-          <Typography variant="h5">Financial Summary</Typography>
+          <Typography>Financial Summary</Typography>
           <List sx={{ listStyleType: "disc" }}>
             {financialSummary.financialSummaries.map((summary, idx) => (
               <ListItem key={idx}>
-                <ListItemText>{summary}</ListItemText>
+                <ListItemContent>{summary}</ListItemContent>
               </ListItem>
             ))}
           </List>
@@ -158,11 +138,11 @@ const ForPDF: React.FC<{ report: Outputs.Report | undefined }> = ({
 
       {financialSummary.investmentRisks.length > 0 && (
         <>
-          <Typography variant="h5">Investment risks</Typography>
+          <Typography>Investment risks</Typography>
           <List sx={{ listStyleType: "disc" }}>
             {financialSummary.investmentRisks.map((risk, idx) => (
               <ListItem key={idx}>
-                <ListItemText>{risk}</ListItemText>
+                <ListItemContent>{risk}</ListItemContent>
               </ListItem>
             ))}
           </List>
@@ -171,11 +151,11 @@ const ForPDF: React.FC<{ report: Outputs.Report | undefined }> = ({
 
       {financialSummary.investmentMerits.length > 0 && (
         <>
-          <Typography variant="h5">Investment merits</Typography>
+          <Typography>Investment merits</Typography>
           <List sx={{ listStyleType: "disc" }}>
             {financialSummary.investmentMerits.map((merit, idx) => (
               <ListItem key={idx}>
-                <ListItemText>{merit}</ListItemText>
+                <ListItemContent>{merit}</ListItemContent>
               </ListItem>
             ))}
           </List>
