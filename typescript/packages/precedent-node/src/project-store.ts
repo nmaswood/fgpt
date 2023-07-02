@@ -35,6 +35,7 @@ export class PSqlProjectStore implements ProjectStore {
     return this.pool.connect(async (cnx) => {
       const values = await cnx.query(
         sql.type(ZProjectRow)`
+
 SELECT
     ${PROJECT_FIELDS}
 FROM
@@ -63,7 +64,7 @@ SELECT
 FROM
     project
 WHERE
-    id IN (${sql.join(projectIds, sql.fragment`, `)})
+    id IN ${sql.join(projectIds, sql.fragment`, `)}
 `
       );
 

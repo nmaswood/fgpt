@@ -10,18 +10,6 @@ export class ProjectRouter {
   init() {
     const router = express.Router();
 
-    router.get(
-      "/:projectId",
-      async (req: express.Request, res: express.Response) => {
-        const projectId = req.params.projectId;
-        if (typeof projectId !== "string") {
-          throw new Error("invalid request");
-        }
-        const project = await this.projectStore.get(projectId);
-        res.json({ project });
-      }
-    );
-
     router.get("/list", async (req: express.Request, res: express.Response) => {
       const projects = await this.projectStore.list(req.user.organizationId);
       res.json({ projects });
