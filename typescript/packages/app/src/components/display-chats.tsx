@@ -147,17 +147,17 @@ const ListItemEntry: React.FC<{
   const isLoading = propsIsLoading || isMutating;
 
   return (
-    <ListItemButton
-      key={chat.id}
-      selected={isSelected}
-      onClick={() => setSelectedChatId(chat.id)}
+    <ListItem
+      sx={{
+        width: "100%",
+        display: "flex",
+        justifyContent: "space-between",
+      }}
     >
-      <ListItem
-        sx={{
-          width: "100%",
-          display: "flex",
-          justifyContent: "space-between",
-        }}
+      <ListItemButton
+        key={chat.id}
+        selected={isSelected}
+        onClick={() => setSelectedChatId(chat.id)}
       >
         {isEditing && (
           <Input
@@ -224,7 +224,7 @@ const ListItemEntry: React.FC<{
             </IconButton>
           )}
         </ButtonGroup>
-      </ListItem>
-    </ListItemButton>
+      </ListItemButton>
+    </ListItem>
   );
 };

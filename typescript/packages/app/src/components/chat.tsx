@@ -193,7 +193,6 @@ export const DisplayChat: React.FC<{
         height="100%"
         overflow="auto"
         maxHeight="100%"
-        gridTemplateRows={questions.length > 0 ? "1fr 1fr" : undefined}
       >
         <DisplayChatList
           chats={chats}
@@ -205,21 +204,21 @@ export const DisplayChat: React.FC<{
           deleteChat={onDelete}
           editChat={editChat}
         />
-        {questions.length > 0 && (
-          <DisplayQuestions
-            questions={questions}
-            disabled={isMutating}
-            askQuestion={(question: string) => submit(question)}
-          />
-        )}
       </Box>
       <Box
         display="flex"
         width="100%"
         height="100%"
         flexDirection="column"
-        gap={15}
+        gap={2}
       >
+        {questions.length > 0 && (
+          <DisplayQuestions
+            questions={questions}
+            disabled={isMutating || loading}
+            askQuestion={(question: string) => submit(question)}
+          />
+        )}
         <Box
           display="flex"
           width="100%"
@@ -244,8 +243,7 @@ export const DisplayChat: React.FC<{
         <Box
           display="flex"
           width="100%"
-          height="160px"
-          paddingX={20}
+          paddingBottom={10}
           position="sticky"
           bottom={0}
         >
@@ -293,12 +291,7 @@ const RenderChatEntryFromServer: React.FC<{
 
   return (
     <>
-      <ListItem
-        sx={{
-          paddingY: 3,
-          paddingX: 20,
-        }}
-      >
+      <ListItem>
         {picture && (
           <ListItemDecorator>
             <Avatar src={picture} />
@@ -308,8 +301,6 @@ const RenderChatEntryFromServer: React.FC<{
       </ListItem>
       <ListItem
         sx={{
-          paddingY: 3,
-          paddingX: 20,
           display: "flex",
           position: "relative",
           flexDirection: "column",
@@ -413,8 +404,8 @@ const RenderChatEntryFromClient: React.FC<{
     <>
       <ListItem
         sx={{
-          paddingY: 3,
-          paddingX: 20,
+          display: "flex",
+          gap: 2,
         }}
       >
         {picture && (
@@ -426,8 +417,6 @@ const RenderChatEntryFromClient: React.FC<{
       </ListItem>
       <ListItem
         sx={{
-          paddingY: 3,
-          paddingX: 20,
           display: "flex",
           position: "relative",
           flexDirection: "column",
@@ -480,13 +469,7 @@ const DisplayQuestions: React.FC<{
   disabled: boolean;
 }> = ({ questions, askQuestion, disabled }) => {
   return (
-    <Box
-      display="flex"
-      width="100%"
-      height="100%"
-      maxHeight="100%"
-      overflow="auto"
-    >
+    <Box display="flex" width="100%" maxHeight="120px" overflow="auto">
       <List>
         {questions.map((question, idx) => {
           return (
