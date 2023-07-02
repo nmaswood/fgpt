@@ -21,8 +21,8 @@ export interface ProjectStore {
   getMany: (projectIds: string[]) => Promise<Project[]>;
   list: (organizationId: string) => Promise<Project[]>;
   create: (args: CreateProjectArgs) => Promise<Project>;
-  delete: (ids: string) => Promise<void>;
-  deleteMany: (ids: string[]) => Promise<void>;
+  delete: (ids: string) => Promise<boolean>;
+  deleteMany: (ids: string[]) => Promise<number>;
   update: (args: UpdateProject) => Promise<Project>;
   addToFileCount: (projectId: string, delta: number) => Promise<Project>;
 }
@@ -108,12 +108,13 @@ RETURNING
   }
 
   async delete(id: string) {
-    await this.deleteMany([id]);
+    const count = await this.deleteMany([id]);
+    return count === 1;
   }
 
   // TODO
   async deleteMany(ids: string[]) {
-    await this.pool.query(
+    const res = await this.pool.query(
       sql.unsafe`
 UPDATE
     PROJECT
@@ -123,6 +124,7 @@ where
     id IN (${sql.join(ids, sql.fragment`, `)})
 `
     );
+    return res.rowCount;
   }
 
   async addToFileCount(id: string, delta: number): Promise<Project> {

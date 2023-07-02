@@ -1,11 +1,12 @@
-import { ProjectStore, TaskStore } from "@fgpt/precedent-node";
+import { ProjectStore, TaskStore, UserOrgService } from "@fgpt/precedent-node";
 import express from "express";
 import { z } from "zod";
 
 export class ProjectRouter {
   constructor(
     private readonly projectStore: ProjectStore,
-    private readonly taskService: TaskStore
+    private readonly taskService: TaskStore,
+    private readonly userOrgService: UserOrgService
   ) {}
   init() {
     const router = express.Router();
@@ -25,6 +26,10 @@ export class ProjectRouter {
           organizationId: user.organizationId,
           creatorUserId: user.id,
         });
+        await this.userOrgService.addToProjectCountForOrg(
+          user.organizationId,
+          1
+        );
 
         res.json({ project });
       }
@@ -38,7 +43,13 @@ export class ProjectRouter {
           throw new Error("invalid request");
         }
 
-        await this.projectStore.delete(projectId);
+        const wasDeleted = await this.projectStore.delete(projectId);
+        if (!wasDeleted) {
+          await this.userOrgService.addToProjectCountForOrg(
+            req.user.organizationId,
+            -1
+          );
+        }
         res.json({ status: "ok" });
       }
     );

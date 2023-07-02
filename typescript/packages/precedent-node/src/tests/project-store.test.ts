@@ -64,7 +64,8 @@ test("delete", async () => {
     creatorUserId: userId,
   });
 
-  await projectService.delete(project.id);
+  const res = await projectService.delete(project.id);
+  expect(res).toEqual(true);
   const projects = await projectService.list(organizationId);
   expect(projects.length).toEqual(0);
 });
