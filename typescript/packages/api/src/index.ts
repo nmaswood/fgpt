@@ -144,7 +144,8 @@ async function start() {
       objectStoreService,
       SETTINGS.assetBucket,
       taskStore,
-      loadedFileStore
+      loadedFileStore,
+      projectStore
     ).init()
   );
 

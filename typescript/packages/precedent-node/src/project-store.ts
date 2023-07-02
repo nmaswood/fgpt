@@ -24,9 +24,10 @@ export interface ProjectStore {
   delete: (ids: string) => Promise<void>;
   deleteMany: (ids: string[]) => Promise<void>;
   update: (args: UpdateProject) => Promise<Project>;
+  addToFileCount: (projectId: string, delta: number) => Promise<Project>;
 }
 
-const PROJECT_FIELDS = sql.fragment`id, organization_id, name`;
+const PROJECT_FIELDS = sql.fragment`id, organization_id, name, file_count`;
 
 export class PSqlProjectStore implements ProjectStore {
   constructor(private readonly pool: DatabasePool) {}
@@ -114,7 +115,6 @@ RETURNING
   async deleteMany(ids: string[]) {
     await this.pool.query(
       sql.unsafe`
-
 UPDATE
     PROJECT
 SET
@@ -123,6 +123,25 @@ where
     id IN (${sql.join(ids, sql.fragment`, `)})
 `
     );
+  }
+
+  async addToFileCount(id: string, delta: number): Promise<Project> {
+    return this.pool.connect(async (cnx) => {
+      const project = await cnx.one(
+        sql.type(ZProjectRow)`
+UPDATE
+    Project
+SET
+file_count = COALESCE(file_count, 0) + ${delta}
+WHERE
+    id = ${id}
+RETURNING
+    ${PROJECT_FIELDS}
+`
+      );
+
+      return project;
+    });
   }
 
   async update({ id, name }: UpdateProject): Promise<Project> {
@@ -150,9 +169,11 @@ const ZProjectRow = z
     id: z.string(),
     organization_id: z.string(),
     name: z.string(),
+    file_count: z.number().nullable(),
   })
   .transform((v) => ({
     id: v.id,
     organizationId: v.organization_id,
     name: v.name,
+    fileCount: v.file_count ?? 0,
   }));

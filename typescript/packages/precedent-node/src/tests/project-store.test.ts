@@ -85,3 +85,18 @@ test("update", async () => {
 
   expect(updatedProject.name).toEqual("I love cats");
 });
+
+test("addToFileCount", async () => {
+  const { projectService, userId, organizationId } = await setup();
+
+  const project = await projectService.create({
+    name: "test",
+    organizationId,
+    creatorUserId: userId,
+  });
+
+  expect(project.fileCount).toEqual(0);
+
+  const newP = await projectService.addToFileCount(project.id, 10);
+  expect(newP.fileCount).toEqual(10);
+});

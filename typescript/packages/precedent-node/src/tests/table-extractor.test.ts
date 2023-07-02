@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 
-import { HttpTabularDataService } from "../table-extractor/table-extractor";
+import { HttpTabularDataService } from "../tabular-data-service/tabular-data-service";
 import { TEST_SETTINGS } from "./test-settings";
 
 async function setup() {

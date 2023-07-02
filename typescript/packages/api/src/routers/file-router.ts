@@ -6,6 +6,7 @@ import {
   ObjectStorageService,
   ShaHash,
   TaskStore,
+  ProjectStore,
 } from "@fgpt/precedent-node";
 import crypto from "crypto";
 import express from "express";
@@ -30,7 +31,8 @@ export class FileRouter {
     private readonly blobStorageService: ObjectStorageService,
     private readonly bucket: string,
     private readonly taskStore: TaskStore,
-    private readonly loadedFileStore: LoadedFileStore
+    private readonly loadedFileStore: LoadedFileStore,
+    private readonly projectStore: ProjectStore
   ) {}
   init() {
     const router = express.Router();
@@ -88,6 +90,7 @@ export class FileRouter {
         };
 
         const [fileRef] = await this.fileReferenceStore.insertMany([ref]);
+        await this.projectStore.addToFileCount(projectId, 1);
 
         const fileType = getFileType(file.mimetype);
 

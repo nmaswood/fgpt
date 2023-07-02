@@ -9,6 +9,10 @@ export interface UpsertUserArguments {
 
 export interface UserOrgService {
   upsert: (args: UpsertUserArguments) => Promise<User>;
+  addToProjectCountForOrg: (
+    organizationId: string,
+    delta: number
+  ) => Promise<number>;
 }
 
 const USER_FIELDS = sql.fragment`id, organization_id, email`;
@@ -60,6 +64,23 @@ RETURNING
 `);
 
     return Convert.fromUserRow(newUser);
+  }
+
+  async addToProjectCountForOrg(id: string, delta: number): Promise<number> {
+    return this.pool.connect(async (cnx) => {
+      return cnx.oneFirst(
+        sql.type(z.object({ project_count: z.number() }))`
+UPDATE
+    organization
+SET
+  project_count = COALESCE(project_count, 0) + ${delta}
+WHERE
+    id = ${id}
+RETURNING
+project_count
+`
+      );
+    });
   }
 }
 
