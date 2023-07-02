@@ -291,14 +291,11 @@ const RenderChatEntryFromServer: React.FC<{
 
   return (
     <>
-      <ListItem>
-        {picture && (
-          <ListItemDecorator>
-            <Avatar src={picture} />
-          </ListItemDecorator>
-        )}
-        <ListItemContent>{chatEntry.question}</ListItemContent>
-      </ListItem>
+      <UserAvatarWithResponse
+        text={chatEntry.question}
+        picture={picture ?? undefined}
+      />
+
       <ListItem
         sx={{
           display: "flex",
@@ -402,19 +399,11 @@ const RenderChatEntryFromClient: React.FC<{
   }, [current, mounted]);
   return (
     <>
-      <ListItem
-        sx={{
-          display: "flex",
-          gap: 2,
-        }}
-      >
-        {picture && (
-          <ListItemDecorator>
-            <Avatar src={picture} />
-          </ListItemDecorator>
-        )}
-        <ListItemContent>{q.question}</ListItemContent>
-      </ListItem>
+      <UserAvatarWithResponse
+        text={q.question}
+        picture={picture ?? undefined}
+      />
+
       <ListItem
         sx={{
           display: "flex",
@@ -486,5 +475,26 @@ const DisplayQuestions: React.FC<{
         })}
       </List>
     </Box>
+  );
+};
+
+const UserAvatarWithResponse: React.FC<{
+  picture: string | undefined;
+  text: string;
+}> = ({ picture, text }) => {
+  return (
+    <ListItem
+      sx={{
+        display: "flex",
+        gap: 2,
+      }}
+    >
+      {picture && (
+        <ListItemDecorator>
+          <Avatar src={picture} />
+        </ListItemDecorator>
+      )}
+      <ListItemContent>{text}</ListItemContent>
+    </ListItem>
   );
 };
