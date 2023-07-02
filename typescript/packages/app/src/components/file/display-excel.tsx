@@ -2,7 +2,7 @@ import "@fortune-sheet/react/dist/index.css";
 
 import { Sheet } from "@fortune-sheet/core";
 import { Workbook, WorkbookInstance } from "@fortune-sheet/react";
-import { Box, Link, Typography } from "@mui/material";
+import { Box, Link, Typography } from "@mui/joy";
 import NextLink from "next/link";
 import React from "react";
 

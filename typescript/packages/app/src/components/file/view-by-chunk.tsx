@@ -1,18 +1,9 @@
 import { ChunkStrategy } from "@fgpt/precedent-iso";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { Box, Button, ButtonGroup, Select, Typography } from "@mui/joy";
-import {
-  Card,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-} from "@mui/material";
+import { Box, Button, ButtonGroup, Select, Typography, Option } from "@mui/joy";
+import { TextField, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import React from "react";
-
 import { useFetchPlayground } from "../../hooks/use-fetch-playground";
 import { useFetchTextChunk } from "../../hooks/use-fetch-text-chunk";
 import { useFetchTextChunkGroup } from "../../hooks/use-fetch-text-chunk-group";
@@ -52,19 +43,16 @@ export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
           height="100%"
         >
           <Box display="flex" gap={2} alignItems="center">
-            <FormControl>
-              <InputLabel>Chunk strategy</InputLabel>
-              <Select
-                value={chunkStrategy}
-                onChange={(_, value) =>
-                  setChunkStrategyAndResetOrder(value as ChunkStrategy)
-                }
-              >
-                <MenuItem value="greedy_v0">Greedy 500</MenuItem>
-                <MenuItem value="greedy_5k">Greedy 5000</MenuItem>
-                <MenuItem value="greedy_15k">Greedy 15000</MenuItem>
-              </Select>
-            </FormControl>
+            <Select
+              value={chunkStrategy}
+              onChange={(_, value) =>
+                setChunkStrategyAndResetOrder(value as ChunkStrategy)
+              }
+            >
+              <Option value="greedy_v0">Greedy 500</Option>
+              <Option value="greedy_5k">Greedy 5000</Option>
+              <Option value="greedy_15k">Greedy 15000</Option>
+            </Select>
             <Box display="flex" flexDirection="column">
               <Typography>
                 Chunk: {order + 1} / {textChunkGroup.numChunks}
@@ -132,18 +120,7 @@ const DisplayOutput: React.FC<{ text: string }> = ({ text }) => {
       maxHeight="100%"
       gridTemplateRows="1fr 1fr"
     >
-      <Card
-        variant="outlined"
-        sx={{
-          padding: 1,
-          overflow: "auto",
-          maxHeight: "300px",
-          minHeight: "100%",
-          maxWidth: "100%",
-        }}
-      >
-        <Typography overflow="auto">{text}</Typography>
-      </Card>
+      <Typography overflow="auto">{text}</Typography>
     </Box>
   );
 };

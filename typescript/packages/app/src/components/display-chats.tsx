@@ -16,7 +16,6 @@ import {
   ListItemContent,
 } from "@mui/joy";
 import React from "react";
-import { TransitionGroup } from "react-transition-group";
 
 export const DisplayChatList: React.FC<{
   chats: Chat[];
@@ -88,20 +87,18 @@ export const DisplayChatList: React.FC<{
           }
         }}
       >
-        <TransitionGroup>
-          {chats.map((chat) => (
-            <ListItemEntry
-              key={chat.id}
-              chat={chat}
-              selectedChatId={selectedChatId}
-              setSelectedChatId={setSelectedChatId}
-              isLoading={isMutating}
-              onDelete={deleteChat}
-              editChat={editChat}
-              isMutating={isMutating}
-            />
-          ))}
-        </TransitionGroup>
+        {chats.map((chat) => (
+          <ListItemEntry
+            key={chat.id}
+            chat={chat}
+            selectedChatId={selectedChatId}
+            setSelectedChatId={setSelectedChatId}
+            isLoading={isMutating}
+            onDelete={deleteChat}
+            editChat={editChat}
+            isMutating={isMutating}
+          />
+        ))}
       </List>
     </Box>
   );
@@ -155,7 +152,13 @@ const ListItemEntry: React.FC<{
       selected={isSelected}
       onClick={() => setSelectedChatId(chat.id)}
     >
-      <ListItem>
+      <ListItem
+        sx={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
         {isEditing && (
           <Input
             value={name}

@@ -1,7 +1,6 @@
 import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 import AddIcon from "@mui/icons-material/Add";
-import { Button } from "@mui/joy";
-import { Box } from "@mui/material";
+import { Button, Box } from "@mui/joy";
 import { useRouter } from "next/router";
 import * as React from "react";
 import { z } from "zod";
@@ -67,6 +66,7 @@ const Home: React.FC = () => {
       height="100%"
       width="100%"
       maxHeight="100%"
+      maxWidth="100%"
       overflow="auto"
     >
       <Sidebar
@@ -93,6 +93,9 @@ const Home: React.FC = () => {
               display="flex"
               width="100%"
               height="100%"
+              maxHeight="100%"
+              maxWidth="100%"
+              overflow="auto"
               justifyContent="center"
               alignItems="center"
             >

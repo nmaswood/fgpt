@@ -51,16 +51,7 @@ export const Sidebar: React.FC<{
   setProjectModalOpen,
 }) => {
   return (
-    <Box
-      sx={{
-        width: SIDE_BAR_WIDTH,
-        flexShrink: 0,
-        "& .MuiDrawer-paper": {
-          width: SIDE_BAR_WIDTH,
-          boxSizing: "border-box",
-        },
-      }}
-    >
+    <Box display="flex" flexDirection="column">
       <CreateProject
         loading={projectsLoading}
         projects={projects ?? []}
@@ -120,7 +111,13 @@ export const Sidebar: React.FC<{
                           <FolderIcon color="primary" />
                         </ListItemDecorator>
 
-                        <ListItemContent>{project.name}</ListItemContent>
+                        <ListItemContent
+                          sx={{
+                            wordBreak: "break-all",
+                          }}
+                        >
+                          {project.name}
+                        </ListItemContent>
                       </ListItemButton>
                     </ListItem>
                   </Collapse>

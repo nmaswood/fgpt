@@ -32,6 +32,9 @@ export default function App({ Component, pageProps }: AppProps) {
             flexDirection="column"
             width="100%"
             height="100%"
+            maxHeight="100%"
+            maxWidth="100%"
+            overflow="auto"
             position="relative"
           >
             {/* eslint-disable-next-line*/}
