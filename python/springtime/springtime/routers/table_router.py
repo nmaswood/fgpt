@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from loguru import logger
 from pydantic import BaseModel
-from springtime.llm.table_analyzer import AnalyzeResponseChunk, TableAnalyzer
+from springtime.services.table_analyzer import AnalyzeResponseChunk, TableAnalyzer
 from springtime.object_store.object_store import ObjectStore
 import tempfile
 import pandas as pd

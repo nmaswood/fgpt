@@ -4,10 +4,10 @@ import openai
 
 import abc
 
+from springtime.models.chat import ChatHistory
 
-from springtime.llm.models import ChatHistory
 
-from springtime.llm.prompt import create_prompt
+from springtime.services.prompt import create_prompt
 
 
 class ChatService(abc.ABC):
@@ -18,12 +18,12 @@ class ChatService(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def ask_sync(self, context: str, question: str) -> str:
+    def ask(self, context: str, question: str) -> str:
         pass
 
 
-class OpenAIChatService(abc.ABC):
-    def ask_stream(
+class OpenAIChatService(ChatService):
+    def ask_streaming(
         self, context: str, question: str, history: list[ChatHistory]
     ) -> Generator[Any, Any, None]:
         prompt = create_prompt(context, question, history)

@@ -1,4 +1,4 @@
-from typing import Any, Generator
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -9,7 +9,7 @@ import openai
 import json
 
 
-from springtime.llm.prompts import (
+from springtime.services.prompts import (
     questions_schema,
     summaries_schema,
     terms_schema,
@@ -60,12 +60,12 @@ class PlaygroundRequest(BaseModel):
 
 class ReportService(abc.ABC):
     @abc.abstractmethod
-    def generate_output(self, text: str) -> Generator[Any, Any, None]:
+    def generate_output(self, text: str) -> Output:
         pass
 
 
-class OpenAIReportService(abc.ABC):
-    def get_output(self, text: str) -> Output:
+class OpenAIReportService(ReportService):
+    def generate_output(self, text: str) -> Output:
         questions = self.get_questions(text)
         summaries = self.get_summaries(text)
         terms = self.get_terms(text)

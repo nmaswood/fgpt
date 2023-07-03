@@ -1,10 +1,15 @@
 from loguru import logger
-from springtime.llm.embeddings import OpenAIEmbeddingsService
-from springtime.llm.pinecone import PineconeVectorService
-from springtime.llm.table_analyzer import TableAnalyzerImpl
+from springtime.routers.chat_router import ChatRouter
+from springtime.routers.text_router import TextRouter
+from springtime.routers.vector_router import VectorRouter
+from springtime.services.chat_service import OpenAIChatService
+from springtime.services.embeddings_service import OpenAIEmbeddingsService
+from springtime.services.report_service import OpenAIReportService
+from springtime.services.vector_service import PineconeVectorService
+from springtime.services.table_analyzer import TableAnalyzerImpl
 from springtime.object_store.object_store import GCSObjectStore
 from springtime.excel.table_extractor import TabulaTableExtractor
-from springtime.routers.ml_router import MLRouter
+from springtime.routers.report_router import ReportRouter
 
 from springtime.routers.pdf_router import PdfRouter
 import uvicorn
@@ -32,6 +37,8 @@ VECTOR_SERVICE = PineconeVectorService(
     index_name=SETTINGS.pinecone_index,
     namespace=SETTINGS.pinecone_namespace,
 )
+REPORT_SERVICE = OpenAIReportService()
+CHAT_SERVICE = OpenAIChatService()
 
 
 @app.middleware("http")
@@ -47,9 +54,12 @@ async def add_process_time_header(request: Request, call_next):
     return await call_next(request)
 
 
-app.include_router(MLRouter(EMBEDDING_SERVICE, VECTOR_SERVICE).get_router())
+app.include_router(ChatRouter(CHAT_SERVICE).get_router())
+app.include_router(ReportRouter(REPORT_SERVICE).get_router())
 app.include_router(PdfRouter(TABLE_EXTRACTOR).get_router())
 app.include_router(TableRouter(TABLE_ANALYZER, OBJECT_STORE).get_router())
+app.include_router(TextRouter().get_router())
+app.include_router(VectorRouter(VECTOR_SERVICE).get_router())
 
 
 @app.get("/ping")

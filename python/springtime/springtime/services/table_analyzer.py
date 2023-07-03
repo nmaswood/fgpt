@@ -3,15 +3,15 @@ from typing import NamedTuple
 from loguru import logger
 
 import pandas as pd
-from springtime.llm.token import TokenLengthResponse, get_token_length
+from springtime.services.token import TokenLengthResponse, get_token_length
 
 from springtime.utils.chunks import chunks
 import openai
 from pydantic import BaseModel
-from springtime.llm.open_ai_types import CompletionResponse
+from springtime.models.open_ai import CompletionResponse
 
 
-from springtime.llm.prompts import EXCEL_SYSTEM_CONTEXT
+from springtime.services.prompts import EXCEL_SYSTEM_CONTEXT
 
 
 class AnalyzeArguments(BaseModel):
