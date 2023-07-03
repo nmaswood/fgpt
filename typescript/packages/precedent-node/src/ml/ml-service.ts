@@ -134,7 +134,7 @@ export class MLServiceClientImpl implements MLServiceClient {
 
   async getEmbeddings(args: GetEmbeddingsArgs): Promise<GetEmbeddingsResponse> {
     const response = await this.#client.post<PredictResponse>(
-      "/embedding-for-documents",
+      "/embeddings/embedding-for-documents",
       { documents: args.documents }
     );
     const parsed = ZEmbeddingsResponse.parse(response.data);
@@ -147,7 +147,7 @@ export class MLServiceClientImpl implements MLServiceClient {
   }
 
   async upsertVectors(vectors: UpsertVector[]): Promise<void> {
-    await this.#client.put<PredictResponse>("/upsert-vectors", {
+    await this.#client.put<PredictResponse>("/vector/upsert-vectors", {
       vectors,
     });
   }
@@ -157,7 +157,7 @@ export class MLServiceClientImpl implements MLServiceClient {
     metadata,
   }: SimiliarSearch): Promise<VectorResult[]> {
     const response = await this.#client.post<PredictResponse>(
-      "/similar-vectors",
+      "/vector/similar-vectors",
       {
         vector,
         metadata,
@@ -167,7 +167,7 @@ export class MLServiceClientImpl implements MLServiceClient {
   }
 
   async askQuestion({ context, question }: AskQuestion): Promise<string> {
-    const response = await this.#client.post<unknown>("/ask-question", {
+    const response = await this.#client.post<unknown>("/chat/ask-question", {
       context,
       question,
     });
@@ -184,7 +184,7 @@ export class MLServiceClientImpl implements MLServiceClient {
     history,
   }: AskQuestionStreamingArgs): Promise<void> {
     const response = await this.#client.post<any>(
-      "/ask-question-streaming",
+      "/chat/ask-question-streaming",
       {
         context,
         question,
@@ -233,7 +233,7 @@ export class MLServiceClientImpl implements MLServiceClient {
   }
 
   async llmOutput({ text }: LLMOutputArgs): Promise<LLMOutputResponse> {
-    const response = await this.#client.post<unknown>("/llm-output", {
+    const response = await this.#client.post<unknown>("/report/llm-output", {
       text,
     });
     return ZLLMOutputResponse.parse(response.data);
@@ -250,7 +250,7 @@ export class MLServiceClientImpl implements MLServiceClient {
   }
 
   async tokenLength(text: string): Promise<{ model: "gpt4"; length: number }> {
-    const response = await this.#client.post<unknown>("/token-length", {
+    const response = await this.#client.post<unknown>("/text/token-length", {
       text,
     });
     const resp = TokenLengthResponse.parse(response.data);
