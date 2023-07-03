@@ -1,4 +1,6 @@
 from loguru import logger
+from springtime.llm.embeddings import OpenAIEmbeddingsService
+from springtime.llm.pinecone import PineconeVectorService
 from springtime.llm.table_analyzer import TableAnalyzerImpl
 from springtime.object_store.object_store import GCSObjectStore
 from springtime.excel.table_extractor import TabulaTableExtractor
@@ -23,6 +25,14 @@ OBJECT_STORE = GCSObjectStore()
 TABLE_EXTRACTOR = TabulaTableExtractor(OBJECT_STORE)
 TABLE_ANALYZER = TableAnalyzerImpl()
 
+EMBEDDING_SERVICE = OpenAIEmbeddingsService()
+VECTOR_SERVICE = PineconeVectorService(
+    api_key=SETTINGS.pinecone_api_key,
+    environment=SETTINGS.pinecone_env,
+    index_name=SETTINGS.pinecone_index,
+    namespace=SETTINGS.pinecone_namespace,
+)
+
 
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
@@ -37,7 +47,7 @@ async def add_process_time_header(request: Request, call_next):
     return await call_next(request)
 
 
-app.include_router(MLRouter().get_router())
+app.include_router(MLRouter(EMBEDDING_SERVICE, VECTOR_SERVICE).get_router())
 app.include_router(PdfRouter(TABLE_EXTRACTOR).get_router())
 app.include_router(TableRouter(TABLE_ANALYZER, OBJECT_STORE).get_router())
 

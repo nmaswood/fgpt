@@ -36,7 +36,7 @@ const LLM_OUTPUT_CHUNK_SIZE = "greedy_15k" as const;
 const EXCEL_PATH_SUFFIX = "excel-uploads";
 
 export class TaskExecutorImpl implements TaskExecutor {
-  STRATEGIES = ["greedy_v0", "greedy_5k", "greedy_15k"] as const;
+  STRATEGIES = ["greedy_v0", "greedy_15k"] as const;
   CHUNKER = new GreedyTextChunker();
   constructor(
     private readonly textExtractor: TextExtractor,
@@ -178,11 +178,6 @@ export class TaskExecutorImpl implements TaskExecutor {
         break;
       }
 
-      case "create-analysis": {
-        LOGGER.warn("Create analysis not implemented");
-        break;
-      }
-
       case "llm-outputs": {
         const chunk = await this.textChunkStore.getTextChunkById(
           config.textChunkId
@@ -256,6 +251,7 @@ export class TaskExecutorImpl implements TaskExecutor {
             file.id
           ),
         });
+
         if (extracted.type === "empty") {
           LOGGER.info("No tables extracted");
           return;

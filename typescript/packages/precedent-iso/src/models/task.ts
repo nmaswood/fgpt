@@ -68,15 +68,6 @@ export const ZDeleteProjectConfig = z.object({
   projectId: z.string(),
 });
 
-export const ZCreateAnalysisConfig = z.object({
-  type: z.literal("create-analysis"),
-  version: z.literal("1"),
-  organizationId: z.string(),
-  projectId: z.string(),
-  fileReferenceId: z.string(),
-  analysisId: z.string(),
-});
-
 export const ZLLMOutputsConfig = z.object({
   type: z.literal("llm-outputs"),
   version: z.literal("1"),
@@ -117,7 +108,6 @@ export const ZTaskConfig = z.discriminatedUnion("type", [
   ZGenEmbeddingsConfig,
   ZUpsertEmbeddingsConfig,
   ZDeleteProjectConfig,
-  ZCreateAnalysisConfig,
   ZLLMOutputsConfig,
   ZExtractTableConfig,
   ZAnalyzeTableConfig,

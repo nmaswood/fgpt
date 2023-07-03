@@ -115,7 +115,7 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
                   <ListItemDecorator>
                     <ConstructionIcon />
                   </ListItemDecorator>
-                  Chat
+                  Debug
                 </Tab>
               )}
             </TabList>
