@@ -1,2 +1,2 @@
 def test_analyze():
-    pass
+    assert False

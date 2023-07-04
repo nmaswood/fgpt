@@ -131,10 +131,11 @@ where
     return this.pool.connect(async (cnx) => {
       const project = await cnx.one(
         sql.type(ZProjectRow)`
+
 UPDATE
     Project
 SET
-file_count = COALESCE(file_count, 0) + ${delta}
+    file_count = COALESCE(file_count, 0) + ${delta}
 WHERE
     id = ${id}
 RETURNING

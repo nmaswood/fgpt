@@ -70,14 +70,15 @@ RETURNING
     return this.pool.connect(async (cnx) => {
       return cnx.oneFirst(
         sql.type(z.object({ project_count: z.number() }))`
+
 UPDATE
     organization
 SET
-  project_count = COALESCE(project_count, 0) + ${delta}
+    project_count = COALESCE(project_count, 0) + ${delta}
 WHERE
     id = ${id}
 RETURNING
-project_count
+    project_count
 `
       );
     });
