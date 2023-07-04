@@ -11,7 +11,7 @@ class EmbeddingForDocumentResponse(BaseModel):
     response: list[list[float]]
 
 
-class VectorRouter:
+class EmbeddingsRouter:
     def __init__(self, embeddings_service: EmbeddingsService):
         self.embeddings_service = embeddings_service
 

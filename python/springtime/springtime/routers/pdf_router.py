@@ -1,6 +1,9 @@
+from typing import Optional
 from fastapi import APIRouter
-from pydantic import BaseModel
-from springtime.excel.table_extractor import TableExtractor
+from pydantic import BaseModel, NonNegativeInt
+from springtime.excel.table_extractor import ExtractionArguments, TableExtractor
+from springtime.object_store.object_store import ObjectStore
+import tempfile
 
 
 class ExtractTablesRequest(BaseModel):
@@ -10,15 +13,39 @@ class ExtractTablesRequest(BaseModel):
     title: str
 
 
+class ExtractTableResponse(BaseModel):
+    number_of_sheets: NonNegativeInt
+    object_path: Optional[str]
+
+
+XLSX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
 class PdfRouter:
-    def __init__(self, table_extractor: TableExtractor):
+    def __init__(self, table_extractor: TableExtractor, object_store: ObjectStore):
         self.table_extractor = table_extractor
+        self.object_store = object_store
 
     def get_router(self):
         router = APIRouter(prefix="/pdf")
 
         @router.post("/extract-tables")
         async def extract_tables(req: ExtractTablesRequest):
-            return self.table_extractor.extract(req)
+            with tempfile.NamedTemporaryFile("wb+") as tmp:
+                self.object_store.download_to_filename(
+                    req.bucket, req.object_path, tmp.name
+                )
+
+                resp = self.table_extractor.extract(
+                    ExtractionArguments(
+                        file_name=tmp.name,
+                        title=req.title,
+                        bucket=req.bucket,
+                        output_prefix=req.output_prefix,
+                    )
+                )
+                return ExtractTableResponse(
+                    number_of_sheets=resp.number_of_sheets, object_path=resp.path
+                )
 
         return router

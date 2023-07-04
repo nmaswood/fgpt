@@ -1,5 +1,6 @@
 from loguru import logger
 from springtime.routers.chat_router import ChatRouter
+from springtime.routers.embeddings_router import EmbeddingsRouter
 from springtime.routers.text_router import TextRouter
 from springtime.routers.vector_router import VectorRouter
 from springtime.services.chat_service import OpenAIChatService
@@ -56,10 +57,11 @@ async def add_process_time_header(request: Request, call_next):
 
 app.include_router(ChatRouter(CHAT_SERVICE).get_router())
 app.include_router(ReportRouter(REPORT_SERVICE).get_router())
-app.include_router(PdfRouter(TABLE_EXTRACTOR).get_router())
+app.include_router(PdfRouter(TABLE_EXTRACTOR, OBJECT_STORE).get_router())
 app.include_router(TableRouter(TABLE_ANALYZER, OBJECT_STORE).get_router())
 app.include_router(TextRouter().get_router())
 app.include_router(VectorRouter(VECTOR_SERVICE).get_router())
+app.include_router(EmbeddingsRouter(EMBEDDING_SERVICE).get_router())
 
 
 @app.get("/ping")
