@@ -1,7 +1,7 @@
 import { ChunkStrategy } from "@fgpt/precedent-iso";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { Box, Button, ButtonGroup, Option,Select, Typography } from "@mui/joy";
+import { Box, Button, ButtonGroup, Option, Select, Typography } from "@mui/joy";
 import { TextField, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import React from "react";
 
@@ -51,7 +51,6 @@ export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
               }
             >
               <Option value="greedy_v0">Greedy 500</Option>
-              <Option value="greedy_5k">Greedy 5000</Option>
               <Option value="greedy_15k">Greedy 15000</Option>
             </Select>
             <Box display="flex" flexDirection="column">
