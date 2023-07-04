@@ -32,7 +32,6 @@ export interface TaskExecutor {
   execute(task: Task): Promise<void>;
 }
 
-const LLM_OUTPUT_CHUNK_SIZE = "greedy_15k" as const;
 const EXCEL_PATH_SUFFIX = "excel-uploads";
 
 export class TaskExecutorImpl implements TaskExecutor {
@@ -408,8 +407,7 @@ export class TaskExecutorImpl implements TaskExecutor {
         });
         break;
       }
-      case "greedy_15k":
-      case "greedy_5k": {
+      case "greedy_15k": {
         const chunks = this.CHUNKER.chunk({
           tokenChunkLimit: CHUNK_STRATEGY_TO_CHUNK_SIZE[strategy],
           text,
@@ -438,10 +436,6 @@ export class TaskExecutorImpl implements TaskExecutor {
             commonArgs,
             group
           );
-          if (strategy !== LLM_OUTPUT_CHUNK_SIZE) {
-            LOGGER.info("Skipping LLM Generation");
-            continue;
-          }
 
           await this.taskService.insertMany(
             chunks.map((chunk) => ({

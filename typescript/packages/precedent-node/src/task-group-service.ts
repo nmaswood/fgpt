@@ -44,7 +44,8 @@ export class PsqlTaskGroupService implements TaskGroupService {
     fileReferenceId,
   }: InsertTaskGroup): Promise<TaskGroup> {
     return this.pool.one(sql.type(ZTaskGroupRowForLength)`
-INSERT INTO task_group (description, pending_tasks, completed_tasks, failed_tasks, organization_id, project_id, file_reference_id )
+
+INSERT INTO task_group (description, pending_tasks, completed_tasks, failed_tasks, organization_id, project_id, file_reference_id)
     VALUES (${description}, ${JSON.stringify([])}, ${JSON.stringify(
       []
     )}, ${JSON.stringify(
@@ -75,13 +76,14 @@ RETURNING
     taskIds: string[]
   ): Promise<TaskGroup> {
     const tasksWithStatus = await trx.query(sql.type(ZTaskWithStatus)`
+
 SELECT
     id,
     status
 FROM
     task
 WHERE
-  id IN (${sql.join(taskIds, sql.fragment`, `)})
+    id IN (${sql.join(taskIds, sql.fragment`, `)})
 `);
 
     const { pendingTasks, completedTasks, failedTasks } =
