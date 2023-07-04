@@ -5,7 +5,6 @@ from loguru import logger
 import pandas as pd
 from springtime.services.token import TokenLengthResponse, get_token_length
 
-from springtime.utils.chunks import chunks
 import openai
 from pydantic import BaseModel
 from springtime.models.open_ai import CompletionResponse
@@ -36,6 +35,7 @@ class _PreprocessedSheet(NamedTuple):
     sheet_name: str
     token_length: TokenLengthResponse
     parsed_sheet: dict[str, pd.DataFrame]
+    sheet_as_string: str
 
 
 class AnalyzeResponse(BaseModel):
@@ -48,6 +48,9 @@ class TableAnalyzer(abc.ABC):
         return None
 
 
+GPT4_TOKEN_LIMIT = 5000
+
+
 class TableAnalyzerImpl(TableAnalyzer):
     def __init__(self):
         pass
@@ -58,17 +61,18 @@ class TableAnalyzerImpl(TableAnalyzer):
         xl = pd.ExcelFile(excel_file)
         preprocessed = self.preprocess(xl)
 
-        for sheet_chunk in chunks(xl.sheet_names, 10):
-            logger.info(f"Starting to analyze Analyzing sheet chunk: {sheet_chunk}")
-            input_chunk = self._input_chunk_from_sheets(xl, sheet_chunk)
-            resp = self._chat_completion(input_chunk.prompt)
-            content = resp.choices[0].message.content
+        chunks = chunker(GPT4_TOKEN_LIMIT, preprocessed)
+
+        logger.info(f"{len(chunks)} Chunks being analyzed")
+        for sheet_chunk in chunks:
+            table_content = "\n".join([sheet.sheet_as_string for sheet in sheet_chunk])
+            resp = self._chat_completion(table_content)
 
             acc.append(
                 AnalyzeResponseChunk(
-                    sheet_names=input_chunk.sheet_names,
-                    content=content,
-                    prompt=input_chunk.prompt,
+                    sheet_names=[sheet.sheet_name for sheet in sheet_chunk],
+                    content=resp.choices[0].message.content,
+                    prompt=table_content,
                 )
             )
 
@@ -103,14 +107,34 @@ class TableAnalyzerImpl(TableAnalyzer):
                     sheet_name=sheet_name,
                     token_length=token_len,
                     parsed_sheet=parsed_sheet,
+                    sheet_as_string=sheet_as_string,
                 )
             )
         return acc
 
 
-def chunker(sheets: list[_PreprocessedSheet]) -> list[list[_PreprocessedSheet]]:
+def chunker(
+    token_limit: int, sheets: list[_PreprocessedSheet]
+) -> list[list[_PreprocessedSheet]]:
     acc: list[list[_PreprocessedSheet]] = []
     curr: list[_PreprocessedSheet] = []
     curr_len = 0
+
+    for sheet in sheets:
+        if sheet.token_length.gpt4 > token_limit:
+            logger.warning(
+                f"Skipping sheet {sheet.sheet_name} due to token length {sheet.token_length.gpt4} > {token_limit}"
+            )
+            continue
+
+        if curr_len + sheet.token_length.gpt4 > token_limit:
+            acc.append(curr)
+            curr = []
+            curr_len = 0
+        else:
+            curr.append(sheet)
+            curr_len += sheet.token_length.gpt4
+    if curr:
+        acc.append(curr)
 
     return acc
