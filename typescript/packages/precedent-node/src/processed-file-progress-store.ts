@@ -1,3 +1,5 @@
+import { DatabasePool } from "slonik";
+
 export interface ProcessedFileProgress {
   chunking: "pending" | "in-progress" | "complete";
   upsertEmbeddings: "pending" | "in-progress" | "complete";
@@ -22,7 +24,9 @@ export interface ProcessedFileProgressStore {
 export class PSqlProcessedFileProgressStore
   implements ProcessedFileProgressStore
 {
+  constructor(private readonly pool: DatabasePool) {}
   async getProgress(_: string): Promise<ProcessedFileProgress> {
+    console.log(this.pool);
     throw new Error("not implemented");
   }
   async setChunkingTaskGroupId(_: string, __: string): Promise<void> {

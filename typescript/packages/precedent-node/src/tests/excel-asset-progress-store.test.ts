@@ -7,7 +7,7 @@ import { PsqlProcessedFileStore } from "../processed-file-store";
 import { PSqlProjectStore } from "../project-store";
 import { PsqlUserOrgService } from "../user-org/user-org-service";
 import { TEST_SETTINGS } from "./test-settings";
-import { PsqlProcessedFileProgressStore } from "../processed-file-progress-store";
+import { PSqlExcelOutputProgressStore } from "../excel-asset-progress-store";
 
 async function setup() {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
@@ -50,7 +50,7 @@ async function setup() {
     gpt4TokenLength: 1000,
   });
 
-  const processedFileProgressStore = new PsqlProcessedFileProgressStore(pool);
+  const excelAssetProgressStore = new PSqlExcelOutputProgressStore(pool);
 
   return {
     pool,
@@ -59,7 +59,7 @@ async function setup() {
     fileReference,
     fileReferenceStore,
     processedFile,
-    processedFileProgressStore,
+    processedFileProgressStore: excelAssetProgressStore,
   };
 }
 
@@ -78,7 +78,4 @@ afterEach(async () => {
 });
 
 test("getProgress", async () => {});
-test("setChunkingTaskGroupId", async () => {});
-test("setUpsertEmbeddingTaskId", async () => {});
-test("setExtractTableTaskId", async () => {});
 test("setAnalyzeTableTaskId", async () => {});
