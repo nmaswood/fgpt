@@ -1,4 +1,4 @@
-import { assertNever, getFileType } from "@fgpt/precedent-iso";
+import { getFileType } from "@fgpt/precedent-iso";
 import {
   FileReferenceStore,
   InsertFileReference,
@@ -14,8 +14,6 @@ import * as F from "fs/promises";
 import multer from "multer";
 import path from "path";
 import { z } from "zod";
-
-import { LOGGER } from "../logger";
 
 const upload = multer({
   dest: "/var/tmp/api-upload",
@@ -122,15 +120,15 @@ export class FileRouter {
     );
 
     router.get(
-      "/signed-url/:fileId",
+      "/signed-url/:fileReferenceId",
       async (req: express.Request, res: express.Response) => {
-        const fileId = req.params.fileId;
+        const fileReferenceId = req.params.fileReferenceId;
 
-        if (typeof fileId !== "string") {
+        if (typeof fileReferenceId !== "string") {
           throw new Error("invalid request");
         }
 
-        const file = await this.fileReferenceStore.get(fileId);
+        const file = await this.fileReferenceStore.get(fileReferenceId);
         const signedUrl = await this.blobStorageService.getSignedUrl(
           this.bucket,
           file.path

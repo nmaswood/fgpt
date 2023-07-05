@@ -57,7 +57,7 @@ test("insertMany", async () => {
         organizationId: user.organizationId,
         projectId: project.id,
         type: "text-extraction",
-        fileId: "123",
+        fileReferenceId: "123",
       },
     },
   ]);
@@ -77,7 +77,7 @@ test("insert", async () => {
       organizationId: user.organizationId,
       projectId: project.id,
       type: "text-extraction",
-      fileId: "123",
+      fileReferenceId: "123",
     },
   });
 
@@ -96,7 +96,7 @@ test("get", async () => {
       organizationId: user.organizationId,
       projectId: project.id,
       type: "text-extraction",
-      fileId: "123",
+      fileReferenceId: "123",
     },
   });
 
@@ -119,7 +119,7 @@ test("getAndSetToInProgress", async () => {
         organizationId: user.organizationId,
         projectId: project.id,
         type: "text-extraction",
-        fileId: "123",
+        fileReferenceId: "123",
       },
     },
     {
@@ -131,7 +131,7 @@ test("getAndSetToInProgress", async () => {
         organizationId: user.organizationId,
         projectId: project.id,
         type: "text-extraction",
-        fileId: "123",
+        fileReferenceId: "123",
       },
     },
   ]);
@@ -153,7 +153,7 @@ test("setToSuceeded", async () => {
       organizationId: user.organizationId,
       projectId: project.id,
       type: "text-extraction",
-      fileId: "123",
+      fileReferenceId: "123",
     },
   });
 
@@ -174,7 +174,7 @@ test("setToInProgress", async () => {
       organizationId: user.organizationId,
       projectId: project.id,
       type: "text-extraction",
-      fileId: "123",
+      fileReferenceId: "123",
     },
   });
 
@@ -197,7 +197,7 @@ test("setToFailed", async () => {
       organizationId: user.organizationId,
       projectId: project.id,
       type: "text-extraction",
-      fileId: "123",
+      fileReferenceId: "123",
     },
   });
 
@@ -218,7 +218,7 @@ test("setToQueued", async () => {
       organizationId: user.organizationId,
       projectId: project.id,
       type: "text-extraction",
-      fileId: "123",
+      fileReferenceId: "123",
     },
   });
 

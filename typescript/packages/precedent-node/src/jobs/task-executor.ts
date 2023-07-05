@@ -2,14 +2,14 @@ import { assertNever } from "@fgpt/precedent-iso";
 import lodashChunk from "lodash/chunk";
 
 import { LOGGER } from "../logger";
+import { TaskGroupService } from "../task-group-service";
 import { Task, TaskStore } from "../task-store";
 import { EmbeddingsHandler } from "./generate-embeddings-handler";
+import { IngestFileHandlerImpl } from "./ingest-file-handler";
 import { LLMOutputHandler } from "./llm-output-handler";
 import { TableHandler } from "./table-handler";
 import { TextChunkHandler } from "./text-chunk-handler";
 import { TextExtractionHandler } from "./text-extraction-handler";
-import { TaskGroupService } from "../task-group-service";
-import { IngestFileHandlerImpl } from "./ingest-file-handler";
 
 export interface TaskExecutor {
   execute(task: Task): Promise<void>;

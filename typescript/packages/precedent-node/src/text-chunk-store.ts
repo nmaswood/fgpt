@@ -97,7 +97,7 @@ export interface TextChunkStore {
     textGroupId: string
   ): Promise<Progress | undefined>;
   getTextChunkGroupByStrategy(
-    fileId: string,
+    fileReferenceId: string,
     strategy: ChunkStrategy
   ): Promise<TextChunkGroup | undefined>;
   getLlmOutputProgress(textGroupId: string): Promise<Progress | undefined>;

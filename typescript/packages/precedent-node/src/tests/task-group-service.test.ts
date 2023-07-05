@@ -78,7 +78,7 @@ test("insertTaskGroup", async () => {
       organizationId,
       projectId,
       type: "text-extraction",
-      fileId: "123",
+      fileReferenceId: "123",
     },
   });
 
@@ -128,7 +128,7 @@ test("upsertTask", async () => {
         organizationId,
         projectId,
         type: "text-extraction",
-        fileId: "123",
+        fileReferenceId: "123",
       },
     },
     {
@@ -140,7 +140,7 @@ test("upsertTask", async () => {
         organizationId,
         projectId,
         type: "text-extraction",
-        fileId: "123",
+        fileReferenceId: "123",
       },
     },
     {
@@ -152,7 +152,7 @@ test("upsertTask", async () => {
         organizationId,
         projectId,
         type: "text-extraction",
-        fileId: "123",
+        fileReferenceId: "123",
       },
     },
     {
@@ -164,7 +164,7 @@ test("upsertTask", async () => {
         organizationId,
         projectId,
         type: "text-extraction",
-        fileId: "123",
+        fileReferenceId: "123",
       },
     },
   ]);

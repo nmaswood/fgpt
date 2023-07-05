@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { ZFileType } from "../file-type";
 
+import { ZFileType } from "../file-type";
 import { ZChunkStrategy } from "../text-chunker/text-chunker";
 import { ZExcelSource } from "./excel";
 

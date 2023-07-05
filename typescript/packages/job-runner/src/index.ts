@@ -33,6 +33,7 @@ import {
 } from "@fgpt/precedent-node";
 import { SETTINGS, Settings } from "./settings";
 import { MainRouter } from "./router";
+import { IngestFileHandlerImpl } from "@fgpt/precedent-node/src/jobs/ingest-file-handler";
 
 LOGGER.info("Server starting...");
 
@@ -111,6 +112,10 @@ async function start(settings: Settings) {
     excelOutputStore
   );
 
+  const taskStore = new PSqlTaskStore(pool, messageBusService);
+
+  const ingestFileHandler = new IngestFileHandlerImpl(taskStore);
+
   const taskGroupService = new PsqlTaskGroupService(pool);
   const taskExecutor = new TaskExecutorImpl(
     taskService,
@@ -119,10 +124,9 @@ async function start(settings: Settings) {
     generateEmbeddingsHandler,
     llmOutputHandler,
     tableHandler,
-    taskGroupService
+    taskGroupService,
+    ingestFileHandler
   );
-
-  const taskStore = new PSqlTaskStore(pool, messageBusService);
 
   const mainRouter = new MainRouter(taskStore, taskExecutor, taskGroupService);
 
