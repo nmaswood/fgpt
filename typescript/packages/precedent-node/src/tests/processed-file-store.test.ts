@@ -3,11 +3,11 @@ import { afterEach, beforeEach, expect, test } from "vitest";
 
 import { dataBasePool } from "../data-base-pool";
 import { PsqlFileReferenceStore } from "../file-reference-store";
+import { PsqlProcessedFileProgressStore } from "../processed-file-progress-store";
 import { PsqlProcessedFileStore } from "../processed-file-store";
 import { PSqlProjectStore } from "../project-store";
 import { PsqlUserOrgService } from "../user-org/user-org-service";
 import { TEST_SETTINGS } from "./test-settings";
-import { PsqlProcessedFileProgressStore } from "../processed-file-progress-store";
 
 async function setup() {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);

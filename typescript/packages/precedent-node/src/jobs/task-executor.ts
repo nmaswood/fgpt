@@ -5,7 +5,7 @@ import { LOGGER } from "../logger";
 import { TaskGroupService } from "../task-group-service";
 import { Task, TaskStore } from "../task-store";
 import { EmbeddingsHandler } from "./generate-embeddings-handler";
-import { IngestFileHandlerImpl } from "./ingest-file-handler";
+import { IngestFileHandler } from "./ingest-file-handler";
 import { LLMOutputHandler } from "./llm-output-handler";
 import { TableHandler } from "./table-handler";
 import { TextChunkHandler } from "./text-chunk-handler";
@@ -25,7 +25,7 @@ export class TaskExecutorImpl implements TaskExecutor {
     private readonly llmOutputHandler: LLMOutputHandler,
     private readonly tableHandler: TableHandler,
     private readonly taskGroupService: TaskGroupService,
-    private readonly ingestFileHandler: IngestFileHandlerImpl
+    private readonly ingestFileHandler: IngestFileHandler
   ) {}
 
   async execute({ config, organizationId, projectId }: Task) {
@@ -36,11 +36,28 @@ export class TaskExecutorImpl implements TaskExecutor {
       }
 
       case "text-extraction": {
-        await this.textExtractionHandler.extract({
+        const { processedFileId } = await this.textExtractionHandler.extract({
           organizationId,
           projectId,
           fileReferenceId: config.fileReferenceId,
         });
+
+        await this.taskStore.insertMany(
+          this.STRATEGIES.map((strategy) => ({
+            organizationId: config.organizationId,
+            projectId: config.projectId,
+            fileReferenceId: config.fileReferenceId,
+            config: {
+              type: "text-chunk",
+              version: "1",
+              organizationId,
+              projectId,
+              fileReferenceId: config.fileReferenceId,
+              processedFileId,
+              strategy,
+            },
+          }))
+        );
 
         break;
       }
@@ -50,7 +67,7 @@ export class TaskExecutorImpl implements TaskExecutor {
           projectId: config.projectId,
           fileReferenceId: config.fileReferenceId,
           processedFileId: config.processedFileId,
-          strategy: config.strategy ?? "greedy_v0",
+          strategy: config.strategy,
         });
 
         switch (resp?.type) {
@@ -92,17 +109,13 @@ export class TaskExecutorImpl implements TaskExecutor {
               }))
             );
 
-            const taskGroup = await this.taskGroupService.insertTaskGroup({
+            await this.taskGroupService.insertTaskGroup({
               description: `Generate report for ${config.fileReferenceId}`,
               organizationId,
               projectId,
               fileReferenceId: config.fileReferenceId,
+              taskIds: tasks.map((task) => task.id),
             });
-
-            await this.taskGroupService.upsertTasks(
-              taskGroup.id,
-              tasks.map((task) => task.id)
-            );
 
             break;
           }
@@ -138,17 +151,13 @@ export class TaskExecutorImpl implements TaskExecutor {
           }))
         );
 
-        const taskGroup = await this.taskGroupService.insertTaskGroup({
+        await this.taskGroupService.insertTaskGroup({
           description: `Upsert embeddings for ${config.fileReferenceId}`,
           organizationId,
           projectId,
           fileReferenceId: config.fileReferenceId,
+          taskIds: tasks.map((task) => task.id),
         });
-
-        await this.taskGroupService.upsertTasks(
-          taskGroup.id,
-          tasks.map((task) => task.id)
-        );
 
         break;
       }

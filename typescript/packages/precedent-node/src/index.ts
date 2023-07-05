@@ -5,6 +5,7 @@ export * from "./excel-output-store";
 export * from "./file-reference-store";
 export * from "./file-render-service";
 export * from "./jobs/generate-embeddings-handler";
+export * from "./jobs/ingest-file-handler";
 export * from "./jobs/llm-output-handler";
 export * from "./jobs/table-handler";
 export * from "./jobs/task-executor";

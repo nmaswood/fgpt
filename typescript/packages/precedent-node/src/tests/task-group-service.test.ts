@@ -87,6 +87,7 @@ test("insertTaskGroup", async () => {
     projectId,
     fileReferenceId,
     description: "I love cats",
+    taskIds: [],
   });
 
   expect(taskGroup.id).toBeDefined();
@@ -110,6 +111,8 @@ test("upsertTask", async () => {
     projectId,
     fileReferenceId,
     description: "I love cats",
+
+    taskIds: [],
   });
 
   expect(taskGroup.id).toBeDefined();

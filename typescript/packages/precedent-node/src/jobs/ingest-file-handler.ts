@@ -2,8 +2,19 @@ import { assertNever, IngestFileConfig } from "@fgpt/precedent-iso";
 
 import { TaskStore } from "../task-store";
 
+export type DispatchResponse =
+  | {
+      type: "pdf";
+      textExtractionTaskId: string;
+      extractTableTaskId: string;
+    }
+  | {
+      type: "excel";
+      analyzeTableTaskId: string;
+    };
+
 export interface IngestFileHandler {
-  dispatch: (config: IngestFileConfig) => Promise<void>;
+  dispatch: (config: IngestFileConfig) => Promise<DispatchResponse>;
 }
 
 export class IngestFileHandlerImpl implements IngestFileHandler {
@@ -14,24 +25,52 @@ export class IngestFileHandlerImpl implements IngestFileHandler {
     projectId,
     fileReferenceId,
     fileType,
-  }: IngestFileConfig): Promise<void> {
+  }: IngestFileConfig): Promise<DispatchResponse> {
     switch (fileType) {
-      case "pdf":
-        await this.taskStore.insert({
-          organizationId,
-          projectId,
-          fileReferenceId,
-          config: {
-            version: "1",
+      case "pdf": {
+        const tasks = await this.taskStore.insertMany([
+          {
             organizationId,
             projectId,
-            type: "text-extraction",
             fileReferenceId,
+            config: {
+              version: "1",
+              organizationId,
+              projectId,
+              type: "text-extraction",
+              fileReferenceId,
+            },
           },
-        });
-        break;
+          {
+            organizationId,
+            projectId,
+            fileReferenceId,
+            config: {
+              version: "1",
+              organizationId,
+              projectId,
+              type: "extract-table",
+              fileReferenceId,
+            },
+          },
+        ]);
+
+        const textExtractionTaskId = tasks.find(
+          (task) => task.config.type === "text-extraction"
+        )!.id;
+
+        const extractTableTaskId = tasks.find(
+          (task) => task.config.type === "extract-table"
+        )!.id;
+
+        return {
+          type: "pdf",
+          textExtractionTaskId,
+          extractTableTaskId,
+        };
+      }
       case "excel": {
-        await this.taskStore.insert({
+        const { id: analyzeTableTaskId } = await this.taskStore.insert({
           organizationId,
           projectId,
           fileReferenceId,
@@ -46,7 +85,11 @@ export class IngestFileHandlerImpl implements IngestFileHandler {
             },
           },
         });
-        break;
+
+        return {
+          type: "excel",
+          analyzeTableTaskId,
+        };
       }
       default:
         assertNever(fileType);

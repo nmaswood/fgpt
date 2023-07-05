@@ -85,4 +85,4 @@ test("insertMany", async () => {
 
   const text = await processedFileStore.getText(res.id);
   expect(text).toEqual("hi");
-}
+});

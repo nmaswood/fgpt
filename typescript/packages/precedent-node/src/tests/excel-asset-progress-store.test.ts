@@ -2,12 +2,12 @@ import { sql } from "slonik";
 import { afterEach, beforeEach, expect, test } from "vitest";
 
 import { dataBasePool } from "../data-base-pool";
+import { PSqlExcelOutputProgressStore } from "../excel-asset-progress-store";
 import { PsqlFileReferenceStore } from "../file-reference-store";
 import { PsqlProcessedFileStore } from "../processed-file-store";
 import { PSqlProjectStore } from "../project-store";
 import { PsqlUserOrgService } from "../user-org/user-org-service";
 import { TEST_SETTINGS } from "./test-settings";
-import { PSqlExcelOutputProgressStore } from "../excel-asset-progress-store";
 
 async function setup() {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
