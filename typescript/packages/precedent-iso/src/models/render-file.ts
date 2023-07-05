@@ -6,18 +6,18 @@ import { Report } from "./llm-outputs";
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace FileToRender {
+  export interface DerivedTable {
+    parsed: WorkBook;
+    sheets: ISOSheet<any>[];
+    output: AnalyzeOutput | undefined;
+  }
+
   export interface PDFFile {
     type: "pdf";
     signedUrl: string;
     report: Report | undefined;
     projectId: string;
-    derived:
-      | {
-          parsed: WorkBook;
-          sheets: ISOSheet<any>[];
-          output: AnalyzeOutput | undefined;
-        }
-      | undefined;
+    derived: DerivedTable | undefined;
   }
 
   export type File = PDFFile | ExcelFile;

@@ -27,7 +27,7 @@ export const DisplayFileReport: React.FC<{
       overflow="auto"
       flexDirection="column"
     >
-      <Dispatch file={file} />;
+      <Dispatch file={file} />
     </Box>
   );
 };
@@ -43,7 +43,7 @@ const Dispatch: React.FC<{ file: FileToRender.File }> = ({ file }) => {
   }
 };
 
-const ForExcel: React.FC<{ output: AnalyzeOutput | undefined }> = ({
+export const ForExcel: React.FC<{ output: AnalyzeOutput | undefined }> = ({
   output,
 }) => {
   const chunks = output?.value ?? [];
@@ -57,7 +57,7 @@ const ForExcel: React.FC<{ output: AnalyzeOutput | undefined }> = ({
   );
 };
 
-const ForExcelValue: React.FC<{ chunk: AnalyzeResponseChunk }> = ({
+export const ForExcelValue: React.FC<{ chunk: AnalyzeResponseChunk }> = ({
   chunk,
 }) => {
   return (

@@ -26,7 +26,7 @@ export const DisplayAsset: React.FC<{
   }
 };
 
-const DisplayExcelFile: React.FC<{
+export const DisplayExcelFile: React.FC<{
   sheets: Sheet[];
 }> = ({ sheets }) => {
   return (

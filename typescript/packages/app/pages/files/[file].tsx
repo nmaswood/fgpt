@@ -3,6 +3,7 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import BoltIcon from "@mui/icons-material/Bolt";
 import ConstructionIcon from "@mui/icons-material/Construction";
 import MenuIcon from "@mui/icons-material/Menu";
+import TableViewIcon from "@mui/icons-material/TableView";
 import {
   Box,
   IconButton,
@@ -16,6 +17,7 @@ import { useRouter } from "next/router";
 import React from "react";
 
 import { DisplayAsset } from "../../src/components/file/display-asset";
+import { DisplayDerived } from "../../src/components/file/display-derived";
 import { DisplayFileChat } from "../../src/components/file/display-file-chat";
 import { DisplayFileReport } from "../../src/components/file/report";
 import { useTabState } from "../../src/components/file/use-tab-state";
@@ -110,6 +112,14 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
                   Chat
                 </Tab>
               )}
+              {file && file.type === "pdf" && file.derived && (
+                <Tab value="tables">
+                  <ListItemDecorator>
+                    <TableViewIcon />
+                  </ListItemDecorator>
+                  Table
+                </Tab>
+              )}
               {file && file.type === "pdf" && (
                 <Tab value="debug">
                   <ListItemDecorator>
@@ -139,6 +149,9 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
           )}
 
           {tab === "debug" && <ViewByChunk fileId={fileId} />}
+          {tab === "tables" && file && file.type == "pdf" && file.derived && (
+            <DisplayDerived derived={file.derived} />
+          )}
         </Box>
       </Box>
     </Box>
