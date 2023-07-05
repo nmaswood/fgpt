@@ -91,6 +91,13 @@ export class TaskExecutorImpl implements TaskExecutor {
             break;
           }
           case "llm-output": {
+            const taskGroup = await this.taskGroupService.insertTaskGroup({
+              description: `Generate report for ${config.fileReferenceId}`,
+              organizationId,
+              projectId,
+              fileReferenceId: config.fileReferenceId,
+            });
+
             const tasks = await this.taskStore.insertMany(
               resp.textChunkIds.map((textChunkId) => ({
                 organizationId,
@@ -105,17 +112,14 @@ export class TaskExecutorImpl implements TaskExecutor {
                   processedFileId: config.processedFileId,
                   textChunkGroupId: resp.textGroupId,
                   textChunkId,
+                  taskGroupId: taskGroup.id,
                 },
               }))
             );
-
-            await this.taskGroupService.insertTaskGroup({
-              description: `Generate report for ${config.fileReferenceId}`,
-              organizationId,
-              projectId,
-              fileReferenceId: config.fileReferenceId,
-              taskIds: tasks.map((task) => task.id),
-            });
+            await this.taskGroupService.upsertTasks(
+              taskGroup.id,
+              tasks.map((task) => task.id)
+            );
 
             break;
           }
@@ -134,6 +138,13 @@ export class TaskExecutorImpl implements TaskExecutor {
 
         const groups = lodashChunk(textChunkIds, 100);
 
+        const taskGroup = await this.taskGroupService.insertTaskGroup({
+          description: `Upsert embeddings for ${config.fileReferenceId}`,
+          organizationId,
+          projectId,
+          fileReferenceId: config.fileReferenceId,
+        });
+
         const tasks = await this.taskStore.insertMany(
           groups.map((chunkIds) => ({
             organizationId,
@@ -147,17 +158,15 @@ export class TaskExecutorImpl implements TaskExecutor {
               fileReferenceId: config.fileReferenceId,
               processedFileId: config.processedFileId,
               chunkIds,
+              taskGroupId: taskGroup.id,
             },
           }))
         );
 
-        await this.taskGroupService.insertTaskGroup({
-          description: `Upsert embeddings for ${config.fileReferenceId}`,
-          organizationId,
-          projectId,
-          fileReferenceId: config.fileReferenceId,
-          taskIds: tasks.map((task) => task.id),
-        });
+        await this.taskGroupService.upsertTasks(
+          taskGroup.id,
+          tasks.map((task) => task.id)
+        );
 
         break;
       }

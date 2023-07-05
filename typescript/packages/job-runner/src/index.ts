@@ -30,10 +30,10 @@ import {
   LLMOutputHandlerImpl,
   TableHandlerImpl,
   PsqlTaskGroupService,
+  IngestFileHandlerImpl,
 } from "@fgpt/precedent-node";
 import { SETTINGS, Settings } from "./settings";
 import { MainRouter } from "./router";
-import { IngestFileHandlerImpl } from "@fgpt/precedent-node/src/jobs/ingest-file-handler";
 
 LOGGER.info("Server starting...");
 

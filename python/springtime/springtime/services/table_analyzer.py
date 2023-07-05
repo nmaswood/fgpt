@@ -76,7 +76,8 @@ class TableAnalyzerImpl(TableAnalyzer):
                 )
             )
 
-            logger.info(f"Finished analyzing sheet chunk: {sheet_chunk}")
+            sheet_names = ", ".join([sheet.sheet_name for sheet in sheet_chunk])
+            logger.info(f"Finished analyzing sheet chunk: {sheet_names}")
 
         return AnalyzeResponse(chunks=acc)
 

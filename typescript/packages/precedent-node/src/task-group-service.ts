@@ -16,7 +16,6 @@ export interface InsertTaskGroup {
   organizationId: string;
   projectId: string;
   fileReferenceId: string;
-  taskIds: string[];
 }
 
 export interface TaskGroupService {
@@ -40,45 +39,17 @@ export class PsqlTaskGroupService implements TaskGroupService {
 
   async insertTaskGroup(args: InsertTaskGroup): Promise<TaskGroup> {
     return this.pool.transaction(async (trx) =>
-      this.#insertTaskGroup(trx, {
-        ...args,
-        taskIds: [...new Set(args.taskIds)].sort(),
-      })
+      this.#insertTaskGroup(trx, args)
     );
   }
 
   async #insertTaskGroup(
     trx: DatabaseTransactionConnection,
-    {
-      description,
-      organizationId,
-      projectId,
-      fileReferenceId,
-      taskIds,
-    }: InsertTaskGroup
+    { description, organizationId, projectId, fileReferenceId }: InsertTaskGroup
   ): Promise<TaskGroup> {
-    const tasksWithStatus = await this.#getTaskStatuses(trx, taskIds);
-
     const pendingTasks: string[] = [];
     const completedTasks: string[] = [];
     const failedTasks: string[] = [];
-
-    for (const { id, status } of tasksWithStatus) {
-      switch (status) {
-        case "queued":
-        case "in-progress":
-          pendingTasks.push(id);
-          break;
-        case "succeeded":
-          completedTasks.push(id);
-          break;
-        case "failed":
-          failedTasks.push(id);
-          break;
-        default:
-          assertNever(status);
-      }
-    }
 
     return trx.one(sql.type(ZTaskGroupRowForLength)`
 INSERT INTO task_group (description, pending_tasks, completed_tasks, failed_tasks, organization_id, project_id, file_reference_id)

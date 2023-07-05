@@ -85,7 +85,7 @@ const ZAnalyzeResponse = z.object({
 const ZExtractResponse = z
   .object({
     number_of_sheets: z.number(),
-    object_path: z.string().optional(),
+    object_path: z.string().nullable(),
   })
   .transform(
     (row): ExtractionResponse =>

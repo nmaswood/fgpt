@@ -20,3 +20,5 @@ SET
     WHERE
       file_reference.project_id = project.id
   );
+
+-- migrate:down

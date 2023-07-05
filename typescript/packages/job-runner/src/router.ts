@@ -34,7 +34,7 @@ export class MainRouter {
       try {
         await this.taskStore.setToInProgress(taskId);
         const task = await this.taskStore.get(taskId);
-        LOGGER.info({ task }, "Executing task");
+        LOGGER.info({ task: task.config }, "Executing task");
         this.taskExecutor;
         await this.taskExecutor.execute(task);
         await this.taskStore.setToSuceeded(task.id);
