@@ -22,8 +22,13 @@ import {
   TikaTextExtractor,
   TaskExecutorImpl,
   HttpTabularDataService,
+  TextExtractionHandlerImpl,
   PsqlExcelAssetStore,
   PsqlExcelOutputStore,
+  TextChunkHandlerImpl,
+  EmbeddingsHandlerImpl,
+  LLMOutputHandlerImpl,
+  TableHandlerImpl,
 } from "@fgpt/precedent-node";
 import { SETTINGS, Settings } from "./settings";
 import { MainRouter } from "./router";
@@ -66,7 +71,7 @@ async function start(settings: Settings) {
   );
 
   const questionStore = new PsqlQuestionStore(pool);
-  const metricsStore = new PsqlMiscOutputStore(pool);
+  const miscOutputStore = new PsqlMiscOutputStore(pool);
 
   const tabularDataService = new HttpTabularDataService(
     settings.mlServiceUri,
@@ -76,18 +81,42 @@ async function start(settings: Settings) {
   const excelAssetStore = new PsqlExcelAssetStore(pool);
   const excelOutputStore = new PsqlExcelOutputStore(pool);
 
-  const taskExecutor = new TaskExecutorImpl(
+  const textExtractionHandler = new TextExtractionHandlerImpl(
     textExtractor,
-    taskService,
     processedFileStore,
-    textChunkStore,
+    mlServiceClient
+  );
+
+  const textChunkHandler = new TextChunkHandlerImpl(
+    processedFileStore,
+    textChunkStore
+  );
+
+  const generateEmbeddingsHandler = new EmbeddingsHandlerImpl(
     mlServiceClient,
+    textChunkStore
+  );
+  const llmOutputHandler = new LLMOutputHandlerImpl(
+    mlServiceClient,
+    textChunkStore,
     questionStore,
-    metricsStore,
+    miscOutputStore
+  );
+
+  const tableHandler = new TableHandlerImpl(
     fileReferenceStore,
     tabularDataService,
     excelAssetStore,
     excelOutputStore
+  );
+
+  const taskExecutor = new TaskExecutorImpl(
+    taskService,
+    textExtractionHandler,
+    textChunkHandler,
+    generateEmbeddingsHandler,
+    llmOutputHandler,
+    tableHandler
   );
 
   const taskStore = new PSqlTaskStore(pool, messageBusService);

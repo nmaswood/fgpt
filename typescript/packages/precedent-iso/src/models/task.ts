@@ -38,7 +38,7 @@ export const ZTextChunkConfig = z.object({
   projectId: z.string(),
   fileId: z.string(),
   processedFileId: z.string(),
-  strategy: ZChunkStrategy.optional(),
+  strategy: ZChunkStrategy,
   taskGroupId: z.string().optional(),
 });
 
