@@ -29,6 +29,7 @@ import {
   EmbeddingsHandlerImpl,
   LLMOutputHandlerImpl,
   TableHandlerImpl,
+  PsqlTaskGroupService,
 } from "@fgpt/precedent-node";
 import { SETTINGS, Settings } from "./settings";
 import { MainRouter } from "./router";
@@ -110,18 +111,20 @@ async function start(settings: Settings) {
     excelOutputStore
   );
 
+  const taskGroupService = new PsqlTaskGroupService(pool);
   const taskExecutor = new TaskExecutorImpl(
     taskService,
     textExtractionHandler,
     textChunkHandler,
     generateEmbeddingsHandler,
     llmOutputHandler,
-    tableHandler
+    tableHandler,
+    taskGroupService
   );
 
   const taskStore = new PSqlTaskStore(pool, messageBusService);
 
-  const mainRouter = new MainRouter(taskStore, taskExecutor);
+  const mainRouter = new MainRouter(taskStore, taskExecutor, taskGroupService);
 
   app.use("/", mainRouter.init());
 

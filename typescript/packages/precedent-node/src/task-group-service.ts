@@ -44,7 +44,6 @@ export class PsqlTaskGroupService implements TaskGroupService {
     fileReferenceId,
   }: InsertTaskGroup): Promise<TaskGroup> {
     return this.pool.one(sql.type(ZTaskGroupRowForLength)`
-
 INSERT INTO task_group (description, pending_tasks, completed_tasks, failed_tasks, organization_id, project_id, file_reference_id)
     VALUES (${description}, ${JSON.stringify([])}, ${JSON.stringify(
       []

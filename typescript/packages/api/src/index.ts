@@ -108,7 +108,7 @@ async function start() {
 
   // hack to wake up ml service
   // when api request is made
-  mlService.ping();
+  mlService.ping().catch(() => console.log("ML service is down"));
 
   const chatStore = new PsqlChatStore(pool);
 

@@ -1,5 +1,6 @@
-export type FileType = "excel" | "pdf";
-
+import { z } from "zod";
+export const ZFileType = z.enum(["excel", "pdf"]);
+export type FileType = z.infer<typeof ZFileType>;
 export function getFileType(assetType: string): FileType | undefined {
   switch (assetType) {
     case "application/pdf":

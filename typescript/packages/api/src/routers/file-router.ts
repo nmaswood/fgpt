@@ -89,57 +89,31 @@ export class FileRouter {
           fileSize: file.size,
         };
 
-        const [fileRef] = await this.fileReferenceStore.insertMany([ref]);
+        const fileReference = await this.fileReferenceStore.insert(ref);
         await this.projectStore.addToFileCount(projectId, 1);
 
         const fileType = getFileType(file.mimetype);
 
-        if (fileRef === undefined) {
+        if (fileReference === undefined) {
           throw new Error("failed to insert file reference");
         }
         if (fileType === undefined) {
           throw new Error("Unrecognized file type");
         }
 
-        switch (fileType) {
-          case "pdf": {
-            await this.taskStore.insert({
-              organizationId,
-              projectId,
-              fileReferenceId: fileRef.id,
-              config: {
-                version: "1",
-                organizationId: req.user.organizationId,
-                projectId: req.body.projectId,
-                type: "text-extraction",
-                fileId: fileRef.id,
-              },
-            });
-            break;
-          }
-          case "excel": {
-            LOGGER.info({ mimetype: file.mimetype }, "Excel file detected");
-            await this.taskStore.insert({
-              organizationId,
-              projectId,
-              fileReferenceId: fileRef.id,
-              config: {
-                version: "1",
-                type: "analyze-table",
-                organizationId: req.user.organizationId,
-                projectId: req.body.projectId,
-                fileReferenceId: fileRef.id,
-                source: {
-                  type: "direct-upload",
-                },
-              },
-            });
-
-            break;
-          }
-          default:
-            assertNever(fileType);
-        }
+        await this.taskStore.insert({
+          organizationId,
+          projectId,
+          fileReferenceId: fileReference.id,
+          config: {
+            version: "1",
+            organizationId: req.user.organizationId,
+            projectId: req.body.projectId,
+            type: "ingest-file",
+            fileReferenceId: fileReference.id,
+            fileType,
+          },
+        });
 
         await F.unlink(file.path);
 

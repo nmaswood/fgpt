@@ -1,9 +1,11 @@
 import { z } from "zod";
+import { ZFileType } from "../file-type";
 
 import { ZChunkStrategy } from "../text-chunker/text-chunker";
 import { ZExcelSource } from "./excel";
 
 export const ZTaskType = z.enum([
+  "ingest-file",
   "text-extraction",
   "text-chunk",
   "gen-embeddings",
@@ -22,12 +24,24 @@ export const ZTaskStatus = z.enum([
   "failed",
 ]);
 
+export const ZIngestFileConfig = z.object({
+  type: z.literal("ingest-file"),
+  version: z.literal("1"),
+  organizationId: z.string(),
+  projectId: z.string(),
+  fileReferenceId: z.string(),
+  fileType: ZFileType,
+  taskGroupId: z.string().optional(),
+});
+
+export type IngestFileConfig = z.infer<typeof ZIngestFileConfig>;
+
 export const ZTextExtractionConfig = z.object({
   type: z.literal("text-extraction"),
   version: z.literal("1"),
   organizationId: z.string(),
   projectId: z.string(),
-  fileId: z.string(),
+  fileReferenceId: z.string(),
   taskGroupId: z.string().optional(),
 });
 
@@ -36,7 +50,7 @@ export const ZTextChunkConfig = z.object({
   version: z.literal("1"),
   organizationId: z.string(),
   projectId: z.string(),
-  fileId: z.string(),
+  fileReferenceId: z.string(),
   processedFileId: z.string(),
   strategy: ZChunkStrategy,
   taskGroupId: z.string().optional(),
@@ -49,7 +63,7 @@ export const ZGenEmbeddingsConfig = z.object({
   version: z.literal("1"),
   organizationId: z.string(),
   projectId: z.string(),
-  fileId: z.string(),
+  fileReferenceId: z.string(),
   processedFileId: z.string(),
   textChunkGroupId: z.string(),
   taskGroupId: z.string().optional(),
@@ -60,7 +74,7 @@ export const ZUpsertEmbeddingsConfig = z.object({
   version: z.literal("1"),
   organizationId: z.string(),
   projectId: z.string(),
-  fileId: z.string(),
+  fileReferenceId: z.string(),
   processedFileId: z.string(),
   chunkIds: z.string().array(),
   taskGroupId: z.string().optional(),
@@ -111,6 +125,7 @@ export type ExtractTableConfig = z.infer<typeof ZExtractTableConfig>;
 export type LLMOutputsConfig = z.infer<typeof ZLLMOutputsConfig>;
 
 export const ZTaskConfig = z.discriminatedUnion("type", [
+  ZIngestFileConfig,
   ZTextExtractionConfig,
   ZTextChunkConfig,
   ZGenEmbeddingsConfig,
