@@ -6,7 +6,7 @@ export class ProjectRouter {
   constructor(
     private readonly projectStore: ProjectStore,
     private readonly taskService: TaskStore,
-    private readonly userOrgService: UserOrgService
+    private readonly userOrgService: UserOrgService,
   ) {}
   init() {
     const router = express.Router();
@@ -28,11 +28,11 @@ export class ProjectRouter {
         });
         await this.userOrgService.addToProjectCountForOrg(
           user.organizationId,
-          1
+          1,
         );
 
         res.json({ project });
-      }
+      },
     );
 
     router.delete(
@@ -47,11 +47,11 @@ export class ProjectRouter {
         if (!wasDeleted) {
           await this.userOrgService.addToProjectCountForOrg(
             req.user.organizationId,
-            -1
+            -1,
           );
         }
         res.json({ status: "ok" });
-      }
+      },
     );
 
     router.patch(
@@ -73,7 +73,7 @@ export class ProjectRouter {
         });
 
         res.json({ project });
-      }
+      },
     );
 
     return router;

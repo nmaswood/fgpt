@@ -1,7 +1,6 @@
 import {
   LOGGER,
   TaskExecutor,
-  TaskGroupService,
   TaskStore,
   ZMessage,
 } from "@fgpt/precedent-node";
@@ -12,7 +11,6 @@ export class MainRouter {
   constructor(
     private readonly taskStore: TaskStore,
     private readonly taskExecutor: TaskExecutor,
-    private readonly taskGroupService: TaskGroupService
   ) {}
   init() {
     const router = express.Router();
@@ -38,11 +36,7 @@ export class MainRouter {
         this.taskExecutor;
         await this.taskExecutor.execute(task);
         await this.taskStore.setToSuceeded(task.id);
-        const taskGroupId = task.config.taskGroupId;
-        if (taskGroupId) {
-          LOGGER.info({ taskGroupId }, "Updating task group id");
-          await this.taskGroupService.upsertTask(taskGroupId, task.id);
-        }
+
         LOGGER.info({ taskId: task.id }, "completed task");
         res.status(204).send();
         LOGGER.info("Just sent a 204");
@@ -64,7 +58,7 @@ export class MainRouter {
       async (req: express.Request, res: express.Response) => {
         LOGGER.info(
           { body: req.body },
-          "Dead letter: Starting to process message"
+          "Dead letter: Starting to process message",
         );
         const rawMessage = req.body?.message;
 
@@ -88,7 +82,7 @@ export class MainRouter {
           res.status(204).send();
           return;
         }
-      }
+      },
     );
 
     return router;

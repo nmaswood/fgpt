@@ -12,7 +12,7 @@ export class LLMOutputRouter {
     private readonly questionStore: QuestionStore,
     private readonly mlService: MLServiceClient,
     private readonly chunkStore: TextChunkStore,
-    private readonly fileToRenderService: FileRenderService
+    private readonly fileToRenderService: FileRenderService,
   ) {}
   init() {
     const router = express.Router();
@@ -23,10 +23,10 @@ export class LLMOutputRouter {
         const body = ZChunkRequest.parse(req.params);
 
         const questions = await this.questionStore.getForChunk(
-          body.textChunkId
+          body.textChunkId,
         );
         res.json({ questions });
-      }
+      },
     );
 
     router.post(
@@ -41,7 +41,7 @@ export class LLMOutputRouter {
         });
 
         res.json({ output });
-      }
+      },
     );
 
     router.post(
@@ -59,7 +59,7 @@ export class LLMOutputRouter {
         });
 
         res.json({ response });
-      }
+      },
     );
 
     router.get(
@@ -69,11 +69,11 @@ export class LLMOutputRouter {
 
         const questions = await this.questionStore.sampleForFile(
           body.fileReferenceId,
-          10
+          10,
         );
 
         res.json({ questions });
-      }
+      },
     );
 
     router.get(
@@ -83,11 +83,11 @@ export class LLMOutputRouter {
 
         const questions = await this.questionStore.sampleForProject(
           body.projectId,
-          10
+          10,
         );
 
         res.json({ questions });
-      }
+      },
     );
 
     router.get(
@@ -95,11 +95,11 @@ export class LLMOutputRouter {
       async (req: express.Request, res: express.Response) => {
         const body = ZFileToRenderRequest.parse(req.params);
         const file = await this.fileToRenderService.forFile(
-          body.fileReferenceId
+          body.fileReferenceId,
         );
 
         res.json({ file });
-      }
+      },
     );
 
     return router;

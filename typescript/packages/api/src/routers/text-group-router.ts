@@ -15,10 +15,10 @@ export class TextGroupRouter {
 
         const textGroup = await this.textChunkStore.getTextChunkGroupByFileId(
           body.chunkStrategy,
-          body.fileId
+          body.fileId,
         );
         res.json({ textGroup });
-      }
+      },
     );
 
     router.post(
@@ -27,11 +27,11 @@ export class TextGroupRouter {
         const params = ZTextGroupChunkRequest.parse(req.body);
         const chunk = await this.textChunkStore.getTextChunkByOrder(
           params.textGroupId,
-          params.order
+          params.order,
         );
 
         res.json({ textGroup: chunk });
-      }
+      },
     );
 
     return router;

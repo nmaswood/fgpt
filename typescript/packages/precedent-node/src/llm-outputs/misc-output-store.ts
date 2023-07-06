@@ -14,15 +14,32 @@ export interface InsertMiscValue {
 
 const FIELDS = sql.fragment`id, organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, text_chunk_id, metrics`;
 export interface MiscOutputStore {
+  textChunkIdsPresent(fileReferenceId: string): Promise<string[]>;
   getForFile(fileReferenceId: string): Promise<Outputs.MiscValue[]>;
   insertMany(metrics: InsertMiscValue[]): Promise<Outputs.MiscValueRow[]>;
 }
 
+const ZIdRow = z.object({
+  id: z.string(),
+});
+
 export class PsqlMiscOutputStore implements MiscOutputStore {
   constructor(private readonly pool: DatabasePool) {}
 
+  async textChunkIdsPresent(fileReferenceId: string): Promise<string[]> {
+    const result = await this.pool.query(sql.type(ZIdRow)`
+
+SELECT distinct
+    text_chunk_id as id
+FROM
+    text_chunk_metrics
+WHERE
+    file_reference_id = ${fileReferenceId}
+`);
+    return result.rows.map((row) => row.id).sort();
+  }
+
   async getForFile(fileReferenceId: string): Promise<Outputs.MiscValue[]> {
-    fileReferenceId;
     const result = await this.pool.query(sql.type(
       z.object({ metrics: ZMiscValue }),
     )`

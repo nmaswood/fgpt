@@ -10,14 +10,14 @@ export interface GenerateAndUpsertArguments {
 
 export interface EmbeddingsHandler {
   generateAndUpsertEmbeddings: (
-    args: GenerateAndUpsertArguments
+    args: GenerateAndUpsertArguments,
   ) => Promise<void>;
 }
 
 export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
   constructor(
     private readonly mlService: MLServiceClient,
-    private readonly textChunkStore: TextChunkStore
+    private readonly textChunkStore: TextChunkStore,
   ) {}
 
   async generateAndUpsertEmbeddings({
@@ -25,13 +25,13 @@ export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
   }: GenerateAndUpsertArguments): Promise<void> {
     const chunkGenerator = this.textChunkStore.iterateTextChunks(
       100,
-      textChunkGroupId
+      textChunkGroupId,
     );
 
     for await (const group of chunkGenerator) {
       const byChunkId = await this.#getAndSetEmbeddingsIfNeeded(
         textChunkGroupId,
-        group
+        group,
       );
       const payloads = group
         .map((textChunk) => {
@@ -63,7 +63,7 @@ export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
   }
   async #getAndSetEmbeddingsIfNeeded(
     textChunkGroupId: string,
-    chunks: TextChunk[]
+    chunks: TextChunk[],
   ) {
     const hasNoEmbeddings = chunks.filter((c) => !c.hasEmbedding);
     const embeddings = await this.mlService.getEmbeddings({
@@ -83,11 +83,11 @@ export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
 
     await this.textChunkStore.setManyEmbeddings(
       textChunkGroupId,
-      withEmbeddings
+      withEmbeddings,
     );
 
     const newEmbeddings = await this.textChunkStore.getEmbeddings(
-      chunks.map((c) => c.id)
+      chunks.map((c) => c.id),
     );
 
     return keyBy(newEmbeddings, (e) => e.chunkId);

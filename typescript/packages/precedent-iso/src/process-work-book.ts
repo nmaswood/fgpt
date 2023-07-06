@@ -14,7 +14,7 @@ export type ISOSheet<V> = {
 };
 
 export const processWorkBook = (
-  sheets: Record<string, WorkSheet>
+  sheets: Record<string, WorkSheet>,
 ): ISOSheet<any>[] =>
   Object.entries(sheets).map(([name, sheet]) => {
     return {

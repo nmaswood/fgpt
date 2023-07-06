@@ -30,7 +30,7 @@ export class FileRouter {
     private readonly bucket: string,
     private readonly taskStore: TaskStore,
     private readonly loadedFileStore: LoadedFileStore,
-    private readonly projectStore: ProjectStore
+    private readonly projectStore: ProjectStore,
   ) {}
   init() {
     const router = express.Router();
@@ -50,7 +50,7 @@ export class FileRouter {
           },
         });
         res.json({ files });
-      }
+      },
     );
 
     router.post(
@@ -71,7 +71,7 @@ export class FileRouter {
           "user-uploads",
           organizationId,
           projectId,
-          `${crypto.randomBytes(16).toString("hex")}${extension}`
+          `${crypto.randomBytes(16).toString("hex")}${extension}`,
         );
 
         await this.blobStorageService.upload(this.bucket, filePath, buffer);
@@ -116,7 +116,7 @@ export class FileRouter {
         await F.unlink(file.path);
 
         res.json({ ok: true });
-      }
+      },
     );
 
     router.get(
@@ -131,11 +131,11 @@ export class FileRouter {
         const file = await this.fileReferenceStore.get(fileReferenceId);
         const signedUrl = await this.blobStorageService.getSignedUrl(
           this.bucket,
-          file.path
+          file.path,
         );
 
         res.json({ signedUrl });
-      }
+      },
     );
 
     router.get(
@@ -144,7 +144,7 @@ export class FileRouter {
         const params = ZSingleRequest.parse(req.params);
         const file = await this.fileReferenceStore.get(params.fileReferenceId);
         res.json({ file });
-      }
+      },
     );
     return router;
   }

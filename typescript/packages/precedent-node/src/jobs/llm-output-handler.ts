@@ -10,12 +10,12 @@ import { TextChunkStore } from "../text-chunk-store";
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace LLMOutputHandler {
   export interface Arguments {
-    textChunkId: string;
     organizationId: string;
     projectId: string;
     fileReferenceId: string;
     processedFileId: string;
     textChunkGroupId: string;
+    textChunkIds: string[];
   }
 }
 
@@ -32,8 +32,35 @@ export class LLMOutputHandlerImpl implements LLMOutputHandler {
   ) {}
 
   async generateReport(config: LLMOutputHandler.Arguments): Promise<void> {
+    const { textChunkGroupId } = config;
+
+    const allChunkIdsSeen = new Set(
+      await this.miscOutputStore.textChunkIdsPresent(textChunkGroupId),
+    );
+
+    const toProcess = config.textChunkIds.filter(
+      (id) => !allChunkIdsSeen.has(id),
+    );
+
+    for (const textChunkId of toProcess) {
+      await this.#generateReportForChunk({
+        ...config,
+        textChunkId,
+      });
+    }
+  }
+
+  async #generateReportForChunk(config: {
+    textChunkId: string;
+    organizationId: string;
+    projectId: string;
+    fileReferenceId: string;
+    processedFileId: string;
+    textChunkGroupId: string;
+  }): Promise<void> {
     const { textChunkId } = config;
     const chunk = await this.textChunkStore.getTextChunkById(textChunkId);
+
     const { summaries, questions, financialSummary, terms } =
       await this.mlService.llmOutput({
         text: chunk.chunkText,
@@ -81,10 +108,6 @@ export class LLMOutputHandlerImpl implements LLMOutputHandler {
         question,
         hash: ShaHash.forData(question),
       })),
-    );
-
-    await this.textChunkStore.incrementLlmOutputChunkSeen(
-      config.textChunkGroupId,
     );
   }
 }

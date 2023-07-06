@@ -54,7 +54,7 @@ const Home: React.FC = () => {
   const [projectModalOpen, setProjectModalOpen] = React.useState(false);
 
   const selectedProjectIdx = projects.findIndex(
-    (p) => p.id === selectedProjectId
+    (p) => p.id === selectedProjectId,
   );
 
   const selectedProject =

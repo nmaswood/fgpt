@@ -18,7 +18,7 @@ export class ChatRouter {
     private readonly mlClient: MLServiceClient,
     private readonly textChunkStore: TextChunkStore,
     private readonly chatStore: ChatStore,
-    private readonly fileReferenceStore: FileReferenceStore
+    private readonly fileReferenceStore: FileReferenceStore,
   ) {}
   init() {
     const router = express.Router();
@@ -29,7 +29,7 @@ export class ChatRouter {
         const body = ZListProjectChatRequest.parse(req.params);
         const chats = await this.chatStore.listProjectChats(body.projectId);
         res.json({ chats });
-      }
+      },
     );
 
     router.get(
@@ -37,10 +37,10 @@ export class ChatRouter {
       async (req: express.Request, res: express.Response) => {
         const body = ZListFileChatRequest.parse(req.params);
         const chats = await this.chatStore.listfileReferenceChats(
-          body.fileReferenceId
+          body.fileReferenceId,
         );
         res.json({ chats });
-      }
+      },
     );
 
     router.post(
@@ -74,7 +74,7 @@ export class ChatRouter {
         });
 
         res.json({ chat });
-      }
+      },
     );
 
     router.post(
@@ -110,7 +110,7 @@ export class ChatRouter {
             });
           },
         });
-      }
+      },
     );
 
     router.delete(
@@ -119,7 +119,7 @@ export class ChatRouter {
         const body = ZDeleteChatRequest.parse(req.params);
         await this.chatStore.deleteChat(body.chatId);
         res.json({ status: "ok" });
-      }
+      },
     );
 
     router.get(
@@ -130,7 +130,7 @@ export class ChatRouter {
         const chatEntries = await this.chatStore.listChatEntries(body.chatId);
 
         res.json({ chatEntries });
-      }
+      },
     );
 
     router.put("/chat", async (req: express.Request, res: express.Response) => {
@@ -171,11 +171,11 @@ export class ChatRouter {
 
         const [chunks, history, files] = await Promise.all([
           this.textChunkStore.getTextChunks(
-            similarDocuments.map((doc) => doc.id)
+            similarDocuments.map((doc) => doc.id),
           ),
           this.chatStore.listChatHistory(args.chatId),
           this.fileReferenceStore.getMany(
-            similarDocuments.map((doc) => doc.metadata.fileId)
+            similarDocuments.map((doc) => doc.metadata.fileId),
           ),
         ]);
 
@@ -252,7 +252,7 @@ export class ChatRouter {
             });
           },
         });
-      }
+      },
     );
 
     router.get(
@@ -261,7 +261,7 @@ export class ChatRouter {
         const args = ZContextRequest.parse(req.params);
         const context = await this.chatStore.getContext(args.chatEntryId);
         res.json({ context });
-      }
+      },
     );
 
     return router;

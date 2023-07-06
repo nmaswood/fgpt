@@ -2,7 +2,7 @@ import type express from "express";
 
 export const invalidPathHandler = (
   req: express.Request,
-  res: express.Response
+  res: express.Response,
 ) => {
   res.status(404);
   console.warn(`invalid path: ${req.path}`);

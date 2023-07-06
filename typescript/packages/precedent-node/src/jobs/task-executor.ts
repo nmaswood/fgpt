@@ -1,7 +1,6 @@
 import { assertNever } from "@fgpt/precedent-iso";
 
 import { LOGGER } from "../logger";
-import { TaskGroupService } from "../task-group-service";
 import { Task, TaskStore } from "../task-store";
 import { EmbeddingsHandler } from "./generate-embeddings-handler";
 import { IngestFileHandler } from "./ingest-file-handler";
@@ -23,7 +22,6 @@ export class TaskExecutorImpl implements TaskExecutor {
     private readonly generateEmbeddingsHandler: EmbeddingsHandler,
     private readonly llmOutputHandler: LLMOutputHandler,
     private readonly tableHandler: TableHandler,
-    private readonly taskGroupService: TaskGroupService,
     private readonly ingestFileHandler: IngestFileHandler,
   ) {}
 
@@ -42,14 +40,7 @@ export class TaskExecutorImpl implements TaskExecutor {
           fileReferenceId: config.fileReferenceId,
         });
 
-        const taskGroup = await this.taskGroupService.insertTaskGroup({
-          description: `Text chunking for ${config.fileReferenceId}`,
-          organizationId,
-          projectId,
-          fileReferenceId: config.fileReferenceId,
-        });
-
-        const tasks = await this.taskStore.insertMany(
+        await this.taskStore.insertMany(
           this.STRATEGIES.map((strategy) => ({
             organizationId: config.organizationId,
             projectId: config.projectId,
@@ -64,11 +55,6 @@ export class TaskExecutorImpl implements TaskExecutor {
               strategy,
             },
           })),
-        );
-
-        await this.taskGroupService.upsertTasks(
-          taskGroup.id,
-          tasks.map((task) => task.id),
         );
 
         break;
@@ -103,36 +89,21 @@ export class TaskExecutorImpl implements TaskExecutor {
             break;
           }
           case "llm-output": {
-            const { id: taskGroupId } =
-              await this.taskGroupService.insertTaskGroup({
-                description: `Generate report for ${config.fileReferenceId}`,
+            await this.taskStore.insert({
+              organizationId,
+              projectId,
+              fileReferenceId: config.fileReferenceId,
+              config: {
+                type: "llm-outputs",
+                version: "1",
                 organizationId,
                 projectId,
                 fileReferenceId: config.fileReferenceId,
-              });
-
-            const tasks = await this.taskStore.insertMany(
-              resp.textChunkIds.map((textChunkId) => ({
-                organizationId,
-                projectId,
-                fileReferenceId: config.fileReferenceId,
-                config: {
-                  type: "llm-outputs",
-                  version: "1",
-                  organizationId,
-                  projectId,
-                  fileReferenceId: config.fileReferenceId,
-                  processedFileId: config.processedFileId,
-                  textChunkGroupId: resp.textGroupId,
-                  textChunkId,
-                  taskGroupId,
-                },
-              })),
-            );
-            await this.taskGroupService.upsertTasks(
-              taskGroupId,
-              tasks.map((task) => task.id),
-            );
+                processedFileId: config.processedFileId,
+                textChunkGroupId: resp.textGroupId,
+                textChunkIds: resp.textChunkIds,
+              },
+            });
 
             break;
           }

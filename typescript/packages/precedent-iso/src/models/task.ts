@@ -30,7 +30,6 @@ export const ZIngestFileConfig = z.object({
   projectId: z.string(),
   fileReferenceId: z.string(),
   fileType: ZFileType,
-  taskGroupId: z.string().optional(),
 });
 
 export type IngestFileConfig = z.infer<typeof ZIngestFileConfig>;
@@ -41,7 +40,6 @@ export const ZTextExtractionConfig = z.object({
   organizationId: z.string(),
   projectId: z.string(),
   fileReferenceId: z.string(),
-  taskGroupId: z.string().optional(),
 });
 
 export const ZTextChunkConfig = z.object({
@@ -52,7 +50,6 @@ export const ZTextChunkConfig = z.object({
   fileReferenceId: z.string(),
   processedFileId: z.string(),
   strategy: ZChunkStrategy,
-  taskGroupId: z.string().optional(),
 });
 
 export type TextChunkConfig = z.infer<typeof ZTextChunkConfig>;
@@ -65,14 +62,12 @@ export const ZGenEmbeddingsConfig = z.object({
   fileReferenceId: z.string(),
   processedFileId: z.string(),
   textChunkGroupId: z.string(),
-  taskGroupId: z.string().optional(),
 });
 
 export const ZDeleteProjectConfig = z.object({
   type: z.literal("delete-project"),
   version: z.literal("1"),
   projectId: z.string(),
-  taskGroupId: z.string().optional(),
 });
 
 export const ZLLMOutputsConfig = z.object({
@@ -83,8 +78,7 @@ export const ZLLMOutputsConfig = z.object({
   fileReferenceId: z.string(),
   processedFileId: z.string(),
   textChunkGroupId: z.string(),
-  textChunkId: z.string(),
-  taskGroupId: z.string().optional(),
+  textChunkIds: z.string().array(),
 });
 
 export const ZExtractTableConfig = z.object({
@@ -93,7 +87,6 @@ export const ZExtractTableConfig = z.object({
   organizationId: z.string(),
   projectId: z.string(),
   fileReferenceId: z.string(),
-  taskGroupId: z.string().optional(),
 });
 
 export const ZAnalyzeTableConfig = z.object({
@@ -103,7 +96,6 @@ export const ZAnalyzeTableConfig = z.object({
   projectId: z.string(),
   fileReferenceId: z.string(),
   source: ZExcelSource,
-  taskGroupId: z.string().optional(),
 });
 
 export type AnalyzeTableConfig = z.infer<typeof ZAnalyzeTableConfig>;

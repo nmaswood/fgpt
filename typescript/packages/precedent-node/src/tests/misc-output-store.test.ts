@@ -62,7 +62,7 @@ async function setup() {
     embeddingsWillBeGenerated: true,
   });
 
-  const [chunk] = await chunkStore.upsertManyTextChunks(
+  const [chunk, chunkTwo] = await chunkStore.upsertManyTextChunks(
     {
       organizationId: processedFile.organizationId,
       projectId: processedFile.projectId,
@@ -76,10 +76,15 @@ async function setup() {
         chunkText: "hi",
         hash: ShaHash.forData("hi"),
       },
+      {
+        chunkOrder: 1,
+        chunkText: "hi",
+        hash: ShaHash.forData("hi"),
+      },
     ],
   );
 
-  const metricsStore = new PsqlMiscOutputStore(pool);
+  const miscOutputStore = new PsqlMiscOutputStore(pool);
 
   return {
     pool,
@@ -90,7 +95,8 @@ async function setup() {
     processedFileId: processedFile.id,
     textChunkGroupId: textChunkGroup.id,
     textChunkId: chunk.id,
-    metricsStore,
+    textChunkId2: chunkTwo.id,
+    miscOutputStore,
   };
 }
 
@@ -116,10 +122,10 @@ test("insertMany", async () => {
     processedFileId,
     textChunkGroupId,
     textChunkId,
-    metricsStore,
+    miscOutputStore,
   } = await setup();
 
-  const [financialSummary] = await metricsStore.insertMany([
+  const [financialSummary] = await miscOutputStore.insertMany([
     {
       organizationId,
       projectId,
@@ -147,7 +153,7 @@ test("insertMany", async () => {
     },
   });
 
-  const [terms] = await metricsStore.insertMany([
+  const [terms] = await miscOutputStore.insertMany([
     {
       organizationId,
       projectId,
@@ -177,7 +183,7 @@ test("insertMany", async () => {
     ],
   });
 
-  const [summary] = await metricsStore.insertMany([
+  const [summary] = await miscOutputStore.insertMany([
     {
       organizationId,
       projectId,
@@ -206,10 +212,10 @@ test("getFile", async () => {
     processedFileId,
     textChunkGroupId,
     textChunkId,
-    metricsStore,
+    miscOutputStore,
   } = await setup();
 
-  await metricsStore.insertMany([
+  await miscOutputStore.insertMany([
     {
       organizationId,
       projectId,
@@ -257,6 +263,70 @@ test("getFile", async () => {
     },
   ]);
 
-  const output = await metricsStore.getForFile(fileReferenceId);
+  const output = await miscOutputStore.getForFile(fileReferenceId);
   expect(output.length).toEqual(3);
+});
+
+test("textChunkIdsPresent", async () => {
+  const {
+    organizationId,
+    projectId,
+    fileReferenceId,
+    processedFileId,
+    textChunkGroupId,
+    textChunkId,
+    textChunkId2,
+    miscOutputStore,
+  } = await setup();
+
+  await miscOutputStore.insertMany([
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      processedFileId,
+      textChunkGroupId,
+      textChunkId,
+      value: {
+        type: "financial_summary",
+        value: {
+          investmentRisks: ["foo"],
+          investmentMerits: ["bar"],
+          financialSummaries: ["baz"],
+        },
+      },
+    },
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      processedFileId,
+      textChunkGroupId,
+      textChunkId,
+      value: {
+        type: "terms",
+        value: [
+          {
+            termValue: "value",
+            termName: "name",
+          },
+        ],
+      },
+    },
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      processedFileId,
+      textChunkGroupId,
+      textChunkId: textChunkId2,
+      value: {
+        type: "summary",
+        value: ["hi there"],
+      },
+    },
+  ]);
+
+  const output = await miscOutputStore.textChunkIdsPresent(fileReferenceId);
+  expect(output).toEqual([textChunkId, textChunkId2].sort());
 });

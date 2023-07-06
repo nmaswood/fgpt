@@ -1,4 +1,4 @@
-import { ChunkStrategy, Progress, TextChunkGroup } from "@fgpt/precedent-iso";
+import { ChunkStrategy, TextChunkGroup } from "@fgpt/precedent-iso";
 import {
   DatabasePool,
   DatabaseTransactionConnection,
@@ -97,14 +97,11 @@ export interface TextChunkStore {
   getEmbedding(ids: string): Promise<EmbeddingResult>;
   getEmbeddings(ids: string[]): Promise<EmbeddingResult[]>;
   listWithNoEmbeddings(processedFileId: string): Promise<TextChunk[]>;
-  incrementLlmOutputChunkSeen(
-    textGroupId: string,
-  ): Promise<Progress | undefined>;
+
   getTextChunkGroupByStrategy(
     fileReferenceId: string,
     strategy: ChunkStrategy,
   ): Promise<TextChunkGroup | undefined>;
-  getLlmOutputProgress(textGroupId: string): Promise<Progress | undefined>;
 }
 
 const TEXT_CHUNK_FIELDS = sql.fragment`text_chunk.id, text_chunk.organization_id, text_chunk.project_id, text_chunk.file_reference_id, text_chunk.processed_file_id, text_chunk.chunk_order, text_chunk.chunk_text, text_chunk.embedding IS NOT NULL AS has_embedding, text_chunk_group_id`;
@@ -147,37 +144,6 @@ LIMIT ${limit}
       }
       id = lastId;
     }
-  }
-  async incrementLlmOutputChunkSeen(
-    textGroupId: string,
-  ): Promise<Progress | undefined> {
-    return this.pool.one(sql.type(ZProgress)`
-UPDATE
-    text_chunk_group
-SET
-    llm_output_generated = COALESCE(llm_output_chunks_seen + 1, 1) >= num_chunks,
-    llm_output_chunks_seen = COALESCE(llm_output_chunks_seen + 1, 1)
-WHERE
-    id = ${textGroupId}
-RETURNING
-    num_chunks as total,
-    llm_output_chunks_seen as value
-`);
-  }
-
-  async getLlmOutputProgress(
-    textChunkGroupId: string,
-  ): Promise<Progress | undefined> {
-    const res = await this.pool.maybeOne(sql.type(ZProgress)`
-SELECT
-    num_chunks as total,
-    COALESCE(llm_output_chunks_seen, 0) as value
-FROM
-    text_chunk_group
-WHERE
-    id = ${textChunkGroupId}
-`);
-    return res ?? undefined;
   }
 
   async getTextChunkGroupByStrategy(
@@ -575,8 +541,3 @@ const ZEmbeddingRow = z
     chunkId: row.id,
     embedding: JSON.parse(row.embedding),
   }));
-
-const ZProgress = z.object({
-  value: z.number(),
-  total: z.number().min(0),
-});

@@ -9,7 +9,7 @@ test("basic example", () => {
       text: "I love cats. They are really so fantastic. They are the best",
 
       tokenChunkLimit: 10,
-    })
+    }),
   ).toEqual([
     "I love cats.",
     "They are",

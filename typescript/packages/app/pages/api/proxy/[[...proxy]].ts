@@ -26,7 +26,7 @@ async function proxy(req: NextApiRequest, res: NextApiResponse) {
           "Content-Type": "application/json",
         },
         ...(req.body ? { body: JSON.stringify(req.body) } : {}),
-      }
+      },
     );
     res.status(response.status).json(await response.json());
   } catch (error) {

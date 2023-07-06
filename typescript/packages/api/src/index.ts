@@ -71,7 +71,7 @@ async function start() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (req as any).rawBody = buf;
       },
-    })
+    }),
   );
 
   const pool = await dataBasePool(SETTINGS.sql.uri);
@@ -86,7 +86,7 @@ async function start() {
   const fileReferenceStore = new PsqlFileReferenceStore(pool);
   const loadedFileStore = new PsqlLoadedFileStore(pool);
   const objectStoreService = new GoogleCloudStorageService(
-    SETTINGS.urlSigningServiceAccountPath
+    SETTINGS.urlSigningServiceAccountPath,
   );
   const excelAssetStore = new PsqlExcelAssetStore(pool);
   const excelOutputStore = new PsqlExcelOutputStore(pool);
@@ -94,7 +94,7 @@ async function start() {
   const messageBusService = new PubsubMessageBusService(
     SETTINGS.pubsub.projectId,
     SETTINGS.pubsub.topic,
-    SETTINGS.pubsub.emulatorHost
+    SETTINGS.pubsub.emulatorHost,
   );
 
   const taskStore = new PSqlTaskStore(pool, messageBusService);
@@ -103,7 +103,7 @@ async function start() {
 
   const mlService = new MLServiceClientImpl(
     SETTINGS.mlServiceUri,
-    SETTINGS.serviceToServiceSecret
+    SETTINGS.serviceToServiceSecret,
   );
 
   // hack to wake up ml service
@@ -121,7 +121,7 @@ async function start() {
     reportService,
     objectStoreService,
     excelOutputStore,
-    excelAssetStore
+    excelAssetStore,
   );
 
   app.use(cors({ origin: SETTINGS.corsOrigin }));
@@ -132,7 +132,7 @@ async function start() {
     "/api/v1/projects",
     jwtCheck,
     addUser,
-    new ProjectRouter(projectStore, taskStore, userOrgService).init()
+    new ProjectRouter(projectStore, taskStore, userOrgService).init(),
   );
 
   app.use(
@@ -145,8 +145,8 @@ async function start() {
       SETTINGS.assetBucket,
       taskStore,
       loadedFileStore,
-      projectStore
-    ).init()
+      projectStore,
+    ).init(),
   );
 
   app.use(
@@ -157,15 +157,15 @@ async function start() {
       mlService,
       textChunkStore,
       chatStore,
-      fileReferenceStore
-    ).init()
+      fileReferenceStore,
+    ).init(),
   );
 
   app.use(
     "/api/v1/text",
     jwtCheck,
     addUser,
-    new TextGroupRouter(textChunkStore).init()
+    new TextGroupRouter(textChunkStore).init(),
   );
 
   app.use(
@@ -176,14 +176,14 @@ async function start() {
       questionStore,
       mlService,
       textChunkStore,
-      fileRenderService
-    ).init()
+      fileRenderService,
+    ).init(),
   );
 
   if (SETTINGS.debug.includeRouter) {
     app.use(
       "/api/v1/debug",
-      new DebugRouter(taskStore, fileReferenceStore, messageBusService).init()
+      new DebugRouter(taskStore, fileReferenceStore, messageBusService).init(),
     );
   }
 

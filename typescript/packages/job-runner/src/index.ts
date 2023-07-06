@@ -29,7 +29,6 @@ import {
   EmbeddingsHandlerImpl,
   LLMOutputHandlerImpl,
   TableHandlerImpl,
-  PsqlTaskGroupService,
   IngestFileHandlerImpl,
 } from "@fgpt/precedent-node";
 import { SETTINGS, Settings } from "./settings";
@@ -52,13 +51,13 @@ async function start(settings: Settings) {
     fileReferenceStore,
     settings.assetBucket,
     blobStorageService,
-    tikaClient
+    tikaClient,
   );
 
   const messageBusService = new PubsubMessageBusService(
     settings.pubsub.projectId,
     settings.pubsub.topic,
-    settings.pubsub.emulatorHost
+    settings.pubsub.emulatorHost,
   );
 
   const taskService = new PSqlTaskStore(pool, messageBusService);
@@ -69,7 +68,7 @@ async function start(settings: Settings) {
 
   const mlServiceClient = new MLServiceClientImpl(
     settings.mlServiceUri,
-    settings.serviceToServiceSecret
+    settings.serviceToServiceSecret,
   );
 
   const questionStore = new PsqlQuestionStore(pool);
@@ -77,7 +76,7 @@ async function start(settings: Settings) {
 
   const tabularDataService = new HttpTabularDataService(
     settings.mlServiceUri,
-    settings.serviceToServiceSecret
+    settings.serviceToServiceSecret,
   );
 
   const excelAssetStore = new PsqlExcelAssetStore(pool);
@@ -86,37 +85,36 @@ async function start(settings: Settings) {
   const textExtractionHandler = new TextExtractionHandlerImpl(
     textExtractor,
     processedFileStore,
-    mlServiceClient
+    mlServiceClient,
   );
 
   const textChunkHandler = new TextChunkHandlerImpl(
     processedFileStore,
-    textChunkStore
+    textChunkStore,
   );
 
   const generateEmbeddingsHandler = new EmbeddingsHandlerImpl(
     mlServiceClient,
-    textChunkStore
+    textChunkStore,
   );
   const llmOutputHandler = new LLMOutputHandlerImpl(
     mlServiceClient,
     textChunkStore,
     questionStore,
-    miscOutputStore
+    miscOutputStore,
   );
 
   const tableHandler = new TableHandlerImpl(
     fileReferenceStore,
     tabularDataService,
     excelAssetStore,
-    excelOutputStore
+    excelOutputStore,
   );
 
   const taskStore = new PSqlTaskStore(pool, messageBusService);
 
   const ingestFileHandler = new IngestFileHandlerImpl(taskStore);
 
-  const taskGroupService = new PsqlTaskGroupService(pool);
   const taskExecutor = new TaskExecutorImpl(
     taskService,
     textExtractionHandler,
@@ -124,11 +122,10 @@ async function start(settings: Settings) {
     generateEmbeddingsHandler,
     llmOutputHandler,
     tableHandler,
-    taskGroupService,
-    ingestFileHandler
+    ingestFileHandler,
   );
 
-  const mainRouter = new MainRouter(taskStore, taskExecutor, taskGroupService);
+  const mainRouter = new MainRouter(taskStore, taskExecutor);
 
   app.use("/", mainRouter.init());
 

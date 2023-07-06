@@ -10,7 +10,7 @@ export class DebugRouter {
   constructor(
     private readonly taskService: TaskStore,
     private readonly fileReferenceStore: FileReferenceStore,
-    private readonly messageBusService: MessageBusService
+    private readonly messageBusService: MessageBusService,
   ) {}
   init() {
     const router = express.Router();
@@ -34,7 +34,7 @@ export class DebugRouter {
         });
 
         res.json({ task });
-      }
+      },
     );
 
     router.get(
@@ -47,7 +47,7 @@ export class DebugRouter {
         });
 
         res.send("OK");
-      }
+      },
     );
 
     return router;
