@@ -10,10 +10,11 @@ export const DisplayFileChat: React.FC<{
   token: string;
   fileReferenceId: string;
 }> = ({ projectId, token, fileReferenceId }) => {
-  const { data: chats, isLoading: chatsLoading } = useFetchChats(
-    "file",
-    fileReferenceId
-  );
+  const {
+    data: chats,
+    isLoading: chatsLoading,
+    mutate: refetchChats,
+  } = useFetchChats("file", fileReferenceId);
 
   const { data: questions } = useSampleForFile(fileReferenceId);
 
@@ -42,6 +43,7 @@ export const DisplayFileChat: React.FC<{
         createChatIsMutating || isDeleteChatMutating || isEditingChatMutating
       }
       questions={questions}
+      refetchChats={refetchChats}
     />
   );
 };
