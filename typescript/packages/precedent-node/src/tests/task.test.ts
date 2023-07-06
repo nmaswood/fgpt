@@ -7,6 +7,7 @@ import { PSqlProjectStore } from "../project-store";
 import { PSqlTaskStore } from "../task-store";
 import { PsqlUserOrgService } from "../user-org/user-org-service";
 import { TEST_SETTINGS } from "./test-settings";
+import { PsqlFileReferenceStore } from "../file-reference-store";
 
 async function setup() {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
@@ -28,26 +29,52 @@ async function setup() {
     creatorUserId: user.id,
     organizationId: user.organizationId,
   });
+
+  const fileReferenceStore = new PsqlFileReferenceStore(pool);
+
+  const [f1, f2] = await fileReferenceStore.insertMany([
+    {
+      projectId: project.id,
+      organizationId: user.organizationId,
+      fileName: "foo",
+      contentType: "by",
+      bucketName: "bye",
+      path: "hi",
+      sha256: "hi",
+      fileSize: 1,
+    },
+    {
+      projectId: project.id,
+      organizationId: user.organizationId,
+      fileName: "foo",
+      contentType: "by",
+      bucketName: "bye",
+      path: "hi",
+      sha256: "hi",
+      fileSize: 1,
+    },
+  ]);
   return {
     user,
     project,
     pool,
-    taskService: taskStore,
+    taskStore,
+    fileReferenceId1: f1.id,
+    fileReferenceId2: f2.id,
   };
 }
 
 beforeEach(async () => {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
-
   await pool.query(
-    sql.unsafe`TRUNCATE TABLE organization, app_user, project, task CASCADE`,
+    sql.unsafe`TRUNCATE TABLE organization, app_user, project, task, file_reference  CASCADE`,
   );
 });
 
 test("insertMany", async () => {
-  const { user, project, taskService } = await setup();
-  expect(await taskService.insertMany([])).toEqual([]);
-  const [task] = await taskService.insertMany([
+  const { user, project, taskStore } = await setup();
+  expect(await taskStore.insertMany([])).toEqual([]);
+  const [task] = await taskStore.insertMany([
     {
       organizationId: user.organizationId,
       projectId: project.id,
@@ -67,8 +94,8 @@ test("insertMany", async () => {
 });
 
 test("insert", async () => {
-  const { user, project, taskService } = await setup();
-  const task = await taskService.insert({
+  const { user, project, taskStore } = await setup();
+  const task = await taskStore.insert({
     organizationId: user.organizationId,
     projectId: project.id,
     fileReferenceId: undefined,
@@ -86,8 +113,8 @@ test("insert", async () => {
 });
 
 test("get", async () => {
-  const { user, project, taskService } = await setup();
-  const { id } = await taskService.insert({
+  const { user, project, taskStore } = await setup();
+  const { id } = await taskStore.insert({
     organizationId: user.organizationId,
     projectId: project.id,
     fileReferenceId: undefined,
@@ -100,16 +127,16 @@ test("get", async () => {
     },
   });
 
-  const task = await taskService.get(id);
+  const task = await taskStore.get(id);
 
   expect(task.projectId).toEqual(project.id);
   expect(task.config.type).toEqual("text-extraction");
 });
 
 test("getAndSetToInProgress", async () => {
-  const { user, project, taskService } = await setup();
-  expect(await taskService.insertMany([])).toEqual([]);
-  await taskService.insertMany([
+  const { user, project, taskStore } = await setup();
+  expect(await taskStore.insertMany([])).toEqual([]);
+  await taskStore.insertMany([
     {
       organizationId: user.organizationId,
       projectId: project.id,
@@ -136,14 +163,14 @@ test("getAndSetToInProgress", async () => {
     },
   ]);
 
-  const task = await taskService.getAndSetToInProgress();
+  const task = await taskStore.getAndSetToInProgress();
   expect(task?.status).toEqual("in-progress");
 });
 
 test("setToSuceeded", async () => {
-  const { user, project, taskService } = await setup();
-  expect(await taskService.insertMany([])).toEqual([]);
-  const task = await taskService.insert({
+  const { user, project, taskStore } = await setup();
+  expect(await taskStore.insertMany([])).toEqual([]);
+  const task = await taskStore.insert({
     organizationId: user.organizationId,
     projectId: project.id,
 
@@ -157,14 +184,14 @@ test("setToSuceeded", async () => {
     },
   });
 
-  const completedTask = await taskService.setToSuceeded(task.id);
+  const completedTask = await taskStore.setToSuceeded(task.id);
   expect(completedTask?.status).toEqual("succeeded");
 });
 
 test("setToInProgress", async () => {
-  const { user, project, taskService } = await setup();
-  expect(await taskService.insertMany([])).toEqual([]);
-  const task = await taskService.insert({
+  const { user, project, taskStore } = await setup();
+  expect(await taskStore.insertMany([])).toEqual([]);
+  const task = await taskStore.insert({
     organizationId: user.organizationId,
     projectId: project.id,
 
@@ -178,16 +205,16 @@ test("setToInProgress", async () => {
     },
   });
 
-  const completedTask = await taskService.setToSuceeded(task.id);
+  const completedTask = await taskStore.setToSuceeded(task.id);
   expect(completedTask?.status).toEqual("succeeded");
-  const inProgress = await taskService.setToInProgress(task.id);
+  const inProgress = await taskStore.setToInProgress(task.id);
   expect(inProgress?.status).toEqual("in-progress");
 });
 
 test("setToFailed", async () => {
-  const { user, project, taskService } = await setup();
-  expect(await taskService.insertMany([])).toEqual([]);
-  const task = await taskService.insert({
+  const { user, project, taskStore } = await setup();
+  expect(await taskStore.insertMany([])).toEqual([]);
+  const task = await taskStore.insert({
     organizationId: user.organizationId,
     projectId: project.id,
 
@@ -201,14 +228,14 @@ test("setToFailed", async () => {
     },
   });
 
-  const completedTask = await taskService.setToSuceeded(task.id);
+  const completedTask = await taskStore.setToSuceeded(task.id);
   expect(completedTask?.status).toEqual("succeeded");
 });
 
 test("setToQueued", async () => {
-  const { user, project, taskService } = await setup();
-  expect(await taskService.insertMany([])).toEqual([]);
-  const task = await taskService.insert({
+  const { user, project, taskStore } = await setup();
+  expect(await taskStore.insertMany([])).toEqual([]);
+  const task = await taskStore.insert({
     organizationId: user.organizationId,
     projectId: project.id,
 
@@ -222,6 +249,40 @@ test("setToQueued", async () => {
     },
   });
 
-  const queuedTask = await taskService.setToQueued(task.id);
+  const queuedTask = await taskStore.setToQueued(task.id);
   expect(queuedTask?.status).toEqual("queued");
+});
+
+test("getByFileReferenceId", async () => {
+  const { user, project, taskStore, fileReferenceId1, fileReferenceId2 } =
+    await setup();
+  expect(await taskStore.insertMany([])).toEqual([]);
+  const [task1] = await taskStore.insertMany([
+    {
+      organizationId: user.organizationId,
+      projectId: project.id,
+      fileReferenceId: fileReferenceId1,
+      config: {
+        version: "1",
+        organizationId: user.organizationId,
+        projectId: project.id,
+        type: "text-extraction",
+        fileReferenceId: fileReferenceId1,
+      },
+    },
+    {
+      organizationId: user.organizationId,
+      projectId: project.id,
+      fileReferenceId: fileReferenceId2,
+      config: {
+        version: "1",
+        organizationId: user.organizationId,
+        projectId: project.id,
+        type: "text-extraction",
+        fileReferenceId: fileReferenceId2,
+      },
+    },
+  ]);
+  const res = await taskStore.getByFileReferenceId(fileReferenceId1);
+  expect(res).toEqual([task1]);
 });

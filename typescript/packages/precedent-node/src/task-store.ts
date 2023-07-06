@@ -37,6 +37,7 @@ interface SetAsCompleted {
 
 export interface TaskStore {
   get(taskId: string): Promise<Task>;
+  getByFileReferenceId(fileReferenceId: string): Promise<Task[]>;
   insert(config: CreateTask): Promise<Task>;
   insertMany(configs: CreateTask[]): Promise<Task[]>;
   getAndSetToInProgress(): Promise<Task | undefined>;
@@ -62,6 +63,18 @@ FROM
 WHERE
     id = ${taskId}
 `);
+  }
+
+  async getByFileReferenceId(fileReferenceId: string): Promise<Task[]> {
+    const resp = await this.pool.any(sql.type(ZFromTaskRow)`
+SELECT
+    ${FIELDS}
+FROM
+  task
+WHERE
+    file_reference_id = ${fileReferenceId}
+`);
+    return Array.from(resp);
   }
 
   async insert(config: CreateTask): Promise<Task> {
@@ -206,7 +219,12 @@ RETURNING
       return [];
     }
 
-    const inserts = args.map(toFragment);
+    const inserts = args.map(
+      ({ organizationId, projectId, config, fileReferenceId }: CreateTask) =>
+        sql.fragment`(${organizationId}, ${projectId}, ${
+          config.type
+        }, 'queued', ${JSON.stringify(config)}, ${fileReferenceId ?? null})`,
+    );
 
     const tasks = await this.pool.connect(async (cnx) => {
       const resp = await cnx.query(
@@ -255,14 +273,3 @@ const ZFromTaskRow = z
       config: ZTaskConfig.parse(row.config),
     }),
   );
-
-function toFragment({
-  organizationId,
-  projectId,
-  config,
-  fileReferenceId,
-}: CreateTask) {
-  return sql.fragment`(${organizationId}, ${projectId}, ${
-    config.type
-  }, 'queued', ${JSON.stringify(config)}, ${fileReferenceId ?? null})`;
-}
