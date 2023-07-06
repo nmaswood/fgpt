@@ -135,23 +135,31 @@ export class TaskExecutorImpl implements TaskExecutor {
         const res = await this.tableHandler.extractTable({
           fileReferenceId: config.fileReferenceId,
         });
-        if (!res) {
-          return;
-        }
+
+        const { source, fileReferenceId } = res
+          ? {
+              source: {
+                type: "derived",
+                excelAssetId: res.excelAssetId,
+              } as const,
+              fileReferenceId: res.fileReferenceId,
+            }
+          : {
+              source: null,
+              fileReferenceId: config.fileReferenceId,
+            };
+
         await this.taskStore.insert({
           organizationId,
           projectId,
-          fileReferenceId: res.fileReferenceId,
+          fileReferenceId,
           config: {
             type: "analyze-table",
             version: "1",
             organizationId,
             projectId,
-            fileReferenceId: res.fileReferenceId,
-            source: {
-              type: "derived",
-              excelAssetId: res.excelAssetId,
-            },
+            fileReferenceId,
+            source,
           },
         });
 
@@ -159,7 +167,15 @@ export class TaskExecutorImpl implements TaskExecutor {
       }
 
       case "analyze-table": {
-        await this.tableHandler.analyzeTable({ config });
+        if (config.source === null) {
+          return;
+        }
+        await this.tableHandler.analyzeTable({
+          projectId: config.projectId,
+          organizationId: config.organizationId,
+          source: config.source,
+          fileReferenceId: config.fileReferenceId,
+        });
         break;
       }
 

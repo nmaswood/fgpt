@@ -95,7 +95,7 @@ export const ZAnalyzeTableConfig = z.object({
   organizationId: z.string(),
   projectId: z.string(),
   fileReferenceId: z.string(),
-  source: ZExcelSource,
+  source: ZExcelSource.nullable(),
 });
 
 export type AnalyzeTableConfig = z.infer<typeof ZAnalyzeTableConfig>;

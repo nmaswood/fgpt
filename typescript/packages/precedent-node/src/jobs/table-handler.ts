@@ -1,4 +1,4 @@
-import { AnalyzeTableConfig, assertNever } from "@fgpt/precedent-iso";
+import { assertNever, ExcelSource } from "@fgpt/precedent-iso";
 import path from "path";
 
 import { ExcelAssetStore } from "../excel-asset-store";
@@ -15,7 +15,10 @@ export namespace TableHandler {
     fileReferenceId: string;
   }
   export interface AnalyzeArguments {
-    config: AnalyzeTableConfig;
+    organizationId: string;
+    projectId: string;
+    fileReferenceId: string;
+    source: ExcelSource;
   }
 
   export type ExtractResponse =
@@ -78,7 +81,7 @@ export class TableHandlerImpl implements TableHandler {
     };
   }
 
-  async analyzeTable({ config }: TableHandler.AnalyzeArguments): Promise<void> {
+  async analyzeTable(config: TableHandler.AnalyzeArguments): Promise<void> {
     const { bucketName, path } = await this.#pathForExcel(config);
     LOGGER.info({ bucketName, path }, "Analyzing excel file");
     const { responses } = await this.tableExtractor.analyze({
@@ -105,7 +108,7 @@ export class TableHandlerImpl implements TableHandler {
     });
   }
 
-  async #pathForExcel(config: AnalyzeTableConfig) {
+  async #pathForExcel(config: TableHandler.AnalyzeArguments) {
     switch (config.source.type) {
       case "derived": {
         const asset = await this.excelAssetStore.get(
