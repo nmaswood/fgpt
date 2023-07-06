@@ -2,10 +2,9 @@ from springtime.models.chat import ChatHistory
 
 
 TOKEN_LIMIT = 4_000
-ANALYST_PROMPT = "You are an expert financial analyst."
 RESPOND_PROMPT = "Respond to the following prompt:"
 CONTEXT_PROMPT = "Use the following context to supplement your information:"
-DEFAULT_PROMPT_LEN = len(ANALYST_PROMPT) + len(RESPOND_PROMPT)
+DEFAULT_PROMPT_LEN = len(RESPOND_PROMPT)
 
 
 def create_prompt(context: str, question: str, history: list[ChatHistory]):
@@ -35,7 +34,6 @@ def create_prompt(context: str, question: str, history: list[ChatHistory]):
     non_empty_prompts = [
         prompt
         for prompt in [
-            ANALYST_PROMPT,
             history_prompt,
             context_prompt,
             RESPOND_PROMPT,

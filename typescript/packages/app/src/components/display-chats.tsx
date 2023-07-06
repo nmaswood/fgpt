@@ -8,6 +8,7 @@ import {
   Box,
   Button,
   ButtonGroup,
+  CircularProgress,
   IconButton,
   Input,
   List,
@@ -17,21 +18,16 @@ import {
 } from "@mui/joy";
 import React from "react";
 
-interface TitleWithId {
-  chatId: string;
-  title: string;
-}
-
 export const DisplayChatList: React.FC<{
   chats: Chat[];
   selectedChatId: string | undefined;
   setSelectedChatId: (s: string) => void;
   selectedChatIdx: number;
-  createChat: (name: string) => Promise<Chat | undefined>;
+  createChat: (name: string | undefined) => Promise<Chat | undefined>;
   deleteChat: (name: string) => Promise<unknown>;
   isMutating: boolean;
+  loading: boolean;
   editChat: (args: { id: string; name: string }) => Promise<unknown>;
-  titleWithId: TitleWithId | undefined;
 }> = ({
   chats,
   selectedChatId,
@@ -40,8 +36,8 @@ export const DisplayChatList: React.FC<{
   createChat,
   deleteChat,
   isMutating,
+  loading,
   editChat,
-  titleWithId,
 }) => {
   return (
     <Box
@@ -104,6 +100,7 @@ export const DisplayChatList: React.FC<{
             onDelete={deleteChat}
             editChat={editChat}
             isMutating={isMutating}
+            loading={loading}
           />
         ))}
       </List>
@@ -119,7 +116,7 @@ const ListItemEntry: React.FC<{
   onDelete: (chatId: string) => void;
   editChat: (args: { id: string; name: string }) => Promise<unknown>;
   isMutating: boolean;
-  titleWithId: TitleWithId | undefined;
+  loading: boolean;
 }> = ({
   chat,
   selectedChatId,
@@ -128,23 +125,13 @@ const ListItemEntry: React.FC<{
   onDelete,
   editChat,
   isMutating,
-  titleWithId,
+  loading,
 }) => {
   const [isEditing, setIsEditing] = React.useState(false);
 
   const [name, setName] = React.useState(chat.name ?? "");
 
   const isSelected = chat.id === selectedChatId;
-
-  React.useEffect(() => {
-    if (!isSelected || titleWithId?.chatId !== chat.id) {
-      return;
-    }
-    if (name === titleWithId.title) {
-      return;
-    }
-    setName(titleWithId.title);
-  }, [isSelected, titleWithId, name, chat.id]);
 
   const onSubmit = async () => {
     const trimmed = name.trim();
@@ -165,6 +152,8 @@ const ListItemEntry: React.FC<{
 
   const isLoading = propsIsLoading || isMutating;
 
+  const waitingForTitle = loading && !chat.name && isSelected;
+
   return (
     <ListItem
       sx={{
@@ -173,77 +162,82 @@ const ListItemEntry: React.FC<{
         justifyContent: "space-between",
       }}
     >
-      <ListItemButton
-        key={chat.id}
-        selected={isSelected}
-        onClick={() => setSelectedChatId(chat.id)}
-      >
-        {isEditing && (
-          <Input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                onSubmit();
-              }
-            }}
-            autoFocus
-          />
-        )}
-        {!isEditing && (
-          <ListItemContent>{chat.name ?? "no name"}</ListItemContent>
-        )}
-        <ButtonGroup>
-          {isSelected && !isEditing && (
-            <IconButton
-              disabled={isLoading}
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsEditing(true);
-              }}
-            >
-              <ModeEditIcon />
-            </IconButton>
-          )}
-
-          {isSelected && !isEditing && (
-            <IconButton
-              disabled={isLoading}
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(chat.id);
-              }}
-            >
-              <DeleteIcon />
-            </IconButton>
-          )}
+      {waitingForTitle && (
+        <Box display="flex" width="100%" justifyContent="center">
+          <CircularProgress />
+        </Box>
+      )}
+      {!waitingForTitle && (
+        <ListItemButton
+          key={chat.id}
+          selected={isSelected}
+          onClick={() => setSelectedChatId(chat.id)}
+        >
           {isEditing && (
-            <IconButton
-              disabled={isLoading}
-              onClick={(e) => {
-                e.stopPropagation();
-                onSubmit();
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  onSubmit();
+                }
               }}
-            >
-              <CheckIcon />
-            </IconButton>
+              autoFocus
+            />
           )}
+          {!isEditing && <ListItemContent>{chat.name}</ListItemContent>}
+          <ButtonGroup>
+            {isSelected && !isEditing && (
+              <IconButton
+                disabled={isLoading}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsEditing(true);
+                }}
+              >
+                <ModeEditIcon />
+              </IconButton>
+            )}
 
-          {isEditing && (
-            <IconButton
-              disabled={isLoading}
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsEditing(false);
-                setName(chat.name ?? "");
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-          )}
-        </ButtonGroup>
-      </ListItemButton>
+            {isSelected && !isEditing && (
+              <IconButton
+                disabled={isLoading}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(chat.id);
+                }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            )}
+            {isEditing && (
+              <IconButton
+                disabled={isLoading}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSubmit();
+                }}
+              >
+                <CheckIcon />
+              </IconButton>
+            )}
+
+            {isEditing && (
+              <IconButton
+                disabled={isLoading}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsEditing(false);
+                  setName(chat.name ?? "");
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+            )}
+          </ButtonGroup>
+        </ListItemButton>
+      )}
     </ListItem>
   );
 };

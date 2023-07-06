@@ -33,7 +33,14 @@ class OpenAIChatService(ChatService):
         prompt = create_prompt(context, question, history)
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}],
+            messages=[
+                {"role": "system", "content": "You are an expert financial analyst."},
+                {
+                    "role": "system",
+                    "content": "Output your format in an easy to read format, for example for list responses use bullet points and place line breaks in the appropriate locations.",
+                },
+                {"role": "user", "content": prompt},
+            ],
             temperature=0,
             stream=True,
         )
@@ -53,7 +60,10 @@ class OpenAIChatService(ChatService):
         response = openai.ChatCompletion.create(
             # model='gpt-4',
             model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": formatted_message}],
+            messages=[
+                {"role": "system", "content": "You are an expert financial analyst."},
+                {"role": "user", "content": formatted_message},
+            ],
             temperature=0,
         )
         choices = response["choices"]
@@ -65,6 +75,7 @@ class OpenAIChatService(ChatService):
     def get_title(self, question: str, answer: str) -> Generator[Any, Any, None]:
         prompt = f"""
         Based on the question and answer please respond with a concise, accurate title for the exchange.
+        Do not output anything except the title itself.
 
         Question: {question}
         Answer: {answer}

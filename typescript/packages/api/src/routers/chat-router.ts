@@ -238,8 +238,6 @@ export class ChatRouter {
               question: args.question,
               answer,
               onData: (resp) => {
-                const encoded = encoder.encode(resp);
-                res.write(encoded);
                 titleBuffer.push(resp);
               },
               onEnd: async () => {

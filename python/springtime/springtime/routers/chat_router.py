@@ -27,12 +27,6 @@ class ChatRouter:
     def get_router(self):
         router = APIRouter(prefix="/chat")
 
-        @router.post("/ask-question")
-        async def ask_question_route(req: AskQuestionRequest):
-            answer = self.chat_service.ask(req.context, req.question)
-
-            return {"data": answer}
-
         @router.post("/ask-question-streaming")
         async def ask_question_streaming_route(req: AskQuestionRequest):
             stream = self.chat_service.ask_streaming(

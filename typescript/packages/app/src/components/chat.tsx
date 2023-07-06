@@ -26,13 +26,7 @@ import React from "react";
 import { useAskQuestion } from "../hooks/use-ask-question";
 import { useFetchContext } from "../hooks/use-context-chat";
 import { useFetchChatEntries } from "../hooks/use-fetch-chat-entry";
-import { useGetTitle } from "../hooks/use-get-title";
 import { DisplayChatList } from "./display-chats";
-
-interface TitleWithId {
-  chatId: string;
-  title: string;
-}
 
 interface EntryToRender {
   id: string;
@@ -213,6 +207,7 @@ export const DisplayChat: React.FC<{
           selectedChatIdx={selectedChatIdx}
           createChat={(name?: string) => createChat({ name })}
           isMutating={isMutating}
+          loading={loading}
           deleteChat={onDelete}
           editChat={editChat}
         />
@@ -320,7 +315,9 @@ const RenderChatEntryFromServer: React.FC<{
             <Box display="flex" width="56" height="40" marginRight={2}>
               <ResponseAvatar state={"data"} />
             </Box>
-            <Typography>{chatEntry.answer}</Typography>
+            <Typography sx={{ whiteSpace: "pre-line" }}>
+              {chatEntry.answer}
+            </Typography>
             <IconButton
               onClick={() => setOpen((prev) => !prev)}
               sx={{
@@ -428,9 +425,14 @@ const RenderChatEntryFromClient: React.FC<{
             <ResponseAvatar state={"data"} />
           </Box>
           {q.state.type === "rendered" && (
-            <Typography>{q.state.value}</Typography>
+            <Typography sx={{ whiteSpace: "pre-line" }}>
+              {q.state.value}
+            </Typography>
           )}
-          {q.state.type === "rendering" && <Typography>{text}</Typography>}
+          {q.state.type === "rendering" && (
+            <Typography sx={{ whiteSpace: "pre-line" }}>{text}</Typography>
+          )}
+
           {q.state.type === "rendering" && text.length === 0 && (
             <CircularProgress />
           )}

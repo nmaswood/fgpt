@@ -70,7 +70,6 @@ RETURNING
     return this.pool.connect(async (cnx) => {
       return cnx.oneFirst(
         sql.type(z.object({ project_count: z.number() }))`
-
 UPDATE
     organization
 SET

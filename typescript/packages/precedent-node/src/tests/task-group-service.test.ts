@@ -69,7 +69,7 @@ test("insertTaskGroup", async () => {
     fileReferenceId,
   } = await setup();
   expect(await taskStore.insertMany([])).toEqual([]);
-  const task = await taskStore.insert({
+  await taskStore.insert({
     organizationId,
     projectId,
     fileReferenceId,
@@ -87,7 +87,6 @@ test("insertTaskGroup", async () => {
     projectId,
     fileReferenceId,
     description: "I love cats",
-    taskIds: [],
   });
 
   expect(taskGroup.id).toBeDefined();
@@ -111,8 +110,6 @@ test("upsertTask", async () => {
     projectId,
     fileReferenceId,
     description: "I love cats",
-
-    taskIds: [],
   });
 
   expect(taskGroup.id).toBeDefined();
