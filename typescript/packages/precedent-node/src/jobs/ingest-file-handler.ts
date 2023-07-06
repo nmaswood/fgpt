@@ -57,11 +57,15 @@ export class IngestFileHandlerImpl implements IngestFileHandler {
 
         const textExtractionTaskId = tasks.find(
           (task) => task.config.type === "text-extraction",
-        )!.id;
+        )?.id;
 
         const extractTableTaskId = tasks.find(
           (task) => task.config.type === "extract-table",
-        )!.id;
+        )?.id;
+
+        if (!textExtractionTaskId || !extractTableTaskId) {
+          throw new Error("illegal state");
+        }
 
         return {
           type: "pdf",
