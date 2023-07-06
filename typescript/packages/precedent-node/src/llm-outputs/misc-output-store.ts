@@ -24,7 +24,7 @@ export class PsqlMiscOutputStore implements MiscOutputStore {
   async getForFile(fileReferenceId: string): Promise<Outputs.MiscValue[]> {
     fileReferenceId;
     const result = await this.pool.query(sql.type(
-      z.object({ metrics: ZMiscValue })
+      z.object({ metrics: ZMiscValue }),
     )`
 SELECT
     metrics
@@ -40,7 +40,7 @@ ORDER BY
   }
 
   async insertMany(
-    metrics: InsertMiscValue[]
+    metrics: InsertMiscValue[],
   ): Promise<Outputs.MiscValueRow[]> {
     if (metrics.length === 0) {
       return [];
@@ -64,7 +64,7 @@ ORDER BY
     ${textChunkId},
     ${null},
     ${JSON.stringify(value)})
-`
+`,
     );
 
     const res = await this.pool.query(sql.type(ZMetricsRow)`
@@ -126,5 +126,5 @@ const ZMetricsRow = z
       textChunkGroupId: row.text_chunk_group_id,
       textChunkId: row.text_chunk_id,
       value: row.metrics,
-    })
+    }),
   );

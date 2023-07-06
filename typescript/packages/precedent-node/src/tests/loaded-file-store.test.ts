@@ -69,7 +69,7 @@ beforeEach(async () => {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
 
   await pool.query(
-    sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference, processed_file CASCADE`
+    sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference, processed_file CASCADE`,
   );
 });
 
@@ -99,7 +99,7 @@ test("paginate", async () => {
       chunkOrder: 0,
       chunkText: "hi",
       hash: ShaHash.forData("hi"),
-    }
+    },
   );
 
   await chunkStore.setManyEmbeddings(
@@ -110,7 +110,7 @@ test("paginate", async () => {
         chunkId: textChunk.id,
         embedding: [1, 2, 3],
       },
-    ]
+    ],
   );
 
   const [loadedFile] = await loadedFileStore.paginate({

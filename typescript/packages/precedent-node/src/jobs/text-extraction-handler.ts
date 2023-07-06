@@ -18,7 +18,7 @@ export namespace TextExtractionHandler {
 
 export interface TextExtractionHandler {
   extract: (
-    page: TextExtractionHandler.Arguments
+    page: TextExtractionHandler.Arguments,
   ) => Promise<TextExtractionHandler.Response>;
 }
 
@@ -27,7 +27,7 @@ export class TextExtractionHandlerImpl implements TextExtractionHandler {
   constructor(
     private readonly textExtractor: TextExtractor,
     private readonly processedFileStore: ProcessedFileStore,
-    private readonly mlService: MLServiceClient
+    private readonly mlService: MLServiceClient,
   ) {}
 
   async extract({

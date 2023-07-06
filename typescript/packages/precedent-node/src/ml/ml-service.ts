@@ -127,7 +127,7 @@ export class MLServiceClientImpl implements MLServiceClient {
   async predict({ content }: PredictArguments): Promise<PredictResponse> {
     const response = await this.#client.post<PredictResponse>(
       "/predict-for-ticker",
-      { content: content.slice(4012) }
+      { content: content.slice(4012) },
     );
     return ZPredictionResponse.parse(response.data);
   }
@@ -135,7 +135,7 @@ export class MLServiceClientImpl implements MLServiceClient {
   async getEmbeddings(args: GetEmbeddingsArgs): Promise<GetEmbeddingsResponse> {
     const response = await this.#client.post<PredictResponse>(
       "/embeddings/embedding-for-documents",
-      { documents: args.documents }
+      { documents: args.documents },
     );
     const parsed = ZEmbeddingsResponse.parse(response.data);
     return parsed;
@@ -161,7 +161,7 @@ export class MLServiceClientImpl implements MLServiceClient {
       {
         vector,
         metadata,
-      }
+      },
     );
     return ZSimilarResponse.parse(response.data).results;
   }
@@ -192,7 +192,7 @@ export class MLServiceClientImpl implements MLServiceClient {
       },
       {
         responseType: "stream",
-      }
+      },
     );
     const stream = response.data;
 
@@ -219,7 +219,7 @@ export class MLServiceClientImpl implements MLServiceClient {
       },
       {
         responseType: "stream",
-      }
+      },
     );
     const stream = response.data;
 
@@ -283,7 +283,7 @@ const ZTerm = z
     (row): Term => ({
       termValue: row.term_value,
       termName: row.term_name,
-    })
+    }),
   );
 
 const ZFinancialSummary = z
@@ -297,7 +297,7 @@ const ZFinancialSummary = z
       investmentMerits: row.investment_merits,
       investmentRisks: row.investment_risks,
       financialSummaries: row.financial_summaries,
-    })
+    }),
   );
 
 const ZLLMOutputResponse = z
@@ -313,5 +313,5 @@ const ZLLMOutputResponse = z
       questions: row.questions,
       terms: row.terms,
       financialSummary: row.financial_summary,
-    })
+    }),
   );

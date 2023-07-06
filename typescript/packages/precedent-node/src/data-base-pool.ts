@@ -24,7 +24,7 @@ const createResultParserInterceptor = (): Interceptor => {
         throw new SchemaValidationError(
           actualQuery,
           row as any,
-          validationResult.error.issues
+          validationResult.error.issues,
         );
       }
 

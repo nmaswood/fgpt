@@ -28,7 +28,7 @@ export class LLMOutputHandlerImpl implements LLMOutputHandler {
     private readonly mlService: MLServiceClient,
     private readonly textChunkStore: TextChunkStore,
     private readonly questionStore: QuestionStore,
-    private readonly miscOutputStore: MiscOutputStore
+    private readonly miscOutputStore: MiscOutputStore,
   ) {}
 
   async generateReport(config: LLMOutputHandler.Arguments): Promise<void> {
@@ -80,11 +80,11 @@ export class LLMOutputHandlerImpl implements LLMOutputHandler {
         ...config,
         question,
         hash: ShaHash.forData(question),
-      }))
+      })),
     );
 
     await this.textChunkStore.incrementLlmOutputChunkSeen(
-      config.textChunkGroupId
+      config.textChunkGroupId,
     );
   }
 }

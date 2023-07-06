@@ -28,7 +28,7 @@ export namespace TableHandler {
 
 export interface TableHandler {
   extractTable: (
-    args: TableHandler.ExtractArguments
+    args: TableHandler.ExtractArguments,
   ) => Promise<TableHandler.ExtractResponse>;
 
   analyzeTable: (config: TableHandler.AnalyzeArguments) => Promise<void>;
@@ -39,7 +39,7 @@ export class TableHandlerImpl implements TableHandler {
     private readonly fileReferenceStore: FileReferenceStore,
     private readonly tableExtractor: TabularDataService,
     private readonly excelAssetStore: ExcelAssetStore,
-    private readonly excelOutputStore: ExcelOutputStore
+    private readonly excelOutputStore: ExcelOutputStore,
   ) {}
 
   async extractTable({
@@ -55,7 +55,7 @@ export class TableHandlerImpl implements TableHandler {
         EXCEL_PATH_SUFFIX,
         file.organizationId,
         file.projectId,
-        file.id
+        file.id,
       ),
     });
 
@@ -109,7 +109,7 @@ export class TableHandlerImpl implements TableHandler {
     switch (config.source.type) {
       case "derived": {
         const asset = await this.excelAssetStore.get(
-          config.source.excelAssetId
+          config.source.excelAssetId,
         );
         return {
           bucketName: asset.bucketName,

@@ -27,7 +27,7 @@ test("extract-longer", async () => {
   const { tikaClient } = await setup();
   const fileName = "dummy.pdf";
   const buffer = await F.readFile(
-    `${__dirname}/test-documents/sample-pitch.pdf`
+    `${__dirname}/test-documents/sample-pitch.pdf`,
   );
   const text = await tikaClient.extract(fileName, buffer);
   const xml = cheerio.load(text);

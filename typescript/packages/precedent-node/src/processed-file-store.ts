@@ -41,7 +41,7 @@ FROM
     processed_file
 WHERE
     id = ${id}
-`
+`,
     );
   }
 
@@ -63,7 +63,7 @@ WHERE
 
   async #upsertMany(
     cnx: DatabasePoolConnection,
-    args: UpsertProcessedFile[]
+    args: UpsertProcessedFile[],
   ): Promise<ProcessedFile[]> {
     const values = args.map(
       ({
@@ -82,7 +82,7 @@ WHERE
     ${hash},
     ${text.length},
     ${gpt4TokenLength ?? null})
-`
+`,
     );
     const { rows } = await cnx.query(
       sql.type(ZProcessedFileRow)`
@@ -94,7 +94,7 @@ INSERT INTO processed_file (organization_id, project_id, file_reference_id, extr
             extracted_text = COALESCE(EXCLUDED.extracted_text, processed_file.extracted_text)
         RETURNING
             ${FIELDS}
-`
+`,
     );
 
     return Array.from(rows);

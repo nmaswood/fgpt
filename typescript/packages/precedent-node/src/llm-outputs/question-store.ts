@@ -44,7 +44,7 @@ LIMIT ${limit + 10}
 
   async sampleForFile(
     fileReferenceId: string,
-    limit: number
+    limit: number,
   ): Promise<string[]> {
     const result = await this.pool.query(sql.type(ZGetForFile)`
 SELECT
@@ -111,7 +111,7 @@ WHERE
     ${textChunkId},
     ${question},
     ${hash})
-`
+`,
     );
 
     const res = await this.pool.query(sql.type(ZQuestionRow)`
@@ -147,7 +147,7 @@ const ZQuestionRow = z
       textChunkGroupId: row.text_chunk_group_id,
       textChunkId: row.text_chunk_id,
       question: row.question,
-    })
+    }),
   );
 
 const ZGetForFile = z.object({

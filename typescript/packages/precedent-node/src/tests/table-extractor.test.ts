@@ -6,7 +6,7 @@ import { TEST_SETTINGS } from "./test-settings";
 async function setup() {
   const tableExtractor = new HttpTabularDataService(
     TEST_SETTINGS.springtimeUri,
-    "test"
+    "test",
   );
   return { tableExtractor };
 }

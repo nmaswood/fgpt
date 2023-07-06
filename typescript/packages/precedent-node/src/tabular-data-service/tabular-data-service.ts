@@ -95,5 +95,5 @@ const ZExtractResponse = z
             path: row.object_path,
             numberOfSheets: row.number_of_sheets,
           }
-        : { type: "empty" }
+        : { type: "empty" },
   );

@@ -65,14 +65,14 @@ beforeEach(async () => {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
 
   await pool.query(
-    sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference, processed_file, excel_analysis, excel_asset  CASCADE`
+    sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference, processed_file, excel_analysis, excel_asset  CASCADE`,
   );
 });
 
 afterEach(async () => {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
   await pool.query(
-    sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference CASCADE`
+    sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference CASCADE`,
   );
 });
 

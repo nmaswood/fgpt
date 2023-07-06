@@ -50,7 +50,7 @@ FROM
     file_reference
 WHERE
     id IN (${sql.join(uniq, sql.fragment`, `)})
-`
+`,
       );
       return Array.from(rows);
     });
@@ -66,7 +66,7 @@ FROM
     file_reference
 WHERE
     project_id = ${projectId}
-`
+`,
       );
       return Array.from(rows);
     });
@@ -86,13 +86,13 @@ WHERE
     }
 
     return this.pool.connect((cnx) =>
-      cnx.transaction((trx) => this.#insertMany(trx, args))
+      cnx.transaction((trx) => this.#insertMany(trx, args)),
     );
   }
 
   async #insertMany(
     trx: DatabaseTransactionConnection,
-    args: InsertFileReference[]
+    args: InsertFileReference[],
   ): Promise<FileReference[]> {
     const [arg] = args;
     if (!arg) {
@@ -131,7 +131,7 @@ where
     ${path},
     ${sha256 ?? null},
     ${fileSize ?? null})
-`
+`,
     );
 
     const resp = await trx.query(
@@ -141,7 +141,7 @@ INSERT INTO file_reference (file_name, bucket_name, content_type, organization_i
         ${sql.join(values, sql.fragment`, `)}
     RETURNING
         ${FIELDS}
-`
+`,
     );
 
     return Array.from(resp.rows);

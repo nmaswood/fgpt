@@ -39,13 +39,18 @@ export class PsqlTaskGroupService implements TaskGroupService {
 
   async insertTaskGroup(args: InsertTaskGroup): Promise<TaskGroup> {
     return this.pool.transaction(async (trx) =>
-      this.#insertTaskGroup(trx, args)
+      this.#insertTaskGroup(trx, args),
     );
   }
 
   async #insertTaskGroup(
     trx: DatabaseTransactionConnection,
-    { description, organizationId, projectId, fileReferenceId }: InsertTaskGroup
+    {
+      description,
+      organizationId,
+      projectId,
+      fileReferenceId,
+    }: InsertTaskGroup,
   ): Promise<TaskGroup> {
     const pendingTasks: string[] = [];
     const completedTasks: string[] = [];
@@ -54,9 +59,9 @@ export class PsqlTaskGroupService implements TaskGroupService {
     return trx.one(sql.type(ZTaskGroupRowForLength)`
 INSERT INTO task_group (description, pending_tasks, completed_tasks, failed_tasks, organization_id, project_id, file_reference_id)
     VALUES (${description}, ${JSON.stringify(pendingTasks)}, ${JSON.stringify(
-      completedTasks
+      completedTasks,
     )}, ${JSON.stringify(
-      failedTasks
+      failedTasks,
     )}, ${organizationId}, ${projectId}, ${fileReferenceId})
 RETURNING
     ${FIELDS}
@@ -69,18 +74,18 @@ RETURNING
 
   async upsertTasks(
     taskGroupId: string,
-    taskIds: string[]
+    taskIds: string[],
   ): Promise<TaskGroup> {
     const sortedUnique = [...new Set(taskIds)].sort();
     return this.pool.transaction(async (trx) =>
-      this.#upsertTasks(trx, taskGroupId, sortedUnique)
+      this.#upsertTasks(trx, taskGroupId, sortedUnique),
     );
   }
 
   async #upsertTasks(
     trx: DatabaseTransactionConnection,
     taskGroupId: string,
-    taskIds: string[]
+    taskIds: string[],
   ): Promise<TaskGroup> {
     const tasksWithStatus = await this.#getTaskStatuses(trx, taskIds);
     const { pendingTasks, completedTasks, failedTasks } =
@@ -130,7 +135,7 @@ RETURNING
 
   async #getTaskStatuses(
     trx: DatabaseTransactionConnection,
-    taskIds: string[]
+    taskIds: string[],
   ) {
     if (taskIds.length === 0) {
       return [];
@@ -170,7 +175,7 @@ const ZTaskGroupRowForLength = z
       numFailedTasks: row.num_failed_tasks,
       numTotalTasks:
         row.num_failed_tasks + row.num_completed_tasks + row.num_pending_tasks,
-    })
+    }),
   );
 
 const ZTaskGroupRowValues = z

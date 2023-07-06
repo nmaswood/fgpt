@@ -1,8 +1,8 @@
 import { ChunkStrategy, Progress, TextChunkGroup } from "@fgpt/precedent-iso";
 import {
   DatabasePool,
-  DatabasePoolConnection,
   DatabaseTransactionConnection,
+  QueryResult,
   sql,
 } from "slonik";
 import { z } from "zod";
@@ -59,10 +59,14 @@ export interface SetManyEmbeddings {
 }
 
 export interface TextChunkStore {
+  iterateTextChunks(
+    limit: number,
+    textChunkGroupId: string,
+  ): AsyncIterable<TextChunk[]>;
   getTextChunkGroup(id: string): Promise<TextChunkGroup>;
   getTextChunkGroupByFileId(
     strategy: ChunkStrategy,
-    id: string
+    id: string,
   ): Promise<TextChunkGroup>;
 
   getTextChunkById(id: string): Promise<TextChunk>;
@@ -70,35 +74,35 @@ export interface TextChunkStore {
 
   upsertTextChunkGroup(args: UpsertTextChunkGroup): Promise<TextChunkGroup>;
   upsertManyTextChunkGroups(
-    args: UpsertTextChunkGroup[]
+    args: UpsertTextChunkGroup[],
   ): Promise<TextChunkGroup[]>;
 
   getTextChunks(ids: string[]): Promise<TextChunk[]>;
 
   upsertTextChunk(
     common: UpsertTextChunkCommon,
-    args: UpsertTextChunk
+    args: UpsertTextChunk,
   ): Promise<TextChunk>;
 
   upsertManyTextChunks(
     common: UpsertTextChunkCommon,
-    args: UpsertTextChunk[]
+    args: UpsertTextChunk[],
   ): Promise<TextChunk[]>;
 
   setManyEmbeddings(
     textChunkGroupId: string,
-    args: SetManyEmbeddings[]
+    args: SetManyEmbeddings[],
   ): Promise<TextChunk[]>;
 
   getEmbedding(ids: string): Promise<EmbeddingResult>;
   getEmbeddings(ids: string[]): Promise<EmbeddingResult[]>;
   listWithNoEmbeddings(processedFileId: string): Promise<TextChunk[]>;
   incrementLlmOutputChunkSeen(
-    textGroupId: string
+    textGroupId: string,
   ): Promise<Progress | undefined>;
   getTextChunkGroupByStrategy(
     fileReferenceId: string,
-    strategy: ChunkStrategy
+    strategy: ChunkStrategy,
   ): Promise<TextChunkGroup | undefined>;
   getLlmOutputProgress(textGroupId: string): Promise<Progress | undefined>;
 }
@@ -109,8 +113,43 @@ const TEXT_CHUNK_GROUP_FIELDS = sql.fragment`text_chunk_group.id, organization_i
 
 export class PsqlTextChunkStore implements TextChunkStore {
   constructor(private readonly pool: DatabasePool) {}
+
+  async *iterateTextChunks(
+    limit: number,
+    textChunkGroupId: string,
+  ): AsyncIterable<TextChunk[]> {
+    let id: string | undefined = undefined;
+
+    while (true) {
+      const fragment = id
+        ? sql.fragment`AND text_chunk.id > ${id}`
+        : sql.fragment``;
+
+      const resp: QueryResult<z.infer<typeof ZTextChunkRow>> = await this.pool
+        .query(sql.type(ZTextChunkRow)`
+SELECT
+    ${TEXT_CHUNK_FIELDS}
+FROM
+    text_chunk
+WHERE
+    text_chunk_group_id = ${textChunkGroupId} ${fragment}
+ORDER BY
+    text_chunk.id ASC
+LIMIT ${limit}
+`);
+      if (resp.rowCount === 0) {
+        return;
+      }
+      yield Array.from(resp.rows);
+      const lastId = resp.rows.at(-1)?.id;
+      if (!lastId) {
+        throw new Error("illegal state");
+      }
+      id = lastId;
+    }
+  }
   async incrementLlmOutputChunkSeen(
-    textGroupId: string
+    textGroupId: string,
   ): Promise<Progress | undefined> {
     return this.pool.one(sql.type(ZProgress)`
 UPDATE
@@ -127,7 +166,7 @@ RETURNING
   }
 
   async getLlmOutputProgress(
-    textChunkGroupId: string
+    textChunkGroupId: string,
   ): Promise<Progress | undefined> {
     const res = await this.pool.maybeOne(sql.type(ZProgress)`
 SELECT
@@ -143,7 +182,7 @@ WHERE
 
   async getTextChunkGroupByStrategy(
     fileId: string,
-    strategy: ChunkStrategy
+    strategy: ChunkStrategy,
   ): Promise<TextChunkGroup | undefined> {
     const res = await this.pool.maybeOne(sql.type(ZTextChunkGroupRow)`
 SELECT
@@ -180,13 +219,13 @@ FROM
     text_chunk
 WHERE
     id = ${id}
-`
+`,
     );
   }
 
   async getTextChunkByOrder(
     groupId: string,
-    order: number
+    order: number,
   ): Promise<TextChunk> {
     return this.pool.one(
       sql.type(ZTextChunkRow)`
@@ -197,13 +236,13 @@ FROM
 WHERE
     text_chunk_group_id = ${groupId}
     AND chunk_order = ${order}
-`
+`,
     );
   }
 
   async getTextChunkGroupByFileId(
     strategy: ChunkStrategy,
-    fileId: string
+    fileId: string,
   ): Promise<TextChunkGroup> {
     return this.pool.connect(async (cnx) => {
       return cnx.one(sql.type(ZTextChunkGroupRow)`
@@ -219,7 +258,7 @@ WHERE
   }
 
   async upsertTextChunkGroup(
-    args: UpsertTextChunkGroup
+    args: UpsertTextChunkGroup,
   ): Promise<TextChunkGroup> {
     const [res] = await this.upsertManyTextChunkGroups([args]);
     if (!res) {
@@ -229,19 +268,19 @@ WHERE
   }
 
   async upsertManyTextChunkGroups(
-    args: UpsertTextChunkGroup[]
+    args: UpsertTextChunkGroup[],
   ): Promise<TextChunkGroup[]> {
     if (args.length === 0) {
       return [];
     }
-    return this.pool.connect(async (cnx) =>
-      cnx.transaction((trx) => this.#upsertManyTextChunkGroups(trx, args))
+    return this.pool.transaction((trx) =>
+      this.#upsertManyTextChunkGroups(trx, args),
     );
   }
 
   async #upsertManyTextChunkGroups(
     trx: DatabaseTransactionConnection,
-    args: UpsertTextChunkGroup[]
+    args: UpsertTextChunkGroup[],
   ): Promise<TextChunkGroup[]> {
     const values = args.map(
       ({
@@ -263,7 +302,7 @@ WHERE
     ${EMBEDDING_INFO.type},
     ${EMBEDDING_INFO.size},
     ${embeddingsWillBeGenerated})
-`
+`,
     );
     // fix this later
     const { rows } = await trx.query(
@@ -276,7 +315,7 @@ INSERT INTO text_chunk_group (organization_id, project_id, file_reference_id, pr
             num_chunks = EXCLUDED.num_chunks
         RETURNING
             ${TEXT_CHUNK_GROUP_FIELDS}
-`
+`,
     );
 
     return Array.from(rows);
@@ -294,14 +333,11 @@ INSERT INTO text_chunk_group (organization_id, project_id, file_reference_id, pr
     if (ids.length === 0) {
       return [];
     }
-    return this.pool.connect(async (cnx) => this.#getEmbeddings(cnx, ids));
+    return this.#getEmbeddings(ids);
   }
 
-  async #getEmbeddings(
-    cnx: DatabasePoolConnection,
-    ids: string[]
-  ): Promise<EmbeddingResult[]> {
-    const resp = await cnx.query(
+  async #getEmbeddings(ids: string[]): Promise<EmbeddingResult[]> {
+    const resp = await this.pool.query(
       sql.type(ZEmbeddingRow)`
 SELECT
     id,
@@ -310,14 +346,14 @@ FROM
     text_chunk
 WHERE
     id IN (${sql.join(ids, sql.fragment`, `)})
-`
+`,
     );
     return Array.from(resp.rows);
   }
 
   async setManyEmbeddings(
     textChunkGroupId: string,
-    args: SetManyEmbeddings[]
+    args: SetManyEmbeddings[],
   ): Promise<TextChunk[]> {
     if (args.length === 0) {
       return [];
@@ -325,22 +361,22 @@ WHERE
 
     return this.pool.connect(async (cnx) =>
       cnx.transaction((trx) =>
-        this.#setManyEmbeddings(trx, textChunkGroupId, args)
-      )
+        this.#setManyEmbeddings(trx, textChunkGroupId, args),
+      ),
     );
   }
 
   async #setManyEmbeddings(
     trx: DatabaseTransactionConnection,
     textChunkGroupId: string,
-    args: SetManyEmbeddings[]
+    args: SetManyEmbeddings[],
   ): Promise<TextChunk[]> {
     const rows = args.map(
       ({ chunkId, embedding }) =>
         sql.fragment`
 (${chunkId}::uuid,
     ${sql.jsonb(JSON.stringify(embedding))})
-`
+`,
     );
     const resp = await trx.query(
       sql.type(ZTextChunkRow)`
@@ -354,7 +390,7 @@ WHERE
     text_chunk.id = c.id
 RETURNING
     ${TEXT_CHUNK_FIELDS}
-`
+`,
     );
 
     const toReturn = Array.from(resp.rows);
@@ -387,7 +423,7 @@ WHERE
     AND text_chunk_group.embeddings_will_be_generated = true
 ORDER BY
     chunk_order ASC
-`
+`,
       );
       return Array.from(resp.rows);
     });
@@ -406,7 +442,7 @@ FROM
     text_chunk
 WHERE
     id IN (${sql.join(ids, sql.fragment`, `)})
-`
+`,
     );
 
     return Array.from(res.rows);
@@ -414,7 +450,7 @@ WHERE
 
   async upsertTextChunk(
     common: UpsertTextChunkCommon,
-    args: UpsertTextChunk
+    args: UpsertTextChunk,
   ): Promise<TextChunk> {
     const [res] = await this.upsertManyTextChunks(common, [args]);
     if (res === undefined) {
@@ -425,21 +461,21 @@ WHERE
 
   async upsertManyTextChunks(
     common: UpsertTextChunkCommon,
-    args: UpsertTextChunk[]
+    args: UpsertTextChunk[],
   ): Promise<TextChunk[]> {
     if (args.length === 0) {
       return [];
     }
 
-    return this.pool.connect((cnx) =>
-      cnx.transaction((trx) => this.#upsertMany(trx, common, args))
+    return this.pool.transaction((trx) =>
+      this.#upsertManyTextChunks(trx, common, args),
     );
   }
 
-  async #upsertMany(
+  async #upsertManyTextChunks(
     trx: DatabaseTransactionConnection,
     common: UpsertTextChunkCommon,
-    args: UpsertTextChunk[]
+    args: UpsertTextChunk[],
   ): Promise<TextChunk[]> {
     const values = args.map(
       ({ chunkOrder, chunkText, hash }) =>
@@ -452,7 +488,7 @@ WHERE
     ${chunkOrder},
     ${chunkText},
     ${hash})
-`
+`,
     );
 
     const { rows } = await trx.query(
@@ -465,7 +501,7 @@ INSERT INTO text_chunk (organization_id, project_id, file_reference_id, processe
             chunk_order = EXCLUDED.chunk_order
         RETURNING
             ${TEXT_CHUNK_FIELDS}
-`
+`,
     );
     const maxOrder = Math.max(...args.map((c) => c.chunkOrder));
     const toReturn = Array.from(rows);

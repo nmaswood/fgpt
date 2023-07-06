@@ -22,7 +22,7 @@ export class PsqlLoadedFileStore implements LoadedFileStore {
 
   async #paginate(
     cnx: DatabasePoolConnection,
-    { projectId }: CursorArguments
+    { projectId }: CursorArguments,
   ): Promise<LoadedFile[]> {
     const { rows } = await cnx.query(
       sql.type(ZLoadedFileRow)`
@@ -46,7 +46,7 @@ WHERE
 ORDER BY
     file_reference.uploaded_at DESC
 LIMIT ${HARD_CODED_LIMIT + 1}
-`
+`,
     );
 
     if (rows.length === HARD_CODED_LIMIT + 1) {
@@ -80,5 +80,5 @@ const ZLoadedFileRow = z
       gpt4TokenLength: row.gpt4_token_length ?? undefined,
       fullyChunked: Boolean(row.fully_chunked),
       fullyEmbedded: Boolean(row.fully_embedded),
-    })
+    }),
   );

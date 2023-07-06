@@ -34,7 +34,7 @@ export namespace TextChunkHandler {
 
 export interface TextChunkHandler {
   chunk: (
-    args: TextChunkHandler.Arguments
+    args: TextChunkHandler.Arguments,
   ) => Promise<TextChunkHandler.Response>;
 }
 
@@ -42,7 +42,7 @@ export class TextChunkHandlerImpl implements TextChunkHandler {
   CHUNKER = new GreedyTextChunker();
   constructor(
     private readonly processedFileStore: ProcessedFileStore,
-    private readonly textChunkStore: TextChunkStore
+    private readonly textChunkStore: TextChunkStore,
   ) {}
 
   async chunk({
@@ -95,8 +95,8 @@ export class TextChunkHandlerImpl implements TextChunkHandler {
       textChunks.push(
         ...(await this.textChunkStore.upsertManyTextChunks(
           commonArgs,
-          upsertTextArgsGroup
-        ))
+          upsertTextArgsGroup,
+        )),
       );
     }
 

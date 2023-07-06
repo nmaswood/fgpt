@@ -20,7 +20,7 @@ beforeEach(async () => {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
 
   await pool.query(
-    sql.unsafe`TRUNCATE TABLE app_user, organization, project CASCADE`
+    sql.unsafe`TRUNCATE TABLE app_user, organization, project CASCADE`,
   );
 });
 
@@ -28,7 +28,7 @@ afterEach(async () => {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
 
   await pool.query(
-    sql.unsafe`TRUNCATE TABLE app_user, organization, project CASCADE`
+    sql.unsafe`TRUNCATE TABLE app_user, organization, project CASCADE`,
   );
 });
 
@@ -59,13 +59,13 @@ test("addToProjectCountForOrg", async () => {
 
   const count = await userOrgService.addToProjectCountForOrg(
     user.organizationId,
-    10
+    10,
   );
   expect(count).toEqual(10);
 
   const countPost = await userOrgService.addToProjectCountForOrg(
     user.organizationId,
-    -1
+    -1,
   );
 
   expect(countPost).toEqual(9);

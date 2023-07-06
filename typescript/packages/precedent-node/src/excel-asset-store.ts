@@ -67,7 +67,7 @@ WHERE
     ${bucketName},
     ${path},
     ${numSheets})
-`
+`,
     );
     const { rows } = await this.pool.query(
       sql.type(ZExcelAssetRow)`
@@ -76,7 +76,7 @@ INSERT INTO excel_asset (organization_id, project_id, file_reference_id, bucket_
         ${sql.join(values, sql.fragment`, `)}
     RETURNING
         ${FIELDS}
-`
+`,
     );
 
     return Array.from(rows);
@@ -91,7 +91,7 @@ FROM
     excel_asset
 WHERE
     file_reference_id = ${fileReferenceId}
-`
+`,
     );
 
     return Array.from(rows);
@@ -117,5 +117,5 @@ const ZExcelAssetRow = z
       bucketName: row.bucket_name,
       path: row.path,
       numSheets: row.num_sheets,
-    })
+    }),
   );

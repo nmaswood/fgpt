@@ -23,7 +23,7 @@ export class FileToRenderServiceImpl implements FileRenderService {
     private readonly reportService: ReportService,
     private readonly objectStorageService: ObjectStorageService,
     private readonly excelOutputStore: ExcelOutputStore,
-    private readonly excelAssetStore: ExcelAssetStore
+    private readonly excelAssetStore: ExcelAssetStore,
   ) {}
 
   async forFile(fileReferenceId: string): Promise<FileToRender.File> {
@@ -48,7 +48,7 @@ export class FileToRenderServiceImpl implements FileRenderService {
 
     const signedUrl = await this.objectStorageService.getSignedUrl(
       file.bucketName,
-      file.path
+      file.path,
     );
     return {
       type: "excel",
@@ -77,7 +77,7 @@ export class FileToRenderServiceImpl implements FileRenderService {
         ? await (async () => {
             const parsed = await this.#fetchExcel(
               derived.bucketName,
-              derived.path
+              derived.path,
             );
             return {
               parsed,

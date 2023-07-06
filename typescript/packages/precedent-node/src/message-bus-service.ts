@@ -19,7 +19,7 @@ export class PubsubMessageBusService implements MessageBusService {
   constructor(
     projectId: string,
     private readonly topic: string,
-    emulatorHost: string | undefined
+    emulatorHost: string | undefined,
   ) {
     this.#client = new PubSub({
       projectId,

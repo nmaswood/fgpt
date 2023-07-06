@@ -10,7 +10,7 @@ export interface ReportService {
 export class ReportServiceImpl implements ReportService {
   constructor(
     private readonly questionStore: QuestionStore,
-    private readonly miscValueStore: MiscOutputStore
+    private readonly miscValueStore: MiscOutputStore,
   ) {}
 
   async forFileReferenceId(fileReferenceId: string): Promise<Outputs.Report> {
@@ -26,7 +26,7 @@ export class ReportServiceImpl implements ReportService {
   }
 
   #processMiscValues(
-    values: Outputs.MiscValue[]
+    values: Outputs.MiscValue[],
   ): Omit<Outputs.Report, "questions"> {
     const acc: Omit<Outputs.Report, "questions"> = {
       summaries: [],
@@ -44,18 +44,18 @@ export class ReportServiceImpl implements ReportService {
       switch (value.type) {
         case "financial_summary":
           acc.financialSummary.financialSummaries.push(
-            ...value.value.financialSummaries
+            ...value.value.financialSummaries,
           );
           acc.financialSummary.investmentRisks.push(
-            ...value.value.investmentRisks
+            ...value.value.investmentRisks,
           );
           acc.financialSummary.investmentMerits.push(
-            ...value.value.investmentMerits
+            ...value.value.investmentMerits,
           );
           break;
         case "terms": {
           const uniqueTerms = value.value.filter(
-            (term) => !alreadySeenTerms.has(term.termName)
+            (term) => !alreadySeenTerms.has(term.termName),
           );
           acc.terms.push(...uniqueTerms);
           for (const term of uniqueTerms) {

@@ -34,7 +34,7 @@ export class GoogleCloudStorageService implements ObjectStorageService {
   async upload(
     bucketName: string,
     fileName: string,
-    data: Buffer
+    data: Buffer,
   ): Promise<void> {
     const bucket = this.#storage.bucket(bucketName);
     const blob = bucket.file(fileName);

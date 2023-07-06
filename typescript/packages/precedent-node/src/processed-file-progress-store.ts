@@ -11,11 +11,11 @@ export interface ProcessedFileProgressStore {
   getProgress(processedFileId: string): Promise<ProcessedFileProgress>;
   setChunkingTaskGroupId(
     processedFileId: string,
-    taskGroupId: string
+    taskGroupId: string,
   ): Promise<void>;
   setUpsertEmbeddingTaskId(
     processedFileId: string,
-    taskId: string
+    taskId: string,
   ): Promise<void>;
   setExtractTableTaskId(processedFileId: string, taskId: string): Promise<void>;
   setAnalyzeTableTaskId(processedFileId: string, taskId: string): Promise<void>;

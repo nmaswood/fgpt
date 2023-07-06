@@ -11,7 +11,7 @@ export interface UserOrgService {
   upsert: (args: UpsertUserArguments) => Promise<User>;
   addToProjectCountForOrg: (
     organizationId: string,
-    delta: number
+    delta: number,
   ) => Promise<number>;
 }
 
@@ -26,13 +26,13 @@ export class PsqlUserOrgService implements UserOrgService {
     }
 
     return this.pool.connect((cnx) =>
-      cnx.transaction((trx) => this.#upsert(trx, sub.value, email))
+      cnx.transaction((trx) => this.#upsert(trx, sub.value, email)),
     );
   }
   async #upsert(
     trx: DatabaseTransactionConnection,
     googleSub: string,
-    email: string
+    email: string,
   ): Promise<User> {
     const user = await trx.maybeOne(sql.type(ZUserRow)`
 SELECT
@@ -78,7 +78,7 @@ WHERE
     id = ${id}
 RETURNING
     project_count
-`
+`,
       );
     });
   }

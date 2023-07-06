@@ -1,5 +1,4 @@
 import { assertNever } from "@fgpt/precedent-iso";
-import lodashChunk from "lodash/chunk";
 
 import { LOGGER } from "../logger";
 import { TaskGroupService } from "../task-group-service";
@@ -25,13 +24,14 @@ export class TaskExecutorImpl implements TaskExecutor {
     private readonly llmOutputHandler: LLMOutputHandler,
     private readonly tableHandler: TableHandler,
     private readonly taskGroupService: TaskGroupService,
-    private readonly ingestFileHandler: IngestFileHandler
+    private readonly ingestFileHandler: IngestFileHandler,
   ) {}
 
   async execute({ config, organizationId, projectId }: Task) {
     switch (config.type) {
       case "ingest-file": {
-        this.ingestFileHandler.dispatch(config);
+        // this handler is special because it creates tasks
+        await this.ingestFileHandler.dispatch(config);
         break;
       }
 
@@ -42,7 +42,14 @@ export class TaskExecutorImpl implements TaskExecutor {
           fileReferenceId: config.fileReferenceId,
         });
 
-        await this.taskStore.insertMany(
+        const taskGroup = await this.taskGroupService.insertTaskGroup({
+          description: `Text chunking for ${config.fileReferenceId}`,
+          organizationId,
+          projectId,
+          fileReferenceId: config.fileReferenceId,
+        });
+
+        const tasks = await this.taskStore.insertMany(
           this.STRATEGIES.map((strategy) => ({
             organizationId: config.organizationId,
             projectId: config.projectId,
@@ -56,7 +63,12 @@ export class TaskExecutorImpl implements TaskExecutor {
               processedFileId,
               strategy,
             },
-          }))
+          })),
+        );
+
+        await this.taskGroupService.upsertTasks(
+          taskGroup.id,
+          tasks.map((task) => task.id),
         );
 
         break;
@@ -91,12 +103,13 @@ export class TaskExecutorImpl implements TaskExecutor {
             break;
           }
           case "llm-output": {
-            const taskGroup = await this.taskGroupService.insertTaskGroup({
-              description: `Generate report for ${config.fileReferenceId}`,
-              organizationId,
-              projectId,
-              fileReferenceId: config.fileReferenceId,
-            });
+            const { id: taskGroupId } =
+              await this.taskGroupService.insertTaskGroup({
+                description: `Generate report for ${config.fileReferenceId}`,
+                organizationId,
+                projectId,
+                fileReferenceId: config.fileReferenceId,
+              });
 
             const tasks = await this.taskStore.insertMany(
               resp.textChunkIds.map((textChunkId) => ({
@@ -112,13 +125,13 @@ export class TaskExecutorImpl implements TaskExecutor {
                   processedFileId: config.processedFileId,
                   textChunkGroupId: resp.textGroupId,
                   textChunkId,
-                  taskGroupId: taskGroup.id,
+                  taskGroupId,
                 },
-              }))
+              })),
             );
             await this.taskGroupService.upsertTasks(
-              taskGroup.id,
-              tasks.map((task) => task.id)
+              taskGroupId,
+              tasks.map((task) => task.id),
             );
 
             break;
@@ -131,56 +144,12 @@ export class TaskExecutorImpl implements TaskExecutor {
       }
 
       case "gen-embeddings": {
-        const { textChunkIds } =
-          await this.generateEmbeddingsHandler.generateEmbeddings({
-            textChunkGroupId: config.textChunkGroupId,
-          });
-
-        const groups = lodashChunk(textChunkIds, 100);
-
-        const taskGroup = await this.taskGroupService.insertTaskGroup({
-          description: `Upsert embeddings for ${config.fileReferenceId}`,
-          organizationId,
-          projectId,
-          fileReferenceId: config.fileReferenceId,
+        await this.generateEmbeddingsHandler.generateAndUpsertEmbeddings({
+          textChunkGroupId: config.textChunkGroupId,
         });
-
-        const tasks = await this.taskStore.insertMany(
-          groups.map((chunkIds) => ({
-            organizationId,
-            projectId,
-            fileReferenceId: config.fileReferenceId,
-            config: {
-              type: "upsert-embeddings",
-              version: "1",
-              organizationId: config.organizationId,
-              projectId: config.projectId,
-              fileReferenceId: config.fileReferenceId,
-              processedFileId: config.processedFileId,
-              chunkIds,
-              taskGroupId: taskGroup.id,
-            },
-          }))
-        );
-
-        await this.taskGroupService.upsertTasks(
-          taskGroup.id,
-          tasks.map((task) => task.id)
-        );
-
         break;
       }
-      case "upsert-embeddings": {
-        await this.generateEmbeddingsHandler.upsertEmbeddings({
-          textChunkIds: config.chunkIds,
-          organizationId: config.organizationId,
-          projectId: config.projectId,
-          fileReferenceId: config.fileReferenceId,
-          processedFileId: config.processedFileId,
-        });
 
-        break;
-      }
       case "delete-project": {
         LOGGER.warn("Delete project not implemented");
         break;

@@ -17,7 +17,7 @@ export class TikaTextExtractor implements TextExtractor {
     private readonly fileReferenceStore: FileReferenceStore,
     private readonly bucketName: string,
     private readonly blobStore: ObjectStorageService,
-    private readonly tikaClient: TikaClient
+    private readonly tikaClient: TikaClient,
   ) {}
 
   async extract(fileId: string): Promise<ExtractResponse> {

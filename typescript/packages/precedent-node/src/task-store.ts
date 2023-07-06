@@ -50,7 +50,7 @@ const FIELDS = sql.fragment`task.id, task.organization_id, task.project_id, task
 export class PSqlTaskStore implements TaskStore {
   constructor(
     private readonly pool: DatabasePool,
-    private readonly messageBusService: MessageBusService
+    private readonly messageBusService: MessageBusService,
   ) {}
 
   async get(taskId: string): Promise<Task> {
@@ -84,7 +84,7 @@ WHERE
     task.id = ${taskId}
 RETURNING
     ${FIELDS}
-`
+`,
     );
   }
 
@@ -100,7 +100,7 @@ WHERE
     task.id = ${taskId}
 RETURNING
     ${FIELDS}
-`
+`,
     );
   }
 
@@ -151,13 +151,13 @@ SET
 FROM (
     VALUES ${sql.join(
       rows,
-      sql.fragment`, `
+      sql.fragment`, `,
     )}) c (id, status, success_output, error_output)
 WHERE
     task.id = c.id
 RETURNING
     ${FIELDS}
-`
+`,
       );
 
       return Array.from(resp.rows);
@@ -192,7 +192,7 @@ WHERE
     task.id = subquery.id
 RETURNING
     ${FIELDS}
-`
+`,
       );
 
       return Array.from(resp.rows);
@@ -216,7 +216,7 @@ INSERT INTO task (organization_id, project_id, task_type, status, config, file_r
         ${sql.join(inserts, sql.fragment`, `)}
     RETURNING
         ${FIELDS}
-`
+`,
       );
 
       return Array.from(resp.rows);
@@ -227,8 +227,8 @@ INSERT INTO task (organization_id, project_id, task_type, status, config, file_r
         this.messageBusService.enqueue({
           type: "task",
           taskId: task.id,
-        })
-      )
+        }),
+      ),
     );
 
     return tasks;
@@ -253,7 +253,7 @@ const ZFromTaskRow = z
       fileReferenceId: row.file_reference_id ?? undefined,
       status: row.status,
       config: ZTaskConfig.parse(row.config),
-    })
+    }),
   );
 
 function toFragment({

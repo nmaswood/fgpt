@@ -33,9 +33,9 @@ export class PSqlProjectStore implements ProjectStore {
   constructor(private readonly pool: DatabasePool) {}
 
   async list(organizationId: string): Promise<Project[]> {
-    return this.pool.connect(async (cnx) => {
-      const values = await cnx.query(
-        sql.type(ZProjectRow)`
+    const resp = await this.pool.query(
+      sql.type(ZProjectRow)`
+
 SELECT
     ${PROJECT_FIELDS}
 FROM
@@ -43,11 +43,11 @@ FROM
 WHERE
     organization_id = ${organizationId}
     AND STATUS != 'pending_deletion'
-`
-      );
-
-      return Array.from(values.rows);
-    });
+ORDER BY
+    created_at DESC
+`,
+    );
+    return Array.from(resp.rows);
   }
 
   async get(projectId: string): Promise<Project | undefined> {
@@ -65,7 +65,7 @@ FROM
     project
 WHERE
     id IN (${sql.join(projectIds, sql.fragment`, `)})
-`
+`,
       );
 
       return Array.from(values.rows);
@@ -74,13 +74,13 @@ WHERE
 
   async create(args: CreateProjectArgs): Promise<Project> {
     return this.pool.connect((cnx) =>
-      cnx.transaction((trx) => this.#create(trx, args))
+      cnx.transaction((trx) => this.#create(trx, args)),
     );
   }
 
   async #create(
     trx: DatabaseTransactionConnection,
-    { name, organizationId, creatorUserId }: CreateProjectArgs
+    { name, organizationId, creatorUserId }: CreateProjectArgs,
   ): Promise<Project> {
     const projectLength = await trx.one(
       sql.type(ZCountRow)`
@@ -90,7 +90,7 @@ FROM
     project
 WHERE
     organization_id = ${organizationId}
-`
+`,
     );
 
     if (projectLength.count === MAX_PROJECT_LIMIT) {
@@ -103,7 +103,7 @@ INSERT INTO project (name, organization_id, creator_user_id)
     VALUES (${name}, ${organizationId}, ${creatorUserId})
 RETURNING
     ${PROJECT_FIELDS}
-`
+`,
     );
   }
 
@@ -122,7 +122,7 @@ SET
     status = 'pending_deletion'
 where
     id IN (${sql.join(ids, sql.fragment`, `)})
-`
+`,
     );
     return res.rowCount;
   }
@@ -140,7 +140,7 @@ WHERE
     id = ${id}
 RETURNING
     ${PROJECT_FIELDS}
-`
+`,
       );
 
       return project;
@@ -159,7 +159,7 @@ WHERE
     id = ${id}
 RETURNING
     ${PROJECT_FIELDS}
-`
+`,
       );
 
       return project;

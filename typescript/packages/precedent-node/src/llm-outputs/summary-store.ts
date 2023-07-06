@@ -71,7 +71,7 @@ WHERE
     ${textChunkId},
     ${summary},
     ${hash})
-`
+`,
     );
 
     const res = await this.pool.query(sql.type(ZSummaryRow)`
@@ -111,5 +111,5 @@ const ZSummaryRow = z
       textChunkGroupId: row.text_chunk_group_id,
       textChunkId: row.text_chunk_id,
       summary: row.summary,
-    })
+    }),
   );

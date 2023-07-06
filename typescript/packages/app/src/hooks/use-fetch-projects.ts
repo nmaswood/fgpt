@@ -7,8 +7,8 @@ export const useFetchProjects = () => {
     async (url) => {
       const response = await fetch(url);
       const data = await response.json();
-      return data.projects.reverse();
-    }
+      return data.projects;
+    },
   );
 
   return {

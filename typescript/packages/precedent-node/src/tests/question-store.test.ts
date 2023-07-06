@@ -76,7 +76,7 @@ async function setup() {
         chunkText: "hi",
         hash: ShaHash.forData("hi"),
       },
-    ]
+    ],
   );
 
   const questionStore = new PsqlQuestionStore(pool);
@@ -97,14 +97,14 @@ async function setup() {
 beforeEach(async () => {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
   await pool.query(
-    sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference, processed_file, text_chunk_group, text_chunk, text_chunk_question CASCADE`
+    sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference, processed_file, text_chunk_group, text_chunk, text_chunk_question CASCADE`,
   );
 });
 
 afterEach(async () => {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
   await pool.query(
-    sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference, processed_file, text_chunk_group, text_chunk, text_chunk_question CASCADE`
+    sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference, processed_file, text_chunk_group, text_chunk, text_chunk_question CASCADE`,
   );
 });
 

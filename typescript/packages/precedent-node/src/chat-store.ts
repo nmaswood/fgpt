@@ -79,7 +79,7 @@ WHERE
 
   async #insertChat(
     trx: DatabaseTransactionConnection,
-    chat: InsertChat
+    chat: InsertChat,
   ): Promise<Chat> {
     const count = await trx.oneFirst(sql.type(ZCountRow)`
 SELECT
@@ -117,7 +117,7 @@ RETURNING
 
   async insertChatEntry(chatEntry: InsertChatEntry): Promise<ChatEntry> {
     return this.pool.transaction(async (trx) =>
-      this.#insertChatEntry(trx, chatEntry)
+      this.#insertChatEntry(trx, chatEntry),
     );
   }
 
@@ -131,7 +131,7 @@ RETURNING
       question,
       context,
       answer,
-    }: InsertChatEntry
+    }: InsertChatEntry,
   ): Promise<ChatEntry> {
     const count = await trx.oneFirst(sql.type(ZCountRow)`
 SELECT
@@ -148,7 +148,7 @@ WHERE
     return trx.one(sql.type(ZChatEntryRow)`
 INSERT INTO chat_entry (organization_id, project_id, creator_id, chat_id, question_v2, context_v2, answer, entry_order)
     VALUES (${organizationId}, ${projectId}, ${creatorId}, ${chatId}, ${question}, ${JSON.stringify(
-      context
+      context,
     )}, ${JSON.stringify({
       answer,
     })}, COALESCE((
@@ -294,7 +294,7 @@ const ZChatRow = z
       id: row.chat_id,
       name: row.chat_name ?? undefined,
       fileReferenceId: row.file_reference_id ?? undefined,
-    })
+    }),
   );
 
 const ZChatEntryAnswer = z.object({
@@ -312,7 +312,7 @@ const ZChatEntryRow = z
       id: row.chat_entry_id,
       question: row.question,
       answer: row.answer?.answer ?? undefined,
-    })
+    }),
   );
 
 const ZChatHistory = z.object({

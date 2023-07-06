@@ -3,9 +3,9 @@ import { afterEach, beforeEach, expect, test } from "vitest";
 
 import { dataBasePool } from "../data-base-pool";
 import { PsqlFileReferenceStore } from "../file-reference-store";
-import { PsqlProcessedFileProgressStore } from "../processed-file-progress-store";
 import { PsqlProcessedFileStore } from "../processed-file-store";
 import { PSqlProjectStore } from "../project-store";
+import { ShaHash } from "../sha-hash";
 import { PsqlUserOrgService } from "../user-org/user-org-service";
 import { TEST_SETTINGS } from "./test-settings";
 
@@ -41,44 +41,48 @@ async function setup() {
     path: "my-path/foo",
   });
 
-  const processedFile = await processedFileStore.upsert({
-    organizationId: fileReference.organizationId,
-    projectId: fileReference.projectId,
-    fileReferenceId: fileReference.id,
-    text: "hi",
-    hash: "hi",
-    gpt4TokenLength: 1000,
-  });
-
-  const processedFileProgressStore = new PsqlProcessedFileProgressStore(pool);
-
   return {
     pool,
     user,
     project,
     fileReference,
     fileReferenceStore,
-    processedFile,
-    processedFileProgressStore,
+    processedFileStore,
   };
 }
-
-const TRUNCATE = sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference, processed_file, task, task_group CASCADE`;
 
 beforeEach(async () => {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
 
-  await pool.query(TRUNCATE);
+  await pool.query(
+    sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference, processed_file CASCADE`,
+  );
 });
 
 afterEach(async () => {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
 
-  await pool.query(TRUNCATE);
+  await pool.query(
+    sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference CASCADE`,
+  );
 });
 
-test("getProgress", async () => {});
-test("setChunkingTaskGroupId", async () => {});
-test("setUpsertEmbeddingTaskId", async () => {});
-test("setExtractTableTaskId", async () => {});
-test("setAnalyzeTableTaskId", async () => {});
+test("insertMany", async () => {
+  const { fileReference, processedFileStore } = await setup();
+
+  const [res] = await processedFileStore.upsertMany([
+    {
+      organizationId: fileReference.organizationId,
+      projectId: fileReference.projectId,
+      fileReferenceId: fileReference.id,
+      text: "hi",
+      hash: ShaHash.forData("hi"),
+      gpt4TokenLength: 1000,
+    },
+  ]);
+
+  expect(res.id).toBeDefined();
+
+  const text = await processedFileStore.getText(res.id);
+  expect(text).toEqual("hi");
+});

@@ -41,17 +41,17 @@ export class PsqlExcelOutputStore implements ExcelOutputStore {
       sql.type(ZExcelOutputRow)`
 INSERT INTO excel_analysis (organization_id, project_id, file_reference_id, excel_asset_id, output)
     VALUES (${organizationId}, ${projectId}, ${fileReferenceId}, ${
-        excelAssetId ?? null
-      }, ${JSON.stringify(output)})
+      excelAssetId ?? null
+    }, ${JSON.stringify(output)})
 RETURNING
     ${FIELDS}
-`
+`,
     );
     return value ?? undefined;
   }
 
   async forDirectUpload(
-    fileReferenceId: string
+    fileReferenceId: string,
   ): Promise<ExcelOutput | undefined> {
     return this.#forFileReference(fileReferenceId, "direct-upload");
   }
@@ -62,7 +62,7 @@ RETURNING
 
   async #forFileReference(
     fileReferenceId: string,
-    source: "direct-upload" | "derived"
+    source: "direct-upload" | "derived",
   ): Promise<ExcelOutput | undefined> {
     const value = await this.pool.maybeOne(
       sql.type(ZExcelOutputRow)`
@@ -75,7 +75,7 @@ WHERE
     AND excel_asset_id IS ${
       source === "direct-upload" ? sql.fragment`NULL` : sql.fragment`NOT NULL`
     }
-`
+`,
     );
     return value ?? undefined;
   }
@@ -115,5 +115,5 @@ const ZExcelOutputRow = z
             type: "direct-upload",
           },
       output: row.output,
-    })
+    }),
   );

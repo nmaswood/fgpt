@@ -9,7 +9,6 @@ export const ZTaskType = z.enum([
   "text-extraction",
   "text-chunk",
   "gen-embeddings",
-  "upsert-embeddings",
   "delete-project",
   "create-analysis",
   "llm-outputs",
@@ -69,17 +68,6 @@ export const ZGenEmbeddingsConfig = z.object({
   taskGroupId: z.string().optional(),
 });
 
-export const ZUpsertEmbeddingsConfig = z.object({
-  type: z.literal("upsert-embeddings"),
-  version: z.literal("1"),
-  organizationId: z.string(),
-  projectId: z.string(),
-  fileReferenceId: z.string(),
-  processedFileId: z.string(),
-  chunkIds: z.string().array(),
-  taskGroupId: z.string().optional(),
-});
-
 export const ZDeleteProjectConfig = z.object({
   type: z.literal("delete-project"),
   version: z.literal("1"),
@@ -129,7 +117,6 @@ export const ZTaskConfig = z.discriminatedUnion("type", [
   ZTextExtractionConfig,
   ZTextChunkConfig,
   ZGenEmbeddingsConfig,
-  ZUpsertEmbeddingsConfig,
   ZDeleteProjectConfig,
   ZLLMOutputsConfig,
   ZExtractTableConfig,
