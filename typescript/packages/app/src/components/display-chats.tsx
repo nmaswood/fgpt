@@ -17,6 +17,11 @@ import {
 } from "@mui/joy";
 import React from "react";
 
+interface TitleWithId {
+  chatId: string;
+  title: string;
+}
+
 export const DisplayChatList: React.FC<{
   chats: Chat[];
   selectedChatId: string | undefined;
@@ -26,6 +31,7 @@ export const DisplayChatList: React.FC<{
   deleteChat: (name: string) => Promise<unknown>;
   isMutating: boolean;
   editChat: (args: { id: string; name: string }) => Promise<unknown>;
+  titleWithId: TitleWithId | undefined;
 }> = ({
   chats,
   selectedChatId,
@@ -35,6 +41,7 @@ export const DisplayChatList: React.FC<{
   deleteChat,
   isMutating,
   editChat,
+  titleWithId,
 }) => {
   return (
     <Box
@@ -53,7 +60,7 @@ export const DisplayChatList: React.FC<{
           if (!selectedChatId) {
             return;
           }
-          const chat = await createChat("New chat");
+          const chat = await createChat(undefined);
           if (chat) {
             setSelectedChatId(chat.id);
           }
@@ -112,6 +119,7 @@ const ListItemEntry: React.FC<{
   onDelete: (chatId: string) => void;
   editChat: (args: { id: string; name: string }) => Promise<unknown>;
   isMutating: boolean;
+  titleWithId: TitleWithId | undefined;
 }> = ({
   chat,
   selectedChatId,
@@ -120,12 +128,23 @@ const ListItemEntry: React.FC<{
   onDelete,
   editChat,
   isMutating,
+  titleWithId,
 }) => {
   const [isEditing, setIsEditing] = React.useState(false);
 
   const [name, setName] = React.useState(chat.name ?? "");
 
   const isSelected = chat.id === selectedChatId;
+
+  React.useEffect(() => {
+    if (!isSelected || titleWithId?.chatId !== chat.id) {
+      return;
+    }
+    if (name === titleWithId.title) {
+      return;
+    }
+    setName(titleWithId.title);
+  }, [isSelected, titleWithId, name, chat.id]);
 
   const onSubmit = async () => {
     const trimmed = name.trim();

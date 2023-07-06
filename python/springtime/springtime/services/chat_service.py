@@ -21,6 +21,10 @@ class ChatService(abc.ABC):
     def ask(self, context: str, question: str) -> str:
         pass
 
+    @abc.abstractmethod
+    def get_title(self, question: str, answer: str) -> Generator[Any, Any, None]:
+        pass
+
 
 class OpenAIChatService(ChatService):
     def ask_streaming(
@@ -57,3 +61,33 @@ class OpenAIChatService(ChatService):
             logger.warning("No choices returned from OpenAI")
         first_choice = choices[0]
         return first_choice["message"]["content"]
+
+    def get_title(self, question: str, answer: str) -> Generator[Any, Any, None]:
+        prompt = f"""
+        Based on the question and answer please respond with a concise, accurate title for the exchange.
+
+        Question: {question}
+        Answer: {answer}
+        """.format(
+            question=question, answer=answer
+        )
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a expert financial analyst chat bot. The user asked you the following question and you responded with the following answer.",
+                },
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0,
+            stream=True,
+        )
+        for resp in response:
+            choices = resp["choices"]
+            delta = choices[0].get("delta")
+            if not delta:
+                continue
+            content = delta.get("content")
+            if content:
+                yield content

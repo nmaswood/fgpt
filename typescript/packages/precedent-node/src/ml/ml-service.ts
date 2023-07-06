@@ -101,7 +101,7 @@ export interface MLServiceClient {
   askQuestion(args: AskQuestion): Promise<string>;
   askQuestionStreaming(args: AskQuestionStreamingArgs): Promise<void>;
 
-  generateTitleStreaming(args: GenerateTitleStreamingArgs): Promise<void>;
+  getTitleStreaming(args: GenerateTitleStreamingArgs): Promise<void>;
   llmOutput(args: LLMOutputArgs): Promise<LLMOutputResponse>;
   playGround(args: PlaygroundRequest): Promise<PlaygroundResponse>;
   tokenLength(text: string): Promise<{ model: "gpt4"; length: number }>;
@@ -205,14 +205,14 @@ export class MLServiceClientImpl implements MLServiceClient {
     });
   }
 
-  async generateTitleStreaming({
+  async getTitleStreaming({
     question,
     answer,
     onData,
     onEnd,
   }: GenerateTitleStreamingArgs): Promise<void> {
     const response = await this.#client.post<any>(
-      "/ask-question-streaming",
+      "/chat/get-title-streaming",
       {
         question,
         answer,

@@ -408,10 +408,11 @@ const SelectedProjectInner: React.FC<{
   const closeModal = () => setModal(undefined);
   const { data: files, isLoading: filesLoading } = useFetchFiles(project.id);
 
-  const { data: chats, isLoading: chatsLoading } = useFetchChats(
-    "project",
-    project.id
-  );
+  const {
+    data: chats,
+    isLoading: chatsLoading,
+    mutate: refetchChats,
+  } = useFetchChats("project", project.id);
   const { trigger: createChat, isMutating: createChatIsLoading } =
     useCreateChat("project", project.id);
 
@@ -484,6 +485,7 @@ const SelectedProjectInner: React.FC<{
               isEditingChatMutating
             }
             questions={questions}
+            refetchChats={refetchChats}
           />
         </Box>
       )}

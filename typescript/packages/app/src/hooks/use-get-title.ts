@@ -4,34 +4,25 @@ import { CLIENT_SETTINGS } from "../client-settings";
 
 interface Arguments {
   projectId: string;
-  question: string;
   chatId: string;
 }
 
 const decoder = new TextDecoder();
 
-export const useAskQuestion = (
-  token: string,
-  onDone: (value: { answer: string; shouldRefresh: boolean }) => void
-) => {
-  const [answerBuffer, setAnswerBuffer] = React.useState<string[]>([]);
-  const answerRefBuffer = React.useRef<string[]>([]);
-
+export const useGetTitle = (token: string) => {
+  const [buffer, setBuffer] = React.useState<Record<string, string[]>>({});
   const [loading, setLoading] = React.useState(false);
 
-  const text = React.useMemo(() => answerBuffer.join(""), [answerBuffer]);
   const trigger = React.useRef<(args: Arguments) => Promise<void>>(
-    async function fetchData({ projectId, question, chatId }) {
-      let shouldRefresh = false;
+    async function fetchData({ projectId, chatId }) {
       try {
         setLoading(true);
         const res = await fetch(
-          `${CLIENT_SETTINGS.publicApiEndpoint}/api/v1/chat/chat`,
+          `${CLIENT_SETTINGS.publicApiEndpoint}/api/v1/chat/get-title`,
           {
             method: "POST",
             body: JSON.stringify({
               projectId,
-              question,
               chatId,
             }),
             headers: {
@@ -53,28 +44,28 @@ export const useAskQuestion = (
           if (done) {
             return;
           }
-          let s = decoder.decode(value);
-          if (s.includes("__REFRESH__")) {
-            s = s.replace("__REFRESH__", "");
-            shouldRefresh = true;
-          }
-          answerRefBuffer.current.push(s);
-          setAnswerBuffer((prev) => [...prev, s]);
+          const s = decoder.decode(value);
+          console.log({ s });
+          setBuffer((prev) => {
+            const copy = { ...copy };
+            if (copy[chatId] === undefined) {
+              copy[chatId] = [];
+            }
+            copy[chatId]!.push(s);
+
+            console.log(copy[chatId].join(""));
+
+            return copy;
+          });
         }
       } finally {
-        onDone({
-          answer: answerRefBuffer.current.join(""),
-          shouldRefresh,
-        });
         setLoading(false);
-        setAnswerBuffer([]);
-        answerRefBuffer.current = [];
       }
     }
   );
   return {
     trigger: trigger.current,
-    text,
     loading,
+    buffer,
   };
 };

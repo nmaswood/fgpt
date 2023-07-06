@@ -26,7 +26,13 @@ import React from "react";
 import { useAskQuestion } from "../hooks/use-ask-question";
 import { useFetchContext } from "../hooks/use-context-chat";
 import { useFetchChatEntries } from "../hooks/use-fetch-chat-entry";
+import { useGetTitle } from "../hooks/use-get-title";
 import { DisplayChatList } from "./display-chats";
+
+interface TitleWithId {
+  chatId: string;
+  title: string;
+}
 
 interface EntryToRender {
   id: string;
@@ -57,6 +63,7 @@ export const DisplayChat: React.FC<{
   editChat: (args: { id: string; name: string }) => Promise<unknown>;
   isMutating: boolean;
   questions: string[];
+  refetchChats: () => Promise<unknown>;
 }> = ({
   projectId,
   token,
@@ -67,6 +74,7 @@ export const DisplayChat: React.FC<{
   deleteChat,
   editChat,
   questions,
+  refetchChats,
 }) => {
   const [selectedChatId, setSelectedChatId] = React.useState<
     string | undefined
@@ -110,8 +118,12 @@ export const DisplayChat: React.FC<{
     trigger: askQuestion,
     text,
     loading,
-  } = useAskQuestion(token, (value: string) => {
+  } = useAskQuestion(token, ({ answer, shouldRefresh }) => {
     setEntriesToRender((qs) => {
+      if (shouldRefresh) {
+        refetchChats();
+      }
+
       const last = qs[qs.length - 1];
       if (!last || last.state.type !== "rendering") {
         return qs;
@@ -122,7 +134,7 @@ export const DisplayChat: React.FC<{
           ...last,
           state: {
             type: "rendered",
-            value,
+            value: answer,
           },
         },
       ]);

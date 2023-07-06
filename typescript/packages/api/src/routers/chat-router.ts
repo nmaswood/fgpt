@@ -78,21 +78,24 @@ export class ChatRouter {
     );
 
     router.post(
-      "/generate-title",
+      "/get-title",
       async (req: express.Request, res: express.Response) => {
-        const body = ZGenerateTitleRequest.parse(req.body);
-        const { question, answer } = await this.chatStore.getChatEntry(
-          body.chatEntryId
-        );
-
+        const { chatId } = ZGenerateTitleRequest.parse(req.body);
+        const [first] = await this.chatStore.listChatEntries(chatId);
         res.set("Content-Type", "text/event-stream");
         res.set("Cache-Control", "no-cache");
         res.set("Connection", "keep-alive");
 
+        if (!first) {
+          res.send("User Chat");
+          res.end();
+          return;
+        }
+
         const buffer: string[] = [];
-        await this.mlClient.generateTitleStreaming({
-          question,
-          answer: answer ?? "",
+        await this.mlClient.getTitleStreaming({
+          question: first.question,
+          answer: first.answer ?? "",
           onData: (resp) => {
             const encoded = encoder.encode(resp);
             res.write(encoded);
@@ -100,10 +103,10 @@ export class ChatRouter {
           },
           onEnd: async () => {
             res.end();
-            const title = buffer.join("");
+            const name = buffer.join("");
             await this.chatStore.updateChat({
-              chatId: body.chatId,
-              name: title,
+              chatId,
+              name,
             });
           },
         });
@@ -176,6 +179,9 @@ export class ChatRouter {
           ),
         ]);
 
+        const shouldGenerateName =
+          chat.name === undefined && history.length === 0;
+
         const byId = keyBy(chunks, (chunk) => chunk.id);
         const filesById = keyBy(files, (file) => file.id);
 
@@ -192,7 +198,8 @@ export class ChatRouter {
         res.set("Cache-Control", "no-cache");
         res.set("Connection", "keep-alive");
 
-        const buffer: string[] = [];
+        const answerBuffer: string[] = [];
+        const titleBuffer: string[] = [];
 
         await this.mlClient.askQuestionStreaming({
           context: justText.join("\n"),
@@ -201,23 +208,49 @@ export class ChatRouter {
           onData: (resp) => {
             const encoded = encoder.encode(resp);
             res.write(encoded);
-            buffer.push(resp);
+            answerBuffer.push(resp);
           },
           onEnd: async () => {
-            res.end();
+            if (shouldGenerateName) {
+              res.write("__REFRESH__");
+            } else {
+              res.end();
+              return;
+            }
+
+            const answer = answerBuffer.join("");
             await this.chatStore.insertChatEntry({
               organizationId: req.user.organizationId,
               projectId: args.projectId,
               creatorId: req.user.id,
               chatId: args.chatId,
               question: args.question,
-              answer: buffer.join(""),
+              answer,
               context: similarDocuments.map((doc) => ({
                 fileId: doc.metadata.fileId,
                 filename: filesById[doc.metadata.fileId]?.fileName ?? "",
                 score: doc.score,
                 text: byId[doc.id]?.chunkText ?? "",
               })),
+            });
+
+            await this.mlClient.getTitleStreaming({
+              question: args.question,
+              answer,
+              onData: (resp) => {
+                const encoded = encoder.encode(resp);
+                res.write(encoded);
+                titleBuffer.push(resp);
+              },
+              onEnd: async () => {
+                const name = titleBuffer.join("");
+                await this.chatStore.updateChat({
+                  chatId: args.chatId,
+                  name,
+                });
+
+                res.end();
+              },
             });
           },
         });
@@ -260,8 +293,8 @@ const ZGetChatEntryRequest = z.object({ chatId: z.string() });
 const ZChatLocation = z.enum(["project", "file"]);
 
 const ZGenerateTitleRequest = z.object({
+  projectId: z.string(),
   chatId: z.string(),
-  chatEntryId: z.string(),
 });
 
 const ZCreateChatRequest = z.object({
