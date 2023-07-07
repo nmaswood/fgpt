@@ -27,7 +27,6 @@ export * from "./project-store";
 export * from "./project-store";
 export * from "./sha-hash";
 export * from "./tabular-data-service/tabular-data-service";
-export * from "./task-group-service";
 export * from "./task-store";
 export * from "./text-chunk-store";
 export * from "./text-extractor";

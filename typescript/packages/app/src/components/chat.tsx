@@ -352,7 +352,7 @@ const DisplayContextForId: React.FC<{ id: string }> = ({ id }) => {
   return (
     <>
       {data.length > 0 && (
-        <Table aria-label="simple table">
+        <Table variant="outlined">
           <thead>
             <tr>
               <th align="left">Filename</th>

@@ -121,11 +121,6 @@ export class TaskExecutorImpl implements TaskExecutor {
         break;
       }
 
-      case "delete-project": {
-        LOGGER.warn("Delete project not implemented");
-        break;
-      }
-
       case "llm-outputs": {
         await this.llmOutputHandler.generateReport(config);
         break;

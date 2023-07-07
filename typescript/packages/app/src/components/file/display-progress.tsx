@@ -1,12 +1,16 @@
 // write a component that displays the progress of a pdf download
 
 import { FileToRender, ProgressTaskStatus } from "@fgpt/precedent-iso";
-import Table from "@mui/joy/Table";
+import { Box, Table, Typography } from "@mui/joy";
 
 export const DisplayProgress: React.FC<{
   file: FileToRender.File;
 }> = ({ file }) => {
-  return <Dispatch file={file} />;
+  return (
+    <Box display="flex" width="50%" padding={2}>
+      <Dispatch file={file} />
+    </Box>
+  );
 };
 
 const Dispatch: React.FC<{
@@ -22,18 +26,26 @@ const DisplayProgressInner: React.FC<{ tasks: DisplayTask[] }> = ({
   tasks,
 }) => {
   return (
-    <Table aria-label="basic table">
+    <Table variant="outlined">
       <thead>
         <tr>
-          <th>Task name</th>
-          <th>Status</th>
+          <th>
+            <Typography>Task name</Typography>
+          </th>
+          <th>
+            <Typography>Status</Typography>
+          </th>
         </tr>
       </thead>
       <tbody>
         {tasks.map((task) => (
           <tr key={task.displayName}>
-            <td>{task.displayName}</td>
-            <td>{task.displayStatus}</td>
+            <td>
+              <Typography>{task.displayName}</Typography>
+            </td>
+            <td>
+              <Typography>{task.displayStatus}</Typography>
+            </td>
           </tr>
         ))}
       </tbody>

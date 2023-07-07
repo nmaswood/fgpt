@@ -120,7 +120,9 @@ const DisplayOutput: React.FC<{ text: string }> = ({ text }) => {
       maxHeight="100%"
       gridTemplateRows="1fr 1fr"
     >
-      <Typography overflow="auto">{text}</Typography>
+      <Typography overflow="auto" whiteSpace="pre-wrap">
+        {text}
+      </Typography>
     </Box>
   );
 };

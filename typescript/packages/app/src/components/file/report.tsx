@@ -64,16 +64,14 @@ export const ForExcelValue: React.FC<{ chunk: AnalyzeResponseChunk }> = ({
     <Box
       display="flex"
       flexDirection="column"
-      gap={3}
+      gap={1}
       maxWidth="100%"
       maxHeight="100%"
       overflow="auto"
       padding={2}
     >
-      <Typography sx={{ textDecoration: "underline" }}>
-        {formatSheetNames(chunk.sheetNames)}
-      </Typography>
-      <Typography>{chunk.content}</Typography>
+      <Typography level="h6">{formatSheetNames(chunk.sheetNames)}</Typography>
+      <Typography whiteSpace="pre-wrap">{chunk.content}</Typography>
     </Box>
   );
 };
@@ -87,21 +85,29 @@ const ForPDF: React.FC<{ report: Outputs.Report | undefined }> = ({
   return (
     <Box display="flex" flexDirection="column" gap={1} padding={2}>
       {terms.length > 0 && (
-        <Box display="flex" flexDirection="column">
-          <Typography>Terms</Typography>
+        <Box display="flex" flexDirection="column" gap={1}>
+          <Typography level="h4">Terms</Typography>
 
-          <Table>
+          <Table variant="outlined">
             <thead>
               <tr>
-                <td></td>
-                <td></td>
+                <th>
+                  <Typography>Term</Typography>
+                </th>
+                <th>
+                  <Typography>Value</Typography>
+                </th>
               </tr>
             </thead>
             <tbody>
               {terms.map((term, index) => (
                 <tr key={index}>
-                  <th scope="row">{term.termName}</th>
-                  <td>{term.termValue}</td>
+                  <td scope="row">
+                    <Typography>{term.termName}</Typography>
+                  </td>
+                  <td>
+                    <Typography>{term.termValue}</Typography>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -111,7 +117,7 @@ const ForPDF: React.FC<{ report: Outputs.Report | undefined }> = ({
 
       {summaries.length > 0 && (
         <>
-          <Typography>Summary</Typography>
+          <Typography level="h4">Summary</Typography>
 
           <List sx={{ listStyleType: "disc" }}>
             {summaries.map((summary, idx) => (

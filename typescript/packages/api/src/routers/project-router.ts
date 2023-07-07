@@ -1,11 +1,10 @@
-import { ProjectStore, TaskStore, UserOrgService } from "@fgpt/precedent-node";
+import { ProjectStore, UserOrgService } from "@fgpt/precedent-node";
 import express from "express";
 import { z } from "zod";
 
 export class ProjectRouter {
   constructor(
     private readonly projectStore: ProjectStore,
-    private readonly taskService: TaskStore,
     private readonly userOrgService: UserOrgService,
   ) {}
   init() {
@@ -57,20 +56,8 @@ export class ProjectRouter {
     router.patch(
       "/update",
       async (req: express.Request, res: express.Response) => {
-        const user = req.user;
         const args = ZUpdateProjectArgs.parse(req.body);
         const project = await this.projectStore.update(args);
-
-        await this.taskService.insert({
-          organizationId: user.organizationId,
-          projectId: project.id,
-          fileReferenceId: undefined,
-          config: {
-            type: "delete-project",
-            version: "1",
-            projectId: project.id,
-          },
-        });
 
         res.json({ project });
       },

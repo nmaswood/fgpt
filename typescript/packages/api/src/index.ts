@@ -141,7 +141,7 @@ async function start() {
     "/api/v1/projects",
     jwtCheck,
     addUser,
-    new ProjectRouter(projectStore, taskStore, userOrgService).init(),
+    new ProjectRouter(projectStore, userOrgService).init(),
   );
 
   app.use(

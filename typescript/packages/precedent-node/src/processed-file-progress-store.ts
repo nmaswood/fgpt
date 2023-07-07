@@ -92,7 +92,6 @@ export class PSqlProcessedFileProgressStore
         }
         case "ingest-file":
         case "text-extraction":
-        case "delete-project":
           break;
         default:
           assertNever(task.config);
