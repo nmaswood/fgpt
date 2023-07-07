@@ -20,6 +20,7 @@ export * from "./logger";
 export * from "./message-bus-service";
 export * from "./ml/ml-service";
 export * from "./object-store/object-store";
+export * from "./processed-file-progress-store";
 export * from "./processed-file-store";
 export * from "./project-store";
 export * from "./project-store";

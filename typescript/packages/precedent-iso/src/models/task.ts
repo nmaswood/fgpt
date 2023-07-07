@@ -10,7 +10,6 @@ export const ZTaskType = z.enum([
   "text-chunk",
   "gen-embeddings",
   "delete-project",
-  "create-analysis",
   "llm-outputs",
   "extract-table",
   "analyze-table",

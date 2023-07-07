@@ -40,7 +40,7 @@ export class PubsubMessageBusService implements MessageBusService {
 
 export class NoopMessageBusService implements MessageBusService {
   async enqueue(_: Message): Promise<string> {
-    return "test";
+    return "";
   }
 }
 export const NOOP_MESSAGE_BUS_SERVICE = new NoopMessageBusService();

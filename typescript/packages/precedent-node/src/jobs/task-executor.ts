@@ -149,6 +149,13 @@ export class TaskExecutorImpl implements TaskExecutor {
               fileReferenceId: config.fileReferenceId,
             };
 
+        LOGGER.info({ fileReferenceId }, "about to extract table");
+        LOGGER.info({ fileReferenceId }, "about to extract table");
+        LOGGER.info({ fileReferenceId }, "about to extract table");
+        LOGGER.info({ fileReferenceId }, "about to extract table");
+        LOGGER.info({ fileReferenceId }, "about to extract table");
+        LOGGER.info({ fileReferenceId }, "about to extract table");
+
         await this.taskStore.insert({
           organizationId,
           projectId,

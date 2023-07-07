@@ -1,5 +1,3 @@
-import { Progress } from "./file";
-
 export interface Summary {
   id: string;
   organizationId: string;
@@ -81,12 +79,3 @@ export const EMPTY_REPORT = {
     financialSummaries: [],
   },
 };
-
-export type ReportStatus =
-  | {
-      type: "not_started" | "already_exists" | "finished";
-    }
-  | {
-      type: "in_progress";
-      value: Progress;
-    };

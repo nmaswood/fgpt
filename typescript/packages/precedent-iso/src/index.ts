@@ -12,6 +12,7 @@ export * from "./models/excel";
 export * from "./models/file";
 export * as Outputs from "./models/llm-outputs";
 export * from "./models/organization";
+export * from "./models/progress";
 export * from "./models/project";
 export * from "./models/render-file";
 export * from "./models/sql-helpers";

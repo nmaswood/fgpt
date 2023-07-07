@@ -3,6 +3,7 @@ import { WorkBook } from "xlsx";
 import { ISOSheet } from "../process-work-book";
 import { AnalyzeOutput } from "./excel";
 import { Report } from "./llm-outputs";
+import { ProcessedFileProgress } from "./progress";
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace FileToRender {
@@ -18,6 +19,7 @@ export namespace FileToRender {
     report: Report | undefined;
     projectId: string;
     derived: DerivedTable | undefined;
+    progress: ProcessedFileProgress;
   }
 
   export type File = PDFFile | ExcelFile;

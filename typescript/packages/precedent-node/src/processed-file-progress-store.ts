@@ -1,47 +1,112 @@
-import { DatabasePool } from "slonik";
+import {
+  assertNever,
+  DEFAULT_STATUS,
+  ProcessedFileProgress,
+  ProgressForTask,
+  TaskStatus,
+} from "@fgpt/precedent-iso";
 
-export interface ProcessedFileProgress {
-  chunking: "pending" | "in-progress" | "complete";
-  upsertEmbeddings: "pending" | "in-progress" | "complete";
-  extractTable: "pending" | "in-progress" | "complete";
-  analyzeTable: "pending" | "in-progress" | "complete";
-}
+import { TaskStore } from "./task-store";
 
 export interface ProcessedFileProgressStore {
   getProgress(processedFileId: string): Promise<ProcessedFileProgress>;
-  setChunkingTaskGroupId(
-    processedFileId: string,
-    taskGroupId: string,
-  ): Promise<void>;
-  setUpsertEmbeddingTaskId(
-    processedFileId: string,
-    taskId: string,
-  ): Promise<void>;
-  setExtractTableTaskId(processedFileId: string, taskId: string): Promise<void>;
-  setAnalyzeTableTaskId(processedFileId: string, taskId: string): Promise<void>;
 }
 
 export class PSqlProcessedFileProgressStore
   implements ProcessedFileProgressStore
 {
-  constructor(private readonly pool: DatabasePool) {}
-  async getProgress(_: string): Promise<ProcessedFileProgress> {
-    console.log(this.pool);
-    throw new Error("not implemented");
-  }
-  async setChunkingTaskGroupId(_: string, __: string): Promise<void> {
-    throw new Error("not implemented");
-  }
+  constructor(private readonly taskStore: TaskStore) {}
+  async getProgress(fileReferenceId: string): Promise<ProcessedFileProgress> {
+    const tasks = await this.taskStore.getByFileReferenceId(fileReferenceId);
 
-  async setUpsertEmbeddingTaskId(_: string, __: string): Promise<void> {
-    throw new Error("not implemented");
-  }
+    const forTask: ProgressForTask = {
+      embeddingChunk: DEFAULT_STATUS,
+      reportChunk: DEFAULT_STATUS,
+      report: DEFAULT_STATUS,
+      upsertEmbeddings: DEFAULT_STATUS,
+      extractTable: DEFAULT_STATUS,
+      analyzeTable: DEFAULT_STATUS,
+    };
 
-  async setExtractTableTaskId(_: string, __: string): Promise<void> {
-    throw new Error("not implemented");
-  }
+    let hasSeenError = false;
+    let totalCompleted = 0;
 
-  async setAnalyzeTableTaskId(_: string, __: string): Promise<void> {
-    throw new Error("not implemented");
+    const checkStatus = (status: TaskStatus) => {
+      switch (status) {
+        case "in-progress":
+        case "queued":
+          break;
+        case "failed":
+          hasSeenError = true;
+          break;
+        case "succeeded":
+          totalCompleted += 1;
+          break;
+        default:
+          assertNever(status);
+      }
+    };
+    for (const task of tasks) {
+      switch (task.config.type) {
+        case "text-chunk": {
+          switch (task.config.strategy) {
+            case "greedy_v0": {
+              forTask.embeddingChunk = { type: task.status };
+              checkStatus(task.status);
+              break;
+            }
+            case "greedy_15k": {
+              forTask.reportChunk = { type: task.status };
+              checkStatus(task.status);
+              break;
+            }
+            default:
+              assertNever(task.config.strategy);
+          }
+          break;
+        }
+
+        case "gen-embeddings": {
+          checkStatus(task.status);
+          forTask.upsertEmbeddings = { type: task.status };
+          break;
+        }
+        case "llm-outputs": {
+          checkStatus(task.status);
+          forTask.report = { type: task.status };
+          break;
+        }
+        case "extract-table": {
+          checkStatus(task.status);
+          forTask.extractTable = { type: task.status };
+          break;
+        }
+        case "analyze-table": {
+          checkStatus(task.status);
+          forTask.analyzeTable = { type: task.status };
+          break;
+        }
+        case "ingest-file":
+        case "text-extraction":
+        case "delete-project":
+          break;
+        default:
+          assertNever(task.config);
+      }
+    }
+
+    const getType = (): ProcessedFileProgress["type"] => {
+      if (hasSeenError) {
+        return "has-failure";
+      } else if (totalCompleted === 6) {
+        return "succeeded";
+      }
+      return "pending";
+    };
+
+    return {
+      type: getType(),
+      forTask,
+    };
   }
 }

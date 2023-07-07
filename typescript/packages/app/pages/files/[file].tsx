@@ -1,5 +1,6 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AssessmentIcon from "@mui/icons-material/Assessment";
+import AutoModeOutlinedIcon from "@mui/icons-material/AutoModeOutlined";
 import BoltIcon from "@mui/icons-material/Bolt";
 import ConstructionIcon from "@mui/icons-material/Construction";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -19,6 +20,7 @@ import React from "react";
 import { DisplayAsset } from "../../src/components/file/display-asset";
 import { DisplayDerived } from "../../src/components/file/display-derived";
 import { DisplayFileChat } from "../../src/components/file/display-file-chat";
+import { DisplayProgress } from "../../src/components/file/display-progress";
 import { DisplayFileReport } from "../../src/components/file/report";
 import { useTabState } from "../../src/components/file/use-tab-state";
 import { ViewByChunk } from "../../src/components/file/view-by-chunk";
@@ -98,6 +100,12 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
           </IconButton>
           <Tabs value={tab} onChange={(_, newValue) => setTab(newValue as any)}>
             <TabList>
+              <Tab value="progress">
+                <ListItemDecorator>
+                  <AutoModeOutlinedIcon />
+                </ListItemDecorator>
+                Progress
+              </Tab>
               <Tab value="report">
                 <ListItemDecorator>
                   <AssessmentIcon />
@@ -139,6 +147,7 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
           maxWidth="100%"
           flexDirection="column"
         >
+          {tab === "progress" && file && <DisplayProgress file={file} />}
           {tab === "report" && file && <DisplayFileReport file={file} />}
           {tab === "chat" && file && (
             <DisplayFileChat

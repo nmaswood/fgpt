@@ -34,6 +34,7 @@ import {
   PsqlExcelAssetStore,
   PsqlExcelOutputStore,
   FileToRenderServiceImpl,
+  PSqlProcessedFileProgressStore,
 } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
 import { UserOrgRouter } from "./routers/user-org-router";
@@ -115,6 +116,9 @@ async function start() {
   const questionStore = new PsqlQuestionStore(pool);
   const metricsStore = new PsqlMiscOutputStore(pool);
   const reportService = new ReportServiceImpl(questionStore, metricsStore);
+  const processedFileProgressStore = new PSqlProcessedFileProgressStore(
+    taskStore,
+  );
 
   const fileRenderService = new FileToRenderServiceImpl(
     fileReferenceStore,
@@ -122,6 +126,7 @@ async function start() {
     objectStoreService,
     excelOutputStore,
     excelAssetStore,
+    processedFileProgressStore,
   );
 
   app.use(cors({ origin: SETTINGS.corsOrigin }));

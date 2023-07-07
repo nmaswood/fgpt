@@ -20,8 +20,3 @@ export interface LoadedFile {
   fullyChunked: boolean;
   fullyEmbedded: boolean;
 }
-
-export interface Progress {
-  value: number;
-  total: number;
-}

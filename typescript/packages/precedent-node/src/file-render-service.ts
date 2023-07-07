@@ -12,6 +12,7 @@ import { ExcelOutputStore } from "./excel-output-store";
 import { FileReferenceStore } from "./file-reference-store";
 import { ReportService } from "./llm-outputs/report-service";
 import { ObjectStorageService } from "./object-store/object-store";
+import { ProcessedFileProgressStore } from "./processed-file-progress-store";
 
 export interface FileRenderService {
   forFile(fileReferenceId: string): Promise<FileToRender.File>;
@@ -24,6 +25,7 @@ export class FileToRenderServiceImpl implements FileRenderService {
     private readonly objectStorageService: ObjectStorageService,
     private readonly excelOutputStore: ExcelOutputStore,
     private readonly excelAssetStore: ExcelAssetStore,
+    private readonly processedFileProgressStore: ProcessedFileProgressStore,
   ) {}
 
   async forFile(fileReferenceId: string): Promise<FileToRender.File> {
@@ -61,11 +63,12 @@ export class FileToRenderServiceImpl implements FileRenderService {
   }
 
   async #forPDF(file: FileReference): Promise<FileToRender.File> {
-    const [signedUrl, [derived], report, output] = await Promise.all([
+    const [signedUrl, [derived], report, output, progress] = await Promise.all([
       this.objectStorageService.getSignedUrl(file.bucketName, file.path),
       this.excelAssetStore.list(file.id),
       this.reportService.forFileReferenceId(file.id),
       this.excelOutputStore.forDerived(file.id),
+      this.processedFileProgressStore.getProgress(file.id),
     ]);
 
     return {
@@ -73,6 +76,7 @@ export class FileToRenderServiceImpl implements FileRenderService {
       signedUrl,
       projectId: file.projectId,
       report,
+      progress,
       derived: derived
         ? await (async () => {
             const parsed = await this.#fetchExcel(

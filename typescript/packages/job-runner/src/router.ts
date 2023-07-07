@@ -45,7 +45,9 @@ export class MainRouter {
         LOGGER.error("Could not execute task");
         LOGGER.error(e);
 
-        await this.taskStore.setToFailed(taskId);
+        // this will put it back into the queue
+        // if it has failed too many times the dead letter queue will fail it.
+        await this.taskStore.setToQueued(taskId);
 
         res.status(500).send();
 
@@ -77,7 +79,6 @@ export class MainRouter {
           res.status(204).send();
           return;
         } catch (e) {
-          LOGGER.error("Could not fail task");
           LOGGER.error("Could not fail task");
           res.status(204).send();
           return;

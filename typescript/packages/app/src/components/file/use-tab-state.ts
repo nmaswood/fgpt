@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import React from "react";
 import { z } from "zod";
 
-const ZFileTab = z.enum(["report", "chat", "debug", "tables"]);
+const ZFileTab = z.enum(["progress", "report", "chat", "debug", "tables"]);
 type FileTab = z.infer<typeof ZFileTab>;
 
 export const useTabState = () => {
