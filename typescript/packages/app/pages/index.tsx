@@ -86,40 +86,38 @@ const Home: React.FC = () => {
         maxHeight="100%"
         overflow="auto"
       >
-        {!projectsLoading &&
-          projects !== undefined &&
-          projects.length === 0 && (
-            <Box
-              display="flex"
-              width="100%"
-              height="100%"
-              maxHeight="100%"
-              maxWidth="100%"
-              overflow="auto"
-              justifyContent="center"
-              alignItems="center"
+        {!projectsLoading && projects !== undefined && projects.length === 0 ? (
+          <Box
+            display="flex"
+            width="100%"
+            height="100%"
+            maxHeight="100%"
+            maxWidth="100%"
+            overflow="auto"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setProjectModalOpen(true);
+              }}
+              startDecorator={<AddIcon />}
+              sx={{ width: "fit-content" }}
+              color="primary"
             >
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  setProjectModalOpen(true);
-                }}
-                startDecorator={<AddIcon />}
-                sx={{ width: "fit-content" }}
-                color="primary"
-              >
-                Create project to begin
-              </Button>
-            </Box>
-          )}
-
-        <SelectedProject
-          token={token}
-          loading={isTokenLoading || projectsLoading}
-          project={selectedProject}
-          projects={projects}
-          setSelectedProjectId={setSelectedProjectId}
-        />
+              Create project to begin
+            </Button>
+          </Box>
+        ) : (
+          <SelectedProject
+            token={token}
+            loading={isTokenLoading || projectsLoading}
+            project={selectedProject}
+            projects={projects}
+            setSelectedProjectId={setSelectedProjectId}
+          />
+        )}
       </Box>
     </Box>
   );

@@ -2,24 +2,28 @@ import {
   assertNever,
   DEFAULT_STATUS,
   ProcessedFileProgress,
-  ProgressForTask,
+  ProgressForPdfTasks,
   TaskStatus,
 } from "@fgpt/precedent-iso";
 
 import { TaskStore } from "./task-store";
 
 export interface ProcessedFileProgressStore {
-  getProgress(processedFileId: string): Promise<ProcessedFileProgress>;
+  getProgress(
+    processedFileId: string,
+  ): Promise<ProcessedFileProgress<ProgressForPdfTasks>>;
 }
 
 export class PSqlProcessedFileProgressStore
   implements ProcessedFileProgressStore
 {
   constructor(private readonly taskStore: TaskStore) {}
-  async getProgress(fileReferenceId: string): Promise<ProcessedFileProgress> {
+  async getProgress(
+    fileReferenceId: string,
+  ): Promise<ProcessedFileProgress<ProgressForPdfTasks>> {
     const tasks = await this.taskStore.getByFileReferenceId(fileReferenceId);
 
-    const forTask: ProgressForTask = {
+    const forTask: ProgressForPdfTasks = {
       embeddingChunk: DEFAULT_STATUS,
       reportChunk: DEFAULT_STATUS,
       report: DEFAULT_STATUS,
@@ -95,7 +99,7 @@ export class PSqlProcessedFileProgressStore
       }
     }
 
-    const getType = (): ProcessedFileProgress["type"] => {
+    const getType = (): ProcessedFileProgress<ProgressForPdfTasks>["type"] => {
       if (hasSeenError) {
         return "has-failure";
       } else if (totalCompleted === 6) {
