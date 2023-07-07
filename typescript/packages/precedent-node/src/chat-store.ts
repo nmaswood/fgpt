@@ -63,7 +63,6 @@ export class PsqlChatStore implements ChatStore {
 
   async getChat(id: string): Promise<Chat> {
     return this.pool.one(sql.type(ZChatRow)`
-
 SELECT
     ${CHAT_FIELDS}
 FROM
@@ -93,10 +92,10 @@ WHERE
       throw new Error("max limit reached");
     }
     return trx.one(sql.type(ZChatRow)`
-INSERT INTO chat (organization_id, project_id, creator_id, name, file_reference_id)
+INSERT INTO chat (organization_id, project_id, creator_id, name, file_reference_id, chat_entry_count)
     VALUES (${chat.organizationId}, ${chat.projectId}, ${chat.creatorId}, ${
       chat.name ?? null
-    }, ${chat.fileReferenceId ?? null})
+    }, ${chat.fileReferenceId ?? null}, 0)
 RETURNING
     ${CHAT_FIELDS}
 `);
@@ -133,17 +132,11 @@ RETURNING
       answer,
     }: InsertChatEntry,
   ): Promise<ChatEntry> {
-    const count = await trx.oneFirst(sql.type(ZCountRow)`
-SELECT
-    COUNT(*) as count
-FROM
-    chat_entry
-WHERE
-    chat_id = ${chatId}
+    await trx.query(sql.type(ZCountRow)`
+UPDATE chat
+SET chat_entry_count = COALESCE(chat_entry_count, 0) + 1
+WHERE id = ${chatId}
 `);
-    if (count === MAX_CHAT_LIMIT) {
-      throw new Error("max limit reached");
-    }
 
     return trx.one(sql.type(ZChatEntryRow)`
 INSERT INTO chat_entry (organization_id, project_id, creator_id, chat_id, question_v2, context_v2, answer, entry_order)

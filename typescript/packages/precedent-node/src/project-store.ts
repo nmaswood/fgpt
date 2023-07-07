@@ -35,7 +35,6 @@ export class PSqlProjectStore implements ProjectStore {
   async list(organizationId: string): Promise<Project[]> {
     const resp = await this.pool.query(
       sql.type(ZProjectRow)`
-
 SELECT
     ${PROJECT_FIELDS}
 FROM
