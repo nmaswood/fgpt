@@ -34,7 +34,15 @@ export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
   );
 
   return (
-    <Box display="flex" width="100%" height="100%" padding={2}>
+    <Box
+      display="flex"
+      width="100%"
+      height="100%"
+      padding={2}
+      maxHeight="100%"
+      maxWidth="100%"
+      overflow="auto"
+    >
       {textChunkGroup && (
         <Box
           display="flex"
@@ -42,6 +50,9 @@ export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
           flexDirection="column"
           width="100%"
           height="100%"
+          maxHeight="100%"
+          maxWidth="100%"
+          overflow="auto"
         >
           <Box display="flex" gap={2} alignItems="center">
             <Select
@@ -114,11 +125,12 @@ export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
 const DisplayOutput: React.FC<{ text: string }> = ({ text }) => {
   return (
     <Box
-      display="grid"
-      gap={2}
+      display="flex"
+      width="100%"
       height="100%"
       maxHeight="100%"
-      gridTemplateRows="1fr 1fr"
+      maxWidth="100%"
+      overflow="auto"
     >
       <Typography overflow="auto" whiteSpace="pre-wrap">
         {text}

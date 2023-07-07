@@ -75,7 +75,7 @@ class OpenAIChatService(ChatService):
     def get_title(self, question: str, answer: str) -> Generator[Any, Any, None]:
         prompt = f"""
         Based on the question and answer please respond with a concise, accurate title for the exchange.
-        Do not output anything except the title itself.
+        Do not output anything except the title itself. Try to limit your response to at most five words.
 
         Question: {question}
         Answer: {answer}
