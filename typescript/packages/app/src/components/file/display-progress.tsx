@@ -81,6 +81,7 @@ const DISPLAY_NAME_MAP: Record<string, string> = {
 };
 
 const STATUS_MAP: Record<string, string> = {
+  task_does_not_exist: "Task is pending creation",
   queued: "Queued",
   "in-progress": "In progress",
   succeeded: "Succeeded",
