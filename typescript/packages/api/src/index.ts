@@ -35,6 +35,7 @@ import {
   PsqlExcelOutputStore,
   FileToRenderServiceImpl,
   PSqlProcessedFileProgressStore,
+  PSqlExcelProgressStore,
 } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
 import { UserOrgRouter } from "./routers/user-org-router";
@@ -120,6 +121,8 @@ async function start() {
     taskStore,
   );
 
+  const excelProgressStore = new PSqlExcelProgressStore(taskStore);
+
   const fileRenderService = new FileToRenderServiceImpl(
     fileReferenceStore,
     reportService,
@@ -127,6 +130,7 @@ async function start() {
     excelOutputStore,
     excelAssetStore,
     processedFileProgressStore,
+    excelProgressStore,
   );
 
   app.use(cors({ origin: SETTINGS.corsOrigin }));

@@ -2,8 +2,10 @@
 
 import {
   assertNever,
+  FileProgress,
   FileToRender,
-  ProcessedFileProgress,
+  ProgressForExcelTasks,
+  ProgressForPdfTasks,
 } from "@fgpt/precedent-iso";
 
 export const DisplayProgress: React.FC<{
@@ -17,7 +19,7 @@ const Dispatch: React.FC<{
 }> = ({ file }) => {
   switch (file.type) {
     case "excel":
-      return <DisplayExcelProgress />;
+      return <DisplayExcelProgress progress={file.progress} />;
     case "pdf":
       return <DisplayPdfProgress progress={file.progress} />;
     default:
@@ -25,12 +27,14 @@ const Dispatch: React.FC<{
   }
 };
 
-const DisplayExcelProgress: React.FC = () => {
-  return null;
+const DisplayExcelProgress: React.FC<{
+  progress: FileProgress<ProgressForExcelTasks>;
+}> = ({ progress }) => {
+  return <pre>{JSON.stringify(progress, null, 2)}</pre>;
 };
 
 const DisplayPdfProgress: React.FC<{
-  progress: ProcessedFileProgress;
+  progress: FileProgress<ProgressForPdfTasks>;
 }> = ({ progress }) => {
   return <pre>{JSON.stringify(progress, null, 2)}</pre>;
 };

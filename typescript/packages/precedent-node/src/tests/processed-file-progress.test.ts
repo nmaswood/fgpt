@@ -1,13 +1,11 @@
+import { DEFAULT_STATUS } from "@fgpt/precedent-iso";
 import { sql } from "slonik";
 import { afterEach, beforeEach, expect, test } from "vitest";
 
 import { dataBasePool } from "../data-base-pool";
 import { PsqlFileReferenceStore } from "../file-reference-store";
 import { NOOP_MESSAGE_BUS_SERVICE } from "../message-bus-service";
-import {
-  DEFAULT_STATUS,
-  PSqlProcessedFileProgressStore,
-} from "../processed-file-progress-store";
+import { PSqlProcessedFileProgressStore } from "../processed-file-progress-store";
 import { PsqlProcessedFileStore } from "../processed-file-store";
 import { PSqlProjectStore } from "../project-store";
 import { PSqlTaskStore } from "../task-store";

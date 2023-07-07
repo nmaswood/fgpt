@@ -1,5 +1,6 @@
 export * from "./chat-store";
 export { dataBasePool } from "./data-base-pool";
+export * from "./excel-asset-progress-store";
 export * from "./excel-asset-store";
 export * from "./excel-output-store";
 export * from "./file-reference-store";
