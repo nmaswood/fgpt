@@ -3,11 +3,11 @@ import "@uppy/dashboard/dist/style.min.css";
 
 import { MAX_FILE_SIZE_BYTES } from "@fgpt/precedent-iso";
 import { Project } from "@fgpt/precedent-iso";
-import BoltIcon from "@mui/icons-material/Bolt";
-import CollectionsIcon from "@mui/icons-material/Collections";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ModeEditIcon from "@mui/icons-material/ModeEdit";
-import SettingsIcon from "@mui/icons-material/Settings";
+import BoltIcon from "@mui/icons-material/BoltOutlined";
+import CollectionsIcon from "@mui/icons-material/CollectionsOutlined";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import ModeEditIcon from "@mui/icons-material/ModeEditOutlined";
+import SettingsIcon from "@mui/icons-material/SettingsOutlined";
 import {
   Box,
   Button,
@@ -81,7 +81,7 @@ export const SelectedProject: React.FC<{
 }> = ({ token, project, projects, setSelectedProjectId, loading }) => {
   const [tab, setTab] = useTabState();
   const [modal, setModal] = React.useState<"delete" | "edit" | undefined>(
-    undefined
+    undefined,
   );
 
   const buttonRef = React.useRef(null);
@@ -325,7 +325,7 @@ const EditProjectModal: React.FC<{
 
   const projectNames = React.useMemo(
     () => new Set(projects.map((project) => project.name)),
-    [projects]
+    [projects],
   );
 
   const isDisabled =
@@ -421,7 +421,7 @@ const SelectedProjectInner: React.FC<{
 
   const { trigger: editChat, isMutating: isEditingChatMutating } = useEditChat(
     "project",
-    project.id
+    project.id,
   );
   const { data: questions } = useSampleForProject(project.id);
 

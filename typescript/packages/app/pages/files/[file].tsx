@@ -1,10 +1,10 @@
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import AssessmentIcon from "@mui/icons-material/Assessment";
+import ArrowBackIcon from "@mui/icons-material/ArrowBackOutlined";
+import AssessmentIcon from "@mui/icons-material/AssessmentOutlined";
 import AutoModeOutlinedIcon from "@mui/icons-material/AutoModeOutlined";
-import BoltIcon from "@mui/icons-material/Bolt";
-import ConstructionIcon from "@mui/icons-material/Construction";
-import MenuIcon from "@mui/icons-material/Menu";
-import TableViewIcon from "@mui/icons-material/TableView";
+import BoltIcon from "@mui/icons-material/BoltOutlined";
+import ConstructionIcon from "@mui/icons-material/ConstructionOutlined";
+import MenuIcon from "@mui/icons-material/MenuOutlined";
+import TableViewIcon from "@mui/icons-material/TableViewOutlined";
 import {
   Box,
   IconButton,

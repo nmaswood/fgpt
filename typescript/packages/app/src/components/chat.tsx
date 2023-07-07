@@ -1,9 +1,9 @@
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { assertNever, Chat, ChatEntry } from "@fgpt/precedent-iso";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ErrorIcon from "@mui/icons-material/Error";
-import InsertCommentIcon from "@mui/icons-material/InsertComment";
-import SendIcon from "@mui/icons-material/Send";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeftOutlined";
+import ErrorIcon from "@mui/icons-material/ErrorOutlined";
+import InsertCommentIcon from "@mui/icons-material/InsertCommentOutlined";
+import SendIcon from "@mui/icons-material/SendOutlined";
 import {
   Avatar,
   Box,
@@ -80,7 +80,7 @@ export const DisplayChat: React.FC<{
 
   const [input, setInput] = React.useState("");
   const [entriesToRender, setEntriesToRender] = React.useState<EntryToRender[]>(
-    []
+    [],
   );
 
   React.useEffect(() => {
@@ -92,11 +92,11 @@ export const DisplayChat: React.FC<{
       return [];
     }
     const filteredEntries = entriesToRender.filter(
-      (e) => e.chatId === selectedChatId
+      (e) => e.chatId === selectedChatId,
     );
 
     const final = filteredEntries.filter(
-      (e, idx) => chatEntries[idx]?.question !== e.question
+      (e, idx) => chatEntries[idx]?.question !== e.question,
     );
     return final;
   })();

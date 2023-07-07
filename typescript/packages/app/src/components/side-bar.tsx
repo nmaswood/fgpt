@@ -1,8 +1,8 @@
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { assertNever, Project } from "@fgpt/precedent-iso";
-import AddIcon from "@mui/icons-material/Add";
-import FolderIcon from "@mui/icons-material/Folder";
-import LogoutIcon from "@mui/icons-material/Logout";
+import AddIcon from "@mui/icons-material/AddOutlined";
+import FolderIcon from "@mui/icons-material/FolderOutlined";
+import LogoutIcon from "@mui/icons-material/LogoutOutlined";
 import {
   Alert,
   Avatar,
@@ -152,7 +152,7 @@ const CreateProject: React.FC<{
 
   const projectNames = React.useMemo(
     () => new Set(projects.map((p) => p.name)),
-    [projects]
+    [projects],
   );
 
   return (

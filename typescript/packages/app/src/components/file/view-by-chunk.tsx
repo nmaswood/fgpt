@@ -1,6 +1,6 @@
 import { ChunkStrategy } from "@fgpt/precedent-iso";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ArrowBackIcon from "@mui/icons-material/ArrowBackOutlined";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForwardOutlined";
 import { Box, Button, ButtonGroup, Option, Select, Typography } from "@mui/joy";
 import { TextField, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import React from "react";
@@ -24,13 +24,13 @@ export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
 
   const { data: textChunkGroup } = useFetchTextChunkGroup(
     chunkStrategy,
-    fileId
+    fileId,
   );
 
   const { data: textChunk } = useFetchTextChunk(textChunkGroup?.id, order);
 
   const [view, setView] = React.useState<"view" | "chat" | "test_output">(
-    "chat"
+    "view",
   );
 
   return (
@@ -129,7 +129,7 @@ const DisplayChat: React.FC<{ textChunkId: string }> = ({ textChunkId }) => {
   const { data, trigger, isMutating, error } = useFetchPlayground();
   const [functionName, setFunctionName] = React.useState("parse_document");
   const [prompt, setPrompt] = React.useState(
-    "You are an expert financial analyst. Parse the document for the requested information. If the information is not available, return 'Not Available'"
+    "You are an expert financial analyst. Parse the document for the requested information. If the information is not available, return 'Not Available'",
   );
   const [jsonSchema, setJsonSchema] = React.useState(BASIC_SCHEMA);
 

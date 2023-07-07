@@ -1,9 +1,9 @@
 import { Chat } from "@fgpt/precedent-iso";
-import AddIcon from "@mui/icons-material/Add";
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ModeEditIcon from "@mui/icons-material/ModeEdit";
+import AddIcon from "@mui/icons-material/AddOutlined";
+import CheckIcon from "@mui/icons-material/CheckOutlined";
+import CloseIcon from "@mui/icons-material/CloseOutlined";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import ModeEditIcon from "@mui/icons-material/ModeEditOutlined";
 import {
   Box,
   Button,

@@ -1,4 +1,4 @@
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import CloudUploadIcon from "@mui/icons-material/CloudUploadOutlined";
 import { Button } from "@mui/joy";
 import Uppy from "@uppy/core";
 import React from "react";
