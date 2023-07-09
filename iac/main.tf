@@ -3,12 +3,12 @@ terraform {
 
     google = {
       source  = "hashicorp/google"
-      version = "4.51.0"
+      version = "~> 4.72.1"
     }
 
     vercel = {
       source  = "vercel/vercel"
-      version = "0.11.5"
+      version = "~> 0.14.0"
     }
 
 
@@ -278,13 +278,28 @@ resource "google_cloud_run_v2_service" "springtime" {
     timeout         = "900s"
     service_account = google_service_account.cloud_run_service_account.email
 
+
     scaling {
-      max_instance_count = 2
+      min_instance_count = 0
+      max_instance_count = 10
     }
 
 
     containers {
       image = "${var.region}-docker.pkg.dev/${var.project}/${var.project_slug}/springtime:latest"
+
+
+
+      resources {
+        limits = {
+          cpu    = "1"
+          memory = "4Gi"
+        }
+
+        startup_cpu_boost = true
+      }
+
+
 
       env {
         name  = "HOST"
@@ -401,12 +416,21 @@ resource "google_cloud_run_v2_service" "api" {
 
     scaling {
       min_instance_count = 1
-      max_instance_count = 2
+      max_instance_count = 10
     }
 
 
     containers {
       image = "${var.region}-docker.pkg.dev/${var.project}/${var.project_slug}/api:latest"
+
+
+      resources {
+        limits = {
+          cpu    = "1"
+          memory = "4Gi"
+        }
+        startup_cpu_boost = true
+      }
 
       env {
         name  = "HOST"
@@ -502,13 +526,21 @@ resource "google_cloud_run_v2_service" "job_runner_server" {
     max_instance_request_concurrency = 30
 
     scaling {
-      min_instance_count = 1
-      max_instance_count = 2
+      min_instance_count = 0
+      max_instance_count = 10
     }
+
 
     containers {
       image   = "${var.region}-docker.pkg.dev/${var.project}/${var.project_slug}/job-runner:latest"
       command = ["yarn", "run-server"]
+
+      resources {
+        limits = {
+          cpu    = "1"
+          memory = "4Gi"
+        }
+      }
 
       env {
         name  = "HOST"

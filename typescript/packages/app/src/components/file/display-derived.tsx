@@ -2,12 +2,11 @@ import { FileToRender } from "@fgpt/precedent-iso";
 import { Box } from "@mui/joy";
 import React from "react";
 
-import { DisplayExcelFile } from "./display-asset";
 import { ForExcel } from "./report";
 
 export const DisplayDerived: React.FC<{
   derived: FileToRender.DerivedTable;
-}> = ({ derived: { sheets, output } }) => {
+}> = ({ derived: { output } }) => {
   return (
     <Box
       display="flex"
@@ -18,7 +17,6 @@ export const DisplayDerived: React.FC<{
       overflow="auto"
       padding={2}
     >
-      <DisplayExcelFile sheets={sheets} />
       {output && (
         <Box
           display="flex"

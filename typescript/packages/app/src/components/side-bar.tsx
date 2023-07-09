@@ -303,30 +303,37 @@ const FormDialog: React.FC<{
   return (
     <Modal open onClose={onClose} keepMounted>
       <ModalDialog>
-        <Typography>Create a project</Typography>
-        <Input
-          autoFocus
-          id="name"
-          type="text"
-          color="primary"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              onSubmit();
-            }
-          }}
-          fullWidth
-        />
-        <ButtonGroup spacing={1}>
-          <Button disabled={loading} onClick={onClose} color="primary">
-            Cancel
-          </Button>
-          <Button loading={loading} onClick={onSubmit} color="primary">
-            Create project
-          </Button>
-        </ButtonGroup>
+        <Box display="flex" flexDirection="column" gap={1}>
+          <Typography level="h6">Create a project</Typography>
+          <Input
+            autoFocus
+            id="name"
+            type="text"
+            color="primary"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                onSubmit();
+              }
+            }}
+            fullWidth
+          />
+          <ButtonGroup spacing={1}>
+            <Button disabled={loading} onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              loading={loading}
+              onClick={onSubmit}
+              variant="solid"
+              color="primary"
+            >
+              Create project
+            </Button>
+          </ButtonGroup>
+        </Box>
         {error && (
           <Snackbar
             open={true}

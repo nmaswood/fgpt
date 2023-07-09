@@ -1,16 +1,23 @@
 import "@fortune-sheet/react/dist/index.css";
 
 import { assertNever, FileToRender } from "@fgpt/precedent-iso";
-import { Sheet } from "@fortune-sheet/core";
 import { Workbook } from "@fortune-sheet/react";
+import { LinearProgress } from "@mui/joy";
 import React from "react";
+
+import { useFetchSheets } from "../../hooks/use-fetch-sheets";
 
 export const DisplayAsset: React.FC<{
   fileToRender: FileToRender.File;
 }> = ({ fileToRender }) => {
   switch (fileToRender.type) {
     case "excel":
-      return <DisplayExcelFile sheets={fileToRender.sheets} />;
+      return (
+        <DisplayExcelFile
+          id={fileToRender.id}
+          signedUrl={fileToRender.signedUrl}
+        />
+      );
     case "pdf":
       return (
         <object
@@ -27,15 +34,22 @@ export const DisplayAsset: React.FC<{
 };
 
 export const DisplayExcelFile: React.FC<{
-  sheets: Sheet[];
-}> = ({ sheets }) => {
+  id: string;
+  signedUrl: string;
+}> = ({ id, signedUrl }) => {
+  const value = useFetchSheets(id, signedUrl);
+  if (!value || value.type === "loading") {
+    return <LinearProgress />;
+  }
+  console.log(value.value);
+
   return (
     <Workbook
       showToolbar={false}
       sheetTabContextMenu={[]}
       showFormulaBar={false}
       allowEdit={false}
-      data={sheets}
+      data={value.value}
     />
   );
 };

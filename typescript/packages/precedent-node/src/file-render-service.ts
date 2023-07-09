@@ -3,9 +3,7 @@ import {
   FileReference,
   FileToRender,
   getFileType,
-  processWorkBook,
 } from "@fgpt/precedent-iso";
-import { read } from "xlsx";
 
 import { ExcelProgressStore } from "./excel-asset-progress-store";
 import { ExcelAssetStore } from "./excel-asset-store";
@@ -47,18 +45,16 @@ export class FileToRenderServiceImpl implements FileRenderService {
   }
 
   async #forExcel(file: FileReference): Promise<FileToRender.ExcelFile> {
-    const [output, parsed, signedUrl, progress] = await Promise.all([
+    const [output, signedUrl, progress] = await Promise.all([
       this.excelOutputStore.forDirectUpload(file.id),
-      this.#fetchExcel(file.bucketName, file.path),
       this.objectStorageService.getSignedUrl(file.bucketName, file.path),
       this.excelProgressStore.getProgress(file.id),
     ]);
     return {
       type: "excel",
+      id: file.id,
       signedUrl,
       projectId: file.projectId,
-      parsed,
-      sheets: processWorkBook(parsed.Sheets),
       output: output?.output,
       progress,
     };
@@ -75,28 +71,23 @@ export class FileToRenderServiceImpl implements FileRenderService {
 
     return {
       type: "pdf",
+      id: file.id,
       signedUrl,
       projectId: file.projectId,
       report,
       progress,
       derived: derived
         ? await (async () => {
-            const parsed = await this.#fetchExcel(
+            const signedUrl = await this.objectStorageService.getSignedUrl(
               derived.bucketName,
               derived.path,
             );
             return {
-              parsed,
-              sheets: processWorkBook(parsed.Sheets),
+              signedUrl,
               output: output?.output,
             };
           })()
         : undefined,
     };
-  }
-
-  async #fetchExcel(bucketName: string, path: string) {
-    const blob = await this.objectStorageService.download(bucketName, path);
-    return read(blob);
   }
 }
