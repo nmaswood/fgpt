@@ -77,42 +77,6 @@ export class ChatRouter {
       },
     );
 
-    router.post(
-      "/get-title",
-      async (req: express.Request, res: express.Response) => {
-        const { chatId } = ZGenerateTitleRequest.parse(req.body);
-        const [first] = await this.chatStore.listChatEntries(chatId);
-        res.set("Content-Type", "text/event-stream");
-        res.set("Cache-Control", "no-cache");
-        res.set("Connection", "keep-alive");
-
-        if (!first) {
-          res.send("User Chat");
-          res.end();
-          return;
-        }
-
-        const buffer: string[] = [];
-        await this.mlClient.getTitleStreaming({
-          question: first.question,
-          answer: first.answer ?? "",
-          onData: (resp) => {
-            const encoded = encoder.encode(resp);
-            res.write(encoded);
-            buffer.push(resp);
-          },
-          onEnd: async () => {
-            res.end();
-            const name = buffer.join("");
-            await this.chatStore.updateChat({
-              chatId,
-              name,
-            });
-          },
-        });
-      },
-    );
-
     router.delete(
       "/delete-chat/:chatId",
       async (req: express.Request, res: express.Response) => {
@@ -147,8 +111,10 @@ export class ChatRouter {
       async (req: express.Request, res: express.Response) => {
         const args = ZChatArguments.parse(req.body);
 
-        const chat = await this.chatStore.getChat(args.chatId);
-        const vector = await this.mlClient.getEmbedding(args.question);
+        const [chat, vector] = await Promise.all([
+          this.chatStore.getChat(args.chatId),
+          this.mlClient.getEmbedding(args.question),
+        ]);
 
         const metadata = chat.fileReferenceId
           ? // note foot gun re fileId
@@ -194,9 +160,7 @@ export class ChatRouter {
 
         const justText = chunks.map((chunk) => chunk.chunkText);
 
-        res.set("Content-Type", "text/event-stream");
-        res.set("Cache-Control", "no-cache");
-        res.set("Connection", "keep-alive");
+        setStreamingCookies(res);
 
         const answerBuffer: string[] = [];
         const titleBuffer: string[] = [];
@@ -308,3 +272,9 @@ const ZDeleteChatRequest = z.object({
 const ZContextRequest = z.object({
   chatEntryId: z.string(),
 });
+
+function setStreamingCookies(res: express.Response) {
+  res.set("Content-Type", "text/event-stream");
+  res.set("Cache-Control", "no-cache");
+  res.set("Connection", "keep-alive");
+}
