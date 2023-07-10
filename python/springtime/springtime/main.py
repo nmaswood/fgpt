@@ -3,8 +3,10 @@ from springtime.routers.chat_router import ChatRouter
 from springtime.routers.embeddings_router import EmbeddingsRouter
 from springtime.routers.text_router import TextRouter
 from springtime.routers.vector_router import VectorRouter
+from springtime.services.anthropic_client import AnthropicClient
 from springtime.services.chat_service import OpenAIChatService
 from springtime.services.embeddings_service import OpenAIEmbeddingsService
+from springtime.services.long_form_report_service import ClaudeLongformReportService
 from springtime.services.report_service import OpenAIReportService
 from springtime.services.vector_service import PineconeVectorService
 from springtime.services.table_analyzer import TableAnalyzerImpl
@@ -31,6 +33,8 @@ OBJECT_STORE = GCSObjectStore()
 TABLE_EXTRACTOR = TabulaTableExtractor(OBJECT_STORE)
 TABLE_ANALYZER = TableAnalyzerImpl()
 
+ANTHROPIC_CLIENT = AnthropicClient()
+LONG_FORM_REPORT_SERVICE = ClaudeLongformReportService(ANTHROPIC_CLIENT)
 EMBEDDING_SERVICE = OpenAIEmbeddingsService()
 VECTOR_SERVICE = PineconeVectorService(
     api_key=SETTINGS.pinecone_api_key,
@@ -56,7 +60,7 @@ async def add_process_time_header(request: Request, call_next):
 
 
 app.include_router(ChatRouter(CHAT_SERVICE).get_router())
-app.include_router(ReportRouter(REPORT_SERVICE).get_router())
+app.include_router(ReportRouter(REPORT_SERVICE, LONG_FORM_REPORT_SERVICE).get_router())
 app.include_router(PdfRouter(TABLE_EXTRACTOR, OBJECT_STORE).get_router())
 app.include_router(TableRouter(TABLE_ANALYZER, OBJECT_STORE).get_router())
 app.include_router(TextRouter().get_router())

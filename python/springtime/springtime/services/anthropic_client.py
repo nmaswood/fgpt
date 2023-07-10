@@ -5,7 +5,7 @@ class AnthropicClient:
     def __init__(self):
         self._anthropic = Anthropic()
 
-    def complete(self, *, prompt: str) -> str:
+    def complete(self, prompt: str) -> str:
         response = self._anthropic.completions.create(
             model="claude-v1-100k",
             prompt=prompt,

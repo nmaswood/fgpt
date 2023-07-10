@@ -498,6 +498,11 @@ resource "google_cloud_run_v2_service" "api" {
         value = var.service_to_service_secret
       }
 
+      env {
+        name  = "CLAUDE_REPORT_GENERATION"
+        value = "true"
+      }
+
       volume_mounts {
         name       = "cloudsql"
         mount_path = "/cloudsql"

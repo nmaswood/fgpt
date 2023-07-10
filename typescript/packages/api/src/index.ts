@@ -36,6 +36,7 @@ import {
   FileToRenderServiceImpl,
   PSqlProcessedFileProgressStore,
   PSqlExcelProgressStore,
+  axiosClientForMlService,
 } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
 import { UserOrgRouter } from "./routers/user-org-router";
@@ -103,10 +104,12 @@ async function start() {
 
   const textChunkStore = new PsqlTextChunkStore(pool);
 
-  const mlService = new MLServiceClientImpl(
-    SETTINGS.mlServiceUri,
-    SETTINGS.serviceToServiceSecret,
-  );
+  const axiosClient = axiosClientForMlService({
+    baseURL: SETTINGS.mlServiceUri,
+    serviceToServiceSecret: SETTINGS.serviceToServiceSecret,
+  });
+
+  const mlService = new MLServiceClientImpl(axiosClient);
 
   // hack to wake up ml service
   // when api request is made

@@ -133,9 +133,13 @@ RETURNING
     }: InsertChatEntry,
   ): Promise<ChatEntry> {
     await trx.query(sql.type(ZCountRow)`
-UPDATE chat
-SET chat_entry_count = COALESCE(chat_entry_count, 0) + 1
-WHERE id = ${chatId}
+
+UPDATE
+    chat
+SET
+    chat_entry_count = COALESCE(chat_entry_count, 0) + 1
+WHERE
+    id = ${chatId}
 `);
 
     return trx.one(sql.type(ZChatEntryRow)`

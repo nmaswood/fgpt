@@ -3,18 +3,8 @@ import {
   FinancialSummary,
   Term,
 } from "@fgpt/precedent-iso/src/models/llm-outputs";
-import axios, { AxiosInstance } from "axios";
+import { AxiosInstance } from "axios";
 import z from "zod";
-
-interface PredictArguments {
-  content: string;
-}
-
-const ZPredictionResponse = z.object({
-  response: z.string(),
-});
-
-type PredictResponse = z.infer<typeof ZPredictionResponse>;
 
 interface GetEmbeddingsArgs {
   documents: string[];
@@ -92,7 +82,6 @@ export interface PlaygroundResponse {
 }
 
 export interface MLServiceClient {
-  predict: (args: PredictArguments) => Promise<PredictResponse>;
   ping: () => Promise<"pong">;
   getEmbedding: (query: string) => Promise<number[]>;
   getEmbeddings: (args: GetEmbeddingsArgs) => Promise<GetEmbeddingsResponse>;
@@ -100,7 +89,6 @@ export interface MLServiceClient {
   getKSimilar: (args: SimiliarSearch) => Promise<VectorResult[]>;
   askQuestion(args: AskQuestion): Promise<string>;
   askQuestionStreaming(args: AskQuestionStreamingArgs): Promise<void>;
-
   getTitleStreaming(args: GenerateTitleStreamingArgs): Promise<void>;
   llmOutput(args: LLMOutputArgs): Promise<LLMOutputResponse>;
   playGround(args: PlaygroundRequest): Promise<PlaygroundResponse>;
@@ -108,32 +96,15 @@ export interface MLServiceClient {
 }
 
 export class MLServiceClientImpl implements MLServiceClient {
-  #client: AxiosInstance;
-
-  constructor(baseURL: string, serviceToServiceSecret: string) {
-    this.#client = axios.create({
-      baseURL,
-      headers: {
-        "X-Service-To-Service-Secret": serviceToServiceSecret,
-      },
-    });
-  }
+  constructor(private readonly client: AxiosInstance) {}
 
   async ping(): Promise<"pong"> {
-    await this.#client.get<PredictResponse>("/ping");
+    await this.client.get<unknown>("/ping");
     return "pong";
   }
 
-  async predict({ content }: PredictArguments): Promise<PredictResponse> {
-    const response = await this.#client.post<PredictResponse>(
-      "/predict-for-ticker",
-      { content: content.slice(4012) },
-    );
-    return ZPredictionResponse.parse(response.data);
-  }
-
   async getEmbeddings(args: GetEmbeddingsArgs): Promise<GetEmbeddingsResponse> {
-    const response = await this.#client.post<PredictResponse>(
+    const response = await this.client.post<unknown>(
       "/embeddings/embedding-for-documents",
       { documents: args.documents },
     );
@@ -147,7 +118,7 @@ export class MLServiceClientImpl implements MLServiceClient {
   }
 
   async upsertVectors(vectors: UpsertVector[]): Promise<void> {
-    await this.#client.put<PredictResponse>("/vector/upsert-vectors", {
+    await this.client.put<unknown>("/vector/upsert-vectors", {
       vectors,
     });
   }
@@ -156,7 +127,7 @@ export class MLServiceClientImpl implements MLServiceClient {
     vector,
     metadata,
   }: SimiliarSearch): Promise<VectorResult[]> {
-    const response = await this.#client.post<PredictResponse>(
+    const response = await this.client.post<unknown>(
       "/vector/similar-vectors",
       {
         vector,
@@ -167,7 +138,7 @@ export class MLServiceClientImpl implements MLServiceClient {
   }
 
   async askQuestion({ context, question }: AskQuestion): Promise<string> {
-    const response = await this.#client.post<unknown>("/chat/ask-question", {
+    const response = await this.client.post<unknown>("/chat/ask-question", {
       context,
       question,
     });
@@ -183,7 +154,7 @@ export class MLServiceClientImpl implements MLServiceClient {
     onEnd,
     history,
   }: AskQuestionStreamingArgs): Promise<void> {
-    const response = await this.#client.post<any>(
+    const response = await this.client.post<any>(
       "/chat/ask-question-streaming",
       {
         context,
@@ -211,7 +182,7 @@ export class MLServiceClientImpl implements MLServiceClient {
     onData,
     onEnd,
   }: GenerateTitleStreamingArgs): Promise<void> {
-    const response = await this.#client.post<any>(
+    const response = await this.client.post<any>(
       "/chat/get-title-streaming",
       {
         question,
@@ -233,14 +204,14 @@ export class MLServiceClientImpl implements MLServiceClient {
   }
 
   async llmOutput({ text }: LLMOutputArgs): Promise<LLMOutputResponse> {
-    const response = await this.#client.post<unknown>("/report/llm-output", {
+    const response = await this.client.post<unknown>("/report/llm-output", {
       text,
     });
     return ZLLMOutputResponse.parse(response.data);
   }
 
   async playGround(args: PlaygroundRequest): Promise<PlaygroundResponse> {
-    const response = await this.#client.post<unknown>("/playground", {
+    const response = await this.client.post<unknown>("/playground", {
       text: args.text,
       prompt: args.prompt,
       json_schema: args.jsonSchema,
@@ -250,7 +221,7 @@ export class MLServiceClientImpl implements MLServiceClient {
   }
 
   async tokenLength(text: string): Promise<{ model: "gpt4"; length: number }> {
-    const response = await this.#client.post<unknown>("/text/token-length", {
+    const response = await this.client.post<unknown>("/text/token-length", {
       text,
     });
     const resp = TokenLengthResponse.parse(response.data);

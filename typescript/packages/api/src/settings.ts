@@ -25,6 +25,8 @@ const ZSettings = z.object({
   }),
   corsOrigin: z.string().array(),
   serviceToServiceSecret: z.string(),
+  // the expensive report!
+  claudeReportGeneration: z.boolean(),
 });
 
 const corsDomain = process.env["CORS_DOMAIN"];
@@ -58,4 +60,6 @@ export const SETTINGS = ZSettings.parse({
     ? [`https://www.${corsDomain}`, `https://${corsDomain}`]
     : ["http://localhost:3000"],
   serviceToServiceSecret: process.env["SERVICE_TO_SERVICE_SECRET"],
+  claudeReportGeneration:
+    process.env["CLAUDE_REPORT_GENERATION"]?.toLowerCase() === "true",
 });

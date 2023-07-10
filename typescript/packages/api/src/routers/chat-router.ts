@@ -254,11 +254,6 @@ const ZGetChatEntryRequest = z.object({ chatId: z.string() });
 
 const ZChatLocation = z.enum(["project", "file"]);
 
-const ZGenerateTitleRequest = z.object({
-  projectId: z.string(),
-  chatId: z.string(),
-});
-
 const ZCreateChatRequest = z.object({
   id: z.string(),
   location: ZChatLocation,

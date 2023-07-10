@@ -1,3 +1,4 @@
+from springtime.services.long_form_report_service import LongformReportService
 from springtime.services.report_service import (
     FinancialSummary,
     Term,
@@ -9,6 +10,10 @@ from pydantic import BaseModel
 
 
 class LLMOutputRequest(BaseModel):
+    text: str
+
+
+class LongFormReportRequest(BaseModel):
     text: str
 
 
@@ -24,14 +29,24 @@ class PlaygroundResponse(BaseModel):
 
 
 class ReportRouter:
-    def __init__(self, report_service: ReportService):
+    def __init__(
+        self,
+        report_service: ReportService,
+        long_form_report_service: LongformReportService,
+    ):
         self.report_service = report_service
+        self.long_form_report_service = long_form_report_service
 
     def get_router(self):
         router = APIRouter(prefix="/report")
 
         @router.post("/llm-output")
         async def llm_output_route(req: LLMOutputRequest):
+            res = self.report_service.generate_output(req.text)
+            return res
+
+        @router.post("/long-form")
+        async def long_form_route(req: LongFormReportRequest):
             res = self.report_service.generate_output(req.text)
             return res
 

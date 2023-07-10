@@ -30,6 +30,7 @@ import {
   LLMOutputHandlerImpl,
   TableHandlerImpl,
   IngestFileHandlerImpl,
+  axiosClientForMlService,
 } from "@fgpt/precedent-node";
 import { SETTINGS, Settings } from "./settings";
 import { MainRouter } from "./router";
@@ -66,10 +67,12 @@ async function start(settings: Settings) {
 
   const textChunkStore = new PsqlTextChunkStore(pool);
 
-  const mlServiceClient = new MLServiceClientImpl(
-    settings.mlServiceUri,
-    settings.serviceToServiceSecret,
-  );
+  const axiosClient = axiosClientForMlService({
+    baseURL: SETTINGS.mlServiceUri,
+    serviceToServiceSecret: SETTINGS.serviceToServiceSecret,
+  });
+
+  const mlServiceClient = new MLServiceClientImpl(axiosClient);
 
   const questionStore = new PsqlQuestionStore(pool);
   const miscOutputStore = new PsqlMiscOutputStore(pool);
