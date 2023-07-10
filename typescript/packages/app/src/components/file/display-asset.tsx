@@ -41,7 +41,6 @@ export const DisplayExcelFile: React.FC<{
   if (!value || value.type === "loading") {
     return <LinearProgress />;
   }
-  console.log(value.value);
 
   return (
     <Workbook

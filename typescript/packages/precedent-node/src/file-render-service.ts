@@ -83,6 +83,7 @@ export class FileToRenderServiceImpl implements FileRenderService {
               derived.path,
             );
             return {
+              id: derived.id,
               signedUrl,
               output: output?.output,
             };

@@ -9,7 +9,8 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace FileToRender {
   export interface DerivedTable {
-    signedUrl: string | undefined;
+    id: string;
+    signedUrl: string;
     output: AnalyzeOutput | undefined;
   }
 

@@ -6,7 +6,11 @@ export const useSampleForFile = (fileReferenceId: string) => {
     ["/api/proxy/v1/output/sample-file", string]
   >(
     ["/api/proxy/v1/output/sample-file", fileReferenceId],
-    forFileSampleFetcher
+    forFileSampleFetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnMount: false,
+    },
   );
 
   return { data: data ?? [], isLoading, mutate };
@@ -14,7 +18,7 @@ export const useSampleForFile = (fileReferenceId: string) => {
 
 async function forFileSampleFetcher([url, fileReferenceId]: [
   "/api/proxy/v1/output/sample-file",
-  string
+  string,
 ]): Promise<string[]> {
   const response = await fetch(`${url}/${fileReferenceId}`);
   const data = await response.json();
@@ -28,7 +32,11 @@ export const useSampleForProject = (projectId: string) => {
     ["/api/proxy/v1/output/sample-project", string]
   >(
     ["/api/proxy/v1/output/sample-project", projectId],
-    forProjectSampleFetcher
+    forProjectSampleFetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnMount: false,
+    },
   );
 
   return { data: data ?? [], isLoading, mutate };
@@ -36,7 +44,7 @@ export const useSampleForProject = (projectId: string) => {
 
 async function forProjectSampleFetcher([url, projectId]: [
   "/api/proxy/v1/output/sample-project",
-  string
+  string,
 ]): Promise<string[]> {
   const response = await fetch(`${url}/${projectId}`);
   const data = await response.json();
