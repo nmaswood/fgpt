@@ -15,6 +15,7 @@ export interface UpsertProcessedFile {
   text: string;
   hash: string;
   gpt4TokenLength?: number;
+  claude100kLength?: number;
 }
 
 export interface ProcessedFileStore {
@@ -73,20 +74,23 @@ WHERE
         text,
         hash,
         gpt4TokenLength,
+        claude100kLength,
       }) =>
         sql.fragment`
+
 (${organizationId},
     ${projectId},
     ${fileReferenceId},
     ${text},
     ${hash},
     ${text.length},
-    ${gpt4TokenLength ?? null})
+    ${gpt4TokenLength ?? null},
+    ${claude100kLength ?? null})
 `,
     );
     const { rows } = await cnx.query(
       sql.type(ZProcessedFileRow)`
-INSERT INTO processed_file (organization_id, project_id, file_reference_id, extracted_text, extracted_text_sha256, token_length, gpt4_token_length)
+INSERT INTO processed_file (organization_id, project_id, file_reference_id, extracted_text, extracted_text_sha256, token_length, gpt4_token_length, claude_100k_length)
     VALUES
         ${sql.join(values, sql.fragment`, `)}
     ON CONFLICT (organization_id, project_id, file_reference_id)

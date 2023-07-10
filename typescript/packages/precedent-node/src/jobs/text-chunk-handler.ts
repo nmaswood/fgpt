@@ -114,6 +114,10 @@ export class TextChunkHandlerImpl implements TextChunkHandler {
           textGroupId: textChunkGroup.id,
         };
       }
+      case "greedy_125k": {
+        return undefined;
+      }
+
       default:
         assertNever(strategy);
     }

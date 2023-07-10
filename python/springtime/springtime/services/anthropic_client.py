@@ -1,4 +1,7 @@
-from anthropic import Anthropic
+from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
+
+
+MAX_TOKENS_TO_SAMPLE = 10_000
 
 
 class AnthropicClient:
@@ -8,7 +11,8 @@ class AnthropicClient:
     def complete(self, prompt: str) -> str:
         response = self._anthropic.completions.create(
             model="claude-v1-100k",
-            prompt=prompt,
+            prompt=f"{HUMAN_PROMPT} {prompt} {AI_PROMPT}",
+            max_tokens_to_sample=MAX_TOKENS_TO_SAMPLE,
         )
         return response.completion
 

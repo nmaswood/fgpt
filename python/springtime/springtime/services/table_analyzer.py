@@ -3,8 +3,8 @@ from typing import NamedTuple
 from loguru import logger
 
 import pandas as pd
+from springtime.routers.token_length_service import TokenLengthService
 from springtime.services.sheet_processor import SheetPreprocessorImpl
-from springtime.services.token import TokenLengthResponse, get_token_length
 
 import openai
 from pydantic import BaseModel
@@ -34,7 +34,7 @@ class InputChunk(BaseModel):
 
 class _PreprocessedSheet(NamedTuple):
     sheet_name: str
-    token_length: TokenLengthResponse
+    token_length: int
     parsed_sheet: dict[str, pd.DataFrame]
     sheet_as_string: str
 
@@ -53,13 +53,13 @@ GPT4_TOKEN_LIMIT = 5000
 
 
 class TableAnalyzerImpl(TableAnalyzer):
-    def __init__(self):
+    def __init__(self, token_length_service: TokenLengthService):
+        self._token_length_service = token_length_service
         self._preprocessor = self.openai_preprocess()
 
-    @staticmethod
-    def openai_preprocess():
+    def openai_preprocess(self):
         def get_length(text: str) -> int:
-            return get_token_length(text).gpt4
+            return self._token_length_service.gpt4(text)
 
         return SheetPreprocessorImpl(get_length, GPT4_TOKEN_LIMIT)
 

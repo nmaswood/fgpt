@@ -51,7 +51,7 @@ export interface MLServiceClient {
   askQuestionStreaming(args: AskQuestionStreamingArgs): Promise<void>;
   getTitleStreaming(args: GenerateTitleStreamingArgs): Promise<void>;
   playGround(args: PlaygroundRequest): Promise<PlaygroundResponse>;
-  tokenLength(text: string): Promise<{ model: "gpt4"; length: number }>;
+  tokenLength(text: string): Promise<TokenLength>;
 }
 
 export class MLServiceClientImpl implements MLServiceClient {
@@ -152,22 +152,20 @@ export class MLServiceClientImpl implements MLServiceClient {
     return ZPlaygroundResponse.parse(response.data);
   }
 
-  async tokenLength(text: string): Promise<{ model: "gpt4"; length: number }> {
+  async tokenLength(text: string): Promise<TokenLength> {
     const response = await this.client.post<unknown>("/text/token-length", {
       text,
     });
-    const resp = TokenLengthResponse.parse(response.data);
-
-    return {
-      model: "gpt4",
-      length: resp.gpt4,
-    };
+    return ZTokenLengthResponse.parse(response.data);
   }
 }
 
-const TokenLengthResponse = z.object({
+const ZTokenLengthResponse = z.object({
   gpt4: z.number(),
+  claude100k: z.number(),
 });
+
+export type TokenLength = z.infer<typeof ZTokenLengthResponse>;
 
 const ZAskQuestionResponse = z.object({
   data: z.string(),

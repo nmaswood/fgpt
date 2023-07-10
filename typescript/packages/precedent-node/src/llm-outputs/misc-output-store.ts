@@ -28,7 +28,6 @@ export class PsqlMiscOutputStore implements MiscOutputStore {
 
   async textChunkIdsPresent(fileReferenceId: string): Promise<string[]> {
     const result = await this.pool.query(sql.type(ZIdRow)`
-
 SELECT distinct
     text_chunk_id as id
 FROM
@@ -119,6 +118,10 @@ const ZMiscValue = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("summary"),
     value: z.string().array(),
+  }),
+  z.object({
+    type: z.literal("long_form"),
+    value: z.string(),
   }),
 ]);
 

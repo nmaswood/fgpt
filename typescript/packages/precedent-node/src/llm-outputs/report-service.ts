@@ -36,6 +36,7 @@ export class ReportServiceImpl implements ReportService {
         financialSummaries: [],
       },
       terms: [],
+      longForm: [],
     };
 
     const alreadySeenTerms = new Set<string>();
@@ -65,6 +66,9 @@ export class ReportServiceImpl implements ReportService {
         }
         case "summary":
           acc.summaries.push(...value.value);
+          break;
+        case "long_form":
+          acc.longForm.push(value.value);
           break;
         default:
           assertNever(value);

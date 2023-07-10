@@ -69,6 +69,13 @@ const columns: GridColDef<LoadedFile>[] = [
     headerAlign: "right",
   },
   {
+    field: "claude100kTokenLength",
+    headerName: "Claude 100k Token length",
+    width: 160,
+    align: "right",
+    headerAlign: "right",
+  },
+  {
     field: "fullyChunked",
     headerName: "Is fully chunked?",
     type: "boolean",

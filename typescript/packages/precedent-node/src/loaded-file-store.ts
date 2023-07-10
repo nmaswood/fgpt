@@ -34,6 +34,7 @@ SELECT
     file_reference.file_size,
     pf.token_length,
     pf.gpt4_token_length,
+    pf.claude_100k_length,
     tcg.fully_chunked,
     tcg.fully_embedded
 FROM
@@ -66,6 +67,7 @@ const ZLoadedFileRow = z
     file_size: z.number().nullish(),
     token_length: z.number().nullish(),
     gpt4_token_length: z.number().nullish(),
+    claude_100k_length: z.number().nullish(),
     fully_chunked: z.boolean().nullish(),
     fully_embedded: z.boolean().nullish(),
   })
@@ -78,6 +80,7 @@ const ZLoadedFileRow = z
       fileSize: row.file_size ?? undefined,
       extractedTextLength: row.token_length ?? undefined,
       gpt4TokenLength: row.gpt4_token_length ?? undefined,
+      claude100kTokenLength: row.claude_100k_length ?? undefined,
       fullyChunked: Boolean(row.fully_chunked),
       fullyEmbedded: Boolean(row.fully_embedded),
     }),

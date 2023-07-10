@@ -2,6 +2,7 @@ from loguru import logger
 from springtime.routers.chat_router import ChatRouter
 from springtime.routers.embeddings_router import EmbeddingsRouter
 from springtime.routers.text_router import TextRouter
+from springtime.routers.token_length_service import TokenLengthService
 from springtime.routers.vector_router import VectorRouter
 from springtime.services.anthropic_client import AnthropicClient
 from springtime.services.chat_service import OpenAIChatService
@@ -30,10 +31,11 @@ app = FastAPI()
 logger.info("Starting server")
 
 OBJECT_STORE = GCSObjectStore()
-TABLE_EXTRACTOR = TabulaTableExtractor(OBJECT_STORE)
-TABLE_ANALYZER = TableAnalyzerImpl()
-
 ANTHROPIC_CLIENT = AnthropicClient()
+TABLE_EXTRACTOR = TabulaTableExtractor(OBJECT_STORE)
+TOKEN_LENGTH_SERVICE = TokenLengthService(ANTHROPIC_CLIENT)
+TABLE_ANALYZER = TableAnalyzerImpl(TOKEN_LENGTH_SERVICE)
+
 LONG_FORM_REPORT_SERVICE = ClaudeLongformReportService(ANTHROPIC_CLIENT)
 EMBEDDING_SERVICE = OpenAIEmbeddingsService()
 VECTOR_SERVICE = PineconeVectorService(
@@ -63,7 +65,7 @@ app.include_router(ChatRouter(CHAT_SERVICE).get_router())
 app.include_router(ReportRouter(REPORT_SERVICE, LONG_FORM_REPORT_SERVICE).get_router())
 app.include_router(PdfRouter(TABLE_EXTRACTOR, OBJECT_STORE).get_router())
 app.include_router(TableRouter(TABLE_ANALYZER, OBJECT_STORE).get_router())
-app.include_router(TextRouter().get_router())
+app.include_router(TextRouter(TOKEN_LENGTH_SERVICE).get_router())
 app.include_router(VectorRouter(VECTOR_SERVICE).get_router())
 app.include_router(EmbeddingsRouter(EMBEDDING_SERVICE).get_router())
 

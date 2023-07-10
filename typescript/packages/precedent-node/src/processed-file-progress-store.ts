@@ -64,6 +64,9 @@ export class PSqlProcessedFileProgressStore
               checkStatus(task.status);
               break;
             }
+            case "greedy_125k": {
+              break;
+            }
             default:
               assertNever(task.config.strategy);
           }

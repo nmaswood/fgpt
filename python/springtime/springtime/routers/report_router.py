@@ -17,6 +17,10 @@ class LongFormReportRequest(BaseModel):
     text: str
 
 
+class LongFormReportResponse(BaseModel):
+    content: str
+
+
 class LLMOutputResponse(BaseModel):
     summaries: list[str] = []
     questions: list[str] = []
@@ -47,7 +51,7 @@ class ReportRouter:
 
         @router.post("/long-form")
         async def long_form_route(req: LongFormReportRequest):
-            res = self.report_service.generate_output(req.text)
-            return res
+            content = self.long_form_report_service.generate(req.text)
+            return LongFormReportResponse(content=content)
 
         return router

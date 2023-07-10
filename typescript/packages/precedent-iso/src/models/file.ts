@@ -17,6 +17,7 @@ export interface LoadedFile {
   contentType: string;
   extractedTextLength: number | undefined;
   gpt4TokenLength: number | undefined;
+  claude100kTokenLength: number | undefined;
   fullyChunked: boolean;
   fullyEmbedded: boolean;
 }

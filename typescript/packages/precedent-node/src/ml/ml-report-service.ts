@@ -9,6 +9,10 @@ export interface LLMOutputArgs {
   text: string;
 }
 
+export interface LongFormArgs {
+  text: string;
+}
+
 export interface LLMOutputResponse {
   summaries: string[];
   questions: string[];
@@ -18,6 +22,7 @@ export interface LLMOutputResponse {
 
 export interface MLReportService {
   llmOutput(args: LLMOutputArgs): Promise<LLMOutputResponse>;
+  longForm(args: LongFormArgs): Promise<string>;
 }
 export class MLReportServiceImpl implements MLReportService {
   constructor(private readonly client: AxiosInstance) {}
@@ -27,7 +32,20 @@ export class MLReportServiceImpl implements MLReportService {
     });
     return ZLLMOutputResponse.parse(response.data);
   }
+
+  async longForm({ text }: LongFormArgs): Promise<string> {
+    const response = await this.client.post<unknown>("/report/long-form", {
+      text,
+    });
+    return ZLongFormReportResponse.parse(response.data);
+  }
 }
+
+const ZLongFormReportResponse = z
+  .object({
+    content: z.string(),
+  })
+  .transform((v) => v.content);
 
 const ZTerm = z
   .object({
