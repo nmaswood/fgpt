@@ -16,29 +16,6 @@ const ZEmbeddingsResponse = z.object({
 
 type GetEmbeddingsResponse = z.infer<typeof ZEmbeddingsResponse>;
 
-const ZVectorResult = z.object({
-  id: z.string(),
-  metadata: z.record(z.any()),
-  score: z.number(),
-});
-
-export type VectorResult = z.infer<typeof ZVectorResult>;
-
-const ZSimilarResponse = z.object({
-  results: ZVectorResult.array(),
-});
-
-interface UpsertVector {
-  id: string;
-  vector: number[];
-  metadata: Record<string, any>;
-}
-
-interface SimiliarSearch {
-  vector: number[];
-  metadata: Record<string, string>;
-}
-
 export interface AskQuestionStreamingArgs {
   context: string;
   question: string;
@@ -85,8 +62,6 @@ export interface MLServiceClient {
   ping: () => Promise<"pong">;
   getEmbedding: (query: string) => Promise<number[]>;
   getEmbeddings: (args: GetEmbeddingsArgs) => Promise<GetEmbeddingsResponse>;
-  upsertVectors: (args: UpsertVector[]) => Promise<void>;
-  getKSimilar: (args: SimiliarSearch) => Promise<VectorResult[]>;
   askQuestion(args: AskQuestion): Promise<string>;
   askQuestionStreaming(args: AskQuestionStreamingArgs): Promise<void>;
   getTitleStreaming(args: GenerateTitleStreamingArgs): Promise<void>;
@@ -115,26 +90,6 @@ export class MLServiceClientImpl implements MLServiceClient {
   async getEmbedding(query: string): Promise<number[]> {
     const { response } = await this.getEmbeddings({ documents: [query] });
     return response[0]!;
-  }
-
-  async upsertVectors(vectors: UpsertVector[]): Promise<void> {
-    await this.client.put<unknown>("/vector/upsert-vectors", {
-      vectors,
-    });
-  }
-
-  async getKSimilar({
-    vector,
-    metadata,
-  }: SimiliarSearch): Promise<VectorResult[]> {
-    const response = await this.client.post<unknown>(
-      "/vector/similar-vectors",
-      {
-        vector,
-        metadata,
-      },
-    );
-    return ZSimilarResponse.parse(response.data).results;
   }
 
   async askQuestion({ context, question }: AskQuestion): Promise<string> {

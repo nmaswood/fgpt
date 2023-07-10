@@ -2,6 +2,7 @@ import { isNotNull, TextChunk } from "@fgpt/precedent-iso";
 import { keyBy } from "lodash";
 
 import { MLServiceClient } from "../ml/ml-service";
+import { VectorService } from "../ml/vector-service";
 import { TextChunkStore } from "../text-chunk-store";
 
 export interface GenerateAndUpsertArguments {
@@ -18,6 +19,7 @@ export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
   constructor(
     private readonly mlService: MLServiceClient,
     private readonly textChunkStore: TextChunkStore,
+    private readonly vectorService: VectorService,
   ) {}
 
   async generateAndUpsertEmbeddings({
@@ -58,7 +60,7 @@ export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
           },
         }));
 
-      await this.mlService.upsertVectors(payloads);
+      await this.vectorService.upsertVectors(payloads);
     }
   }
   async #getAndSetEmbeddingsIfNeeded(

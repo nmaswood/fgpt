@@ -4,6 +4,7 @@ import {
   FileReferenceStore,
   MLServiceClient,
   TextChunkStore,
+  VectorService,
 } from "@fgpt/precedent-node";
 import express from "express";
 import { keyBy, uniqBy } from "lodash";
@@ -19,6 +20,7 @@ export class ChatRouter {
     private readonly textChunkStore: TextChunkStore,
     private readonly chatStore: ChatStore,
     private readonly fileReferenceStore: FileReferenceStore,
+    private readonly vectorService: VectorService,
   ) {}
   init() {
     const router = express.Router();
@@ -122,7 +124,7 @@ export class ChatRouter {
           : { projectId: args.projectId };
 
         const similarDocuments = await (async () => {
-          const docs = await this.mlClient.getKSimilar({
+          const docs = await this.vectorService.getKSimilar({
             vector,
             metadata,
           });

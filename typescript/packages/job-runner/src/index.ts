@@ -31,6 +31,7 @@ import {
   TableHandlerImpl,
   IngestFileHandlerImpl,
   axiosClientForMlService,
+  PineconeVectorService,
 } from "@fgpt/precedent-node";
 import { SETTINGS, Settings } from "./settings";
 import { MainRouter } from "./router";
@@ -72,6 +73,7 @@ async function start(settings: Settings) {
     serviceToServiceSecret: SETTINGS.serviceToServiceSecret,
   });
 
+  const vectorService = new PineconeVectorService(axiosClient);
   const mlServiceClient = new MLServiceClientImpl(axiosClient);
 
   const questionStore = new PsqlQuestionStore(pool);
@@ -99,6 +101,7 @@ async function start(settings: Settings) {
   const generateEmbeddingsHandler = new EmbeddingsHandlerImpl(
     mlServiceClient,
     textChunkStore,
+    vectorService,
   );
   const llmOutputHandler = new LLMOutputHandlerImpl(
     mlServiceClient,

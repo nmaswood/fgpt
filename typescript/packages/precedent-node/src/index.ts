@@ -33,3 +33,4 @@ export * from "./text-chunk-store";
 export * from "./text-extractor";
 export * from "./tika/tika-client";
 export * from "./user-org/user-org-service";
+export * from "./ml/vector-service";

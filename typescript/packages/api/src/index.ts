@@ -37,6 +37,7 @@ import {
   PSqlProcessedFileProgressStore,
   PSqlExcelProgressStore,
   axiosClientForMlService,
+  PineconeVectorService,
 } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
 import { UserOrgRouter } from "./routers/user-org-router";
@@ -115,6 +116,8 @@ async function start() {
   // when api request is made
   mlService.ping().catch(() => console.log("ML service is down"));
 
+  const vectorService = new PineconeVectorService(axiosClient);
+
   const chatStore = new PsqlChatStore(pool);
 
   const questionStore = new PsqlQuestionStore(pool);
@@ -170,6 +173,7 @@ async function start() {
       textChunkStore,
       chatStore,
       fileReferenceStore,
+      vectorService,
     ).init(),
   );
 
