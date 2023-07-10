@@ -16,7 +16,7 @@ export const ZSimilarResponse = z.object({
 export interface UpsertVector {
   id: string;
   vector: number[];
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface SimiliarSearch {

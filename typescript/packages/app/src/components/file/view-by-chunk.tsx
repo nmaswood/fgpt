@@ -8,7 +8,6 @@ import React from "react";
 import { useFetchPlayground } from "../../hooks/use-fetch-playground";
 import { useFetchTextChunk } from "../../hooks/use-fetch-text-chunk";
 import { useFetchTextChunkGroup } from "../../hooks/use-fetch-text-chunk-group";
-import { useGenerateOutput } from "../../hooks/use-gen-output";
 import { BASIC_SCHEMA } from "./default-prompt";
 
 export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
@@ -29,9 +28,7 @@ export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
 
   const { data: textChunk } = useFetchTextChunk(textChunkGroup?.id, order);
 
-  const [view, setView] = React.useState<"view" | "chat" | "test_output">(
-    "view",
-  );
+  const [view, setView] = React.useState<"view" | "chat">("view");
 
   return (
     <Box
@@ -103,7 +100,6 @@ export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
             >
               <ToggleButton value="view">Text chunks</ToggleButton>
               <ToggleButton value="chat">Prompt playground</ToggleButton>
-              <ToggleButton value="test_output">Trigger output</ToggleButton>
             </ToggleButtonGroup>
           </Box>
 
@@ -112,9 +108,6 @@ export const ViewByChunk: React.FC<{ fileId: string }> = ({ fileId }) => {
           )}
           {textChunk && view === "chat" && (
             <DisplayChat textChunkId={textChunk.id} />
-          )}
-          {textChunk && view === "test_output" && (
-            <TestOutput textChunkId={textChunk.id} />
           )}
         </Box>
       )}
@@ -232,42 +225,6 @@ const DisplayChat: React.FC<{ textChunkId: string }> = ({ textChunkId }) => {
           {error && <pre>{JSON.stringify(error, null, 2)}</pre>}
         </>
       </Box>
-    </Box>
-  );
-};
-
-const TestOutput: React.FC<{ textChunkId: string }> = ({ textChunkId }) => {
-  const { data, trigger, isMutating } = useGenerateOutput();
-
-  return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      width="100%"
-      height="100%"
-      maxHeight="100%"
-      maxWidth="100%"
-      overflow="auto"
-      gap={2}
-    >
-      <Button loading={isMutating} onClick={() => trigger({ textChunkId })}>
-        Generate output
-      </Button>
-
-      {data && (
-        <pre
-          style={{
-            overflow: "auto",
-            maxWidth: "100%",
-            height: "100%",
-            minHeight: "300px",
-            border: "0.5px solid lightgray",
-            whiteSpace: "pre-wrap",
-          }}
-        >
-          {JSON.stringify(data, null, 2)}
-        </pre>
-      )}
     </Box>
   );
 };

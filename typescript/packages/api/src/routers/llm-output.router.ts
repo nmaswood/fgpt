@@ -30,21 +30,6 @@ export class LLMOutputRouter {
     );
 
     router.post(
-      "/gen-chunk-output",
-      async (req: express.Request, res: express.Response) => {
-        const body = ZGenChunkRequest.parse(req.body);
-
-        const chunk = await this.chunkStore.getTextChunkById(body.textChunkId);
-
-        const output = await this.mlService.llmOutput({
-          text: chunk.chunkText,
-        });
-
-        res.json({ output });
-      },
-    );
-
-    router.post(
       "/playground",
       async (req: express.Request, res: express.Response) => {
         const body = ZPlaygroundRequest.parse(req.body);
@@ -125,9 +110,5 @@ const ZPlaygroundRequest = z.object({
 });
 
 const ZChunkRequest = z.object({
-  textChunkId: z.string(),
-});
-
-const ZGenChunkRequest = z.object({
   textChunkId: z.string(),
 });

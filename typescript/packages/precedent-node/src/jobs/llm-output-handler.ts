@@ -3,7 +3,7 @@ import {
   MiscOutputStore,
 } from "../llm-outputs/misc-output-store";
 import { QuestionStore } from "../llm-outputs/question-store";
-import { MLServiceClient } from "../ml/ml-service";
+import { MLReportService } from "../ml/ml-report-service";
 import { ShaHash } from "../sha-hash";
 import { TextChunkStore } from "../text-chunk-store";
 
@@ -25,7 +25,7 @@ export interface LLMOutputHandler {
 
 export class LLMOutputHandlerImpl implements LLMOutputHandler {
   constructor(
-    private readonly mlService: MLServiceClient,
+    private readonly mlReportService: MLReportService,
     private readonly textChunkStore: TextChunkStore,
     private readonly questionStore: QuestionStore,
     private readonly miscOutputStore: MiscOutputStore,
@@ -62,7 +62,7 @@ export class LLMOutputHandlerImpl implements LLMOutputHandler {
     const chunk = await this.textChunkStore.getTextChunkById(textChunkId);
 
     const { summaries, questions, financialSummary, terms } =
-      await this.mlService.llmOutput({
+      await this.mlReportService.llmOutput({
         text: chunk.chunkText,
       });
 

@@ -32,6 +32,7 @@ import {
   IngestFileHandlerImpl,
   axiosClientForMlService,
   PineconeVectorService,
+  MLReportServiceImpl,
 } from "@fgpt/precedent-node";
 import { SETTINGS, Settings } from "./settings";
 import { MainRouter } from "./router";
@@ -68,13 +69,14 @@ async function start(settings: Settings) {
 
   const textChunkStore = new PsqlTextChunkStore(pool);
 
-  const axiosClient = axiosClientForMlService({
+  const springtimeClient = axiosClientForMlService({
     baseURL: SETTINGS.mlServiceUri,
     serviceToServiceSecret: SETTINGS.serviceToServiceSecret,
   });
 
-  const vectorService = new PineconeVectorService(axiosClient);
-  const mlServiceClient = new MLServiceClientImpl(axiosClient);
+  const vectorService = new PineconeVectorService(springtimeClient);
+  const mlServiceClient = new MLServiceClientImpl(springtimeClient);
+  const mlReportService = new MLReportServiceImpl(springtimeClient);
 
   const questionStore = new PsqlQuestionStore(pool);
   const miscOutputStore = new PsqlMiscOutputStore(pool);
@@ -104,7 +106,7 @@ async function start(settings: Settings) {
     vectorService,
   );
   const llmOutputHandler = new LLMOutputHandlerImpl(
-    mlServiceClient,
+    mlReportService,
     textChunkStore,
     questionStore,
     miscOutputStore,
@@ -136,7 +138,7 @@ async function start(settings: Settings) {
   app.use("/", mainRouter.init());
 
   app.get("/ping", (_, res) => {
-    res.json({ ping: "pong" });
+    res.send("pong");
   });
 
   app.use("/healthz", (_, res) => {

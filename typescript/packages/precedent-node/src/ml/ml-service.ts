@@ -1,8 +1,4 @@
 import { ChatHistory } from "@fgpt/precedent-iso";
-import {
-  FinancialSummary,
-  Term,
-} from "@fgpt/precedent-iso/src/models/llm-outputs";
 import { AxiosInstance } from "axios";
 import z from "zod";
 
@@ -36,17 +32,6 @@ export interface AskQuestion {
   question: string;
 }
 
-export interface LLMOutputArgs {
-  text: string;
-}
-
-export interface LLMOutputResponse {
-  summaries: string[];
-  questions: string[];
-  financialSummary: FinancialSummary;
-  terms: Term[];
-}
-
 export interface PlaygroundRequest {
   text: string;
   jsonSchema: Record<string, unknown>;
@@ -55,7 +40,7 @@ export interface PlaygroundRequest {
 }
 
 export interface PlaygroundResponse {
-  raw: Record<string, any>;
+  raw: Record<string, unknown>;
 }
 
 export interface MLServiceClient {
@@ -65,7 +50,6 @@ export interface MLServiceClient {
   askQuestion(args: AskQuestion): Promise<string>;
   askQuestionStreaming(args: AskQuestionStreamingArgs): Promise<void>;
   getTitleStreaming(args: GenerateTitleStreamingArgs): Promise<void>;
-  llmOutput(args: LLMOutputArgs): Promise<LLMOutputResponse>;
   playGround(args: PlaygroundRequest): Promise<PlaygroundResponse>;
   tokenLength(text: string): Promise<{ model: "gpt4"; length: number }>;
 }
@@ -158,13 +142,6 @@ export class MLServiceClientImpl implements MLServiceClient {
     });
   }
 
-  async llmOutput({ text }: LLMOutputArgs): Promise<LLMOutputResponse> {
-    const response = await this.client.post<unknown>("/report/llm-output", {
-      text,
-    });
-    return ZLLMOutputResponse.parse(response.data);
-  }
-
   async playGround(args: PlaygroundRequest): Promise<PlaygroundResponse> {
     const response = await this.client.post<unknown>("/playground", {
       text: args.text,
@@ -197,47 +174,5 @@ const ZAskQuestionResponse = z.object({
 });
 
 const ZPlaygroundResponse = z.object({
-  raw: z.record(z.any()),
+  raw: z.record(z.unknown()),
 });
-
-const ZTerm = z
-  .object({
-    term_value: z.string(),
-    term_name: z.string(),
-  })
-  .transform(
-    (row): Term => ({
-      termValue: row.term_value,
-      termName: row.term_name,
-    }),
-  );
-
-const ZFinancialSummary = z
-  .object({
-    investment_merits: z.string().array(),
-    investment_risks: z.string().array(),
-    financial_summaries: z.string().array(),
-  })
-  .transform(
-    (row): FinancialSummary => ({
-      investmentMerits: row.investment_merits,
-      investmentRisks: row.investment_risks,
-      financialSummaries: row.financial_summaries,
-    }),
-  );
-
-const ZLLMOutputResponse = z
-  .object({
-    summaries: z.array(z.string()),
-    questions: z.array(z.string()),
-    financial_summary: ZFinancialSummary,
-    terms: z.array(ZTerm),
-  })
-  .transform(
-    (row): LLMOutputResponse => ({
-      summaries: row.summaries,
-      questions: row.questions,
-      terms: row.terms,
-      financialSummary: row.financial_summary,
-    }),
-  );
