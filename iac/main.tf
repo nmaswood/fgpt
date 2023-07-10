@@ -341,6 +341,11 @@ resource "google_cloud_run_v2_service" "springtime" {
         name  = "SERVICE_TO_SERVICE_SECRET"
         value = var.service_to_service_secret
       }
+
+      env {
+        name  = "ANTHROPIC_API_KEY"
+        value = var.service_to_service_secret
+      }
     }
   }
 

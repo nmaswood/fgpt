@@ -119,3 +119,6 @@ variable "pubsub_task_topic" {
 variable "pubsub_task_subscription" {
   default = "task_subscription"
 }
+
+// ANTHROPIC
+variable "anthropic_api_key" {}

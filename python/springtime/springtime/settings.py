@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     service_to_service_secret: Optional[str] = Field(
         env="SERVICE_TO_SERVICE_SECRET",
     )
+    anthropic_api_key: str = Field(env="ANTHROPIC_API_KEY")
 
     class Config:
         env_file = ".env"
