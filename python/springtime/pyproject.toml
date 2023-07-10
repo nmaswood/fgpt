@@ -11,7 +11,6 @@ fastapi = "^0.95.1"
 uvicorn = "^0.22.0"
 autopep8 = "^2.0.2"
 python-dotenv = "^1.0.0"
-langchain = "v0.0.147"
 openai = "^0.27.5"
 pytest = "^7.3.1"
 pinecone-client = "^2.2.1"
@@ -23,6 +22,7 @@ google-cloud-storage = "^2.9.0"
 pandas = "^2.0.2"
 openpyxl = "^3.1.2"
 httpx = "^0.24.1"
+anthropic = "^0.3.2"
 
 
 [tool.poetry.group.dev.dependencies]

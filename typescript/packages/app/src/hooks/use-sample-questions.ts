@@ -9,7 +9,6 @@ export const useSampleForFile = (fileReferenceId: string) => {
     forFileSampleFetcher,
     {
       revalidateOnFocus: false,
-      revalidateOnMount: false,
     },
   );
 
@@ -35,7 +34,6 @@ export const useSampleForProject = (projectId: string) => {
     forProjectSampleFetcher,
     {
       revalidateOnFocus: false,
-      revalidateOnMount: false,
     },
   );
 

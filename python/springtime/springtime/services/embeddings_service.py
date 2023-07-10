@@ -1,6 +1,8 @@
 import abc
+import openai
 
-from langchain.embeddings import OpenAIEmbeddings
+
+MODEL = "text-embedding-ada-002"
 
 
 class EmbeddingsService(abc.ABC):
@@ -8,17 +10,8 @@ class EmbeddingsService(abc.ABC):
     def embed_documents(self, documents: list[str]) -> list[list[float]]:
         pass
 
-    @abc.abstractmethod
-    def embed_query(self, query: str) -> list[float]:
-        pass
-
 
 class OpenAIEmbeddingsService(EmbeddingsService):
-    def __init__(self):
-        self.embeddings = OpenAIEmbeddings()
-
     def embed_documents(self, documents: list[str]) -> list[list[float]]:
-        return self.embeddings.embed_documents(documents)
-
-    def embed_query(self, query: str) -> list[float]:
-        return self.embeddings.embed_query(query)
+        response = openai.Embedding.create(input=documents, model=MODEL)
+        return [data.embedding for data in response["data"]]
