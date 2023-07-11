@@ -11,7 +11,7 @@ class LongformReportService(abc.ABC):
 
 BASE_PROMPT = (
     "You are an expert financial analyst. Your job is to review materials and evaluate whether it might be a good investment for the PE fund you are supporting."
-    "Provide the key investment merits, investment risks, financial summary and transaction details in well formatted summary memo"
+    "I will provide you a document after you answer OK. The document start after _START_DOCUMENT_ and end after _END_DOCUMENT_.  Read the document and provide key investment merits, investment risks, financial summary and transaction details from the document"
 )
 
 
@@ -21,9 +21,16 @@ class ClaudeLongformReportService(LongformReportService):
 
     def generate(self, text: str) -> str:
         prompt = f"""
-                {BASE_PROMPT}
-                Document:
-                {text}
-                """
 
+
+Human: {BASE_PROMPT}
+
+
+Assistant: OK
+
+
+Human: _START_DOCUMENT_{text.strip()}_END_DOCUMENT_
+
+
+Assistant:"""
         return self._client.complete(prompt)
