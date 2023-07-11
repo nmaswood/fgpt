@@ -1,6 +1,7 @@
 import { assertNever, ChunkStrategy } from "@fgpt/precedent-iso";
 
-import { Task, TaskStore, CreateTask } from "../task-store";
+import { LOGGER } from "../logger";
+import { CreateTask, Task, TaskStore } from "../task-store";
 import { EmbeddingsHandler } from "./generate-embeddings-handler";
 import { IngestFileHandler } from "./ingest-file-handler";
 import { ReportHandler } from "./llm-output-handler";
@@ -55,6 +56,7 @@ export class TaskExecutorImpl implements TaskExecutor {
           },
         }));
         if (this.claudeReportGeneration) {
+          LOGGER.info("Enqueueing greedy_125k chunking");
           taskConfig.push({
             organizationId: config.organizationId,
             projectId: config.projectId,
@@ -69,6 +71,8 @@ export class TaskExecutorImpl implements TaskExecutor {
               strategy: "greedy_125k",
             },
           });
+        } else {
+          LOGGER.info("Skipping greedy_125k chunking");
         }
 
         await this.taskStore.insertMany(taskConfig);
@@ -105,6 +109,9 @@ export class TaskExecutorImpl implements TaskExecutor {
             break;
           }
           case "llm-output": {
+            LOGGER.info(
+              `Inserting an llm-output task with ${resp.textChunkIds.length} text chunks`,
+            );
             await this.taskStore.insert({
               organizationId,
               projectId,

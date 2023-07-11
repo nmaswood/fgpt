@@ -10,7 +10,7 @@ class AnthropicClient:
 
     def complete(self, prompt: str) -> str:
         response = self._anthropic.completions.create(
-            model="claude-v1-100k",
+            model="claude-2",
             prompt=f"{HUMAN_PROMPT} {prompt} {AI_PROMPT}",
             max_tokens_to_sample=MAX_TOKENS_TO_SAMPLE,
         )

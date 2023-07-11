@@ -1,6 +1,8 @@
 from typing import Optional
 from pydantic import BaseSettings, Field
 
+from springtime.models.open_ai import OpenAIModel
+
 
 class Settings(BaseSettings):
     host: str = Field(env="host")
@@ -16,6 +18,7 @@ class Settings(BaseSettings):
         env="SERVICE_TO_SERVICE_SECRET",
     )
     anthropic_api_key: str = Field(env="ANTHROPIC_API_KEY")
+    reports_openai_model: OpenAIModel = Field(env="REPORTS_OPENAI_MODEL")
 
     class Config:
         env_file = ".env"

@@ -27,6 +27,7 @@ export class PSqlProcessedFileProgressStore
       embeddingChunk: DEFAULT_STATUS,
       reportChunk: DEFAULT_STATUS,
       report: DEFAULT_STATUS,
+      longFormReport: DEFAULT_STATUS,
       upsertEmbeddings: DEFAULT_STATUS,
       extractTable: DEFAULT_STATUS,
       analyzeTable: DEFAULT_STATUS,
@@ -65,6 +66,7 @@ export class PSqlProcessedFileProgressStore
               break;
             }
             case "greedy_125k": {
+              forTask.longFormReport = { type: task.status };
               break;
             }
             default:

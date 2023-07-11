@@ -34,7 +34,7 @@ OBJECT_STORE = GCSObjectStore()
 ANTHROPIC_CLIENT = AnthropicClient()
 TABLE_EXTRACTOR = TabulaTableExtractor(OBJECT_STORE)
 TOKEN_LENGTH_SERVICE = TokenLengthService(ANTHROPIC_CLIENT)
-TABLE_ANALYZER = TableAnalyzerImpl(TOKEN_LENGTH_SERVICE)
+TABLE_ANALYZER = TableAnalyzerImpl(TOKEN_LENGTH_SERVICE, SETTINGS.reports_openai_model)
 
 LONG_FORM_REPORT_SERVICE = ClaudeLongformReportService(ANTHROPIC_CLIENT)
 EMBEDDING_SERVICE = OpenAIEmbeddingsService()
@@ -44,7 +44,7 @@ VECTOR_SERVICE = PineconeVectorService(
     index_name=SETTINGS.pinecone_index,
     namespace=SETTINGS.pinecone_namespace,
 )
-REPORT_SERVICE = OpenAIReportService()
+REPORT_SERVICE = OpenAIReportService(SETTINGS.reports_openai_model)
 CHAT_SERVICE = OpenAIChatService()
 
 

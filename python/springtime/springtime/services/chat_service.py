@@ -26,13 +26,16 @@ class ChatService(abc.ABC):
         pass
 
 
+MODEL = "gpt-3.5-turbo"
+
+
 class OpenAIChatService(ChatService):
     def ask_streaming(
         self, context: str, question: str, history: list[ChatHistory]
     ) -> Generator[Any, Any, None]:
         prompt = create_prompt(context, question, history)
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=MODEL,
             messages=[
                 {"role": "system", "content": "You are an expert financial analyst."},
                 {
@@ -58,8 +61,7 @@ class OpenAIChatService(ChatService):
         formatted_message = prompt.format(context=context, question=question)
 
         response = openai.ChatCompletion.create(
-            # model='gpt-4',
-            model="gpt-3.5-turbo",
+            model=MODEL,
             messages=[
                 {"role": "system", "content": "You are an expert financial analyst."},
                 {"role": "user", "content": formatted_message},
@@ -83,7 +85,7 @@ class OpenAIChatService(ChatService):
             question=question, answer=answer
         )
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=MODEL,
             messages=[
                 {
                     "role": "system",

@@ -8,7 +8,7 @@ from springtime.services.sheet_processor import SheetPreprocessorImpl
 
 import openai
 from pydantic import BaseModel
-from springtime.models.open_ai import CompletionResponse
+from springtime.models.open_ai import CompletionResponse, OpenAIModel
 
 
 from springtime.services.prompts import EXCEL_SYSTEM_CONTEXT
@@ -53,9 +53,10 @@ GPT4_TOKEN_LIMIT = 5000
 
 
 class TableAnalyzerImpl(TableAnalyzer):
-    def __init__(self, token_length_service: TokenLengthService):
+    def __init__(self, token_length_service: TokenLengthService, model: OpenAIModel):
         self._token_length_service = token_length_service
         self._preprocessor = self.openai_preprocess()
+        self.model = model
 
     def openai_preprocess(self):
         def get_length(text: str) -> int:
@@ -90,7 +91,7 @@ class TableAnalyzerImpl(TableAnalyzer):
 
     def _chat_completion(self, table: str) -> CompletionResponse:
         completion = openai.ChatCompletion.create(
-            model="gpt-4-0613",
+            model=self.model,
             messages=[
                 {
                     "role": "system",

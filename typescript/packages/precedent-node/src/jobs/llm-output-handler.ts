@@ -3,6 +3,7 @@ import {
   MiscOutputStore,
 } from "../llm-outputs/misc-output-store";
 import { QuestionStore } from "../llm-outputs/question-store";
+import { LOGGER } from "../logger";
 import { MLReportService } from "../ml/ml-report-service";
 import { ShaHash } from "../sha-hash";
 import { TextChunkStore } from "../text-chunk-store";
@@ -77,6 +78,12 @@ export class ReportHandlerImpl implements ReportHandler {
 
     const toProcess = config.textChunkIds.filter(
       (id) => !allChunkIdsSeen.has(id),
+    );
+
+    LOGGER.info(
+      `Skipping ${
+        allChunkIdsSeen.size - toProcess.length
+      } chunks already processed`,
     );
 
     for (const textChunkId of toProcess) {

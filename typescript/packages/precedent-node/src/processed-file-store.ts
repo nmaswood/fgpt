@@ -77,7 +77,6 @@ WHERE
         claude100kLength,
       }) =>
         sql.fragment`
-
 (${organizationId},
     ${projectId},
     ${fileReferenceId},

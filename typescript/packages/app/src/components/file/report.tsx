@@ -10,9 +10,12 @@ import {
   List,
   ListItem,
   ListItemContent,
+  Option,
+  Select,
   Table,
   Typography,
 } from "@mui/joy";
+import React from "react";
 
 export const DisplayFileReport: React.FC<{
   file: FileToRender.File;
@@ -75,15 +78,54 @@ export const ForExcelValue: React.FC<{ chunk: AnalyzeResponseChunk }> = ({
     </Box>
   );
 };
+
+export type ReportType = "gpt4" | "claude";
+
 const ForPDF: React.FC<{ report: Outputs.Report | undefined }> = ({
   report,
 }) => {
+  const [value, setValue] = React.useState<ReportType>("gpt4");
   if (!report) {
     return null;
   }
-  const { summaries, financialSummary, terms } = report;
+
+  const hasClaude = report.longForm.length > 0;
   return (
     <Box display="flex" flexDirection="column" gap={1} padding={2}>
+      {hasClaude && (
+        <Select
+          value={value}
+          sx={{
+            width: "fit-content",
+          }}
+          onChange={(_, newValue) => {
+            if (newValue) {
+              setValue(newValue);
+            }
+          }}
+        >
+          <Option value="gpt4">GPT-4</Option>
+          <Option value="claude">Claude</Option>
+        </Select>
+      )}
+      {value === "claude" && <ClaudeReport longForm={report.longForm} />}
+      {value === "gpt4" && <ChatGPTReport report={report} />}
+    </Box>
+  );
+};
+
+const ClaudeReport: React.FC<{
+  longForm: string[];
+}> = ({ longForm }) => {
+  const allText = longForm.join("\n");
+  return <Typography whiteSpace="pre-wrap"> {allText}</Typography>;
+};
+
+const ChatGPTReport: React.FC<{
+  report: Outputs.Report;
+}> = ({ report: { summaries, financialSummary, terms } }) => {
+  return (
+    <>
       {terms.length > 0 && (
         <Box display="flex" flexDirection="column" gap={1}>
           <Typography level="h4">Terms</Typography>
@@ -167,7 +209,7 @@ const ForPDF: React.FC<{ report: Outputs.Report | undefined }> = ({
           </List>
         </>
       )}
-    </Box>
+    </>
   );
 };
 

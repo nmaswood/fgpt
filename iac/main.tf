@@ -346,6 +346,11 @@ resource "google_cloud_run_v2_service" "springtime" {
         name  = "ANTHROPIC_API_KEY"
         value = var.service_to_service_secret
       }
+
+      env {
+        name  = "REPORTS_OPENAI_MODEL"
+        value = "gpt-4-0613"
+      }
     }
   }
 

@@ -63,6 +63,9 @@ export class MLServiceClientImpl implements MLServiceClient {
   }
 
   async getEmbeddings(args: GetEmbeddingsArgs): Promise<GetEmbeddingsResponse> {
+    if (args.documents.length === 0) {
+      return { response: [] };
+    }
     const response = await this.client.post<unknown>(
       "/embeddings/embedding-for-documents",
       { documents: args.documents },

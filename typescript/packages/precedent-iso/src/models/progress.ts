@@ -18,6 +18,7 @@ export interface ProgressForPdfTasks {
   embeddingChunk: ProgressTaskStatus;
   reportChunk: ProgressTaskStatus;
   report: ProgressTaskStatus;
+  longFormReport: ProgressTaskStatus;
   upsertEmbeddings: ProgressTaskStatus;
   extractTable: ProgressTaskStatus;
   analyzeTable: ProgressTaskStatus;

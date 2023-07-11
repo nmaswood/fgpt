@@ -7,6 +7,7 @@ from loguru import logger
 import openai
 
 import json
+from springtime.models.open_ai import OpenAIModel
 
 
 from springtime.services.prompts import (
@@ -51,7 +52,7 @@ class Summaries(BaseModel):
     summaries: list[str] = []
 
 
-class PlaygroundRequest(BaseModel):
+class CallFunctionRequest(BaseModel):
     text: str
     prompt: str
     json_schema: dict[str, Any]
@@ -65,6 +66,9 @@ class ReportService(abc.ABC):
 
 
 class OpenAIReportService(ReportService):
+    def __init__(self, model: OpenAIModel):
+        self.model = model
+
     def generate_output(self, text: str) -> Output:
         questions = self.get_questions(text)
         summaries = self.get_summaries(text)
@@ -79,7 +83,7 @@ class OpenAIReportService(ReportService):
         )
 
     def get_questions(self, text: str) -> list[str]:
-        req = PlaygroundRequest(
+        req = CallFunctionRequest(
             text=text,
             prompt="You are an expert financial analyst. Parse the document for the requested information.",
             json_schema=questions_schema,
@@ -90,7 +94,7 @@ class OpenAIReportService(ReportService):
         return [q.question for q in questions.questions]
 
     def get_fin_summary(self, text: str) -> FinancialSummary:
-        req = PlaygroundRequest(
+        req = CallFunctionRequest(
             text=text,
             prompt="You are an expert financial analyst. Parse the document for the requested information. If the information is not available, do not return anything.",
             json_schema=financial_summary_schema,
@@ -104,7 +108,7 @@ class OpenAIReportService(ReportService):
             return FinancialSummary()
 
     def get_terms(self, text: str) -> list[Term]:
-        req = PlaygroundRequest(
+        req = CallFunctionRequest(
             text=text,
             prompt="You are an expert financial analyst. Parse the document for the requested information. If the information is not available, return 'Not Available'",
             json_schema=terms_schema,
@@ -120,7 +124,7 @@ class OpenAIReportService(ReportService):
         return terms
 
     def get_summaries(self, text: str) -> list[str]:
-        req = PlaygroundRequest(
+        req = CallFunctionRequest(
             text=text,
             prompt="You are an expert financial analyst. Parse the document for the requested information",
             json_schema=summaries_schema,
@@ -130,10 +134,10 @@ class OpenAIReportService(ReportService):
         summaries = Summaries(**response)
         return summaries.summaries
 
-    def call_function(self, req: PlaygroundRequest) -> dict[str, Any]:
-        print("Running request")
+    def call_function(self, req: CallFunctionRequest) -> dict[str, Any]:
+        print(f"Running function {req.function_name}")
         completion = openai.ChatCompletion.create(
-            model="gpt-4-0613",
+            model=self.model,
             messages=[
                 {"role": "system", "content": req.prompt},
                 {"role": "user", "content": "Document: {}".format(req.text)},
