@@ -3318,4 +3318,4 @@ mlam@bear.com
 
 def test_report(long_form_report_service: LongformReportService):
     resp = long_form_report_service.generate(DATA)
-    breakpoint()
+    assert resp
