@@ -27,7 +27,7 @@ import {
   PsqlExcelOutputStore,
   TextChunkHandlerImpl,
   EmbeddingsHandlerImpl,
-  LLMOutputHandlerImpl,
+  ReportHandlerImpl,
   TableHandlerImpl,
   IngestFileHandlerImpl,
   axiosClientForMlService,
@@ -105,7 +105,7 @@ async function start(settings: Settings) {
     textChunkStore,
     vectorService,
   );
-  const llmOutputHandler = new LLMOutputHandlerImpl(
+  const reportHandler = new ReportHandlerImpl(
     mlReportService,
     textChunkStore,
     questionStore,
@@ -128,9 +128,10 @@ async function start(settings: Settings) {
     textExtractionHandler,
     textChunkHandler,
     generateEmbeddingsHandler,
-    llmOutputHandler,
+    reportHandler,
     tableHandler,
     ingestFileHandler,
+    SETTINGS.claudeReportGeneration,
   );
 
   const mainRouter = new MainRouter(taskStore, taskExecutor);

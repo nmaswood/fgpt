@@ -1,10 +1,9 @@
-import { assertNever } from "@fgpt/precedent-iso";
+import { assertNever, ChunkStrategy } from "@fgpt/precedent-iso";
 
-import { LOGGER } from "../logger";
-import { Task, TaskStore } from "../task-store";
+import { Task, TaskStore, CreateTask } from "../task-store";
 import { EmbeddingsHandler } from "./generate-embeddings-handler";
 import { IngestFileHandler } from "./ingest-file-handler";
-import { LLMOutputHandler } from "./llm-output-handler";
+import { ReportHandler } from "./llm-output-handler";
 import { TableHandler } from "./table-handler";
 import { TextChunkHandler } from "./text-chunk-handler";
 import { TextExtractionHandler } from "./text-extraction-handler";
@@ -14,15 +13,16 @@ export interface TaskExecutor {
 }
 
 export class TaskExecutorImpl implements TaskExecutor {
-  STRATEGIES = ["greedy_v0", "greedy_15k"] as const;
+  STRATEGIES: ChunkStrategy[] = ["greedy_v0", "greedy_15k"];
   constructor(
     private readonly taskStore: TaskStore,
     private readonly textExtractionHandler: TextExtractionHandler,
     private readonly textChunkHandler: TextChunkHandler,
     private readonly generateEmbeddingsHandler: EmbeddingsHandler,
-    private readonly llmOutputHandler: LLMOutputHandler,
+    private readonly reportHandler: ReportHandler,
     private readonly tableHandler: TableHandler,
     private readonly ingestFileHandler: IngestFileHandler,
+    private readonly claudeReportGeneration: boolean,
   ) {}
 
   async execute({ config, organizationId, projectId }: Task) {
@@ -40,8 +40,22 @@ export class TaskExecutorImpl implements TaskExecutor {
           fileReferenceId: config.fileReferenceId,
         });
 
-        await this.taskStore.insertMany(
-          this.STRATEGIES.map((strategy) => ({
+        const taskConfig: CreateTask[] = this.STRATEGIES.map((strategy) => ({
+          organizationId: config.organizationId,
+          projectId: config.projectId,
+          fileReferenceId: config.fileReferenceId,
+          config: {
+            type: "text-chunk",
+            version: "1",
+            organizationId,
+            projectId,
+            fileReferenceId: config.fileReferenceId,
+            processedFileId,
+            strategy,
+          },
+        }));
+        if (this.claudeReportGeneration) {
+          taskConfig.push({
             organizationId: config.organizationId,
             projectId: config.projectId,
             fileReferenceId: config.fileReferenceId,
@@ -52,10 +66,12 @@ export class TaskExecutorImpl implements TaskExecutor {
               projectId,
               fileReferenceId: config.fileReferenceId,
               processedFileId,
-              strategy,
+              strategy: "greedy_125k",
             },
-          })),
-        );
+          });
+        }
+
+        await this.taskStore.insertMany(taskConfig);
 
         break;
       }
@@ -107,6 +123,23 @@ export class TaskExecutorImpl implements TaskExecutor {
 
             break;
           }
+          case "long-form":
+            await this.taskStore.insert({
+              organizationId,
+              projectId,
+              fileReferenceId: config.fileReferenceId,
+              config: {
+                type: "long-form",
+                version: "1",
+                organizationId,
+                projectId,
+                fileReferenceId: config.fileReferenceId,
+                processedFileId: config.processedFileId,
+                textChunkGroupId: resp.textGroupId,
+                textChunkIds: resp.textChunkIds,
+              },
+            });
+            break;
           default:
             assertNever(resp);
         }
@@ -122,7 +155,11 @@ export class TaskExecutorImpl implements TaskExecutor {
       }
 
       case "llm-outputs": {
-        await this.llmOutputHandler.generateReport(config);
+        await this.reportHandler.generateReport(config);
+        break;
+      }
+      case "long-form": {
+        await this.reportHandler.generateLongFormReport(config);
         break;
       }
 
@@ -143,13 +180,6 @@ export class TaskExecutorImpl implements TaskExecutor {
               source: null,
               fileReferenceId: config.fileReferenceId,
             };
-
-        LOGGER.info({ fileReferenceId }, "about to extract table");
-        LOGGER.info({ fileReferenceId }, "about to extract table");
-        LOGGER.info({ fileReferenceId }, "about to extract table");
-        LOGGER.info({ fileReferenceId }, "about to extract table");
-        LOGGER.info({ fileReferenceId }, "about to extract table");
-        LOGGER.info({ fileReferenceId }, "about to extract table");
 
         await this.taskStore.insert({
           organizationId,

@@ -12,6 +12,7 @@ export const ZTaskType = z.enum([
   "llm-outputs",
   "extract-table",
   "analyze-table",
+  "long-form",
 ]);
 
 export const ZTaskStatus = z.enum([
@@ -73,6 +74,17 @@ export const ZLLMOutputsConfig = z.object({
   textChunkIds: z.string().array(),
 });
 
+export const ZLongFormReportConfig = z.object({
+  type: z.literal("long-form"),
+  version: z.literal("1"),
+  organizationId: z.string(),
+  projectId: z.string(),
+  fileReferenceId: z.string(),
+  processedFileId: z.string(),
+  textChunkGroupId: z.string(),
+  textChunkIds: z.string().array(),
+});
+
 export const ZExtractTableConfig = z.object({
   type: z.literal("extract-table"),
   version: z.literal("1"),
@@ -104,6 +116,7 @@ export const ZTaskConfig = z.discriminatedUnion("type", [
   ZLLMOutputsConfig,
   ZExtractTableConfig,
   ZAnalyzeTableConfig,
+  ZLongFormReportConfig,
 ]);
 
 export type TaskType = z.infer<typeof ZTaskType>;

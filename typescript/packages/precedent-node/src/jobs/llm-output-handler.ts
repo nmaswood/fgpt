@@ -8,7 +8,7 @@ import { ShaHash } from "../sha-hash";
 import { TextChunkStore } from "../text-chunk-store";
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
-export namespace LLMOutputHandler {
+export namespace ReportHandler {
   export interface Arguments {
     organizationId: string;
     projectId: string;
@@ -19,11 +19,12 @@ export namespace LLMOutputHandler {
   }
 }
 
-export interface LLMOutputHandler {
-  generateReport: (args: LLMOutputHandler.Arguments) => Promise<void>;
+export interface ReportHandler {
+  generateReport: (args: ReportHandler.Arguments) => Promise<void>;
+  generateLongFormReport: (args: ReportHandler.Arguments) => Promise<void>;
 }
 
-export class LLMOutputHandlerImpl implements LLMOutputHandler {
+export class ReportHandlerImpl implements ReportHandler {
   constructor(
     private readonly mlReportService: MLReportService,
     private readonly textChunkStore: TextChunkStore,
@@ -31,7 +32,43 @@ export class LLMOutputHandlerImpl implements LLMOutputHandler {
     private readonly miscOutputStore: MiscOutputStore,
   ) {}
 
-  async generateReport(config: LLMOutputHandler.Arguments): Promise<void> {
+  async generateLongFormReport(config: ReportHandler.Arguments): Promise<void> {
+    const { textChunkGroupId, textChunkIds } = config;
+    const acc: {
+      value: string;
+      textChunkId: string;
+    }[] = [];
+
+    for (const textChunkId of textChunkIds) {
+      const chunk = await this.textChunkStore.getTextChunkById(textChunkId);
+
+      const value = await this.mlReportService.longForm({
+        text: chunk.chunkText,
+      });
+
+      acc.push({
+        value,
+        textChunkId,
+      });
+    }
+
+    await this.miscOutputStore.insertMany(
+      acc.map((row) => ({
+        textChunkId: row.textChunkId,
+        organizationId: config.organizationId,
+        projectId: config.projectId,
+        fileReferenceId: config.fileReferenceId,
+        processedFileId: config.processedFileId,
+        textChunkGroupId,
+        value: {
+          type: "long_form",
+          value: row.value,
+        },
+      })),
+    );
+  }
+
+  async generateReport(config: ReportHandler.Arguments): Promise<void> {
     const { textChunkGroupId } = config;
 
     const allChunkIdsSeen = new Set(

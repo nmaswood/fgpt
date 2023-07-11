@@ -558,6 +558,11 @@ resource "google_cloud_run_v2_service" "job_runner_server" {
       }
 
       env {
+        name  = "CLAUDE_REPORT_GENERATION"
+        value = "true"
+      }
+
+      env {
 
         name  = "SQL_URI"
         value = "socket://${urlencode(var.database_user)}:${urlencode(var.database_password)}@${urlencode("/cloudsql/${google_sql_database_instance.instance.connection_name}")}/${var.project_slug}"

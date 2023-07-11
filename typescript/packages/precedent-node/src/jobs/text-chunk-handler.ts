@@ -25,7 +25,7 @@ export namespace TextChunkHandler {
   export type Response =
     | { type: "embeddings"; textGroupId: string }
     | {
-        type: "llm-output";
+        type: "llm-output" | "long-form";
         textGroupId: string;
         textChunkIds: string[];
       }

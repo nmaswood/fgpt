@@ -17,6 +17,8 @@ const ZSettings = z.object({
   }),
 
   serviceToServiceSecret: z.string(),
+
+  claudeReportGeneration: z.boolean(),
 });
 
 export type Settings = z.infer<typeof ZSettings>;
@@ -40,4 +42,7 @@ export const SETTINGS = ZSettings.parse({
     emulatorHost: process.env["PUBSUB_EMULATOR_HOST"],
   },
   serviceToServiceSecret: process.env["SERVICE_TO_SERVICE_SECRET"],
+
+  claudeReportGeneration:
+    process.env["CLAUDE_REPORT_GENERATION"]?.toLowerCase() === "true",
 });
