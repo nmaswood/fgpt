@@ -344,7 +344,7 @@ resource "google_cloud_run_v2_service" "springtime" {
 
       env {
         name  = "ANTHROPIC_API_KEY"
-        value = var.service_to_service_secret
+        value = var.anthropic_api_key
       }
 
       env {

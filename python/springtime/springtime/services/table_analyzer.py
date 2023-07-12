@@ -73,7 +73,9 @@ class TableAnalyzerImpl(TableAnalyzer):
 
         logger.info(f"{len(chunks)} Chunks being analyzed")
         for sheet_chunk in chunks.sheets:
-            table_content = "\n".join([sheet.sheet_as_string for sheet in sheet_chunk])
+            table_content = "\n".join(
+                [sheet.stringified_sheet.content for sheet in sheet_chunk]
+            )
             resp = self._chat_completion(table_content)
 
             acc.append(

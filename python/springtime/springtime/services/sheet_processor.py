@@ -2,21 +2,26 @@ from typing import NamedTuple
 
 from collections.abc import Callable
 import abc
+from loguru import logger
 
 
 import pandas as pd
 
 
+class StringifiedSheet(NamedTuple):
+    content: str
+    token_length: int
+    was_truncated: bool
+
+
 class PreprocessedSheet(NamedTuple):
     sheet_name: str
-    token_length: int
     parsed_sheet: dict[str, pd.DataFrame]
-    sheet_as_string: str
+    stringified_sheet: StringifiedSheet
 
 
 class ChunkedSheets(NamedTuple):
     sheets: list[list[PreprocessedSheet]]
-    too_long: list[PreprocessedSheet]
 
 
 class SheetPreprocessor(abc.ABC):
@@ -38,38 +43,55 @@ class SheetPreprocessorImpl(SheetPreprocessor):
         acc: list[PreprocessedSheet] = []
         for sheet_name in xl.sheet_names:
             parsed_sheet = xl.parse(sheet_name)
-            sheet_as_string = parsed_sheet.to_string(
-                show_dimensions=False, index_names=False, index=False, na_rep=""
-            )
-            token_len = self._get_length(sheet_as_string)
+            stringfied_sheet = self.stringify_sheet(parsed_sheet)
+            if stringfied_sheet is None:
+                logger.warning(
+                    f"Sheet {sheet_name} is too long to be processed. Skipping it."
+                )
+                continue
+
             acc.append(
                 PreprocessedSheet(
                     sheet_name=sheet_name,
-                    token_length=token_len,
                     parsed_sheet=parsed_sheet,
-                    sheet_as_string=sheet_as_string,
+                    stringified_sheet=stringfied_sheet,
                 )
             )
         return acc
 
+    STRINGIFY_ATTEMPTS = 5
+
+    def stringify_sheet(self, sheet: pd.DataFrame) -> StringifiedSheet | None:
+        total_rows = sheet.shape[0]
+        for attempt in range(self.STRINGIFY_ATTEMPTS):
+            if attempt == 0:
+                sheet_end = None
+            else:
+                sheet_end = total_rows / 2**attempt
+
+            sheet_as_string = sheet[:sheet_end].to_csv(index=False)
+            length = self._get_length(sheet_as_string)
+            if length < self._max_length:
+                return StringifiedSheet(
+                    content=sheet_as_string,
+                    token_length=length,
+                    was_truncated=attempt > 0,
+                )
+        return None
+
     def chunk(self, sheets: list[PreprocessedSheet]) -> ChunkedSheets:
-        acc = ChunkedSheets(sheets=[], too_long=[])
+        acc = ChunkedSheets(sheets=[])
         curr: list[PreprocessedSheet] = []
         curr_len = 0
 
         for sheet in sheets:
-            if sheet.token_length > self._max_length:
-                acc.too_long.append(sheet)
-
-                continue
-
-            if curr_len + sheet.token_length > self._max_length:
+            if curr_len + sheet.stringified_sheet.token_length > self._max_length:
                 acc.sheets.append(curr)
                 curr = []
                 curr_len = 0
             else:
                 curr.append(sheet)
-                curr_len += sheet.token_length
+                curr_len += sheet.stringified_sheet.token_length
         if curr:
             acc.sheets.append(curr)
 
