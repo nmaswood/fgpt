@@ -1,4 +1,8 @@
-import { assertNever, ExcelSource } from "@fgpt/precedent-iso";
+import {
+  AnalyzeTableModel,
+  assertNever,
+  ExcelSource,
+} from "@fgpt/precedent-iso";
 import path from "path";
 
 import { ExcelAssetStore } from "../excel-asset-store";
@@ -19,6 +23,7 @@ export namespace TableHandler {
     projectId: string;
     fileReferenceId: string;
     source: ExcelSource;
+    model: AnalyzeTableModel;
   }
 
   export type ExtractResponse =
@@ -104,6 +109,7 @@ export class TableHandlerImpl implements TableHandler {
       output: {
         type: "v0_chunks",
         value: responses,
+        model: config.model,
       },
     });
   }

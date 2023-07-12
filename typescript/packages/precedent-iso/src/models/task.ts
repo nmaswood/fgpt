@@ -93,6 +93,9 @@ export const ZExtractTableConfig = z.object({
   fileReferenceId: z.string(),
 });
 
+export const ZAnalyzeTableModel = z.enum(["gpt", "claude"]);
+export type AnalyzeTableModel = z.infer<typeof ZAnalyzeTableModel>;
+
 export const ZAnalyzeTableConfig = z.object({
   type: z.literal("analyze-table"),
   version: z.literal("1"),
@@ -100,6 +103,7 @@ export const ZAnalyzeTableConfig = z.object({
   projectId: z.string(),
   fileReferenceId: z.string(),
   source: ZExcelSource.nullable(),
+  model: ZAnalyzeTableModel,
 });
 
 export type AnalyzeTableConfig = z.infer<typeof ZAnalyzeTableConfig>;

@@ -87,6 +87,7 @@ export class IngestFileHandlerImpl implements IngestFileHandler {
             source: {
               type: "direct-upload",
             },
+            model: "gpt",
           },
         });
 

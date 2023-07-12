@@ -194,6 +194,7 @@ export class TaskExecutorImpl implements TaskExecutor {
           fileReferenceId,
           config: {
             type: "analyze-table",
+            model: "gpt",
             version: "1",
             organizationId,
             projectId,
@@ -214,6 +215,7 @@ export class TaskExecutorImpl implements TaskExecutor {
           organizationId: config.organizationId,
           source: config.source,
           fileReferenceId: config.fileReferenceId,
+          model: config.model,
         });
         break;
       }

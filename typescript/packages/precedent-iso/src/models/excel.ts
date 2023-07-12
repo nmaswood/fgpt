@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { AnalyzeTableModel } from "./task";
+
 export const ZDirectUpload = z.object({
   type: z.literal("direct-upload"),
 });
@@ -24,4 +26,5 @@ export interface AnalyzeResponseChunk {
 export interface AnalyzeOutput {
   type: "v0_chunks";
   value: AnalyzeResponseChunk[];
+  model: AnalyzeTableModel;
 }

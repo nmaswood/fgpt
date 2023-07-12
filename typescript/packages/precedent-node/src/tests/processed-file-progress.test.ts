@@ -307,6 +307,7 @@ test("getProgress#complete", async () => {
         type: "analyze-table",
         fileReferenceId,
         source: null,
+        model: "gpt",
       },
     },
   ]);

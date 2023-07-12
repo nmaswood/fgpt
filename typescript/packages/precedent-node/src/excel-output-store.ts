@@ -1,4 +1,8 @@
-import { AnalyzeOutput, ExcelSource } from "@fgpt/precedent-iso";
+import {
+  AnalyzeOutput,
+  ExcelSource,
+  ZAnalyzeTableModel,
+} from "@fgpt/precedent-iso";
 import { DatabasePool, sql } from "slonik";
 import { z } from "zod";
 
@@ -89,6 +93,7 @@ const ZAnalyzeOutput = z.object({
       content: z.string(),
     })
     .array(),
+  model: ZAnalyzeTableModel.optional(),
 });
 
 const ZExcelOutputRow = z
@@ -114,6 +119,9 @@ const ZExcelOutputRow = z
         : {
             type: "direct-upload",
           },
-      output: row.output,
+      output: {
+        ...row.output,
+        model: row.output.model ?? "gpt",
+      },
     }),
   );
