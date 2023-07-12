@@ -2,19 +2,8 @@ import { assertNever, IngestFileConfig } from "@fgpt/precedent-iso";
 
 import { TaskStore } from "../task-store";
 
-export type DispatchResponse =
-  | {
-      type: "pdf";
-      textExtractionTaskId: string;
-      extractTableTaskId: string;
-    }
-  | {
-      type: "excel";
-      analyzeTableTaskId: string;
-    };
-
 export interface IngestFileHandler {
-  dispatch: (config: IngestFileConfig) => Promise<DispatchResponse>;
+  dispatch: (config: IngestFileConfig) => Promise<void>;
 }
 
 export class IngestFileHandlerImpl implements IngestFileHandler {
@@ -25,10 +14,10 @@ export class IngestFileHandlerImpl implements IngestFileHandler {
     projectId,
     fileReferenceId,
     fileType,
-  }: IngestFileConfig): Promise<DispatchResponse> {
+  }: IngestFileConfig): Promise<void> {
     switch (fileType) {
       case "pdf": {
-        const tasks = await this.taskStore.insertMany([
+        await this.taskStore.insertMany([
           {
             organizationId,
             projectId,
@@ -54,47 +43,44 @@ export class IngestFileHandlerImpl implements IngestFileHandler {
             },
           },
         ]);
-
-        const textExtractionTaskId = tasks.find(
-          (task) => task.config.type === "text-extraction",
-        )?.id;
-
-        const extractTableTaskId = tasks.find(
-          (task) => task.config.type === "extract-table",
-        )?.id;
-
-        if (!textExtractionTaskId || !extractTableTaskId) {
-          throw new Error("illegal state");
-        }
-
-        return {
-          type: "pdf",
-          textExtractionTaskId,
-          extractTableTaskId,
-        };
+        break;
       }
       case "excel": {
-        const { id: analyzeTableTaskId } = await this.taskStore.insert({
-          organizationId,
-          projectId,
-          fileReferenceId,
-          config: {
-            version: "1",
-            type: "analyze-table",
+        await this.taskStore.insertMany([
+          {
             organizationId,
             projectId,
             fileReferenceId,
-            source: {
-              type: "direct-upload",
+            config: {
+              version: "1",
+              type: "analyze-table",
+              organizationId,
+              projectId,
+              fileReferenceId,
+              source: {
+                type: "direct-upload",
+              },
+              model: "gpt",
             },
-            model: "gpt",
           },
-        });
-
-        return {
-          type: "excel",
-          analyzeTableTaskId,
-        };
+          {
+            organizationId,
+            projectId,
+            fileReferenceId,
+            config: {
+              version: "1",
+              type: "analyze-table",
+              organizationId,
+              projectId,
+              fileReferenceId,
+              source: {
+                type: "direct-upload",
+              },
+              model: "claude",
+            },
+          },
+        ]);
+        break;
       }
       default:
         assertNever(fileType);

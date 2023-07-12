@@ -215,7 +215,7 @@ export class TaskExecutorImpl implements TaskExecutor {
           organizationId: config.organizationId,
           source: config.source,
           fileReferenceId: config.fileReferenceId,
-          model: config.model,
+          model: config.model ?? "gpt",
         });
         break;
       }
