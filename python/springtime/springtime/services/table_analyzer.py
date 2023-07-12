@@ -4,7 +4,10 @@ from loguru import logger
 
 import pandas as pd
 from springtime.routers.token_length_service import TokenLengthService
-from springtime.services.sheet_processor import SheetPreprocessorImpl
+from springtime.services.sheet_processor import (
+    PreprocessedSheet,
+    SheetPreprocessorImpl,
+)
 
 import openai
 from pydantic import BaseModel
@@ -73,8 +76,8 @@ class TableAnalyzerImpl(TableAnalyzer):
 
         logger.info(f"{len(chunks)} Chunks being analyzed")
         for sheet_chunk in chunks.sheets:
-            table_content = "\n".join(
-                [sheet.stringified_sheet.content for sheet in sheet_chunk]
+            table_content = "\n---\n".join(
+                [self.format_sheet(sheet) for sheet in sheet_chunk]
             )
             resp = self._chat_completion(table_content)
 
@@ -90,6 +93,12 @@ class TableAnalyzerImpl(TableAnalyzer):
             logger.info(f"Finished analyzing sheet chunk: {sheet_names}")
 
         return AnalyzeResponse(chunks=acc)
+
+    def format_sheet(self, sheet: PreprocessedSheet) -> str:
+        return f"""
+Sheet name: {sheet.sheet_name}
+Sheet content: {sheet.stringified_sheet.content}
+""".strip()
 
     def _chat_completion(self, table: str) -> CompletionResponse:
         completion = openai.ChatCompletion.create(

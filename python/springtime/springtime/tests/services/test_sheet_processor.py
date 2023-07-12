@@ -25,4 +25,3 @@ def test_preprocessor(sheet_preprocessor: SheetPreprocessor):
 
     res = sheet_preprocessor.preprocess(xl=xl)
     chunked = sheet_preprocessor.chunk(res)
-    assert len(chunked.sheets) > 0

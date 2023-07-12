@@ -24,4 +24,5 @@ def test_analyze(table_analyzer: TableAnalyzer):
         excel_file=xl,
     )
     chunks = resp.chunks
+    breakpoint()
     assert len(chunks) > 0
