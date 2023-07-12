@@ -26,6 +26,7 @@ export class PSqlProcessedFileProgressStore
     const forTask: ProgressForPdfTasks = {
       embeddingChunk: DEFAULT_STATUS,
       reportChunk: DEFAULT_STATUS,
+      longFormReportChunk: DEFAULT_STATUS,
       report: DEFAULT_STATUS,
       longFormReport: DEFAULT_STATUS,
       upsertEmbeddings: DEFAULT_STATUS,
@@ -66,7 +67,7 @@ export class PSqlProcessedFileProgressStore
               break;
             }
             case "greedy_125k": {
-              forTask.longFormReport = { type: task.status };
+              forTask.longFormReportChunk = { type: task.status };
               break;
             }
             default:
@@ -95,10 +96,13 @@ export class PSqlProcessedFileProgressStore
           forTask.analyzeTable = { type: task.status };
           break;
         }
+        case "long-form":
+          forTask.longFormReport = { type: task.status };
+          break;
         case "ingest-file":
         case "text-extraction":
-        case "long-form":
           break;
+
         default:
           assertNever(task.config);
       }

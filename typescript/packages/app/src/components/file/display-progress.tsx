@@ -76,6 +76,7 @@ const DISPLAY_NAME_MAP: Record<string, string> = {
   reportChunk: "Chunk text for report",
   report: "Generate report",
   longFormReport: "Long form report",
+  longFormReportChunk: "Chunk text for long form report",
   upsertEmbeddings: "Generate embeddings",
   extractTable: "Extract tables",
   analyzeTable: "Analyze tables (if present)",

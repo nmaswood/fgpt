@@ -89,6 +89,8 @@ test("getProgress#no_tasks", async () => {
       embeddingChunk: DEFAULT_STATUS,
       reportChunk: DEFAULT_STATUS,
       report: DEFAULT_STATUS,
+      longFormReport: DEFAULT_STATUS,
+      longFormReportChunk: DEFAULT_STATUS,
       upsertEmbeddings: DEFAULT_STATUS,
       extractTable: DEFAULT_STATUS,
       analyzeTable: DEFAULT_STATUS,
@@ -142,6 +144,8 @@ test("getProgress#pending", async () => {
       embeddingChunk: { type: "queued" },
       reportChunk: { type: "queued" },
       report: DEFAULT_STATUS,
+      longFormReport: DEFAULT_STATUS,
+      longFormReportChunk: DEFAULT_STATUS,
       upsertEmbeddings: DEFAULT_STATUS,
       extractTable: DEFAULT_STATUS,
       analyzeTable: DEFAULT_STATUS,
@@ -189,8 +193,8 @@ test("getProgress#has_failure", async () => {
     },
   ]);
 
-  const t = await taskStore.setToFailed(task1.id);
-  const t2 = await taskStore.setToSuceeded(task2.id);
+  await taskStore.setToFailed(task1.id);
+  await taskStore.setToSuceeded(task2.id);
   const progress = await progressStore.getProgress(fileReferenceId);
 
   expect(progress).toEqual({
@@ -203,6 +207,8 @@ test("getProgress#has_failure", async () => {
         type: "succeeded",
       },
       report: DEFAULT_STATUS,
+      longFormReport: DEFAULT_STATUS,
+      longFormReportChunk: DEFAULT_STATUS,
       upsertEmbeddings: DEFAULT_STATUS,
       extractTable: DEFAULT_STATUS,
       analyzeTable: DEFAULT_STATUS,
