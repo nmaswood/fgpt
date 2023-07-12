@@ -1,28 +1,43 @@
 import pytest
-from unittest.mock import MagicMock
 import os
 
 import pandas as pd
+from springtime.services.anthropic_client import AnthropicClient
 from springtime.models.open_ai import OpenAIModel
+from springtime.services.sheet_processor import (
+    CLAUDE_SHEET_PROCESSOR,
+    GPT_SHEET_PROCESSOR,
+)
 
 from springtime.services.table_analyzer import TableAnalyzer, TableAnalyzerImpl
-from springtime.routers.token_length_service import TokenLengthService
+from springtime.services.excel_analyzer import ClaudeExcelAnalyzer, OpenAIExcelAnalyzer
 
 XLSX = os.path.join(os.path.dirname(__file__), "../data/dummy-extracted.xlsx")
 
 
+GPT_EXCEL_ANALYZER = OpenAIExcelAnalyzer(OpenAIModel.gpt3_16k)
+CLAUDE_EXCEL_ANALYZER = ClaudeExcelAnalyzer(AnthropicClient())
+
+
 @pytest.fixture
-def table_analyzer():
-    anthropic = MagicMock()
-    token_length_service = TokenLengthService(anthropic)
-    return TableAnalyzerImpl(token_length_service, model=OpenAIModel.gpt3_16k)
+def gpt_table_analyzer():
+    return TableAnalyzerImpl(GPT_EXCEL_ANALYZER, GPT_SHEET_PROCESSOR)
 
 
-def test_analyze(table_analyzer: TableAnalyzer):
+@pytest.fixture
+def claude_table_analyzer():
+    return TableAnalyzerImpl(CLAUDE_EXCEL_ANALYZER, CLAUDE_SHEET_PROCESSOR)
+
+
+def test_analyze(
+    gpt_table_analyzer: TableAnalyzer,
+    claude_table_analyzer: TableAnalyzer,
+):
     xl = pd.ExcelFile(XLSX)
-    resp = table_analyzer.analyze(
-        excel_file=xl,
-    )
-    chunks = resp.chunks
-    breakpoint()
-    assert len(chunks) > 0
+    for svc in (gpt_table_analyzer, claude_table_analyzer):
+        resp = svc.analyze(
+            excel_file=xl,
+        )
+        chunks = resp.chunks
+        breakpoint()
+        assert len(chunks) > 0

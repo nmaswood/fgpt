@@ -24,7 +24,8 @@ export interface AnalyzeResponse {
 
 export interface TabularDataService {
   extract(args: ExtractArguments): Promise<ExtractionResponse>;
-  analyze(args: AnalyzeArguments): Promise<AnalyzeResponse>;
+  analyzeGPT(args: AnalyzeArguments): Promise<AnalyzeResponse>;
+  analyzeClaude(args: AnalyzeArguments): Promise<AnalyzeResponse>;
 }
 
 export class HttpTabularDataService implements TabularDataService {
@@ -55,11 +56,23 @@ export class HttpTabularDataService implements TabularDataService {
     return ZExtractResponse.parse(response.data);
   }
 
-  async analyze({
+  async analyzeGPT({
     bucket,
     objectPath,
   }: AnalyzeArguments): Promise<AnalyzeResponse> {
-    const response = await this.#client.post<unknown>("/excel/analyze", {
+    const response = await this.#client.post<unknown>("/excel/analyze-gpt", {
+      bucket,
+      object_path: objectPath,
+    });
+
+    return { responses: ZAnalyzeResponse.parse(response.data).chunks };
+  }
+
+  async analyzeClaude({
+    bucket,
+    objectPath,
+  }: AnalyzeArguments): Promise<AnalyzeResponse> {
+    const response = await this.#client.post<unknown>("/excel/analyze-claude", {
       bucket,
       object_path: objectPath,
     });

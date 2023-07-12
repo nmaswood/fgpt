@@ -2,13 +2,17 @@ from loguru import logger
 from springtime.routers.chat_router import ChatRouter
 from springtime.routers.embeddings_router import EmbeddingsRouter
 from springtime.routers.text_router import TextRouter
-from springtime.routers.token_length_service import TokenLengthService
 from springtime.routers.vector_router import VectorRouter
 from springtime.services.anthropic_client import AnthropicClient
 from springtime.services.chat_service import OpenAIChatService
 from springtime.services.embeddings_service import OpenAIEmbeddingsService
+from springtime.services.excel_analyzer import ClaudeExcelAnalyzer, OpenAIExcelAnalyzer
 from springtime.services.long_form_report_service import ClaudeLongformReportService
 from springtime.services.report_service import OpenAIReportService
+from springtime.services.sheet_processor import (
+    CLAUDE_SHEET_PROCESSOR,
+    GPT_SHEET_PROCESSOR,
+)
 from springtime.services.vector_service import PineconeVectorService
 from springtime.services.table_analyzer import TableAnalyzerImpl
 from springtime.object_store.object_store import GCSObjectStore
@@ -33,8 +37,13 @@ logger.info("Starting server")
 OBJECT_STORE = GCSObjectStore()
 ANTHROPIC_CLIENT = AnthropicClient()
 TABLE_EXTRACTOR = TabulaTableExtractor(OBJECT_STORE)
-TOKEN_LENGTH_SERVICE = TokenLengthService(ANTHROPIC_CLIENT)
-TABLE_ANALYZER = TableAnalyzerImpl(TOKEN_LENGTH_SERVICE, SETTINGS.reports_openai_model)
+
+GPT_EXCEL_ANALYZER = OpenAIExcelAnalyzer(SETTINGS.reports_openai_model)
+CLAUDE_EXCEL_ANALYZER = ClaudeExcelAnalyzer(ANTHROPIC_CLIENT)
+
+GPT_TABLE_ANALYZER = TableAnalyzerImpl(GPT_EXCEL_ANALYZER, GPT_SHEET_PROCESSOR)
+CLAUDE_TABLE_ANALYZER = TableAnalyzerImpl(CLAUDE_EXCEL_ANALYZER, CLAUDE_SHEET_PROCESSOR)
+
 
 LONG_FORM_REPORT_SERVICE = ClaudeLongformReportService(ANTHROPIC_CLIENT)
 EMBEDDING_SERVICE = OpenAIEmbeddingsService()
@@ -48,24 +57,13 @@ REPORT_SERVICE = OpenAIReportService(SETTINGS.reports_openai_model)
 CHAT_SERVICE = OpenAIChatService()
 
 
-@app.middleware("http")
-async def add_process_time_header(request: Request, call_next):
-    secret = request.headers.get("x-service-to-service-secret")
-
-    if (
-        SETTINGS.service_to_service_secret
-        and SETTINGS.service_to_service_secret != secret
-    ):
-        return JSONResponse(status_code=401, content="Not authorized")
-
-    return await call_next(request)
-
-
 app.include_router(ChatRouter(CHAT_SERVICE).get_router())
 app.include_router(ReportRouter(REPORT_SERVICE, LONG_FORM_REPORT_SERVICE).get_router())
 app.include_router(PdfRouter(TABLE_EXTRACTOR, OBJECT_STORE).get_router())
-app.include_router(TableRouter(TABLE_ANALYZER, OBJECT_STORE).get_router())
-app.include_router(TextRouter(TOKEN_LENGTH_SERVICE).get_router())
+app.include_router(
+    TableRouter(GPT_TABLE_ANALYZER, CLAUDE_TABLE_ANALYZER, OBJECT_STORE).get_router()
+)
+app.include_router(TextRouter().get_router())
 app.include_router(VectorRouter(VECTOR_SERVICE).get_router())
 app.include_router(EmbeddingsRouter(EMBEDDING_SERVICE).get_router())
 
@@ -78,6 +76,19 @@ async def ping():
 @app.get("/healthz")
 async def healthz():
     return "OK"
+
+
+@app.middleware("http")
+async def secure_svc_to_svc(request: Request, call_next):
+    secret = request.headers.get("x-service-to-service-secret")
+
+    if (
+        SETTINGS.service_to_service_secret
+        and SETTINGS.service_to_service_secret != secret
+    ):
+        return JSONResponse(status_code=401, content="Not authorized")
+
+    return await call_next(request)
 
 
 # todo disable reload in prod

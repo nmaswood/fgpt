@@ -1,15 +1,18 @@
+import anthropic
 import tiktoken
 
-from springtime.services.anthropic_client import AnthropicClient
+
+ENC_GPT4 = tiktoken.encoding_for_model("gpt-4")
 
 
-class TokenLengthService:
-    def __init__(self, anthropic: AnthropicClient) -> None:
-        self.anthropic = anthropic
-        self.enc_gpt4 = tiktoken.encoding_for_model("gpt-4")
+client = anthropic.Anthropic()
 
-    def gpt4(self, text: str):
-        return len(self.enc_gpt4.encode(text))
 
-    def claude100k(self, text: str):
-        return self.anthropic.count_tokens(text)
+class TokenLength:
+    @staticmethod
+    def gpt4(text: str):
+        return len(ENC_GPT4.encode(text))
+
+    @staticmethod
+    def claude100k(text: str):
+        return client.count_tokens(text)
