@@ -98,6 +98,7 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
           <IconButton onClick={() => setShowAsset((prev) => !prev)}>
             <MenuIcon />
           </IconButton>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
           <Tabs value={tab} onChange={(_, newValue) => setTab(newValue as any)}>
             <TabList>
               <Tab value="progress">

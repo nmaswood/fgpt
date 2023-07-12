@@ -5,9 +5,10 @@ type Resp<T> = { type: "data"; value: T } | { type: "loading" };
 
 export const useFetchSheets = (id: string, signedUrl: string) => {
   const workerRef = useRef<Worker>();
-  const [record, setRecord] = React.useState<
-    Record<string, Resp<ISOSheet<any>[]>>
-  >({});
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  type T = Record<string, Resp<ISOSheet<any>[]>>;
+  const [record, setRecord] = React.useState<T>({});
 
   useEffect(() => {
     if (!signedUrl || record[id]) {
@@ -25,7 +26,9 @@ export const useFetchSheets = (id: string, signedUrl: string) => {
 
     workerRef.current = new Worker(new URL("../../worker.ts", import.meta.url));
     workerRef.current.onerror = console.error;
-    workerRef.current.onmessage = (event: MessageEvent<ISOSheet<any>[]>) => {
+    workerRef.current.onmessage = (
+      event: MessageEvent<ISOSheet<unknown>[]>,
+    ) => {
       setRecord((prev) => {
         return {
           ...prev,

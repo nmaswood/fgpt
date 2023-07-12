@@ -141,6 +141,7 @@ export const SelectedProject: React.FC<{
   const openUppyModal = () => {
     const dashboard = uppy.getPlugin("Dashboard");
     if (dashboard) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (dashboard as any).openModal();
     }
   };
@@ -171,6 +172,7 @@ export const SelectedProject: React.FC<{
         marginBottom={1 / 2}
         justifyContent="space-between"
       >
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
         <Tabs value={tab} onChange={(_, newValue) => setTab(newValue as any)}>
           <TabList>
             <Tab value="data">
