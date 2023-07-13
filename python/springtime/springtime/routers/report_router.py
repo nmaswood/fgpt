@@ -1,12 +1,14 @@
+from typing import Any
+
+from fastapi import APIRouter
+from pydantic import BaseModel
+
 from springtime.services.long_form_report_service import LongformReportService
 from springtime.services.report_service import (
     FinancialSummary,
-    Term,
     ReportService,
+    Term,
 )
-from typing import Any
-from fastapi import APIRouter
-from pydantic import BaseModel
 
 
 class LLMOutputRequest(BaseModel):
@@ -37,7 +39,7 @@ class ReportRouter:
         self,
         report_service: ReportService,
         long_form_report_service: LongformReportService,
-    ):
+    ) -> None:
         self.report_service = report_service
         self.long_form_report_service = long_form_report_service
 

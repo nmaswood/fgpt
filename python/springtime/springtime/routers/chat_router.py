@@ -1,8 +1,9 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from starlette.responses import StreamingResponse
-from springtime.services.chat_service import ChatService
+
 from springtime.models.chat import ChatHistory
+from springtime.services.chat_service import ChatService
 
 
 class AskQuestionResponse(BaseModel):
@@ -21,7 +22,7 @@ class GetTitleRequest(BaseModel):
 
 
 class ChatRouter:
-    def __init__(self, chat_service: ChatService):
+    def __init__(self, chat_service: ChatService) -> None:
         self.chat_service = chat_service
 
     def get_router(self):
@@ -30,7 +31,9 @@ class ChatRouter:
         @router.post("/ask-question-streaming")
         async def ask_question_streaming_route(req: AskQuestionRequest):
             stream = self.chat_service.ask_streaming(
-                req.context, req.question, req.history
+                req.context,
+                req.question,
+                req.history,
             )
             response = StreamingResponse(content=stream, media_type="text/event-stream")
             return response

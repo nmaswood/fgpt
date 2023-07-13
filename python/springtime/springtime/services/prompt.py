@@ -1,6 +1,5 @@
 from springtime.models.chat import ChatHistory
 
-
 TOKEN_LIMIT = 4_000
 RESPOND_PROMPT = "Respond to the following prompt:"
 CONTEXT_PROMPT = "Use the following context to supplement your information:"
@@ -60,6 +59,6 @@ def create_prompt_for_history(history: list[ChatHistory]):
         [
             "Previously, the user prompted you with the following questions/statements:\n",
             *[f"{h.question}\n" for h in history],
-        ]
+        ],
     )
     return " " + prompt

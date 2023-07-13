@@ -1,11 +1,9 @@
+import abc
+from collections.abc import Callable
 from typing import NamedTuple
 
-from collections.abc import Callable
-import abc
-from loguru import logger
-
-
 import pandas as pd
+from loguru import logger
 
 from springtime.routers.token_length_service import TokenLength
 
@@ -40,17 +38,22 @@ GetLength = Callable[[str], int]
 
 
 def preprocess(
-    *, max_length: int, get_length: GetLength, xl: pd.ExcelFile
+    *,
+    max_length: int,
+    get_length: GetLength,
+    xl: pd.ExcelFile,
 ) -> list[PreprocessedSheet]:
     acc: list[PreprocessedSheet] = []
     for sheet_name in xl.sheet_names:
         parsed_sheet = xl.parse(sheet_name)
         stringfied_sheet = stringify_sheet(
-            get_length=get_length, sheet=parsed_sheet, max_length=max_length
+            get_length=get_length,
+            sheet=parsed_sheet,
+            max_length=max_length,
         )
         if stringfied_sheet is None:
             logger.warning(
-                f"Sheet {sheet_name} is too long to be processed. Skipping it."
+                f"Sheet {sheet_name} is too long to be processed. Skipping it.",
             )
             continue
 
@@ -59,7 +62,7 @@ def preprocess(
                 sheet_name=sheet_name,
                 parsed_sheet=parsed_sheet,
                 stringified_sheet=stringfied_sheet,
-            )
+            ),
         )
     return acc
 
@@ -68,14 +71,14 @@ STRINGIFY_ATTEMPTS = 5
 
 
 def stringify_sheet(
-    *, max_length: int, get_length: GetLength, sheet: pd.DataFrame
+    *,
+    max_length: int,
+    get_length: GetLength,
+    sheet: pd.DataFrame,
 ) -> StringifiedSheet | None:
     total_rows = sheet.shape[0]
     for attempt in range(STRINGIFY_ATTEMPTS):
-        if attempt == 0:
-            sheet_end = None
-        else:
-            sheet_end = total_rows / 2**attempt
+        sheet_end = None if attempt == 0 else int(total_rows / 2**attempt)
 
         sheet_as_string = sheet[:sheet_end].to_csv(index=False)
         length = get_length(sheet_as_string)
@@ -89,7 +92,10 @@ def stringify_sheet(
 
 
 def chunk(
-    *, max_length: int, get_length: GetLength, sheets: list[PreprocessedSheet]
+    *,
+    max_length: int,
+    get_length: GetLength,
+    sheets: list[PreprocessedSheet],
 ) -> ChunkedSheets:
     acc = ChunkedSheets(sheets=[])
     curr: list[PreprocessedSheet] = []
@@ -115,12 +121,16 @@ GPT4_TOKEN_LIMIT = 5000
 class GPT4SheetProcessor(SheetPreprocessor):
     def preprocess(self, *, xl: pd.ExcelFile) -> list[PreprocessedSheet]:
         return preprocess(
-            get_length=TokenLength.gpt4, max_length=GPT4_TOKEN_LIMIT, xl=xl
+            get_length=TokenLength.gpt4,
+            max_length=GPT4_TOKEN_LIMIT,
+            xl=xl,
         )
 
     def chunk(self, sheets: list[PreprocessedSheet]) -> ChunkedSheets:
         return chunk(
-            get_length=TokenLength.gpt4, max_length=GPT4_TOKEN_LIMIT, sheets=sheets
+            get_length=TokenLength.gpt4,
+            max_length=GPT4_TOKEN_LIMIT,
+            sheets=sheets,
         )
 
 
@@ -132,7 +142,9 @@ CLAUDE_TOKEN_LIMIT = 100_000
 class ClaudeSheetProcessor(SheetPreprocessor):
     def preprocess(self, *, xl: pd.ExcelFile) -> list[PreprocessedSheet]:
         return preprocess(
-            get_length=TokenLength.claude100k, max_length=CLAUDE_TOKEN_LIMIT, xl=xl
+            get_length=TokenLength.claude100k,
+            max_length=CLAUDE_TOKEN_LIMIT,
+            xl=xl,
         )
 
     def chunk(self, sheets: list[PreprocessedSheet]) -> ChunkedSheets:

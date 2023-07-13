@@ -490,7 +490,7 @@ __metadata:
     "@types/express": ^4.17.17
     "@types/lodash": ^4.14.195
     "@types/multer": ^1.4.7
-    "@types/node": ^20.4.1
+    "@types/node": ^20.4.2
     "@types/prettier": ^2.7.3
     "@typescript-eslint/eslint-plugin": ^6.0.0
     "@typescript-eslint/parser": ^6.0.0
@@ -532,13 +532,13 @@ __metadata:
     "@mui/joy": ^5.0.0-alpha.87
     "@mui/lab": ^5.0.0-alpha.136
     "@mui/material": ^5.14.0
-    "@mui/x-data-grid": ^6.9.2
+    "@mui/x-data-grid": ^6.10.0
     "@next/eslint-plugin-next": ^13.4.9
     "@types/eslint": ^8.44.0
-    "@types/node": ^20.4.1
+    "@types/node": ^20.4.2
     "@types/prettier": ^2.7.3
     "@types/react": ^18.2.14
-    "@types/react-dom": ^18.2.6
+    "@types/react-dom": ^18.2.7
     "@typescript-eslint/eslint-plugin": ^6.0.0
     "@typescript-eslint/parser": ^6.0.0
     "@uppy/core": ^3.3.0
@@ -576,7 +576,7 @@ __metadata:
     "@types/cors": ^2.8.13
     "@types/eslint": ^8.44.0
     "@types/express": ^4.17.17
-    "@types/node": ^20.4.1
+    "@types/node": ^20.4.2
     "@types/prettier": ^2.7.3
     "@typescript-eslint/eslint-plugin": ^6.0.0
     "@typescript-eslint/parser": ^6.0.0
@@ -1137,9 +1137,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/x-data-grid@npm:^6.9.2":
-  version: 6.9.2
-  resolution: "@mui/x-data-grid@npm:6.9.2"
+"@mui/x-data-grid@npm:^6.10.0":
+  version: 6.10.0
+  resolution: "@mui/x-data-grid@npm:6.10.0"
   dependencies:
     "@babel/runtime": ^7.22.5
     "@mui/utils": ^5.13.6
@@ -1151,7 +1151,7 @@ __metadata:
     "@mui/system": ^5.4.1
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-  checksum: c26aff602c32097729f76729c4c3ad43a7acc1795d68a724713129295270faf16c2458b6ac48d198460fa8ec8969a89dbbc515e4f7d1506de695c47776b31b46
+  checksum: 79925a325d0e8629d12da3949f2cf921d1e323f1aea6a7a5dd77652e37176663057943da40f857b75687068c528c8f69ef85b1dac0ea7e9d465255a97084150e
   languageName: node
   linkType: hard
 
@@ -1651,10 +1651,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^20.4.1":
-  version: 20.4.1
-  resolution: "@types/node@npm:20.4.1"
-  checksum: 22cbcc792f2eb636fe4188778ed0f32658ab872aa7fcb9847b3fa289a42b14b9f5e30c6faec50ef3c7adbc6c2a246926e5858136bb8b10c035a3fcaa6afbeed2
+"@types/node@npm:^20.4.2":
+  version: 20.4.2
+  resolution: "@types/node@npm:20.4.2"
+  checksum: 99e544ea7560d51f01f95627fc40394c24a13da8f041121a0da13e4ef0a2aa332932eaf9a5e8d0e30d1c07106e96a183be392cbba62e8cf0bf6a085d5c0f4149
   languageName: node
   linkType: hard
 
@@ -1704,12 +1704,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^18.2.6":
-  version: 18.2.6
-  resolution: "@types/react-dom@npm:18.2.6"
+"@types/react-dom@npm:^18.2.7":
+  version: 18.2.7
+  resolution: "@types/react-dom@npm:18.2.7"
   dependencies:
     "@types/react": "*"
-  checksum: b56e42efab121a3a8013d2eb8c1688e6028a25ea6d33c4362d2846f0af3760b164b4d7c34846614024cfb8956cca70dd1743487f152e32ff89a00fe6fbd2be54
+  checksum: e02ea908289a7ad26053308248d2b87f6aeafd73d0e2de2a3d435947bcea0422599016ffd1c3e38ff36c42f5e1c87c7417f05b0a157e48649e4a02f21727d54f
   languageName: node
   linkType: hard
 

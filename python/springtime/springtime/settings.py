@@ -1,4 +1,3 @@
-from typing import Optional
 from pydantic import BaseSettings, Field
 
 from springtime.models.open_ai import OpenAIModel
@@ -14,7 +13,7 @@ class Settings(BaseSettings):
     pinecone_namespace: str = Field(env="PINECONE_NAMESPACE")
     telemetry_enabled: bool = Field(env="TRACING_ENABLED", default=False)
     reload: bool = Field(env="RELOAD", default=False)
-    service_to_service_secret: Optional[str] = Field(
+    service_to_service_secret: str | None = Field(
         env="SERVICE_TO_SERVICE_SECRET",
     )
     anthropic_api_key: str = Field(env="ANTHROPIC_API_KEY")

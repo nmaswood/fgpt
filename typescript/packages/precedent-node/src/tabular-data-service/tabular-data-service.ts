@@ -1,4 +1,8 @@
-import { AnalyzeResponseChunk } from "@fgpt/precedent-iso";
+import {
+  AnalyzeResponseChunk,
+  AnalyzeTableModel,
+  assertNever,
+} from "@fgpt/precedent-iso";
 import axios, { AxiosInstance } from "axios";
 import z from "zod";
 
@@ -24,6 +28,10 @@ export interface AnalyzeResponse {
 
 export interface TabularDataService {
   extract(args: ExtractArguments): Promise<ExtractionResponse>;
+  analyzeForModel(
+    model: AnalyzeTableModel,
+    args: AnalyzeArguments,
+  ): Promise<AnalyzeResponse>;
   analyzeGPT(args: AnalyzeArguments): Promise<AnalyzeResponse>;
   analyzeClaude(args: AnalyzeArguments): Promise<AnalyzeResponse>;
 }
@@ -54,6 +62,22 @@ export class HttpTabularDataService implements TabularDataService {
       title,
     });
     return ZExtractResponse.parse(response.data);
+  }
+
+  async analyzeForModel(
+    model: AnalyzeTableModel,
+    { bucket, objectPath }: AnalyzeArguments,
+  ): Promise<AnalyzeResponse> {
+    switch (model) {
+      case "gpt": {
+        return this.analyzeGPT({ bucket, objectPath });
+      }
+      case "claude": {
+        return this.analyzeClaude({ bucket, objectPath });
+      }
+      default:
+        assertNever(model);
+    }
   }
 
   async analyzeGPT({

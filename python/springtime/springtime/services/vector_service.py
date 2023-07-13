@@ -1,8 +1,8 @@
-import pinecone
+import abc
 
+import pinecone
 from pydantic import BaseModel
 
-import abc
 from ..settings import SETTINGS
 
 
@@ -25,15 +25,22 @@ class VectorService(abc.ABC):
 
     @abc.abstractmethod
     def get_similar(
-        self, vector: list[float], metadata: dict[str, str]
+        self,
+        vector: list[float],
+        metadata: dict[str, str],
     ) -> list[VectorResult]:
         pass
 
 
 class PineconeVectorService(VectorService):
     def __init__(
-        self, *, api_key: str, environment: str, index_name: str, namespace: str
-    ):
+        self,
+        *,
+        api_key: str,
+        environment: str,
+        index_name: str,
+        namespace: str,
+    ) -> None:
         pinecone.init(api_key=api_key, environment=environment)
         self.index = pinecone.Index(index_name=index_name)
         self.namespace = namespace
@@ -48,7 +55,9 @@ class PineconeVectorService(VectorService):
         )
 
     def get_similar(
-        self, vector: list[float], metadata: dict[str, str]
+        self,
+        vector: list[float],
+        metadata: dict[str, str],
     ) -> list[VectorResult]:
         result = self.index.query(
             vector=vector,
@@ -62,7 +71,9 @@ class PineconeVectorService(VectorService):
         matches = result["matches"]
         return [
             VectorResult(
-                id=match["id"], metadata=match["metadata"], score=match["score"]
+                id=match["id"],
+                metadata=match["metadata"],
+                score=match["score"],
             )
             for match in matches
         ]

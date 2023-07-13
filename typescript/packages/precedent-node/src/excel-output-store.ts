@@ -25,8 +25,8 @@ export interface InsertExcelOutput {
 
 export interface ExcelOutputStore {
   insert(args: InsertExcelOutput): Promise<ExcelOutput>;
-  forDirectUpload(fileReferenceId: string): Promise<ExcelOutput | undefined>;
-  forDerived(fileReferenceId: string): Promise<ExcelOutput | undefined>;
+  forDirectUpload(fileReferenceId: string): Promise<ExcelOutput[]>;
+  forDerived(fileReferenceId: string): Promise<ExcelOutput[]>;
 }
 
 const FIELDS = sql.fragment` id, organization_id, project_id, file_reference_id, excel_asset_id, output`;
@@ -54,21 +54,19 @@ RETURNING
     return value ?? undefined;
   }
 
-  async forDirectUpload(
-    fileReferenceId: string,
-  ): Promise<ExcelOutput | undefined> {
+  async forDirectUpload(fileReferenceId: string): Promise<ExcelOutput[]> {
     return this.#forFileReference(fileReferenceId, "direct-upload");
   }
 
-  async forDerived(fileReferenceId: string): Promise<ExcelOutput | undefined> {
+  async forDerived(fileReferenceId: string): Promise<ExcelOutput[]> {
     return this.#forFileReference(fileReferenceId, "derived");
   }
 
   async #forFileReference(
     fileReferenceId: string,
     source: "direct-upload" | "derived",
-  ): Promise<ExcelOutput | undefined> {
-    const value = await this.pool.maybeOne(
+  ): Promise<ExcelOutput[]> {
+    const value = await this.pool.query(
       sql.type(ZExcelOutputRow)`
 SELECT
     ${FIELDS}
@@ -81,7 +79,8 @@ WHERE
     }
 `,
     );
-    return value ?? undefined;
+
+    return Array.from(value.rows);
   }
 }
 

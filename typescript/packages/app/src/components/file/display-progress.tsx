@@ -80,6 +80,8 @@ const DISPLAY_NAME_MAP: Record<string, string> = {
   upsertEmbeddings: "Generate embeddings",
   extractTable: "Extract tables",
   analyzeTable: "Analyze tables (if present)",
+  analyzeTableGPT: "Analyze tables (GPT)",
+  analyzeTableClaude: "Analyze tables (Claude)",
 };
 
 const STATUS_MAP: Record<string, string> = {

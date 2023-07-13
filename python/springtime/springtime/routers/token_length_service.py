@@ -1,7 +1,6 @@
 import anthropic
 import tiktoken
 
-
 ENC_GPT4 = tiktoken.encoding_for_model("gpt-4")
 
 

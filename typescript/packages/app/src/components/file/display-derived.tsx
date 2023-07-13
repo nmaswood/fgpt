@@ -4,7 +4,7 @@ import { Box, CircularProgress } from "@mui/joy";
 import React from "react";
 
 import { useFetchSheets } from "../../hooks/use-fetch-sheets";
-import { ForExcel } from "./report";
+import { ForExcelOutput } from "./report";
 
 export const DisplayDerived: React.FC<{
   derived: FileToRender.DerivedTable;
@@ -33,19 +33,7 @@ export const DisplayDerived: React.FC<{
           data={data.value}
         />
       )}
-      {output && (
-        <Box
-          display="flex"
-          height="100"
-          width="100%"
-          maxHeight="100%"
-          maxWidth="100%"
-          overflow="auto"
-          flexDirection="column"
-        >
-          <ForExcel output={output} />
-        </Box>
-      )}
+      <ForExcelOutput output={output} />
     </Box>
   );
 };

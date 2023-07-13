@@ -188,20 +188,36 @@ export class TaskExecutorImpl implements TaskExecutor {
               fileReferenceId: config.fileReferenceId,
             };
 
-        await this.taskStore.insert({
-          organizationId,
-          projectId,
-          fileReferenceId,
-          config: {
-            type: "analyze-table",
-            model: "gpt",
-            version: "1",
+        await this.taskStore.insertMany([
+          {
             organizationId,
             projectId,
             fileReferenceId,
-            source,
+            config: {
+              type: "analyze-table",
+              model: "gpt",
+              version: "1",
+              organizationId,
+              projectId,
+              fileReferenceId,
+              source,
+            },
           },
-        });
+          {
+            organizationId,
+            projectId,
+            fileReferenceId,
+            config: {
+              type: "analyze-table",
+              model: "claude",
+              version: "1",
+              organizationId,
+              projectId,
+              fileReferenceId,
+              source,
+            },
+          },
+        ]);
 
         break;
       }

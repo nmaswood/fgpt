@@ -20,32 +20,46 @@ export class PSqlExcelProgressStore implements ExcelProgressStore {
     const tasks = await this.taskStore.getByFileReferenceId(fileReferenceId);
 
     const forTask: ProgressForExcelTasks = {
-      analyzeTable: { type: "task_does_not_exist" },
+      analyzeTableGPT: { type: "task_does_not_exist" },
+      analyzeTableClaude: { type: "task_does_not_exist" },
     };
-    const analyzeTask = tasks.find((t) => t.config.type === "analyze-table");
-    let type: FileProgress<ProgressForExcelTasks>["type"] = "pending";
 
-    if (analyzeTask) {
-      forTask.analyzeTable = { type: analyzeTask.status };
-      switch (analyzeTask.status) {
-        case "queued":
+    for (const task of tasks) {
+      switch (task.config.type) {
+        case "analyze-table": {
+          switch (task.config.model) {
+            case "gpt":
+            case undefined:
+            case null: {
+              forTask.analyzeTableGPT = { type: task.status };
+              break;
+            }
+            case "claude": {
+              forTask.analyzeTableClaude = { type: task.status };
+              break;
+            }
+            default:
+              assertNever(task.config.model);
+          }
           break;
-        case "in-progress":
-          break;
-        case "succeeded":
-          type = "succeeded";
-          break;
-        case "failed":
-          type = "has-failure";
+        }
+        case "gen-embeddings":
+        case "llm-outputs":
+        case "extract-table":
+        case "long-form":
+        case "ingest-file":
+        case "text-extraction":
+        case "text-chunk":
           break;
         default:
-          assertNever(analyzeTask.status);
+          assertNever(task.config);
       }
     }
 
     return {
       forTask,
-      type,
+      // just hard code for now
+      type: "pending",
     };
   }
 }

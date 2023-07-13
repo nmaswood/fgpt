@@ -93,6 +93,7 @@ test("insertMany", async () => {
     output: {
       type: "v0_chunks",
       value: [{ content: "hi hi hi", sheetNames: ["sheet1"] }],
+      model: "gpt",
     },
   });
 
@@ -116,14 +117,15 @@ test("forDerived", async () => {
     output: {
       type: "v0_chunks",
       value: [{ content: "hi hi hi", sheetNames: ["sheet1"] }],
+      model: "claude",
     },
   });
 
   const derived = await excelOutputStore.forDerived(fileReferenceId);
   const directUpload = await excelOutputStore.forDirectUpload(fileReferenceId);
 
-  expect(derived).toBeDefined();
-  expect(directUpload).toBeUndefined();
+  expect(derived.length).toEqual(1);
+  expect(directUpload.length).toEqual(0);
 });
 
 test("forDirectUpload", async () => {
@@ -138,12 +140,13 @@ test("forDirectUpload", async () => {
     output: {
       type: "v0_chunks",
       value: [{ content: "hi hi hi", sheetNames: ["sheet1"] }],
+      model: "gpt",
     },
   });
 
   const derived = await excelOutputStore.forDerived(fileReferenceId);
   const directUpload = await excelOutputStore.forDirectUpload(fileReferenceId);
 
-  expect(derived).toBeUndefined();
-  expect(directUpload).toBeDefined();
+  expect(derived.length).toEqual(0);
+  expect(directUpload.length).toEqual(1);
 });

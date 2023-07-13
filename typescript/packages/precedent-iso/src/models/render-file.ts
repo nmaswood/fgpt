@@ -1,4 +1,4 @@
-import { AnalyzeOutput } from "./excel";
+import { AnalyzeResponseChunk } from "./excel";
 import { Report } from "./llm-outputs";
 import {
   FileProgress,
@@ -11,7 +11,7 @@ export namespace FileToRender {
   export interface DerivedTable {
     id: string;
     signedUrl: string;
-    output: AnalyzeOutput | undefined;
+    output: ExcelOutputToRender;
   }
 
   export interface PDFFile {
@@ -31,7 +31,12 @@ export namespace FileToRender {
     id: string;
     projectId: string;
     signedUrl: string;
-    output: AnalyzeOutput | undefined;
+    output: ExcelOutputToRender;
     progress: FileProgress<ProgressForExcelTasks>;
   }
+}
+
+export interface ExcelOutputToRender {
+  gpt: AnalyzeResponseChunk[];
+  claude: AnalyzeResponseChunk[];
 }

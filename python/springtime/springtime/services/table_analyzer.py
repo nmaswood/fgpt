@@ -1,13 +1,13 @@
 import abc
-from loguru import logger
 
 import pandas as pd
+from loguru import logger
+from pydantic import BaseModel
+
+from springtime.services.excel_analyzer import ExcelAnalyzer
 from springtime.services.sheet_processor import (
     SheetPreprocessor,
 )
-
-from pydantic import BaseModel
-from springtime.services.excel_analyzer import ExcelAnalyzer
 
 
 class AnalyzeArguments(BaseModel):
@@ -43,8 +43,10 @@ GPT4_TOKEN_LIMIT = 5000
 
 class TableAnalyzerImpl(TableAnalyzer):
     def __init__(
-        self, excel_analyzer: ExcelAnalyzer, sheet_processor: SheetPreprocessor
-    ):
+        self,
+        excel_analyzer: ExcelAnalyzer,
+        sheet_processor: SheetPreprocessor,
+    ) -> None:
         self.excel_analyzer = excel_analyzer
         self.sheet_preprocessor = sheet_processor
 
@@ -57,6 +59,8 @@ class TableAnalyzerImpl(TableAnalyzer):
 
         logger.info(f"{len(chunks)} Chunks being analyzed")
         for sheet_chunk in chunks.sheets:
+            sheet_names = ", ".join(sheet.sheet_name for sheet in sheet_chunk)
+            logger.info(f"Starting to analyze sheet chunks: {sheet_names}")
             resp = self.excel_analyzer.analyze(sheets=sheet_chunk)
 
             acc.append(
@@ -64,10 +68,9 @@ class TableAnalyzerImpl(TableAnalyzer):
                     sheet_names=[sheet.sheet_name for sheet in sheet_chunk],
                     content=resp.content,
                     prompt=resp.prompt,
-                )
+                ),
             )
 
-            sheet_names = ", ".join([sheet.sheet_name for sheet in sheet_chunk])
             logger.info(f"Finished analyzing sheet chunk: {sheet_names}")
 
         return AnalyzeResponse(chunks=acc)

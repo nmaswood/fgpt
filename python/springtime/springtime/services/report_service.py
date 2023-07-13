@@ -1,20 +1,17 @@
+import abc
+import json
 from typing import Any
 
+import openai
+from loguru import logger
 from pydantic import BaseModel
 
-import abc
-from loguru import logger
-import openai
-
-import json
 from springtime.models.open_ai import OpenAIModel
-
-
 from springtime.services.prompts import (
+    financial_summary_schema,
     questions_schema,
     summaries_schema,
     terms_schema,
-    financial_summary_schema,
 )
 
 
@@ -66,7 +63,7 @@ class ReportService(abc.ABC):
 
 
 class OpenAIReportService(ReportService):
-    def __init__(self, model: OpenAIModel):
+    def __init__(self, model: OpenAIModel) -> None:
         self.model = model
 
     def generate_output(self, text: str) -> Output:
@@ -116,12 +113,11 @@ class OpenAIReportService(ReportService):
         )
         response = self.call_function(req)
         terms_from_model = Terms(**response)
-        terms = [
+        return [
             term
             for term in terms_from_model.terms
             if term.term_value != "Not Available"
         ]
-        return terms
 
     def get_summaries(self, text: str) -> list[str]:
         req = CallFunctionRequest(
@@ -135,12 +131,12 @@ class OpenAIReportService(ReportService):
         return summaries.summaries
 
     def call_function(self, req: CallFunctionRequest) -> dict[str, Any]:
-        print(f"Running function {req.function_name}")
+        logger.info(f"Running function {req.function_name}")
         completion = openai.ChatCompletion.create(
             model=self.model,
             messages=[
                 {"role": "system", "content": req.prompt},
-                {"role": "user", "content": "Document: {}".format(req.text)},
+                {"role": "user", "content": f"Document: {req.text}"},
             ],
             functions=[{"name": req.function_name, "parameters": req.json_schema}],
             function_call={"name": req.function_name},

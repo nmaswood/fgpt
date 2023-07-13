@@ -1,5 +1,7 @@
 import {
+  AnalyzeOutput,
   assertNever,
+  ExcelOutputToRender,
   FileReference,
   FileToRender,
   getFileType,
@@ -55,7 +57,7 @@ export class FileToRenderServiceImpl implements FileRenderService {
       id: file.id,
       signedUrl,
       projectId: file.projectId,
-      output: output?.output,
+      output: transformOutput(output.map((row) => row.output)),
       progress,
     };
   }
@@ -85,10 +87,32 @@ export class FileToRenderServiceImpl implements FileRenderService {
             return {
               id: derived.id,
               signedUrl,
-              output: output?.output,
+              output: transformOutput(output.map((row) => row.output)),
             };
           })()
         : undefined,
     };
   }
+}
+
+function transformOutput(output: AnalyzeOutput[]): ExcelOutputToRender {
+  const acc: ExcelOutputToRender = {
+    gpt: [],
+    claude: [],
+  };
+  for (const row of output) {
+    switch (row.model) {
+      case "gpt":
+        acc.gpt.push(...row.value);
+        break;
+      case "claude":
+        acc.claude.push(...row.value);
+        break;
+
+      default:
+        assertNever(row.model);
+    }
+  }
+
+  return acc;
 }

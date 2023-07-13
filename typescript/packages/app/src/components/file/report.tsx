@@ -1,7 +1,7 @@
 import {
-  AnalyzeOutput,
   AnalyzeResponseChunk,
   assertNever,
+  ExcelOutputToRender,
   FileToRender,
   Outputs,
 } from "@fgpt/precedent-iso";
@@ -16,6 +16,8 @@ import {
   Typography,
 } from "@mui/joy";
 import React from "react";
+
+import { ReportType } from "./report-type";
 
 export const DisplayFileReport: React.FC<{
   file: FileToRender.File;
@@ -40,17 +42,52 @@ const Dispatch: React.FC<{ file: FileToRender.File }> = ({ file }) => {
     case "pdf":
       return <ForPDF report={file.report} />;
     case "excel":
-      return <ForExcel output={file.output} />;
+      return <ForExcelOutput output={file.output} />;
     default:
       assertNever(file);
   }
 };
 
-export const ForExcel: React.FC<{ output: AnalyzeOutput | undefined }> = ({
-  output,
+export const ForExcelOutput: React.FC<{ output: ExcelOutputToRender }> = ({
+  output: { claude, gpt },
 }) => {
-  const chunks = output?.value ?? [];
+  const hasBoth = gpt.length > 0 && claude.length > 0;
+  const [value, setValue] = React.useState<ReportType>("gpt4");
+  const output = value == "gpt4" ? gpt : claude;
+  return (
+    <Box
+      display="flex"
+      height="100"
+      width="100%"
+      maxHeight="100%"
+      maxWidth="100%"
+      overflow="auto"
+      flexDirection="column"
+    >
+      {hasBoth && (
+        <Select
+          value={value}
+          sx={{
+            width: "fit-content",
+          }}
+          onChange={(_, newValue) => {
+            if (newValue) {
+              setValue(newValue);
+            }
+          }}
+        >
+          <Option value="gpt4">GPT-4</Option>
+          <Option value="claude">Claude</Option>
+        </Select>
+      )}
+      <ForExcel chunks={output} />
+    </Box>
+  );
+};
 
+export const ForExcel: React.FC<{ chunks: AnalyzeResponseChunk[] }> = ({
+  chunks,
+}) => {
   return (
     <>
       {chunks.map((chunk, i) => (
@@ -70,7 +107,6 @@ export const ForExcelValue: React.FC<{ chunk: AnalyzeResponseChunk }> = ({
       gap={1}
       maxWidth="100%"
       maxHeight="100%"
-      overflow="auto"
       padding={2}
     >
       <Typography level="h6">{formatSheetNames(chunk.sheetNames)}</Typography>
@@ -78,8 +114,6 @@ export const ForExcelValue: React.FC<{ chunk: AnalyzeResponseChunk }> = ({
     </Box>
   );
 };
-
-export type ReportType = "gpt4" | "claude";
 
 const ForPDF: React.FC<{ report: Outputs.Report | undefined }> = ({
   report,

@@ -7,12 +7,12 @@ from springtime.services.long_form_report_service import (
 )
 
 
-@pytest.fixture
+@pytest.fixture()
 def anthropic_client():
     return AnthropicClient()
 
 
-@pytest.fixture
+@pytest.fixture()
 def long_form_report_service(anthropic_client: AnthropicClient):
     return ClaudeLongformReportService(anthropic_client)
 
@@ -50,7 +50,7 @@ This Confidential Information Memorandum (the “Memorandum”) has been prepare
 Stearns & Co. Inc. (“Bear Stearns”) solely for informational purposes from materials supplied to
 Bear Stearns by American Casino and Entertainment Properties LLC (“ACEP” or the “Company”).
 This Memorandum relates to the possible sale of the Company.  This Memorandum is being
-furnished through Bear Stearns as the Company’s exclusive financial advisor, solely for use by
+furnished through Bear Stearns as the Company`s exclusive financial advisor, solely for use by
 prospective purchasers in considering an acquisition of the Company.
 
 This Memorandum has been prepared to assist interested parties in making their own evaluation of
@@ -65,7 +65,7 @@ representation or warranty as to the accuracy or completeness of this Memorandum
 supplemental information furnished in connection herewith, and none of the foregoing shall have
 any liability for any representations (express or implied) contained in, or for any omissions from,
 this Memorandum, any supplemental information furnished in connection herewith or any other
-written or oral communication transmitted to the recipient in the course of the recipient’s evaluation
+written or oral communication transmitted to the recipient in the course of the recipient`s evaluation
 of ACEP.
 
 Neither Bear Stearns, the Company or its subsidiaries, nor their respective affiliates, directors,
@@ -77,7 +77,7 @@ contained herein and all other information provided by Bear Stearns, or the Comp
 is subject to the terms of the confidentiality agreement previously executed by the recipient
 regarding this Memorandum.  Without limiting the generality of the foregoing, (i) the recipient will
 not reproduce this Memorandum, or such other information, in whole or in part, and will use this
-Memorandum and such other information solely for purposes of evaluating the recipient’s interest in
+Memorandum and such other information solely for purposes of evaluating the recipient`s interest in
 acquiring ACEP and (ii) if the recipient does not wish to pursue this matter, the recipient will
 promptly return this Memorandum and such other information, if any, to Bear Stearns, together with
 any other materials relating to ACEP which the recipient may have received from either Bear
@@ -120,9 +120,9 @@ Section
 
  A Stratosphere
 
- B Arizona Charlie’s Decatur
+ B Arizona Charlie`s Decatur
 
- C Arizona Charlie’s Boulder
+ C Arizona Charlie`s Boulder
 
  D Aquarius
 
@@ -168,7 +168,7 @@ and stable gaming markets in the world.
  Stratosphere Casino Hotel & Tower.  One of the most recognized landmarks on the Las
 Vegas Strip, the “Must See” resort caters to visitors to Las Vegas.
 
- Arizona Charlie’s Decatur and Arizona Charlie’s Boulder.  Well-known casinos in their
+ Arizona Charlie`s Decatur and Arizona Charlie`s Boulder.  Well-known casinos in their
 respective marketplaces, the properties are located off-Strip and cater primarily to residents of
 the fast growing Las Vegas metropolitan market.
 
@@ -181,11 +181,11 @@ accommodations, competitive odds in the casinos and a variety of dining faciliti
 the Stratosphere and Aquarius offer value-oriented, well-regarded entertainment attractions and
 amenities.
 
-Notably, all of the Company’s properties have recently undergone extensive capital improvement
+Notably, all of the Company`s properties have recently undergone extensive capital improvement
 programs and are well positioned within their respective markets to benefit from these significant
 investments.
 
-The following table further summarizes the Company’s properties:
+The following table further summarizes the Company`s properties:
 
 Property Summary ($ in millions)
   Completion EBITDA
@@ -193,13 +193,13 @@ Property Summary ($ in millions)
  Date Recent First Full Square Slot Table Hotel Net
 
 Property Acquired Renovation Yr of Ops Footage(1) Machines(1) Games(1) Rooms(1) Revenue EBITDA
-Stratosphere 1998 March ’07 $13.6  80,000  1,309  49  2,444  $197.6  $42.3
+Stratosphere 1998 March `07 $13.6  80,000  1,309  49  2,444  $197.6  $42.3
 
-Arizona Charlie’s Decatur 1999 January ’07  3.2  52,000  1,379  15  258  82.5  29.1
+Arizona Charlie`s Decatur 1999 January `07  3.2  52,000  1,379  15  258  82.5  29.1
 
-Arizona Charlie’s Boulder(3) 2000 June ’06  (6.0)  47,000  1,061  16  303  48.0  11.0
+Arizona Charlie`s Boulder(3) 2000 June `06  (6.0)  47,000  1,061  16  303  48.0  11.0
 
-Aquarius(4) 2006 October ’06 NA  57,000  1,021  42  1,907  101.6  9.0
+Aquarius(4) 2006 October `06 NA  57,000  1,021  42  1,907  101.6  9.0
 
 Total     236,000  4,770  122  4,912  $429.7  $91.5
 
@@ -226,7 +226,7 @@ million and EBITDA increasing from $28.1 million to $89.4 million.
 
 Historical Net Revenue ($ in millions)  Historical EBITDA ($ in millions)
 
-7.8% CAGR ‘01–‘05
+7.8% CAGR `01-`05
 
 $242.5 $250.0 $262.8
 $300.0
@@ -260,7 +260,7 @@ $500
 
 (1)
 
-33.6% CAGR ‘01–‘05
+33.6% CAGR `01-`05
 $72.4
 
 $44.1
@@ -307,12 +307,12 @@ market.  As a result of this initiative, the properties experienced temporary co
 which, in conjunction with a modest softening in the Las Vegas market overall, led to a modest
 decline in operating performance in 2006.
 
-Virtually all of the Company’s capital improvement programs are now complete, and management
+Virtually all of the Company`s capital improvement programs are now complete, and management
 believes each of the properties are now poised to capitalize on these improvements going forward.
 
 Protected Net Revenue ($ in millions)  Projected EBITDA ($ in millions)
 
-4.9% CAGR ‘06E PF–‘08E
+4.9% CAGR `06E PF-`08E
 
 $429.7 $450.9 $472.8
 
@@ -351,7 +351,7 @@ $700
 
 (2)
 
-11.1% CAGR ‘06E PF–‘08E
+11.1% CAGR `06E PF-`08E
 
 $91.5
 $106.5 $112.9
@@ -406,7 +406,7 @@ Bear, Stearns & Co. Inc.  CONFIDENTIAL 3
 
 Summary Financial Information
 
-The Company’s revenues and EBITDA benefit from both geographic and business mix
+The Company`s revenues and EBITDA benefit from both geographic and business mix
 diversification.
 
 Net Revenue and EBITDA by Property
@@ -558,11 +558,11 @@ Investment Considerations respective
 Strategically located, diversified portfolio of casino assets in the most stable gaming regulatory
 jurisdiction in the world, in one of the fastest growing gaming markets in the US.
 
-ACEP’s properties operate in four distinct markets that serve different segments of the overall
+ACEP`s properties operate in four distinct markets that serve different segments of the overall
 gaming market.
 
 •  The Stratosphere caters to visitors to the Las Vegas Strip.
-•  Arizona Charlie’s Boulder and Decatur properties cater to local residents/visitors to the Boulder Strip
+•  Arizona Charlie`s Boulder and Decatur properties cater to local residents/visitors to the Boulder Strip
 
 and its respective surrounding communities, and to local residents of North and West Las Vegas and
 its respective surrounding communities, respectively.
@@ -571,28 +571,28 @@ its respective surrounding communities, respectively.
 Laughlin, Nevada.
 
 
-Arizona Charlie’s
+Arizona Charlie`s
 Decatur
 
 Stratosphere
 
-Arizona Charlie’s
+Arizona Charlie`s
 Boulder
 
-Arizona Charlie’s
+Arizona Charlie`s
 Decatur
 
 Stratosphere
 
-Arizona Charlie’s
+Arizona Charlie`s
 Boulder
 
-Arizona Charlie’s
+Arizona Charlie`s
 Decatur
 
 Stratosphere
 
-Arizona Charlie’s
+Arizona Charlie`s
 Boulder
 
 
@@ -611,7 +611,7 @@ Laughlin, NV
 
 Las Vegas, NV
 
-Harrah’s Laughlin
+Harrah`s Laughlin
 
 River Palms
 
@@ -623,7 +623,7 @@ Ramada Express Colorado Belle
 
 Edgewater
 
-Don Laughlin’s Riverside
+Don Laughlin`s Riverside
 
 Aquarius
 
@@ -638,7 +638,7 @@ Laughlin, NV
 
 Las Vegas, NV
 
-Harrah’s Laughlin
+Harrah`s Laughlin
 
 River Palms
 
@@ -650,7 +650,7 @@ Ramada Express Colorado Belle
 
 Edgewater
 
-Don Laughlin’s Riverside
+Don Laughlin`s Riverside
 
 Aquarius
 
@@ -667,7 +667,7 @@ Laughlin, NV
 
 Las Vegas, NV
 
-Harrah’s Laughlin
+Harrah`s Laughlin
 
 River Palms
 
@@ -679,7 +679,7 @@ Ramada Express Colorado Belle
 
 Edgewater
 
-Don Laughlin’s Riverside
+Don Laughlin`s Riverside
 
 Aquarius
 
@@ -694,7 +694,7 @@ Laughlin, NV
 
 Las Vegas, NV
 
-Harrah’s Laughlin
+Harrah`s Laughlin
 
 River Palms
 
@@ -706,7 +706,7 @@ Ramada Express Colorado Belle
 
 Edgewater
 
-Don Laughlin’s Riverside
+Don Laughlin`s Riverside
 
 Aquarius
 
@@ -731,7 +731,7 @@ Las Vegas assets are well-positioned to cater to both Tourists and the Locals Ma
 
  The Stratosphere is one of the most recognized and most visited tourist attractions on the Strip.
 
- The Arizona Charlie’s properties are recognized as successful proven locals casinos.
+ The Arizona Charlie`s properties are recognized as successful proven locals casinos.
 
 The Las Vegas Market
 
@@ -742,7 +742,7 @@ CAGR of 2.9%.
 
 •  The market has shown a remarkable resiliency to economic downturns and political events.
 
- Las Vegas has been the US’ top-ranked destination for trade shows for the last ten years.
+ Las Vegas has been the US` top-ranked destination for trade shows for the last ten years.
 
 •  Trade show attendees increased from 2.9 million in 1995 to 6.2 million in 2005, a CAGR of 7.7%.
 
@@ -750,7 +750,7 @@ CAGR of 2.9%.
 
 Historical Visitation to Las Vegas  Las Vegas Room Supply and Occupancy
 
-’01–’05 CAGR:  2.5%
+`01-`05 CAGR:  2.5%
 
 35 35 36
 37 39
@@ -805,7 +805,7 @@ illions)
 
 
 
-’01–’05 CAGR:  1.3%
+`01-`05 CAGR:  1.3%
 
 127 127 130 132 133
 
@@ -890,7 +890,7 @@ Investment Considerations
 
 Local Market
 
-ACEP’s properties are well positioned to benefit from the growth in the local population.
+ACEP`s properties are well positioned to benefit from the growth in the local population.
 
  Nevada has been the fastest-growing state in the United States for the last 19 years, according to
 the Las Vegas Convention and Visitation Authority.
@@ -1013,7 +1013,7 @@ located adjacent to the Stratosphere.
 
 Stratosphere
 
- The Stratosphere’s close proximity to the Las Vegas Convention Center provides a compelling
+ The Stratosphere`s close proximity to the Las Vegas Convention Center provides a compelling
 development opportunity on the Las Vegas Strip.
 •  1.3 miles from the Las Vegas Convention Center.
 
@@ -1065,15 +1065,15 @@ Stratosphere
  Having recently completed the renovation of all of the original 1,444 hotel rooms, the
 Stratosphere now boasts the newest room offerings north of Wynn Las Vegas.
 
- The Stratosphere’s newly renovated room product is poised to capture an even greater share of
+ The Stratosphere`s newly renovated room product is poised to capture an even greater share of
 its targeted customer base, as the supply of affordable hotel accommodations continues to
 shrink.
-•  No new comparable room product is scheduled to come online in the Stratosphere’s core market until
+•  No new comparable room product is scheduled to come online in the Stratosphere`s core market until
 
 at least 2010.
 
-•  The luxury room product expected to come online over the next 2 to 3 years (e.g. Wynn’s Encore,
-MGM’s CityCenter, etc.) will likely provide the Stratosphere with a “pricing umbrella” under which
+•  The luxury room product expected to come online over the next 2 to 3 years (e.g. Wynn`s Encore,
+MGM`s CityCenter, etc.) will likely provide the Stratosphere with a “pricing umbrella” under which
 the Stratosphere will be able to continue to capture a greater than fair share of value-oriented
 customers who demand quality, affordable accommodations.
 
@@ -1093,10 +1093,10 @@ additional rooms.
 •  New nightclub, “Polly Esters”; and
 
 •  Casino floor improvements, including:
-−  New carpet and wall covering;
-−  New Center bar;
-−  New High Limit Slots;
-−  New VIP Check-In.
+-  New carpet and wall covering;
+-  New Center bar;
+-  New High Limit Slots;
+-  New VIP Check-In.
 
 
 
@@ -1110,7 +1110,7 @@ Bear, Stearns & Co. Inc.  CONFIDENTIAL 10
 
 
 Investment Considerations
-Arizona Charlie’s Decatur
+Arizona Charlie`s Decatur
 
  Management has invested approximately $38 million to improve the Decatur property:
 •  Converted 100% of slot machines from coin operated to “TITO” technology;
@@ -1121,7 +1121,7 @@ Arizona Charlie’s Decatur
 
 •  Introduced a revitalized tiered player rewards program.
 
-Arizona Charlie’s Boulder
+Arizona Charlie`s Boulder
 
  Completed an $8.1 million casino expansion, in June 2006, which included:
 •  7,300 square feet of new gaming space;
@@ -1140,7 +1140,7 @@ Aquarius
 of the Aquarius, formerly the Flamingo Laughlin Hotel and Casino, in May 2006.
 •  New slot floor in Laughlin with enhanced new gaming systems and “TITO” technology.
 
-−  1,000 new slot machines.
+-  1,000 new slot machines.
 
 •  Re-branding of property as “Aquarius”.
 
@@ -1149,20 +1149,20 @@ of the Aquarius, formerly the Flamingo Laughlin Hotel and Casino, in May 2006.
 •  Hotel room refurbishment.
 
 •  Enhancement of player amenities:
-−  New High-Limit area;
-−  New VIP Check-In;
-−  New VIP Lounge;
-−  Refurbished Center Bar.
+-  New High-Limit area;
+-  New VIP Check-In;
+-  New VIP Lounge;
+-  Refurbished Center Bar.
 
 •  Enhancement of marketing programs to attract walk-in traffic from nearby outdoor River Walk.
-−  New outdoor River Walk patio lounge.
+-  New outdoor River Walk patio lounge.
 
 •  Development of new nationally branded food & beverage options.
-−  Starbucks® coffee outlet.
-−  Outback Steakhouse.
+-  Starbucks® coffee outlet.
+-  Outback Steakhouse.
 
 •  Enhancement of entertainment options.
-−  Extensive showroom and lounge renovation.
+-  Extensive showroom and lounge renovation.
 
  While the extensive renovation of the property resulted in a fair amount of disruption in 2006,
 the renovation is largely complete and the property is poised for renewed growth in 2007.
@@ -1201,9 +1201,9 @@ stabilized from the opening of tribal casinos in California.
 costs of Las Vegas with a broad array of attractions including the Colorado River.
 
  Historically, the Aquarius, operated as the Flamingo Laughlin and owned by Caesars
-Entertainment and subsequently Harrah’s Entertainment, was one of the leading properties in the
+Entertainment and subsequently Harrah`s Entertainment, was one of the leading properties in the
 market.
-•  Consistently generated EBITDA of more than $20 million throughout the 1990’s.
+•  Consistently generated EBITDA of more than $20 million throughout the 1990`s.
 
  More recently, however, the Aquarius has experienced a weakness in operating results given the
 transition in ownership, related property management turnover and a lack of maintenance capital
@@ -1214,7 +1214,7 @@ investment program of $40 million.  Upon completion in 2007, the Aquarius will o
 •  Renewed managerial focus;
 
 •  Newest slot product in the market;
-−  1,000 new state of the art slot machines.
+-  1,000 new state of the art slot machines.
 
 •  Newest room product in the market;
 
@@ -1240,15 +1240,15 @@ Investment Considerations
 Emphasis on slot play, in conjunction with relatively low maintenance capital expenditures,
 produces strong, predictable free cash flow.
 
- The Company’s four properties offer over 4,700 slot machines, all of which are ticket – in, ticket
-– out (TITO) machines.
+ The Company`s four properties offer over 4,700 slot machines, all of which are ticket - in, ticket
+- out (TITO) machines.
 
- Slot revenues account for over 80% of the Company’s gaming revenues:
+ Slot revenues account for over 80% of the Company`s gaming revenues:
 •  Stratosphere, 70%;
 
-•  Arizona Charlie’s Decatur, 91%;
+•  Arizona Charlie`s Decatur, 91%;
 
-•  Arizona Charlie’s Boulder; 91%.
+•  Arizona Charlie`s Boulder; 91%.
 
 •  Aquarius; 81%
 
@@ -1264,7 +1264,7 @@ gaming industry.
  The executive and property-level management teams have an established record of developing,
 integrating and operating gaming and entertainment properties.
 
- Management’s continued focus on guest service training for employees has enabled the
+ Management`s continued focus on guest service training for employees has enabled the
 properties to consistently exceed customer expectation.
 
 Senior Management
@@ -1317,33 +1317,33 @@ Business History and Description
 American Casino & Entertainment Properties, LLC owns and operates four gaming and
 entertainment properties in the Las Vegas metropolitan area.  The four properties are the
 Stratosphere Casino Hotel & Tower, which is located on the Las Vegas Strip and caters to visitors
-to Las Vegas, two off-Strip casinos, Arizona Charlie’s Decatur and Arizona Charlie’s Boulder,
+to Las Vegas, two off-Strip casinos, Arizona Charlie`s Decatur and Arizona Charlie`s Boulder,
 which cater primarily to residents of Las Vegas and the surrounding communities, and the Aquarius
 Casino Resort, formerly known as the Flamingo Laughlin Hotel and Casino, in Laughlin, Nevada,
 or the Aquarius, which caters to visitors to Laughlin.
 
-The Stratosphere is one of the most recognized landmarks in Las Vegas, the two Arizona Charlie’s
+The Stratosphere is one of the most recognized landmarks in Las Vegas, the two Arizona Charlie`s
 properties are well-known casinos in their respective marketplaces and the Aquarius has the largest
 hotel in Laughlin.
 
-Each of the Company’s properties offers customers a value-oriented experience by providing
+Each of the Company`s properties offers customers a value-oriented experience by providing
 competitive odds in their casinos, quality rooms in their hotels, award-winning dining facilities and,
 at the Stratosphere, an offering of entertainment attractions found nowhere else in Las Vegas.  The
 Company believes the value it offers its patrons, together with a strong focus on customer service,
 will enable them to continue to attract customer traffic to their properties.
 
 ACEP is a holding company that was formed in Delaware on December 29, 2003 for the purpose of
-acquiring the entities that own and operate the Stratosphere, Arizona Charlie’s Decatur and Arizona
-Charlie’s Boulder.  ACEP conducts its operations through direct and indirect wholly-owned
+acquiring the entities that own and operate the Stratosphere, Arizona Charlie`s Decatur and Arizona
+Charlie`s Boulder.  ACEP conducts its operations through direct and indirect wholly-owned
 subsidiaries.  These subsidiaries are American Casino & Entertainment Properties Finance Corp.,
 Stratosphere Corporation and its wholly-owned subsidiaries, Stratosphere Gaming Corporation,
 Stratosphere Land Corporation, Stratosphere Advertising Agency and Stratosphere Leasing, LLC;
-and Charlie’s Holding LLC and its wholly-owned subsidiaries, Arizona Charlie’s, LLC and Fresca,
+and Charlie`s Holding LLC and its wholly-owned subsidiaries, Arizona Charlie`s, LLC and Fresca,
 LLC.
 
 On November 29, 2005, AREP Laughlin Corporation entered into an agreement to purchase the
 Flamingo Laughlin Hotel and Casino, now known as the Aquarius Casino Resort, or the Aquarius,
-in Laughlin, Nevada from Harrah’s Entertainment.  The purchase price was $114.0 million,
+in Laughlin, Nevada from Harrah`s Entertainment.  The purchase price was $114.0 million,
 including working capital amounts.  The transaction was approved by the Nevada Gaming
 Commission upon recommendation of the Nevada Gaming Control Board and closed on May 19,
 2006.
@@ -1410,15 +1410,15 @@ approximately $178 million through December 31, 2006.
 
 Casino
 
-The Stratosphere’s casino contains approximately 80,000 square feet of gaming space, with
+The Stratosphere`s casino contains approximately 80,000 square feet of gaming space, with
 approximately 1,309 slot machines on a newly renovated slot floor layout.  In addition to a newly
-constructed high-limit slot area, this renovation converted all of the Stratosphere’s video poker and
+constructed high-limit slot area, this renovation converted all of the Stratosphere`s video poker and
 slot machines to “TITO” technology.  In addition, the Stratosphere has 49 table games, a recently
 constructed six table poker room, a renovated race and sports book area and a new VIP check-in
 area.
 
 For the years ended December 31, 2006, 2005, 2004 and 2003, approximately 69.5%, 70.7%, 70.6%
-and 70.1%, respectively, of the Stratosphere’s gaming revenue was generated by slot machine play.
+and 70.1%, respectively, of the Stratosphere`s gaming revenue was generated by slot machine play.
 The Stratosphere derives its other gaming revenue from the poker room and race and sports book,
 which primarily are intended to attract customers for slot machines and table games.
 
@@ -1431,10 +1431,10 @@ private cabanas and a fitness center.  Beach Club 25, located on the 25th floor,
 adult pool.
 
 The Stratosphere offers seven themed restaurants, a newly renovated $1.4 million Center Bar, and
-four lounges, two of which feature live entertainment.  The Stratosphere’s premier restaurant is the
+four lounges, two of which feature live entertainment.  The Stratosphere`s premier restaurant is the
 recently refurbished Top of the World Restaurant and Lounge, a 336-seat revolving restaurant
 located on level 106 in the Tower.  Top of the World has been awarded “Best All-Around
-Restaurant” and “Best Romantic Restaurant” by America Online’s City’s Best 2005 and the “Award
+Restaurant” and “Best Romantic Restaurant” by America Online`s City`s Best 2005 and the “Award
 of Excellence” in 2004 from Wine Spectator Magazine.
 
 
@@ -1468,7 +1468,7 @@ above the Las Vegas Strip; and
  Insanity, which opened on March 10, 2005, is the final major thrill ride attraction to be built
 atop the Tower.  The new ride holds 10 passengers in “escape proof” seats as it spins at 40
 m.p.h.  The new ride consists of an arm that extends out 64 feet over the edge of the Tower and
-spins passengers at up to three ‘G’s.’  As the ride spins faster and faster, the riders are propelled
+spins passengers at up to three `G`s.`  As the ride spins faster and faster, the riders are propelled
 up to an angle of 70 degrees, overlooking the City of Las Vegas more than 900 feet below.
 
 The Tower also includes:
@@ -1496,7 +1496,7 @@ nightclub/event center, Polly Esters, which will be located just off of the casi
 
 Adjacent to the retail center is a 640-seat showroom that currently offers evening and late-night
 shows, which are designed to appeal to value-oriented visitors who come to Las Vegas.  The
-Stratosphere’s entertainment includes American Superstars, a celebrity tribute production show and
+Stratosphere`s entertainment includes American Superstars, a celebrity tribute production show and
 Bite, a vampire-themed adult review.
 
 
@@ -1533,7 +1533,7 @@ the 107th floor of the observation tower
 
 The Stratosphere participates in the A.C.E. Rewards and other aggressive marketing programs.
 These programs permit members to accumulate points, which can be redeemed for cash at the
-casino and complimentaries at all of ACEP’s properties.  The Company has approximately
+casino and complimentaries at all of ACEP`s properties.  The Company has approximately
 1,085,170 members registered with its A.C.E. Rewards Program at the Stratosphere.  Importantly,
 approximately 22.3% of the active A.C.E. Rewards members frequented the property, on average,
 more than four times per month.
@@ -1611,7 +1611,7 @@ Las Vegas Hilton  76,500  1,340  1,778  2,956
 Stardust  85,000  1,340  1,838  1,500
 New Frontier  100,000  970  1,162  1,388
 Excalibur  121,544  1,745  2,273  3,991
-Source:  Company estimates and Casino City’s North American Gaming Almanac for FY2005.
+Source:  Company estimates and Casino City`s North American Gaming Almanac for FY2005.
 Positions = Slots + (6*Tables).
 As of December 31, 2006.
 
@@ -1620,9 +1620,9 @@ Financial Summary
 The Stratosphere has been able to show very strong and consistent profit throughout its historical
 period.  Through management innovation and focus on profitability, EBITDA has shown a CAGR
 of 30% over the historical period.  Management anticipates very strong profit growth and strong
-margins to continue in the future.  Throughout 2006, the Stratosphere’s extensive renovation
+margins to continue in the future.  Throughout 2006, the Stratosphere`s extensive renovation
 program temporarily disrupted traffic flow and visitation to the property, resulting in a temporary
-decline in the property’s operating results in 2006.  With the renovation program now complete, the
+decline in the property`s operating results in 2006.  With the renovation program now complete, the
 Stratosphere is poised to exploit its relative competitive position as the only recently renovated
 property on the Las Vegas Strip, north of Wynn Las Vegas.
 
@@ -1664,7 +1664,7 @@ $250
 200
 
 $250
-’01–’08E CAGR:  5.7%
+`01-`08E CAGR:  5.7%
 
 (1)
 
@@ -1726,7 +1726,7 @@ $50
 45
 
 $50
-’01–’08E CAGR:  17.0%
+`01-`08E CAGR:  17.0%
 
 (1)
 
@@ -1749,7 +1749,7 @@ $50
 
 
 Section 3-B
-Arizona Charlie’s Decatur
+Arizona Charlie`s Decatur
 
 
 
@@ -1762,7 +1762,7 @@ Bear, Stearns & Co. Inc.  CONFIDENTIAL 20
 
 
 
-Arizona Charlie’s Decatur
+Arizona Charlie`s Decatur
 
 
 
@@ -1777,8 +1777,8 @@ Bear, Stearns & Co. Inc.  CONFIDENTIAL 21
 
 
 
-Arizona Charlie’s Decatur
-Arizona Charlie’s Decatur opened in April 1988 as a full-service casino and hotel geared toward
+Arizona Charlie`s Decatur
+Arizona Charlie`s Decatur opened in April 1988 as a full-service casino and hotel geared toward
 residents of Las Vegas and the surrounding communities.  The property is located on approximately
 17 acres of land four miles west of the Las Vegas Strip in the heavily populated west Las Vegas
 area and is easily accessible from Route 95, a major highway in Las Vegas.
@@ -1788,26 +1788,26 @@ improvement program.
 
 Casino
 
-Arizona Charlie’s Decatur contains approximately 52,000 square feet of gaming space with
+Arizona Charlie`s Decatur contains approximately 52,000 square feet of gaming space with
 approximately 1,379 slot machines, 15 table games, a race and sports book, a 24-hour bingo parlor,
 a keno lounge and a poker lounge.  In 2001 and 2002, the Company expanded the slot floor and
-upgraded the interior design of the casino.  More recently, Arizona Charlie’s Decatur converted
+upgraded the interior design of the casino.  More recently, Arizona Charlie`s Decatur converted
 100% of its video poker and slot machines to “TITO” technology.
 
 For the years ended December 31, 2006, 2005, 2004 and 2003, approximately 90.9%, 89.3%, 90.0%
-and 90.8%, respectively, of the property’s gaming revenue was generated by slot machine play.
-Arizona Charlie’s Decatur also derives other gaming revenue from bingo, keno, poker and the race
+and 90.8%, respectively, of the property`s gaming revenue was generated by slot machine play.
+Arizona Charlie`s Decatur also derives other gaming revenue from bingo, keno, poker and the race
 and sports book, which primarily are intended to attract customers for slot machines and table
 games.
 
 Hotel, Food and Beverage
 
-Arizona Charlie’s Decatur currently has 258 rooms, including nine suites.  Hotel customers include
+Arizona Charlie`s Decatur currently has 258 rooms, including nine suites.  Hotel customers include
 local residents and their out-of-town guests, as well as those business and leisure travelers who,
 because of location or cost considerations, choose not to stay on the Las Vegas Strip or at other
 hotels in Las Vegas.
 
-Arizona Charlie’s Decatur has four restaurants, one of which is a franchised, quick-service
+Arizona Charlie`s Decatur has four restaurants, one of which is a franchised, quick-service
 restaurant and three bars including a lounge.  In October 2003, ACEP opened the new Frisco
 Market Buffet, a 260-seat San Francisco-themed eatery and in January 2007, the property completed
 the conversion of the Yukon Grille on the first floor to an Outback Steakhouse in an effort to
@@ -1815,7 +1815,7 @@ increase branded dinning notoriety and attract new customers.
 
 Retail and Entertainment
 
-Arizona Charlie’s Decatur provides complimentary entertainment as a component of its overall
+Arizona Charlie`s Decatur provides complimentary entertainment as a component of its overall
 customer appeal.  The Naughty Ladies Saloon features a variety of entertainment, including live
 bands and musician showcase nights.  In addition, a small gift shop located adjacent to the casino
 provides a limited range of inexpensive gift items, candy, newspapers, magazines and cigarettes.
@@ -1833,19 +1833,19 @@ Bear, Stearns & Co. Inc.  CONFIDENTIAL 22
 
 Business and Marketing Strategy
 
-Arizona Charlie’s Decatur markets its hotel and casino primarily to local residents of Las Vegas and
+Arizona Charlie`s Decatur markets its hotel and casino primarily to local residents of Las Vegas and
 the surrounding communities, where an estimated 500,000 people live within a five-mile radius.
-The Company believes that the property’s pricing and gaming odds make it one of the best values in
+The Company believes that the property`s pricing and gaming odds make it one of the best values in
 the gaming industry and that its gaming products, hotel rooms, restaurants and other amenities
 attract local customers in search of reasonable prices, smaller casinos and more attentive service.
-Arizona Charlie’s Decatur also tailors its selection of slot machines, including many diverse video
+Arizona Charlie`s Decatur also tailors its selection of slot machines, including many diverse video
 poker machines and table games, including double-deck, hand-dealt blackjack, to appeal to local
 casino patrons.
 
-Arizona Charlie’s Decatur participates in the A.C.E. Rewards and other aggressive marketing
+Arizona Charlie`s Decatur participates in the A.C.E. Rewards and other aggressive marketing
 programs.  These programs permit members to accumulate points, which can be redeemed for cash
-at the casino and complimentaries at all of ACEP’s properties.  The Company has approximately
-290,293 members registered with its A.C.E. Rewards Program at Arizona Charlie’s Decatur.
+at the casino and complimentaries at all of ACEP`s properties.  The Company has approximately
+290,293 members registered with its A.C.E. Rewards Program at Arizona Charlie`s Decatur.
 Importantly, approximately 39.0% of the active A.C.E. Rewards members frequented the property,
 on average, more than four times per month.
 
@@ -1885,7 +1885,7 @@ Texas Station
 
 Santa Fe Station
 
-Arizona Charlie’s Decatur
+Arizona Charlie`s Decatur
 
 Palace Station
 
@@ -1905,7 +1905,7 @@ Texas Station
 
 Santa Fe Station
 
-Arizona Charlie’s Decatur
+Arizona Charlie`s Decatur
 
 Palace Station
 
@@ -1927,7 +1927,7 @@ Property Casino Square Footage Slots Positions Hotel Rooms
 
 
 
-Arizona Charlie’s Decatur(1)  52,000  1,379  1,469  258
+Arizona Charlie`s Decatur(1)  52,000  1,379  1,469  258
 
 Gold Coast  86,600  2,827  3,061  711
 Suncoast  80,000  2,445  2,763  432
@@ -1937,7 +1937,7 @@ Palms  95,000  1,900  2,260  420
 Palace Station  84,000  1,860  2,190  1,030
 Fiesta Rancho  70,000  1,640  1,790  100
 Rampart Casino  50,000  1,180  1,372  541
-Source:  Company estimates and Casino City’s North American Gaming Almanac for FY2005.
+Source:  Company estimates and Casino City`s North American Gaming Almanac for FY2005.
 Positions = Slots + (6*Tables).
 As of December 31, 2006.
 
@@ -1947,11 +1947,11 @@ Management has been able to consistently generate strong returns at the Decatur 
 However, recent capital improvements and external traffic disruption at the Decatur property
 created temporary visitation disruptions.  Construction projects by the Nevada Highway Authority,
 as well as Nevada Gas, in close proximity to the Decatur property, resulted in disrupting access to
-the property.  Additionally, the opening of Station Casino’s Red Rock Hotel & Casino presented
+the property.  Additionally, the opening of Station Casino`s Red Rock Hotel & Casino presented
 additional competition in the Decatur market.  Management does not believe these factors will have
-a long term effect on the property’s performance, as the construction projects will be completed in
+a long term effect on the property`s performance, as the construction projects will be completed in
 the near term and the Las Vegas locals markets have a demonstrated history of absorbing new
-supply growth.  Furthermore, management believes the impact of Red Rock on Decatur’s operating
+supply growth.  Furthermore, management believes the impact of Red Rock on Decatur`s operating
 performance will be minimal, as the properties compete for a different segment of casino patrons.
 
 Net Revenue ($ in millions)  EBITDA ($ in millions)
@@ -1989,7 +1989,7 @@ $100
 80
 
 $10
-’01–’08E CAGR:  2.7%
+`01-`08E CAGR:  2.7%
 
 
 
@@ -2036,7 +2036,7 @@ $35
 30
 
 $35
-’01–’08E CAGR:  8.1%
+`01-`08E CAGR:  8.1%
 
 
   % Margin 23.4% 18.1% 26.0% 33.5% 36.9% 35.2% 33.3% 33.5%
@@ -2057,7 +2057,7 @@ $35
 
 
 Section 3-C
-Arizona Charlie’s Boulder
+Arizona Charlie`s Boulder
 
 
 
@@ -2070,7 +2070,7 @@ Bear, Stearns & Co. Inc.  CONFIDENTIAL 25
 
 
 
-Arizona Charlie’s Boulder
+Arizona Charlie`s Boulder
 
 
 
@@ -2085,8 +2085,8 @@ Bear, Stearns & Co. Inc.  CONFIDENTIAL 26
 
 
 
-Arizona Charlie’s Boulder
-Arizona Charlie’s Boulder opened in 1988 as a stand-alone hotel and RV park and is located on
+Arizona Charlie`s Boulder
+Arizona Charlie`s Boulder opened in 1988 as a stand-alone hotel and RV park and is located on
 approximately 24 acres of land, seven miles east of the Las Vegas Strip, near an I-515 interchange
 in an established retail and residential neighborhood in the eastern metropolitan area of Las Vegas.
 Since ACEP acquired the property in 2000, the Company has invested approximately $37 million to
@@ -2095,26 +2095,26 @@ expansion.
 
 Casino
 
-Arizona Charlie’s Boulder contains approximately 47,000 square feet of gaming space with
+Arizona Charlie`s Boulder contains approximately 47,000 square feet of gaming space with
 approximately 1,061 slot machines, 16 table games, a race and sports book and a 24-hour bingo
 parlor.  In 2002, the Company completed a $5.1 million expansion project, which provided for an
 additional 18,000 square feet of slot floor space, a 500-seat bingo hall and a 43-seat race and sports
 book.  In July 2006, an $8.1 million expansion added approximately 6,000 square feet of gaming
 space including 250 new slot machines, two new table games and a new A.C.E Rewards center.
 
-Arizona Charlie’s Boulder emphasizes video poker because it is popular with local players and, as a
-result, generates high volumes of play and casino revenue.  Arizona Charlie’s Boulder is 100%
-converted to “TITO” technology.  Most table games at Arizona Charlie’s Boulder are devoted to
+Arizona Charlie`s Boulder emphasizes video poker because it is popular with local players and, as a
+result, generates high volumes of play and casino revenue.  Arizona Charlie`s Boulder is 100%
+converted to “TITO” technology.  Most table games at Arizona Charlie`s Boulder are devoted to
 double-deck, hand-dealt blackjack play.
 
 For the years ended December 31, 2006, 2005, 2004 and 2003, approximately 90.8%, 88.1%, 89.1%
-and 86.9%, respectively, of gaming revenue was generated by slot machine play.  Arizona Charlie’s
+and 86.9%, respectively, of gaming revenue was generated by slot machine play.  Arizona Charlie`s
 Boulder also derives other gaming revenue from bingo and the race and sports book, which
 primarily serve to attract customers for slot machines and table games.
 
 Hotel, RV Park, Food and Beverage
 
-Arizona Charlie’s Boulder hotel currently has 303 rooms, including 221 suites.  Arizona Charlie’s
+Arizona Charlie`s Boulder hotel currently has 303 rooms, including 221 suites.  Arizona Charlie`s
 Boulder also has a 12 acre RV park, one of the largest short-term RV parks on the Boulder Strip
 with 30 to 70-foot pull through stations and over 200 spaces.  The RV park offers nightly, weekly
 and monthly rates and a range of services, including laundry facilities, game and exercise rooms, a
@@ -2124,7 +2124,7 @@ Hotel customers include local residents and their out-of-town guests, as well as
 leisure travelers who, because of location or cost considerations, choose not to stay on the Las
 Vegas Strip or at other hotels in Las Vegas.
 
-Arizona Charlie’s Boulder has four restaurants and three bars, one of which is the Palace Grand
+Arizona Charlie`s Boulder has four restaurants and three bars, one of which is the Palace Grand
 lounge.
 
 
@@ -2140,24 +2140,24 @@ Bear, Stearns & Co. Inc.  CONFIDENTIAL 27
 
 Retail and Entertainment
 
-Arizona Charlie’s Boulder provides complimentary live entertainment in its lounge, The Palace
+Arizona Charlie`s Boulder provides complimentary live entertainment in its lounge, The Palace
 Grand, to attract customers.  A small gift shop located adjacent to the casino provides a limited
 range of inexpensive gift items, candy, newspapers, magazines and cigarettes.
 
 Business and Marketing Strategy
 
-Arizona Charlie’s Boulder markets its hotel and casino primarily to residents of Las Vegas and the
+Arizona Charlie`s Boulder markets its hotel and casino primarily to residents of Las Vegas and the
 surrounding communities, where an estimated 423,000 people live within a five-mile radius.  The
 Company believes that its pricing and gaming odds make it one of the best values in the gaming
 industry and that its gaming products, hotel rooms, restaurants, and other amenities attract local
 customers in search of reasonable prices, smaller casinos and more attentive service.  Arizona
-Charlie’s Boulder also tailors its selection of slot machines, including many diverse video poker
+Charlie`s Boulder also tailors its selection of slot machines, including many diverse video poker
 machines, and table games, including double-deck, hand-dealt blackjack, to local casino patrons.
 
-Arizona Charlie’s Boulder also participates in the A.C.E. Rewards and other aggressive marketing
+Arizona Charlie`s Boulder also participates in the A.C.E. Rewards and other aggressive marketing
 programs.  These programs permit members to accumulate points that can be redeemed for cash at
-the casino and complimentaries at all of ACEP’s properties.  The Company has approximately
-31,987 members registered with its A.C.E. Rewards Program at Arizona Charlie’s Boulder.
+the casino and complimentaries at all of ACEP`s properties.  The Company has approximately
+31,987 members registered with its A.C.E. Rewards Program at Arizona Charlie`s Boulder.
 Importantly, approximately 34.1% of its active A.C.E. Rewards members frequented the property,
 on average, more than four times per month.
 
@@ -2185,12 +2185,12 @@ Boulder Strip Locals Market
 
 Boulder Station
 
-Arizona’s Charlie Boulder
+Arizona`s Charlie Boulder
 
 Longshorn
 
 Nevada Palace
-Sam’s Town
+Sam`s Town
 
 Sunset Station
 
@@ -2208,12 +2208,12 @@ Eldorado
 
 Boulder Station
 
-Arizona’s Charlie Boulder
+Arizona`s Charlie Boulder
 
 Longshorn
 
 Nevada Palace
-Sam’s Town
+Sam`s Town
 
 Sunset Station
 
@@ -2229,12 +2229,12 @@ Eldorado
 
 Boulder Station
 
-Arizona’s Charlie Boulder
+Arizona`s Charlie Boulder
 
 Longshorn
 
 Nevada Palace
-Sam’s Town
+Sam`s Town
 
 Sunset Station
 
@@ -2266,25 +2266,25 @@ Property Casino Square Footage Slots Positions Hotel Rooms
 
 
 
-Arizona Charlie’s Boulder(1)  47,000  1,061  1,157  303
+Arizona Charlie`s Boulder(1)  47,000  1,061  1,157  303
 
-Sam’s Town  120,000  3,050  3,350  646
+Sam`s Town  120,000  3,050  3,350  646
 Boulder Station  90,000  2,900  3,176  300
 Sunset Station  100,000  2,600  2,906  456
 Fiesta Henderson  50,000  1,425  1,587  227
 Nevada Palace  15,000  495  549  210
-Source:  Company estimates and Casino City’s North American Gaming Almanac for FY2005.
+Source:  Company estimates and Casino City`s North American Gaming Almanac for FY2005.
 Positions = Slots + (6*Tables).
 Post current expansion projects.
 As of December 31, 2006.
 
 Financial Summary
-Following the opening of the casino at Arizona Charlie’s Boulder, which upon acquisition in 2000
+Following the opening of the casino at Arizona Charlie`s Boulder, which upon acquisition in 2000
 was a stand alone hotel and RV park, management has been able to deliver strong growth in both
 revenues and EBITDA.  With the continued implementation of the various operating initiatives,
-management believes Arizona Charlie’s Boulder will continue to show strong returns in the future.
+management believes Arizona Charlie`s Boulder will continue to show strong returns in the future.
 
-The property faced challenges similar to those experienced by the Company’s other properties in
+The property faced challenges similar to those experienced by the Company`s other properties in
 2006.  Similarly, the capital improvements initiated at the property created a temporary disruption in
 traffic flow.  Management believes capital improvements completed at the Boulder property have
 positioned the property for renewed growth in revenues and EBITDA going forward.
@@ -2330,7 +2330,7 @@ $60
 50
 
 $60
-’01–’08E CAGR:  10.6%
+`01-`08E CAGR:  10.6%
 
 
 
@@ -2377,7 +2377,7 @@ $16
 12
 
 $16
-’01–’08E CAGR:  NM
+`01-`08E CAGR:  NM
 
 
   % Margin (16.7%) (18.6%) (4.5%) 17.8% 26.5% 23.0% 23.6% 23.7%
@@ -2516,8 +2516,8 @@ Business and Marketing Strategy
 
 Aquarius participates in the A.C.E. Rewards and other aggressive marketing programs.  These
 programs permit members to accumulate points, which can be redeemed for cash at the casino and
-complimentaries at all of ACEP’s properties.  Notably, the Company has access to approximately
-472,000 members registered with Harrah’s, at Laughlin, at the time of acquisition.
+complimentaries at all of ACEP`s properties.  Notably, the Company has access to approximately
+472,000 members registered with Harrah`s, at Laughlin, at the time of acquisition.
 
 The Company uses the most sophisticated database marketing software available, Mariposa, to
 aggressively target offers to current patrons.  Additionally, the Company uses billboards, radio and
@@ -2559,21 +2559,21 @@ Property Casino Square Footage Slots Positions Hotel Rooms
 
 
 Aquarius(1)  57,000  1,021  1,273  1,907
-Don Laughlin’s Hotel & Casino  60,000  1,525  1,753  1,404
+Don Laughlin`s Hotel & Casino  60,000  1,525  1,753  1,404
 Ramada Express  53,000  1,350  1,530  1,500
 Colorado Belle Hotel Casino & Microbrewery  60,000  1,220  1,478  1,173
-Harrah’s Laughlin  47,000  1,200  1,464  1,560
+Harrah`s Laughlin  47,000  1,200  1,464  1,560
 River Palms Resort Casino  120,000  1,250  1,400  1,003
 Edgewater Hotel and Casino  60,000  1,125  1,389  1,396
 Golden Nugget Laughlin  32,600  1,000  1,096  300
 Avi Resort and Casino  25,000  845  995  455
 Pioneer Hotel and Gambling Hall  25,532  776  872  416
-Source:  Company estimates and Casino City’s North American Gaming Almanac for FY2005.
+Source:  Company estimates and Casino City`s North American Gaming Almanac for FY2005.
 Positions = Slots + (6*Tables).
 As of September 30, 2006.
 
 Financial Summary
-Prior to ACEP’s purchase of the Aquarius, historical results were inconsistent given the previous
+Prior to ACEP`s purchase of the Aquarius, historical results were inconsistent given the previous
 owners view of the Aquarius as a non-strategic asset.  Upon acquisition by ACEP in May 2006, the
 Company implemented a $40 million capital improvement plan to reposition the property which
 resulted in significant disruption at the property.  Management believes Aquarius is now positioned
@@ -2623,7 +2623,7 @@ $140
 130
 
 $140
-’01–’08E CAGR:  1.0%
+`01-`08E CAGR:  1.0%
 
 
 
@@ -2669,7 +2669,7 @@ $25
 20
 
 $25
-’01–’08E CAGR:  2.3%
+`01-`08E CAGR:  2.3%
 
   % Margin 17.2% 14.1% 11.1% 13.7% 11.8% 8.9% 18.5% 18.8%
 
@@ -2708,7 +2708,7 @@ million and EBITDA increasing from $28.1 million to $89.4 million.
 
 Historical Net Revenue ($ in millions)  Historical EBITDA ($ in millions)
 
-7.8% CAGR ‘01–‘05
+7.8% CAGR `01-`05
 
 $242.5 $250.0 $262.8
 $300.0
@@ -2742,7 +2742,7 @@ $500
 
 (1)
 
-33.6% CAGR ‘01–‘05
+33.6% CAGR `01-`05
 $72.4
 
 $44.1
@@ -2789,12 +2789,12 @@ market.  As a result of this initiative, the properties experienced temporary co
 which, in conjunction with a modest softening in the Las Vegas market overall, led to a modest
 decline in operating performance in 2006.
 
-Virtually all of the Company’s capital improvement programs are now complete, and management
+Virtually all of the Company`s capital improvement programs are now complete, and management
 believes each of the properties are now poised to capitalize on these improvements going forward.
 
 Protected Net Revenue ($ in millions)  Projected EBITDA ($ in millions)
 
-4.9% CAGR ‘06E PF–‘08E
+4.9% CAGR `06E PF-`08E
 
 $429.7 $450.9 $472.8
 
@@ -2833,7 +2833,7 @@ $700
 
 (2)
 
-11.1% CAGR ‘06E PF–‘08E
+11.1% CAGR `06E PF-`08E
 
 $91.5
 $106.5 $112.9
@@ -2897,8 +2897,8 @@ ASSETS
 Current Assets:
 
 Cash and cash equivalents  $77.3  $75.2  $108.3  $54.9
-Restricted cash  –  0.4  0.5  0.3
-Marketable securities  4.2  –  –  –
+Restricted cash  -  0.4  0.5  0.3
+Marketable securities  4.2  -  -  -
 Investments - restricted  3.0  2.5  2.8  3.5
 Accounts receivable, net  4.1  3.9  4.2  6.8
 Related party receivables  0.2  0.4  1.0  0.5
@@ -2910,47 +2910,47 @@ Total Current Assets  $100.9  $95.5  $131.2  $85.6
 Property and equipment, net  $324.5  $314.6  $319.5  $445.8
 
 Debt issuance and deferred financing costs, net  $0.3  $7.4  $6.4  $5.7
-Lessee incentive  0.6  0.4  –  –
-Other receivable  0.1  –  –  –
+Lessee incentive  0.6  0.4  -  -
+Other receivable  0.1  -  -  -
 Deferred income taxes  54.4  46.4  37.2  36.2
-Customer list, net  –  –  –  2.5
+Customer list, net  -  -  -  2.5
 
 Total Other Assets  $55.3  $54.3  $43.6  $44.5
 
 TOTAL ASSETS  $480.7  $464.3  $494.3  $575.8
 
-LIABILITIES AND MEMBER’S EQUITY
+LIABILITIES AND MEMBER`S EQUITY
 Current Liabilities:
 
 Accounts payable  $5.9  $5.2  $4.4  $6.7
 Accrued expenses  17.8  22.8  22.6  33.2
 Accrued payroll and related expenses  12.4  10.8  11.0  14.4
 Current portion of capital lease obligation  0.4  0.5  0.5  0.5
-Current portion of notes payable to related party  14.8  –  –  –
+Current portion of notes payable to related party  14.8  -  -  -
 
 Total Current Liabilities  $51.3  $39.2  $38.4  $54.8
 
 Long-Term Liabilities
-Notes payable to related party  $86.5  –  –  –
-Notes payable  –  215.0  215.0  255.0
-Accrued lessee incentive  0.6  0.6  –  –
+Notes payable to related party  $86.5  -  -  -
+Notes payable  -  215.0  215.0  255.0
+Accrued lessee incentive  0.6  0.6  -  -
 Capital lease obligations, less current portion  3.6  3.3  2.8  2.3
-Deferred income taxes  5.1  –  –  –
+Deferred income taxes  5.1  -  -  -
 Other  3.4  5.3  5.9  6.0
 
 Total Long-Term Liabilities  $99.1  $224.1  $223.7  $263.3
 
 Total Liabilities  $150.4  $263.3  $262.2  $318.1
 
-Member’s/Stockholders’ Equity:
-Common stock  $0.0  –  –  –
-APIC  293.5  –  –  –
-Member’s Equity  –  201.0  232.1  257.7
-Retained earnings  36.9  –  –  –
+Member`s/Stockholders` Equity:
+Common stock  $0.0  -  -  -
+APIC  293.5  -  -  -
+Member`s Equity  -  201.0  232.1  257.7
+Retained earnings  36.9  -  -  -
 
-Total Member’s/Stockholders’ Equity  $330.3  $201.0  $232.1  $257.7
+Total Member`s/Stockholders` Equity  $330.3  $201.0  $232.1  $257.7
 
-TOTAL LIABILITIES AND MEMBER’S
+TOTAL LIABILITIES AND MEMBER`S
 EQUITY
 
  $480.7  $464.3  $494.3  $575.8
@@ -2994,8 +2994,8 @@ Food and beverage  43.4  45.0  48.5  51.8  60.1  67.0  68.2
 Tower, retail and other operations  14.9  14.0  14.0  15.4  16.9  18.1  19.3
 Selling, general and administrative  80.0  75.0  78.7  81.3  107.1  130.0  137.5
 Depreciation and amortization  20.2  20.2  23.5  23.3  28.6  35.9  36.5
-Pre-opening costs   –  –  –  1.9  –  –
-(Gain) loss on disposal of assets  0.4  1.4  0.1  0.0  0.2  –  –
+Pre-opening costs   -  -  -  1.9  -  -
+(Gain) loss on disposal of assets  0.4  1.4  0.1  0.0  0.2  -  -
 Total costs and expenses  $238.9  $239.0  $251.1  $261.9  $328.2  $380.3  $396.5
 
 Income from operations  $11.1  $23.8  $48.9  $66.1  $57.5  $70.6  $76.3
@@ -3048,7 +3048,7 @@ Provision (benefit) for deferred income taxes  1.8  (5.4 )  7.4  9.6  0.3
 
 Changes in operating assets and liabilities:
 
-Restricted cash  –  1.9  (0.4 )  (0.1 )  0.2
+Restricted cash  -  1.9  (0.4 )  (0.1 )  0.2
 
 Accounts receivable, net  (0.1 )  0.2  0.1  (0.2 )  (0.7 )
 
@@ -3056,7 +3056,7 @@ Other current assets  1.8  1.7  0.3  (0.7 )  (2.5 )
 
 Accounts payable and accrued expenses  5.4  3.7  2.7  (2.3 )  11.4
 
-Other  –  3.4  –  0.6  0.1
+Other  -  3.4  -  0.6  0.1
 
 Net Cash Provided By Operating Activities  $30.2  $47.8  $54.6  $62.3  $63.5
 
@@ -3064,13 +3064,13 @@ CASH FLOWS FROM INVESTING ACTIVITIES:
 
 (Increase) decrease in investments—restricted  ($1.6 )  ($0.3 )  $0.4  ($0.3 )  ($0.6 )
 
-Sale of marketable securities  –  –  4.2  –  –
+Sale of marketable securities  -  -  4.2  -  -
 
 Acquisition of property and equipment  (22.1 )  (30.4 )  (14.0 )  (28.2 )  (46.9 )
 
-Acq. of Flamingo Laughlin, net of cash acquired  –  –  –  –  (109.4 )
+Acq. of Flamingo Laughlin, net of cash acquired  -  -  -  -  (109.4 )
 
-Payment for construction-in-progress  (0.8 )  –  –  –  0.0
+Payment for construction-in-progress  (0.8 )  -  -  -  0.0
 
 Related party receivables  0.4  (0.2 )  (0.2 )  (0.2 )  0.5
 
@@ -3080,29 +3080,29 @@ Net Cash Used in Investing Activities  ($24.1 )  ($30.4 )  ($9.1 )  ($28.7 )  ($
 
 CASH FLOWS FROM FINANCING ACTIVITIES:
 
-Debt issuance and deferred financing costs  ($0.9 )  ($0.1 )  ($1.5 )  –  ($0.5 )
+Debt issuance and deferred financing costs  ($0.9 )  ($0.1 )  ($1.5 )  -  ($0.5 )
 
-Proceeds from line of credit  –  –  –  –  60.0
+Proceeds from line of credit  -  -  -  -  60.0
 
-Proceeds from related party note payable  17.2  7.8  –  –  –
+Proceeds from related party note payable  17.2  7.8  -  -  -
 
-Proceeds from notes payable  –  –  215.0  –  –
+Proceeds from notes payable  -  -  215.0  -  -
 
-Member contribution  0.6  –  28.2  –  –
+Member contribution  0.6  -  28.2  -  -
 
-Capital distribution  –  –  (61.9 )  –  –
+Capital distribution  -  -  (61.9 )  -  -
 
-Acquisition of Arizona Charlie’s  –  –  (125.9 )  –  –
+Acquisition of Arizona Charlie`s  -  -  (125.9 )  -  -
 
-Payments on line of credit  –  –  –  –  (20.0 )
+Payments on line of credit  -  -  -  -  (20.0 )
 
-Payments on related party notes payable  (9.3 )  (7.2 )  (101.3 )  –  –
+Payments on related party notes payable  (9.3 )  (7.2 )  (101.3 )  -  -
 
-Payments on long-term debt  (0.0 )  –  –  –  –
+Payments on long-term debt  (0.0 )  -  -  -  -
 
-Payments on capital lease obligation  (3.3 )  –  (0.2 )  (0.5 )  (0.5 )
+Payments on capital lease obligation  (3.3 )  -  (0.2 )  (0.5 )  (0.5 )
 
-Cash acquired from subsidiary contributed by parent  0.3  –  –  –  –
+Cash acquired from subsidiary contributed by parent  0.3  -  -  -  -
 
 Net Cash Provided By (Used In) Financing Activities  $4.6  $0.5  ($47.6 )  ($0.5 )  $39.1
 
@@ -3148,10 +3148,10 @@ Richard P. Brown—President and CEO
 
 Richard Brown has served as President and CEO of the Company since June 2002.  Mr. Brown
 joined the Company in March 2000 as Executive Vice President of Marketing for the Stratosphere
-and both Arizona Charlie’s properties, while also serving as one of three key executives responsible
+and both Arizona Charlie`s properties, while also serving as one of three key executives responsible
 for overall operations of the Stratosphere.  In January 2001, he was promoted to COO, responsible
 for the operations of all three properties, and then to President and CEO in June 2002.  Prior to
-joining the Company, Mr. Brown held executive positions with Harrah’s Entertainment and Hilton
+joining the Company, Mr. Brown held executive positions with Harrah`s Entertainment and Hilton
 Gaming.  In addition, he has held positions with New York Racing Association, Travelers
 Companies of Hartford, Connecticut and J. Walter Thompson Company.  Mr. Brown holds a
 bachelors degree in Economics from Southern Connecticut State College.
@@ -3160,7 +3160,7 @@ Denise Barton—Senior Vice President of Support Services and Chief Financial Of
 
 Denise Barton has served as Senior Vice President of Support Services and Chief Financial Officer
 of the Company since February, 2003.  Ms. Barton oversees all consolidated support services for the
-Stratosphere Casino Hotel and Tower, Arizona Charlie’s Decatur and Arizona Charlie’s Boulder.
+Stratosphere Casino Hotel and Tower, Arizona Charlie`s Decatur and Arizona Charlie`s Boulder.
 Ms. Barton joined the Company in August 2002 as Vice President of Finance and Chief Financial
 Officer of the Stratosphere.  Prior to joining the Company, Ms. Barton served in various
 management and leadership positions in the finance field, most recently as Chief Financial Officer
@@ -3169,14 +3169,14 @@ audit manager and senior accountant serving a variety of gaming and hospitality 
 publicly and privately held.  Ms. Barton is a Certified Public Accountant and holds a Bachelor of
 Science degree in Accounting from Southern Utah University.
 
-Ron Lurie—Executive Vice President and General Manager of Arizona Charlie’s Decatur
+Ron Lurie—Executive Vice President and General Manager of Arizona Charlie`s Decatur
 
-Ron Lurie has served as Executive Vice President and General Manager of Arizona Charlie’s
+Ron Lurie has served as Executive Vice President and General Manager of Arizona Charlie`s
 Decatur since January 1999.  Prior to that time, Mr. Lurie held a number of other positions at the
 property.  Mr. Lurie has been involved in the gaming industry for over 25 years, having held
 positions with IGT and Sigma Games prior to joining the property.  Mr. Lurie has served four years
 as the Mayor of the Las Vegas and 14 years as a Las Vegas City Councilman.  Mr. Lurie is a board
-member and past president of the West Charleston Lion’s Club, board member and past president of
+member and past president of the West Charleston Lion`s Club, board member and past president of
 the Boys & Girls Clubs of Las Vegas, serves on the Board of Governors at Valley Hospital, Board
 of Directors of Youth Charities of Southern Nevada and Opportunity Village as well as Foundation
 Board of the Community College of Southern Nevada.  He continues to serve in an advisory
@@ -3194,13 +3194,13 @@ Bear, Stearns & Co. Inc.  CONFIDENTIAL 40
 
 
 Senior Management Biographies (cont.)
-Mark Majetich—Senior Vice President and General Manager at Arizona Charlie’s Boulder
+Mark Majetich—Senior Vice President and General Manager at Arizona Charlie`s Boulder
 
 Mark Majetich has been Vice President and General Manager at Boulder since May 2001.  Prior to
 that, he was Director of Operations at the property.  Mr. Majetich originally joined the Company in
 2000 as Director of Hotel Operations at Stratosphere.  Prior to joining the Company, Mr. Majetich
-held positions at Excalibur (1992–2000) and Caesars Tahoe (1980–1992).  Mr. Majetich serves on
-the board of directors of the Nick and Kelly Children’s Heart Fund, a non-profit charity dedicated to
+held positions at Excalibur (1992-2000) and Caesars Tahoe (1980-1992).  Mr. Majetich serves on
+the board of directors of the Nick and Kelly Children`s Heart Fund, a non-profit charity dedicated to
 children who have major heart diseases.  Mr. Majetich graduated from the University of Nebraska,
 in Lincoln, with a Bachelor of Science degree in Education.
 
@@ -3262,7 +3262,7 @@ the due diligence investigation
  Following receipt of Indications, Bear Stearns will notify a limited number of parties (“Invited
 Parties”) that they have been invited to continue to work towards a transaction.  Invited Parties
 will have the opportunity to conduct additional due diligence, including:
-•  Access to certain members of the Facility’s management team
+•  Access to certain members of the Facility`s management team
 
 •  Access to a data room containing business and legal information
 

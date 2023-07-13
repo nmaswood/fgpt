@@ -42,11 +42,11 @@ questions_schema = {
                     "question": {
                         "type": "string",
                         "description": "An interesting question one could ask to understand the document",
-                    }
+                    },
                 },
                 "required": ["question"],
             },
-        }
+        },
     },
     "required": ["questions"],
 }
@@ -61,7 +61,7 @@ summaries_schema = {
                 "description": "Key fact or idea which helps summarize this document",
                 "type": "string",
             },
-        }
+        },
     },
     "required": ["summaries"],
 }

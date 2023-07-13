@@ -1,6 +1,7 @@
-import pytest
 import os
 from unittest.mock import MagicMock
+
+import pytest
 
 from springtime.excel.table_extractor import (
     ExtractionArguments,
@@ -9,7 +10,7 @@ from springtime.excel.table_extractor import (
 )
 
 
-@pytest.fixture
+@pytest.fixture()
 def table_extractor():
     object_store = MagicMock()
     return TabulaTableExtractor(object_store)

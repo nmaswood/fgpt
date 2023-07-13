@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
+
 from springtime.services.embeddings_service import EmbeddingsService
 
 
@@ -12,7 +13,7 @@ class EmbeddingForDocumentResponse(BaseModel):
 
 
 class EmbeddingsRouter:
-    def __init__(self, embeddings_service: EmbeddingsService):
+    def __init__(self, embeddings_service: EmbeddingsService) -> None:
         self.embeddings_service = embeddings_service
 
     def get_router(self):

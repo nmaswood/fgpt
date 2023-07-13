@@ -1,6 +1,6 @@
 import abc
-import openai
 
+import openai
 
 MODEL = "text-embedding-ada-002"
 

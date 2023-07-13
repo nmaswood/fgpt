@@ -89,10 +89,13 @@ export class TableHandlerImpl implements TableHandler {
   async analyzeTable(config: TableHandler.AnalyzeArguments): Promise<void> {
     const { bucketName, path } = await this.#pathForExcel(config);
     LOGGER.info({ bucketName, path }, "Analyzing excel file");
-    const { responses } = await this.tableExtractor.analyzeGPT({
-      bucket: bucketName,
-      objectPath: path,
-    });
+    const { responses } = await this.tableExtractor.analyzeForModel(
+      config.model,
+      {
+        bucket: bucketName,
+        objectPath: path,
+      },
+    );
 
     if (responses.length === 0) {
       return;

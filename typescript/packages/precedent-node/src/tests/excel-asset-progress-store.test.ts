@@ -75,7 +75,8 @@ test("getProgress#noop", async () => {
   expect(progress).toEqual({
     type: "pending",
     forTask: {
-      analyzeTable: DEFAULT_STATUS,
+      analyzeTableGPT: DEFAULT_STATUS,
+      analyzeTableClaude: DEFAULT_STATUS,
     },
   });
 });
@@ -108,9 +109,10 @@ test("getProgress#success", async () => {
 
   const progress = await progressStore.getProgress(fileReferenceId);
   expect(progress).toEqual({
-    type: "succeeded",
+    type: "pending",
     forTask: {
-      analyzeTable: { type: "succeeded" },
+      analyzeTableGPT: { type: "succeeded" },
+      analyzeTableClaude: DEFAULT_STATUS,
     },
   });
 });
@@ -143,9 +145,10 @@ test("getProgress#fail", async () => {
 
   const progress = await progressStore.getProgress(fileReferenceId);
   expect(progress).toEqual({
-    type: "has-failure",
+    type: "pending",
     forTask: {
-      analyzeTable: { type: "failed" },
+      analyzeTableGPT: { type: "failed" },
+      analyzeTableClaude: { type: "task_does_not_exist" },
     },
   });
 });

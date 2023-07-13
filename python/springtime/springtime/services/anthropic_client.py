@@ -1,11 +1,10 @@
 from anthropic import Anthropic
 
-
 MAX_TOKENS_TO_SAMPLE = 1_000_000
 
 
 class AnthropicClient:
-    def __init__(self):
+    def __init__(self) -> None:
         self._anthropic = Anthropic()
 
     def complete(self, prompt: str) -> str:

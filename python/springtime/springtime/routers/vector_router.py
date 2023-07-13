@@ -1,7 +1,9 @@
 from typing import Any
+
 from fastapi import APIRouter
 from pydantic import BaseModel
-from springtime.services.vector_service import VectorService, UpsertVector
+
+from springtime.services.vector_service import UpsertVector, VectorService
 
 
 class UpsertVectorRequest(BaseModel):
@@ -14,7 +16,7 @@ class SimilarVectorRequest(BaseModel):
 
 
 class VectorRouter:
-    def __init__(self, vector_service: VectorService):
+    def __init__(self, vector_service: VectorService) -> None:
         self.vector_service = vector_service
 
     def get_router(self):

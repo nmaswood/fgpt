@@ -1,11 +1,9 @@
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+
 from springtime.excel.table_extractor import TabulaTableExtractor
-
 from springtime.object_store.object_store import GCSObjectStore
-
 from springtime.routers.pdf_router import PdfRouter
-
 
 app = FastAPI()
 

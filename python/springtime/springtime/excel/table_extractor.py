@@ -1,11 +1,11 @@
 import abc
-from typing import NamedTuple, Optional
-import tabula
 import os
-import pandas as pd
-import uuid
-
 import tempfile
+import uuid
+from typing import NamedTuple
+
+import pandas as pd
+import tabula
 from pydantic import BaseModel, NonNegativeInt
 
 from springtime.object_store.object_store import ObjectStore
@@ -20,8 +20,8 @@ class ExtractionArguments(BaseModel):
 
 class ExtractionResponse(NamedTuple):
     number_of_sheets: NonNegativeInt
-    xl: Optional[pd.ExcelFile]
-    path: Optional[str]
+    xl: pd.ExcelFile | None
+    path: str | None
 
 
 class TableExtractor(abc.ABC):
@@ -34,7 +34,7 @@ XLSX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sh
 
 
 class TabulaTableExtractor(TableExtractor):
-    def __init__(self, object_store: ObjectStore):
+    def __init__(self, object_store: ObjectStore) -> None:
         self.object_store = object_store
 
     def extract(self, args: ExtractionArguments) -> ExtractionResponse:
@@ -52,7 +52,10 @@ class TabulaTableExtractor(TableExtractor):
 
             path = f"{args.output_prefix}/{uuid.uuid4()}.xlsx"
             self.object_store.upload_from_filename(
-                args.bucket, path, file_name, content_type=XLSX_MIME_TYPE
+                args.bucket,
+                path,
+                file_name,
+                content_type=XLSX_MIME_TYPE,
             )
 
         return ExtractionResponse(number_of_sheets=len(dfs), xl=xl, path=path)

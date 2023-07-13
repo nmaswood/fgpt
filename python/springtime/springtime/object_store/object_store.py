@@ -1,5 +1,5 @@
 import abc
-from typing import Optional
+
 from google.cloud import storage
 
 
@@ -14,7 +14,7 @@ class ObjectStore(abc.ABC):
 
 
 class GCSObjectStore(ObjectStore):
-    def __init__(self):
+    def __init__(self) -> None:
         self.client: storage.Client = storage.Client()
 
     def upload_from_filename(
@@ -22,7 +22,7 @@ class GCSObjectStore(ObjectStore):
         bucket_name: str,
         path: str,
         filename: str,
-        content_type: Optional[str] = None,
+        content_type: str | None = None,
     ) -> None:
         bucket = self.client.bucket(bucket_name)
         blob = bucket.blob(path)
