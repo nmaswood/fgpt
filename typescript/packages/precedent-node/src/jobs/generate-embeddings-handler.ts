@@ -26,7 +26,7 @@ export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
     textChunkGroupId,
   }: GenerateAndUpsertArguments): Promise<void> {
     const chunkGenerator = this.textChunkStore.iterateTextChunks(
-      100,
+      50,
       textChunkGroupId,
     );
 
