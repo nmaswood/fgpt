@@ -561,6 +561,7 @@ __metadata:
     react-transition-group: ^4.4.5
     swr: ^2.2.0
     typescript: ^5.1.6
+    typescript-cookie: ^1.0.6
     vitest: ^0.33.0
     xlsx: ^0.18.5
     zod: ^3.21.4
@@ -7879,6 +7880,13 @@ __metadata:
   version: 0.0.6
   resolution: "typedarray@npm:0.0.6"
   checksum: 33b39f3d0e8463985eeaeeacc3cb2e28bc3dfaf2a5ed219628c0b629d5d7b810b0eb2165f9f607c34871d5daa92ba1dc69f49051cf7d578b4cbd26c340b9d1b1
+  languageName: node
+  linkType: hard
+
+"typescript-cookie@npm:^1.0.6":
+  version: 1.0.6
+  resolution: "typescript-cookie@npm:1.0.6"
+  checksum: 7f478cdc3b3eb47bd7cc3af332667f64da5fdd70d62fbfdcc7ecf58f7d02053a1ac52b06b3c3465b7a8b30291a1cde811dddbed3148074474db96916d4e05ff4
   languageName: node
   linkType: hard
 

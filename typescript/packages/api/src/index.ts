@@ -204,7 +204,13 @@ async function start() {
       new DebugRouter(taskStore, fileReferenceStore, messageBusService).init(),
     );
   }
-  app.use("/api/v1/admin", ensureAdmin, new AdminRouter(userOrgService).init());
+  app.use(
+    "/api/v1/admin",
+    jwtCheck,
+    addUser,
+    ensureAdmin,
+    new AdminRouter(userOrgService).init(),
+  );
 
   app.use("/ping", (_, res) => {
     res.json({ ping: "pong" });

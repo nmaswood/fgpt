@@ -8,6 +8,7 @@ export interface UpsertUserArguments {
 }
 
 export interface UserOrgService {
+  get: (id: string) => Promise<User>;
   upsert: (args: UpsertUserArguments) => Promise<User>;
   list: () => Promise<User[]>;
   addToProjectCountForOrg: (
@@ -20,6 +21,18 @@ const USER_FIELDS = sql.fragment`id, organization_id, email, role`;
 
 export class PsqlUserOrgService implements UserOrgService {
   constructor(private readonly pool: DatabasePool) {}
+
+  async get(id: string): Promise<User> {
+    return this.pool.one(sql.type(ZUserRow)`
+
+SELECT
+    ${USER_FIELDS}
+FROM
+    app_user
+WHERE
+    id = ${id}
+`);
+  }
 
   async list(): Promise<User[]> {
     const rows = await this.pool.any(sql.type(ZUserRow)`

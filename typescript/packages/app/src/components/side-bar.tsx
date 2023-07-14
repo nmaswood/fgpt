@@ -31,6 +31,7 @@ import { TransitionGroup } from "react-transition-group";
 
 import { useCreateProject } from "../hooks/use-create-project";
 import { useFetchMe } from "../hooks/use-fetch-me";
+import { ImpersonateService } from "../services/impersonate-service";
 
 const SIDE_BAR_PIXELS = 200;
 const SIDE_BAR_WIDTH = `${SIDE_BAR_PIXELS}px`;
@@ -270,7 +271,13 @@ const DisplayUser = () => {
             open={open}
             onClose={handleClose}
           >
-            <MenuItem component={Link} href="/api/auth/logout">
+            <MenuItem
+              component={Link}
+              href="/api/auth/logout"
+              onClick={() => {
+                ImpersonateService.clear();
+              }}
+            >
               <ListItemDecorator>
                 <LogoutIcon />
               </ListItemDecorator>

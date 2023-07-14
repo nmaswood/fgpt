@@ -1,4 +1,4 @@
-import { IdentitySub } from "@fgpt/precedent-iso";
+import { IdentitySub, X_IMPERSONATE_HEADER } from "@fgpt/precedent-iso";
 import type { UserOrgService } from "@fgpt/precedent-node";
 import type { NextFunction, Response } from "express";
 import type { Request } from "express-jwt";
@@ -26,7 +26,22 @@ export class UserInformationMiddleware {
         sub: parseSub(jwt.sub),
       });
 
-      req.user = user;
+      const headers = ZHeaders.parse(req.headers);
+      const impersonationUser = headers[X_IMPERSONATE_HEADER];
+      if (impersonationUser && user.role !== "superadmin") {
+        res.json({
+          status: "You do not have permissions for this action.",
+        });
+        return;
+      }
+
+      if (impersonationUser) {
+        req.user = await this.userOrgService.get(impersonationUser);
+      } else {
+        req.user = user;
+      }
+      req.isImpersonating = Boolean(impersonationUser);
+
       next();
     };
 }
@@ -46,4 +61,8 @@ const ZJwt = z.object({
   app_data: z.object({
     email: z.string(),
   }),
+});
+
+const ZHeaders = z.object({
+  [X_IMPERSONATE_HEADER]: z.string().optional(),
 });

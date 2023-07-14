@@ -5,13 +5,9 @@ export class AdminRouter {
   constructor(private readonly userOrgService: UserOrgService) {}
   init() {
     const router = express.Router();
-    router.get(
-      "/users",
-      async (req: express.Request, res: express.Response) => {
-        const users = await this.userOrgService.list();
-        res.json({ users });
-      },
-    );
+    router.get("/users", async (_: express.Request, res: express.Response) => {
+      res.json({ users: await this.userOrgService.list() });
+    });
 
     return router;
   }

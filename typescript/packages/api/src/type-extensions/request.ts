@@ -5,6 +5,7 @@ declare global {
     export interface Request {
       user: User;
       rawBody: Buffer;
+      isImpersonating: boolean;
     }
   }
 }
