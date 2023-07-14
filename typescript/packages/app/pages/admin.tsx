@@ -27,9 +27,13 @@ const Admin: React.FC = () => {
       maxWidth="100%"
       overflow="auto"
     >
-      {user && "Admin"}
+      {user && <AdminInner />}
     </Box>
   );
+};
+
+const AdminInner = () => {
+  return null;
 };
 
 export default withPageAuthRequired(Admin);
