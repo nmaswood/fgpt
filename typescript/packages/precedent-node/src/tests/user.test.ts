@@ -46,6 +46,22 @@ test("create", async () => {
   expect(user.email).toEqual("nasr@test.com");
 });
 
+test("create", async () => {
+  const { userOrgService } = await setup();
+
+  await userOrgService.upsert({
+    sub: {
+      provider: "google",
+      value: "abc",
+    },
+    email: "nasr@test.com",
+  });
+
+  const [user] = await userOrgService.list();
+
+  expect(user.email).toEqual("nasr@test.com");
+});
+
 test("addToProjectCountForOrg", async () => {
   const { userOrgService } = await setup();
 

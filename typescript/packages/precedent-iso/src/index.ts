@@ -18,6 +18,6 @@ export * from "./models/render-file";
 export * from "./models/sql-helpers";
 export * from "./models/task";
 export * from "./models/text-group";
-export { IdentitySub, User } from "./models/user";
+export * from "./models/user";
 export * from "./process-work-book";
 export * from "./text-chunker/text-chunker";

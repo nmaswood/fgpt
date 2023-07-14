@@ -3,6 +3,7 @@ import { assertNever, Project } from "@fgpt/precedent-iso";
 import AddIcon from "@mui/icons-material/AddOutlined";
 import FolderIcon from "@mui/icons-material/FolderOutlined";
 import LogoutIcon from "@mui/icons-material/LogoutOutlined";
+import AdminIcon from "@mui/icons-material/SupervisorAccountOutlined";
 import {
   Alert,
   Avatar,
@@ -29,6 +30,7 @@ import React from "react";
 import { TransitionGroup } from "react-transition-group";
 
 import { useCreateProject } from "../hooks/use-create-project";
+import { useFetchMe } from "../hooks/use-fetch-me";
 
 const SIDE_BAR_PIXELS = 200;
 const SIDE_BAR_WIDTH = `${SIDE_BAR_PIXELS}px`;
@@ -224,7 +226,9 @@ function errorDisplayName(error: InputError) {
 type InputError = "too_long" | "too_short" | "already_exists";
 
 const DisplayUser = () => {
-  const { user } = useUser();
+  const { user: auth0User } = useUser();
+  const { data: user } = useFetchMe();
+  const isSuperAdmin = user?.role === "superadmin";
 
   const [open, setOpen] = React.useState(false);
 
@@ -239,23 +243,23 @@ const DisplayUser = () => {
       alignItems="center"
       padding={1}
     >
-      {user && (
+      {auth0User && (
         <>
           <List ref={buttonRef}>
             <ListItem>
               <ListItemButton onClick={() => setOpen(true)}>
                 <ListItemDecorator>
-                  {user.picture && (
+                  {auth0User.picture && (
                     <Avatar
                       sx={{
                         width: 30,
                         height: 30,
                       }}
-                      src={user.picture}
+                      src={auth0User.picture}
                     />
                   )}
                 </ListItemDecorator>
-                {user.name ?? user.email}
+                {auth0User.name ?? auth0User.email}
               </ListItemButton>
             </ListItem>
           </List>
@@ -272,6 +276,14 @@ const DisplayUser = () => {
               </ListItemDecorator>
               Logout
             </MenuItem>
+            {isSuperAdmin && (
+              <MenuItem component={Link} href="/admin">
+                <ListItemDecorator>
+                  <AdminIcon />
+                </ListItemDecorator>
+                Admin
+              </MenuItem>
+            )}
           </Menu>
         </>
       )}

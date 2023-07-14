@@ -1,4 +1,4 @@
-import { IdentitySub, User } from "@fgpt/precedent-iso";
+import { IdentitySub, User, ZUserRole } from "@fgpt/precedent-iso";
 import { DatabasePool, DatabaseTransactionConnection, sql } from "slonik";
 import { z } from "zod";
 
@@ -9,24 +9,39 @@ export interface UpsertUserArguments {
 
 export interface UserOrgService {
   upsert: (args: UpsertUserArguments) => Promise<User>;
+  list: () => Promise<User[]>;
   addToProjectCountForOrg: (
     organizationId: string,
     delta: number,
   ) => Promise<number>;
 }
 
-const USER_FIELDS = sql.fragment`id, organization_id, email`;
+const USER_FIELDS = sql.fragment`id, organization_id, email, role`;
 
 export class PsqlUserOrgService implements UserOrgService {
   constructor(private readonly pool: DatabasePool) {}
+
+  async list(): Promise<User[]> {
+    const rows = await this.pool.any(sql.type(ZUserRow)`
+SELECT
+    ${USER_FIELDS}
+FROM
+    app_user
+LIMIT 101
+`);
+    if (rows.length === 101) {
+      throw new Error("max row limit");
+    }
+    return Array.from(rows);
+  }
 
   async upsert({ sub, email }: UpsertUserArguments): Promise<User> {
     if (sub.provider !== "google") {
       throw new Error("only google is supported right now");
     }
 
-    return this.pool.connect((cnx) =>
-      cnx.transaction((trx) => this.#upsert(trx, sub.value, email)),
+    return this.pool.transaction(async (trx) =>
+      this.#upsert(trx, sub.value, email),
     );
   }
   async #upsert(
@@ -44,7 +59,7 @@ WHERE
 LIMIT 1
 `);
     if (user) {
-      return Convert.fromUserRow(user);
+      return user;
     }
 
     const organizationId = (
@@ -56,20 +71,17 @@ RETURNING
 `)
     ).id;
 
-    const newUser = await trx.one(sql.type(ZUserRow)`
+    return await trx.one(sql.type(ZUserRow)`
 INSERT INTO app_user (organization_id, email, google_sub)
     VALUES (${organizationId}, ${email}, ${googleSub})
 RETURNING
     ${USER_FIELDS}
 `);
-
-    return Convert.fromUserRow(newUser);
   }
 
   async addToProjectCountForOrg(id: string, delta: number): Promise<number> {
-    return this.pool.connect(async (cnx) => {
-      return cnx.oneFirst(
-        sql.type(z.object({ project_count: z.number() }))`
+    return this.pool.oneFirst(
+      sql.type(ZProjectCountRow)`
 UPDATE
     organization
 SET
@@ -79,29 +91,26 @@ WHERE
 RETURNING
     project_count
 `,
-      );
-    });
+    );
   }
 }
+
+const ZProjectCountRow = z.object({ project_count: z.number() });
 
 const ZCreateOrgRow = z.object({
   id: z.string(),
 });
 
-const ZUserRow = z.object({
-  id: z.string(),
-  organization_id: z.string(),
-  email: z.string(),
-});
-
-type UserRow = z.infer<typeof ZUserRow>;
-
-class Convert {
-  static fromUserRow({ id, email, organization_id }: UserRow) {
-    return {
-      id,
-      email,
-      organizationId: organization_id,
-    };
-  }
-}
+const ZUserRow = z
+  .object({
+    id: z.string(),
+    organization_id: z.string(),
+    email: z.string(),
+    role: ZUserRole,
+  })
+  .transform((row) => ({
+    id: row.id,
+    email: row.email,
+    organizationId: row.organization_id,
+    role: row.role,
+  }));

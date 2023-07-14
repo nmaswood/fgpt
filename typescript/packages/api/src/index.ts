@@ -47,6 +47,8 @@ import { ChatRouter } from "./routers/chat-router";
 import { TextGroupRouter } from "./routers/text-group-router";
 import { LLMOutputRouter } from "./routers/llm-output.router";
 import { DebugRouter } from "./routers/debug-router";
+import { AdminRouter } from "./routers/admin-router";
+import { ensureAdmin } from "./middleware/admin-middleware";
 
 LOGGER.info("Server starting ...");
 
@@ -202,6 +204,7 @@ async function start() {
       new DebugRouter(taskStore, fileReferenceStore, messageBusService).init(),
     );
   }
+  app.use("/api/v1/admin", ensureAdmin, new AdminRouter().init());
 
   app.use("/ping", (_, res) => {
     res.json({ ping: "pong" });
