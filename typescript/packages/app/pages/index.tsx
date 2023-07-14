@@ -106,7 +106,7 @@ const Home: React.FC = () => {
               sx={{ width: "fit-content" }}
               color="primary"
             >
-              Create project to begin
+              Create a project to begin
             </Button>
           </Box>
         ) : (
