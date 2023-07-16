@@ -195,12 +195,14 @@ export class TaskExecutorImpl implements TaskExecutor {
             fileReferenceId,
             config: {
               type: "analyze-table",
-              model: "gpt",
-              version: "1",
               organizationId,
               projectId,
               fileReferenceId,
               source,
+              analysis: {
+                type: "text",
+                model: "gpt",
+              },
             },
           },
           {
@@ -209,12 +211,14 @@ export class TaskExecutorImpl implements TaskExecutor {
             fileReferenceId,
             config: {
               type: "analyze-table",
-              model: "claude",
-              version: "1",
               organizationId,
               projectId,
               fileReferenceId,
               source,
+              analysis: {
+                type: "text",
+                model: "claude",
+              },
             },
           },
         ]);
@@ -226,13 +230,22 @@ export class TaskExecutorImpl implements TaskExecutor {
         if (config.source === null) {
           return;
         }
-        await this.tableHandler.analyzeTable({
-          projectId: config.projectId,
-          organizationId: config.organizationId,
-          source: config.source,
-          fileReferenceId: config.fileReferenceId,
-          model: config.model ?? "gpt",
-        });
+
+        switch (config.analysis.type) {
+          case "text": {
+            await this.tableHandler.analyzeTable({
+              projectId: config.projectId,
+              organizationId: config.organizationId,
+              source: config.source,
+              fileReferenceId: config.fileReferenceId,
+              model: config.analysis.model,
+            });
+            break;
+          }
+          case "code": {
+            throw new Error("Not implemented");
+          }
+        }
         break;
       }
 

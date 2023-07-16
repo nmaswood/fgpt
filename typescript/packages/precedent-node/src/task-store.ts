@@ -67,7 +67,6 @@ WHERE
 
   async getByFileReferenceId(fileReferenceId: string): Promise<Task[]> {
     const resp = await this.pool.any(sql.type(ZFromTaskRow)`
-
 SELECT
     ${FIELDS}
 FROM

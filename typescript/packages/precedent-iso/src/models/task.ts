@@ -1,8 +1,9 @@
 import { z } from "zod";
 
+import { assertNever } from "../assert-never";
 import { ZFileType } from "../file-type";
 import { ZChunkStrategy } from "../text-chunker/text-chunker";
-import { ZExcelSource } from "./excel";
+import { ExcelSource, ZExcelSource } from "./excel";
 
 export const ZTaskType = z.enum([
   "ingest-file",
@@ -41,6 +42,8 @@ export const ZTextExtractionConfig = z.object({
   fileReferenceId: z.string(),
 });
 
+export type TextExtractionConfig = z.infer<typeof ZTextExtractionConfig>;
+
 export const ZTextChunkConfig = z.object({
   type: z.literal("text-chunk"),
   version: z.literal("1"),
@@ -62,6 +65,8 @@ export const ZGenEmbeddingsConfig = z.object({
   processedFileId: z.string(),
   textChunkGroupId: z.string(),
 });
+
+export type GenEmbeddingsConfig = z.infer<typeof ZGenEmbeddingsConfig>;
 
 export const ZLLMOutputsConfig = z.object({
   type: z.literal("llm-outputs"),
@@ -85,6 +90,8 @@ export const ZLongFormReportConfig = z.object({
   textChunkIds: z.string().array(),
 });
 
+export type LongFormReportConfig = z.infer<typeof ZLongFormReportConfig>;
+
 export const ZExtractTableConfig = z.object({
   type: z.literal("extract-table"),
   version: z.literal("1"),
@@ -96,6 +103,23 @@ export const ZExtractTableConfig = z.object({
 export const ZAnalyzeTableModel = z.enum(["gpt", "claude"]);
 export type AnalyzeTableModel = z.infer<typeof ZAnalyzeTableModel>;
 
+export const ZTableTextAnalysis = z.object({
+  type: z.literal("text"),
+  model: ZAnalyzeTableModel,
+});
+
+export const ZTableCodeAnalysis = z.object({
+  type: z.literal("code"),
+  model: ZAnalyzeTableModel,
+});
+
+export const ZTableAnalysis = z.discriminatedUnion("type", [
+  ZTableTextAnalysis,
+  ZTableCodeAnalysis,
+]);
+
+export type TableAnalysis = z.infer<typeof ZTableAnalysis>;
+
 export const ZAnalyzeTableConfig = z.object({
   type: z.literal("analyze-table"),
   version: z.literal("1"),
@@ -104,26 +128,81 @@ export const ZAnalyzeTableConfig = z.object({
   fileReferenceId: z.string(),
   source: ZExcelSource.nullable(),
   model: ZAnalyzeTableModel.optional().nullable(),
+  analysis: ZTableAnalysis.optional().nullable(),
 });
 
-export type AnalyzeTableConfig = z.infer<typeof ZAnalyzeTableConfig>;
+export interface AnalyzeTableConfig {
+  type: "analyze-table";
+  organizationId: string;
+  projectId: string;
+  fileReferenceId: string;
+  source: ExcelSource | null;
+  analysis: TableAnalysis;
+}
+
+export type TaskConfig =
+  | IngestFileConfig
+  | TextExtractionConfig
+  | TextChunkConfig
+  | GenEmbeddingsConfig
+  | LLMOutputsConfig
+  | ExtractTableConfig
+  | LongFormReportConfig
+  | AnalyzeTableConfig;
+
+function analysis(row: z.infer<typeof ZAnalyzeTableConfig>): TableAnalysis {
+  if (row.analysis) {
+    return row.analysis;
+  }
+
+  return row.model
+    ? {
+        type: "text",
+        model: row.model,
+      }
+    : {
+        type: "text",
+        model: "gpt",
+      };
+}
+
+export const ZTaskConfig = z
+  .discriminatedUnion("type", [
+    ZIngestFileConfig,
+    ZTextExtractionConfig,
+    ZTextChunkConfig,
+    ZGenEmbeddingsConfig,
+    ZLLMOutputsConfig,
+    ZExtractTableConfig,
+    ZLongFormReportConfig,
+    ZAnalyzeTableConfig,
+  ])
+  .transform((row): TaskConfig => {
+    switch (row.type) {
+      case "analyze-table": {
+        return {
+          ...row,
+          source: row.source ?? null,
+          analysis: analysis(row),
+        };
+      }
+      case "ingest-file":
+      case "text-extraction":
+      case "text-chunk":
+      case "gen-embeddings":
+      case "llm-outputs":
+      case "extract-table":
+      case "long-form":
+        return row;
+      default:
+        assertNever(row);
+    }
+  });
 
 export type ExtractTableConfig = z.infer<typeof ZExtractTableConfig>;
 
 export type LLMOutputsConfig = z.infer<typeof ZLLMOutputsConfig>;
 
-export const ZTaskConfig = z.discriminatedUnion("type", [
-  ZIngestFileConfig,
-  ZTextExtractionConfig,
-  ZTextChunkConfig,
-  ZGenEmbeddingsConfig,
-  ZLLMOutputsConfig,
-  ZExtractTableConfig,
-  ZAnalyzeTableConfig,
-  ZLongFormReportConfig,
-]);
-
 export type TaskType = z.infer<typeof ZTaskType>;
 export type TaskStatus = z.infer<typeof ZTaskStatus>;
-export type TaskConfig = z.infer<typeof ZTaskConfig>;
 export type TaskOuput = Record<string, unknown>;

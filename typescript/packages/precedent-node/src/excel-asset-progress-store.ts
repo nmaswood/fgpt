@@ -27,10 +27,8 @@ export class PSqlExcelProgressStore implements ExcelProgressStore {
     for (const task of tasks) {
       switch (task.config.type) {
         case "analyze-table": {
-          switch (task.config.model) {
-            case "gpt":
-            case undefined:
-            case null: {
+          switch (task.config.analysis?.model) {
+            case "gpt": {
               forTask.analyzeTableGPT = { type: task.status };
               break;
             }
@@ -38,8 +36,11 @@ export class PSqlExcelProgressStore implements ExcelProgressStore {
               forTask.analyzeTableClaude = { type: task.status };
               break;
             }
+            case undefined:
+            case null:
+              break;
             default:
-              assertNever(task.config.model);
+              assertNever(task.config.analysis.model);
           }
           break;
         }

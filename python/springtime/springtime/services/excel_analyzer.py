@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from springtime.models.open_ai import CompletionResponse, OpenAIModel
 from springtime.services.anthropic_client import AnthropicClient
+from springtime.services.format_sheet import format_sheet
 from springtime.services.prompts import CLAUDE_PROMPT, GPT_PROMPT
 from springtime.services.sheet_processor import PreprocessedSheet
 
@@ -18,13 +19,6 @@ class ExcelAnalyzer(abc.ABC):
     @abc.abstractmethod
     def analyze(self, *, sheets: list[PreprocessedSheet]) -> ResponseWithPrompt:
         pass
-
-
-def format_sheet(sheet: PreprocessedSheet) -> str:
-    return f"""
-Sheet name: {sheet.sheet_name}
-Sheet content: {sheet.stringified_sheet.content}
-""".strip()
 
 
 class OpenAIExcelAnalyzer(ExcelAnalyzer):

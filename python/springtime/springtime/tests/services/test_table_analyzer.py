@@ -39,5 +39,4 @@ def test_analyze(
             excel_file=xl,
         )
         chunks = resp.chunks
-        breakpoint()
         assert len(chunks) > 0

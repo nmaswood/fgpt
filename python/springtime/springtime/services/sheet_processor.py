@@ -16,6 +16,7 @@ class StringifiedSheet(NamedTuple):
 
 class PreprocessedSheet(NamedTuple):
     sheet_name: str
+    index: int
     parsed_sheet: dict[str, pd.DataFrame]
     stringified_sheet: StringifiedSheet
 
@@ -44,7 +45,7 @@ def preprocess(
     xl: pd.ExcelFile,
 ) -> list[PreprocessedSheet]:
     acc: list[PreprocessedSheet] = []
-    for sheet_name in xl.sheet_names:
+    for index, sheet_name in enumerate(xl.sheet_names):
         parsed_sheet = xl.parse(sheet_name)
         stringfied_sheet = stringify_sheet(
             get_length=get_length,
@@ -62,6 +63,7 @@ def preprocess(
                 sheet_name=sheet_name,
                 parsed_sheet=parsed_sheet,
                 stringified_sheet=stringfied_sheet,
+                index=index,
             ),
         )
     return acc

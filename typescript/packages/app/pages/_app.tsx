@@ -11,7 +11,7 @@ import type { AppProps } from "next/app";
 import Head from "next/head";
 import React from "react";
 
-import { THEME } from "../src/style/theme";
+import { JOY_THEME, THEME } from "../src/style/theme";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -26,7 +26,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
       <MaterialCssVarsProvider theme={{ [MATERIAL_THEME_ID]: THEME }}>
-        <JoyCssVarsProvider>
+        <JoyCssVarsProvider theme={JOY_THEME}>
           <Box
             display="flex"
             flexDirection="column"

@@ -28,3 +28,10 @@ export interface AnalyzeOutput {
   value: AnalyzeResponseChunk[];
   model: AnalyzeTableModel;
 }
+
+export interface AnalyzeServiceChunk {
+  parsable: boolean;
+  code: string;
+  prompt: string;
+  sheetNames: string[];
+}
