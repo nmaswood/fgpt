@@ -42,6 +42,13 @@ export const Navbar: React.FC<{ projectName?: string | undefined }> = ({
               variant="soft"
               size="sm"
               onClick={() => router.push("/")}
+              sx={{
+                color: "neutral.200",
+                backgroundColor: "transparent",
+                "&:hover": {
+                  backgroundColor: "transparent",
+                },
+              }}
             >
               <ArrowBackIcon />
             </IconButton>
