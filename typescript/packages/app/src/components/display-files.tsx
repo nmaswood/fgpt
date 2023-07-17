@@ -25,6 +25,8 @@ export const DisplayFiles: React.FC<{
       maxHeight="100%"
       overflow="auto"
       gap={3}
+      bgcolor="neutral.0"
+      borderRadius={8}
     >
       <Box display="flex" width="100%" justifyContent="space-between">
         <Typography level="h4">Data room files</Typography>

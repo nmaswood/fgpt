@@ -264,12 +264,21 @@ const SelectedProjectInner: React.FC<{
             </Box>
           )}
           {files.length > 0 && (
-            <DisplayFiles
-              files={files}
-              uppy={uppy}
-              openModal={openUppyModal}
-              projectId={project.id}
-            />
+            <Box
+              display="flex"
+              width="100%"
+              height="100%"
+              maxHeight="100%"
+              overflow="auto"
+              padding={4}
+            >
+              <DisplayFiles
+                files={files}
+                uppy={uppy}
+                openModal={openUppyModal}
+                projectId={project.id}
+              />
+            </Box>
           )}
         </>
       )}

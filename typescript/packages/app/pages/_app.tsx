@@ -36,7 +36,14 @@ export default function App({ Component, pageProps }: AppProps) {
             maxWidth="100%"
             overflow="auto"
             position="relative"
+            bgcolor="background.backdrop"
           >
+            <Box
+              width="100%"
+              height="62px"
+              bgcolor="primary.800"
+              position="absolute"
+            ></Box>
             {/* eslint-disable-next-line*/}
             {/* @ts-ignore */}
             <Component as any {...pageProps} />

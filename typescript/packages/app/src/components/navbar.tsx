@@ -25,7 +25,7 @@ export const Navbar: React.FC<{ projectName?: string | undefined }> = ({
   return (
     <Box
       display="flex"
-      height="auto"
+      height="62px"
       width="100%"
       maxHeight="100%"
       maxWidth="100%"
