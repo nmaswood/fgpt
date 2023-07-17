@@ -1,10 +1,9 @@
-import { humanReadableFileSize, LoadedFile } from "@fgpt/precedent-iso";
-import { Box, Link, Typography, Table, IconButton } from "@mui/joy";
+import { LoadedFile } from "@fgpt/precedent-iso";
+import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
+import { Box, IconButton, Link, Typography } from "@mui/joy";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import NextLink from "next/link";
 import React from "react";
-
-import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 
 export const DisplayFiles: React.FC<{ files: LoadedFile[] }> = ({ files }) => {
   return (
