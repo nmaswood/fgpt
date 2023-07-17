@@ -25,7 +25,7 @@ export const UploadFilesButton: React.FC<{
       variant="outlined"
       sx={{ height: "40px", whiteSpace: "nowrap" }}
     >
-      Upload files
+      Upload
     </Button>
   );
 };

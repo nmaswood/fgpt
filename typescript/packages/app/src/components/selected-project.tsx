@@ -5,24 +5,13 @@ import { MAX_FILE_SIZE_BYTES } from "@fgpt/precedent-iso";
 import { Project } from "@fgpt/precedent-iso";
 import BoltIcon from "@mui/icons-material/BoltOutlined";
 import CollectionsIcon from "@mui/icons-material/CollectionsOutlined";
-import DeleteIcon from "@mui/icons-material/DeleteOutlined";
-import ModeEditIcon from "@mui/icons-material/ModeEditOutlined";
-import SettingsIcon from "@mui/icons-material/SettingsOutlined";
 import {
   Box,
-  Button,
-  ButtonGroup,
   CircularProgress,
-  Input,
   ListItemDecorator,
-  Menu,
-  MenuItem,
-  Modal,
-  ModalDialog,
   Tab,
   TabList,
   Tabs,
-  Typography,
 } from "@mui/joy";
 import Uppy from "@uppy/core";
 import Dashboard from "@uppy/dashboard";
@@ -34,9 +23,7 @@ import { z } from "zod";
 import { CLIENT_SETTINGS } from "../client-settings";
 import { useCreateChat } from "../hooks/use-create-chat";
 import { useDeleteChat } from "../hooks/use-delete-chat";
-import { useDeleteProject } from "../hooks/use-delete-project";
 import { useEditChat } from "../hooks/use-edit-chat";
-import { useEditProject } from "../hooks/use-edit-project";
 import { useFetchFiles } from "../hooks/use-fetch-files";
 import { useFetchChats } from "../hooks/use-list-chats";
 import { useSampleForProject } from "../hooks/use-sample-questions";
@@ -74,19 +61,10 @@ const useTabState = () => {
 
 export const SelectedProject: React.FC<{
   project: Project | undefined;
-  projects: Project[];
   token: string | undefined;
-  setSelectedProjectId: (projectId: string | undefined) => void;
   loading: boolean;
-}> = ({ token, project, projects, setSelectedProjectId, loading }) => {
+}> = ({ token, project, loading }) => {
   const [tab, setTab] = useTabState();
-  const [modal, setModal] = React.useState<"delete" | "edit" | undefined>(
-    undefined,
-  );
-
-  const buttonRef = React.useRef(null);
-
-  const [open, setOpen] = React.useState(false);
 
   const uppy = React.useMemo(() => {
     return new Uppy({
@@ -196,45 +174,6 @@ export const SelectedProject: React.FC<{
               openModal={openUppyModal}
               projectId={project.id}
             />
-
-            <Button
-              ref={buttonRef}
-              startDecorator={<SettingsIcon />}
-              onClick={() => setOpen(true)}
-              variant="outlined"
-              sx={{ height: "40px", whiteSpace: "nowrap" }}
-            >
-              Project settings
-            </Button>
-
-            <Menu
-              anchorEl={buttonRef.current}
-              open={open}
-              onClose={() => setOpen(false)}
-            >
-              <MenuItem
-                onClick={() => {
-                  setModal("delete");
-                  setOpen(false);
-                }}
-              >
-                <ListItemDecorator>
-                  <DeleteIcon fontSize="small" color="secondary" />
-                </ListItemDecorator>
-                Delete project
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setModal("edit");
-                  setOpen(false);
-                }}
-              >
-                <ListItemDecorator>
-                  <ModeEditIcon fontSize="small" />
-                </ListItemDecorator>
-                Edit project name
-              </MenuItem>
-            </Menu>
           </Box>
         )}
       </Box>
@@ -252,12 +191,8 @@ export const SelectedProject: React.FC<{
       {project && token && (
         <SelectedProjectInner
           project={project}
-          projects={projects}
           token={token}
-          setSelectedProjectId={setSelectedProjectId}
           value={tab}
-          modal={modal}
-          setModal={setModal}
           uppy={uppy}
           openUppyModal={openUppyModal}
         />
@@ -266,148 +201,20 @@ export const SelectedProject: React.FC<{
   );
 };
 
-const DeleteProjectModal: React.FC<{
-  projectId: string;
-  closeModal: () => void;
-  resetSelectedProjectId: () => void;
-}> = ({ closeModal, projectId, resetSelectedProjectId }) => {
-  const { trigger, isMutating } = useDeleteProject();
-  const [text, setText] = React.useState("");
-
-  return (
-    <Modal open onClose={closeModal}>
-      <ModalDialog>
-        <Typography>Delete project</Typography>
-        <Box
-          display="flex"
-          width="100%"
-          height="100%"
-          flexDirection="column"
-          gap={3}
-        >
-          <Input
-            placeholder="Type DELETE to confirm"
-            value={text}
-            onChange={(e) => {
-              setText(e.target.value);
-            }}
-            autoFocus
-          />
-          <ButtonGroup spacing={1}>
-            <Button onClick={closeModal} color="primary">
-              Cancel
-            </Button>
-            <Button
-              loading={isMutating}
-              disabled={text !== "DELETE"}
-              onClick={async () => {
-                await trigger({ id: projectId });
-                resetSelectedProjectId();
-                closeModal();
-              }}
-            >
-              Delete project
-            </Button>
-          </ButtonGroup>
-        </Box>
-      </ModalDialog>
-    </Modal>
-  );
-};
-
-const EditProjectModal: React.FC<{
-  closeModal: () => void;
-  projectId: string;
-  projectName: string;
-  projects: Project[];
-}> = ({ closeModal, projectName, projectId, projects }) => {
-  const [text, setText] = React.useState("");
-  const { trigger, isMutating } = useEditProject();
-  const trimmed = text.trim();
-
-  const projectNames = React.useMemo(
-    () => new Set(projects.map((project) => project.name)),
-    [projects],
-  );
-
-  const isDisabled =
-    trimmed.length <= 3 ||
-    isMutating ||
-    trimmed === projectName ||
-    projectNames.has(trimmed);
-  return (
-    <Modal open onClose={closeModal} keepMounted>
-      <ModalDialog>
-        <Typography>Edit project name</Typography>
-        <Box
-          display="flex"
-          width="100%"
-          height="100%"
-          flexDirection="column"
-          gap={3}
-        >
-          <Input
-            value={text}
-            onChange={(e) => {
-              setText(e.target.value);
-            }}
-            onKeyDown={async (e) => {
-              if (e.key === "Enter" && !isDisabled) {
-                await trigger({
-                  id: projectId,
-                  name: trimmed,
-                });
-                closeModal();
-              }
-            }}
-            autoFocus
-          />
-
-          <ButtonGroup spacing={1}>
-            <Button onClick={closeModal} color="primary">
-              Cancel
-            </Button>
-            <Button
-              disabled={isDisabled}
-              onClick={async () => {
-                await trigger({
-                  id: projectId,
-                  name: trimmed,
-                });
-                closeModal();
-              }}
-            >
-              Change name
-            </Button>
-          </ButtonGroup>
-        </Box>
-      </ModalDialog>
-    </Modal>
-  );
-};
-
 const SelectedProjectInner: React.FC<{
   project: Project;
-  projects: Project[];
   token: string;
-  setSelectedProjectId: (projectId: string | undefined) => void;
   value: Tab;
-  modal: "delete" | "edit" | undefined;
-  setModal: (v: "delete" | "edit" | undefined) => void;
   uppy: Uppy;
   openUppyModal: () => void;
 }> = ({
   token,
   project,
-  projects,
-  setSelectedProjectId,
+
   value,
-  modal,
-  setModal,
   uppy,
   openUppyModal,
 }) => {
-  const closeModal = () => setModal(undefined);
   const { data: files, isLoading: filesLoading } = useFetchFiles(project.id);
 
   const {
@@ -490,24 +297,6 @@ const SelectedProjectInner: React.FC<{
             refetchChats={refetchChats}
           />
         </Box>
-      )}
-      {modal === "delete" && (
-        <DeleteProjectModal
-          closeModal={closeModal}
-          projectId={project.id}
-          resetSelectedProjectId={() => {
-            const newProjectId = projects.find((p) => p.id !== project.id)?.id;
-            setSelectedProjectId(newProjectId);
-          }}
-        />
-      )}
-      {modal === "edit" && (
-        <EditProjectModal
-          closeModal={closeModal}
-          projectId={project.id}
-          projectName={project.name}
-          projects={projects}
-        />
       )}
     </>
   );

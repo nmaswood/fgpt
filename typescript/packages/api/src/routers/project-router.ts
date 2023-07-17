@@ -10,6 +10,15 @@ export class ProjectRouter {
   init() {
     const router = express.Router();
 
+    router.get(
+      "/project/:id",
+      async (req: express.Request, res: express.Response) => {
+        const params = ZGetProject.parse(req.params);
+        const project = await this.projectStore.get(params.id);
+        res.json({ project });
+      },
+    );
+
     router.get("/list", async (req: express.Request, res: express.Response) => {
       const projects = await this.projectStore.list(req.user.organizationId);
       res.json({ projects });
@@ -66,6 +75,9 @@ export class ProjectRouter {
     return router;
   }
 }
+const ZGetProject = z.object({
+  id: z.string(),
+});
 
 const ZUpdateProjectArgs = z.object({
   id: z.string(),

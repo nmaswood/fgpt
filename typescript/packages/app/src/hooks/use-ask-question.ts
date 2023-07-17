@@ -12,7 +12,7 @@ const decoder = new TextDecoder();
 
 export const useAskQuestion = (
   token: string,
-  onDone: (value: { answer: string; shouldRefresh: boolean }) => void
+  onDone: (value: { answer: string; shouldRefresh: boolean }) => void,
 ) => {
   const [answerBuffer, setAnswerBuffer] = React.useState<string[]>([]);
   const answerRefBuffer = React.useRef<string[]>([]);
@@ -26,7 +26,7 @@ export const useAskQuestion = (
       try {
         setLoading(true);
         const res = await fetch(
-          `${CLIENT_SETTINGS.publicApiEndpoint}/api/v1/chat/chat`,
+          `/${CLIENT_SETTINGS.publicApiEndpoint}/api/v1/chat/chat`,
           {
             method: "POST",
             body: JSON.stringify({
@@ -38,7 +38,7 @@ export const useAskQuestion = (
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
         const body = res.body;
@@ -70,7 +70,7 @@ export const useAskQuestion = (
         setAnswerBuffer([]);
         answerRefBuffer.current = [];
       }
-    }
+    },
   );
   return {
     trigger: trigger.current,

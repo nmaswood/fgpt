@@ -1,4 +1,4 @@
-import { CssVarsProvider, extendTheme, useTheme } from "@mui/joy/styles";
+import { extendTheme } from "@mui/joy/styles";
 import { Lato } from "next/font/google";
 
 // If loading a variable font, you don't need to specify the font weight
@@ -104,8 +104,14 @@ declare module "@mui/material/styles" {
 }
 
 export const JOY_THEME = extendTheme({
+  components: {
+    JoyIconButton: {
+      styleOverrides: {},
+    },
+  },
   fontFamily: {
     body: LATO.style.fontFamily,
+    display: LATO.style.fontFamily,
   },
   colorSchemes: {
     light: {

@@ -27,7 +27,7 @@ export interface ProjectStore {
   addToFileCount: (projectId: string, delta: number) => Promise<Project>;
 }
 
-const PROJECT_FIELDS = sql.fragment`id, organization_id, name, file_count`;
+const PROJECT_FIELDS = sql.fragment`id, organization_id, name, file_count, created_at`;
 
 export class PSqlProjectStore implements ProjectStore {
   constructor(private readonly pool: DatabasePool) {}
@@ -172,10 +172,12 @@ const ZProjectRow = z
     organization_id: z.string(),
     name: z.string(),
     file_count: z.number().nullable(),
+    created_at: z.number(),
   })
   .transform((v) => ({
     id: v.id,
     organizationId: v.organization_id,
     name: v.name,
     fileCount: v.file_count ?? 0,
+    createdAt: new Date(v.created_at),
   }));

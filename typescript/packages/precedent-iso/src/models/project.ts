@@ -3,4 +3,5 @@ export interface Project {
   name: string;
   organizationId: string;
   fileCount: number;
+  createdAt: Date;
 }
