@@ -83,11 +83,6 @@ const DisplayUser = () => {
               padding: 0,
               backgroundColor: "transparent",
               transition: "all .2s ease-in-out",
-              "&:hover": {
-                transform: "scale(1.05)",
-
-                backgroundColor: "transparent",
-              },
             }}
             onClick={() => setOpen(true)}
           >
