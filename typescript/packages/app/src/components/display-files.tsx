@@ -2,10 +2,18 @@ import { LoadedFile } from "@fgpt/precedent-iso";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import { Box, IconButton, Link, Typography } from "@mui/joy";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import Uppy from "@uppy/core";
 import NextLink from "next/link";
 import React from "react";
 
-export const DisplayFiles: React.FC<{ files: LoadedFile[] }> = ({ files }) => {
+import { UploadFilesButton } from "./upload-files-button";
+
+export const DisplayFiles: React.FC<{
+  files: LoadedFile[];
+  projectId: string;
+  openModal: () => void;
+  uppy: Uppy;
+}> = ({ files, projectId, openModal, uppy }) => {
   return (
     <Box
       display="flex"
@@ -16,9 +24,16 @@ export const DisplayFiles: React.FC<{ files: LoadedFile[] }> = ({ files }) => {
       paddingBottom={4}
       maxHeight="100%"
       overflow="auto"
-      gap={1}
+      gap={3}
     >
-      <Typography level="h4">Data room files</Typography>
+      <Box display="flex" width="100%" justifyContent="space-between">
+        <Typography level="h4">Data room files</Typography>
+        <UploadFilesButton
+          uppy={uppy}
+          openModal={openModal}
+          projectId={projectId}
+        />
+      </Box>
 
       <DataGrid
         rows={files}

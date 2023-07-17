@@ -105,7 +105,6 @@ const DisplayUser = () => {
           </IconButton>
 
           <Menu
-            id="basic-menu"
             anchorEl={buttonRef.current}
             open={open}
             onClose={handleClose}

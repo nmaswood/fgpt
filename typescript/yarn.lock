@@ -541,6 +541,7 @@ __metadata:
     "@types/react-dom": ^18.2.7
     "@typescript-eslint/eslint-plugin": ^6.0.0
     "@typescript-eslint/parser": ^6.0.0
+    "@uidotdev/usehooks": ^2.0.1
     "@uppy/core": ^3.3.1
     "@uppy/dashboard": ^3.4.2
     "@uppy/drag-drop": ^3.0.2
@@ -1930,6 +1931,16 @@ __metadata:
     "@typescript-eslint/types": 6.0.0
     eslint-visitor-keys: ^3.4.1
   checksum: b0d9848a4490174db1d25b5f336548bb11dde4e0ce664c3dc341bed89fb3a3ada091aeb7f5d2d371433815332d93339c6cb77f7a24469c329c3d055b15237bfa
+  languageName: node
+  linkType: hard
+
+"@uidotdev/usehooks@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "@uidotdev/usehooks@npm:2.0.1"
+  peerDependencies:
+    react: ">=18.0.0"
+    react-dom: ">=18.0.0"
+  checksum: 176bd62347aae83dbca95777074a6d6a8c638e2aea88cd46396e30549f820ccb3c331f027d94d15695c97896912758285557487ed137bd5245b596718c3329d9
   languageName: node
   linkType: hard
 

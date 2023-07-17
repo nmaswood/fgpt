@@ -1,4 +1,3 @@
-import CloudUploadIcon from "@mui/icons-material/CloudUploadOutlined";
 import { Button } from "@mui/joy";
 import Uppy from "@uppy/core";
 import React from "react";
@@ -20,9 +19,8 @@ export const UploadFilesButton: React.FC<{
 
   return (
     <Button
-      startDecorator={<CloudUploadIcon />}
+      size="sm"
       onClick={openModal}
-      variant="outlined"
       sx={{ height: "40px", whiteSpace: "nowrap" }}
     >
       Upload

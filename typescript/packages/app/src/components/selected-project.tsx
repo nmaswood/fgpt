@@ -170,15 +170,6 @@ export const SelectedProject: React.FC<{
             </Tab>
           </TabList>
         </Tabs>
-        {token && project && (
-          <Box display="flex" alignItems="center" gap={1}>
-            <UploadFilesButton
-              uppy={uppy}
-              openModal={openUppyModal}
-              projectId={project.id}
-            />
-          </Box>
-        )}
       </Box>
       {loading && (
         <Box
@@ -272,7 +263,14 @@ const SelectedProjectInner: React.FC<{
               />
             </Box>
           )}
-          {files.length > 0 && <DisplayFiles files={files} />}
+          {files.length > 0 && (
+            <DisplayFiles
+              files={files}
+              uppy={uppy}
+              openModal={openUppyModal}
+              projectId={project.id}
+            />
+          )}
         </>
       )}
       {value === "chat" && (

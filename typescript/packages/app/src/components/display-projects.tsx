@@ -2,16 +2,21 @@ import { Project } from "@fgpt/precedent-iso";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import ModeEditIcon from "@mui/icons-material/ModeEditOutlined";
+import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import {
+  Badge,
   Box,
-  ButtonGroup,
   Card,
   CardContent,
   CircularProgress,
   IconButton,
   Link,
+  ListItemDecorator,
+  Menu,
+  MenuItem,
   Typography,
 } from "@mui/joy";
+import { useHover } from "@uidotdev/usehooks";
 import React from "react";
 
 export const DisplayProjects: React.FC<{
@@ -32,7 +37,6 @@ export const DisplayProjects: React.FC<{
       display="flex"
       flexDirection="column"
       padding={2}
-      gap={1}
       maxHeight="100%"
       height="100%"
       overflow="auto"
@@ -56,128 +60,208 @@ export const DisplayProjects: React.FC<{
           gridTemplateColumns="repeat( auto-fit, 250px )"
           gridAutoRows="auto"
           gap="1rem"
-          justifyContent="center"
+          justifyContent="start"
           maxHeight="100%"
           overflow="auto"
+          paddingY={3}
         >
-          <Box>
-            <Card
-              onClick={openCreateProjects}
-              variant="outlined"
-              sx={{
-                width: "250px",
-                height: "250px",
-                padding: 0,
+          <Card
+            onClick={openCreateProjects}
+            variant="outlined"
+            sx={{
+              width: "250px",
+              height: "250px",
+              padding: 0,
 
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                cursor: "pointer",
-                boxShadow: "rgba(0, 0, 0, 0.06) 0px 2px 4px",
-                transition: "all .3s ease-in-out",
-                "&:hover": {
-                  boxShadow: "rgba(0, 0, 0, 0.22) 0px 9px 21px",
-
-                  transform: "translate3d(0px, -1px, 0px)",
-                },
-              }}
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              cursor: "pointer",
+              boxShadow: "rgba(0, 0, 0, 0.06) 0px 2px 4px",
+              transition: "all .3s ease-in-out",
+              "&:hover": {
+                boxShadow: "rgba(0, 0, 0, 0.22) 0px 9px 21px",
+                transform: "translate3d(0px, -1px, 0px)",
+              },
+            }}
+          >
+            <AddCircleOutlineOutlinedIcon />
+            <Typography
+              level="h2"
+              fontSize="md"
+              textAlign={"center"}
+              sx={{ mb: 0.5 }}
             >
-              <AddCircleOutlineOutlinedIcon />
-              <Typography
-                level="h2"
-                fontSize="md"
-                textAlign={"center"}
-                sx={{ mb: 0.5 }}
-              >
-                Add a deal
-              </Typography>
-            </Card>
-          </Box>
+              Add a deal
+            </Typography>
+          </Card>
           {projects.map((project) => (
-            <Box key={project.id}>
-              <Card
-                variant="outlined"
-                sx={{
-                  width: "250px",
-                  height: "250px",
-                  padding: 0,
-                  transition: "all .3s ease-in-out",
-
-                  boxShadow: "rgba(0, 0, 0, 0.06) 0px 2px 4px",
-                  "&:hover": {
-                    boxShadow: "rgba(0, 0, 0, 0.22) 0px 9px 21px",
-                    transform: "translate3d(0px, -1px, 0px)",
-                  },
-                }}
-              >
-                <Box
-                  display="flex"
-                  bgcolor="primary.900"
-                  flexDirection="column"
-                  color="neutral.50"
-                  padding={2}
-                  height="50%"
-                  justifyContent="center"
-                  borderRadius={"8px 8px 0 0"}
-                  sx={(theme) => ({
-                    background: `linear-gradient(-45deg, ${theme.vars.palette.primary[900]}, ${theme.vars.palette.primary[500]})`,
-                    fontWeight: "lg", // short-hand syntax, same as `theme.fontWeight.lg`
-                  })}
-                  href={`/projects/${project.id}`}
-                  component={Link}
-                >
-                  <Typography
-                    level="h1"
-                    fontSize="md"
-                    textAlign={"center"}
-                    sx={{ mb: 0.5, color: "neutral.50" }}
-                  >
-                    {project.name}
-                  </Typography>
-                </Box>
-
-                <CardContent
-                  orientation="horizontal"
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    paddingX: 2,
-                  }}
-                >
-                  <Box display="flex" flexDirection="column">
-                    <Typography level="body2" sx={{ mb: 0.5 }}>
-                      Created {new Date(project.createdAt).toLocaleDateString()}
-                    </Typography>
-                    <Typography level="body2" sx={{ mb: 0.5 }}>
-                      {project.fileCount} assets
-                    </Typography>
-                  </Box>
-
-                  <ButtonGroup sx={{ height: "32px" }}>
-                    <IconButton
-                      color="info"
-                      onClick={() =>
-                        setEditingProject(project.id, project.name)
-                      }
-                    >
-                      <ModeEditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      color="danger"
-                      onClick={() =>
-                        setDeletingProject(project.id, project.name)
-                      }
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </ButtonGroup>
-                </CardContent>
-              </Card>
-            </Box>
+            <ProjectCard
+              key={project.id}
+              project={project}
+              setEditingProject={setEditingProject}
+              setDeletingProject={setDeletingProject}
+            />
           ))}
         </Box>
       )}
     </Box>
+  );
+};
+
+const ProjectCard: React.FC<{
+  project: Project;
+  setEditingProject: (projectId: string, projectName: string) => void;
+  setDeletingProject: (projectId: string, projectName: string) => void;
+}> = ({ project, setEditingProject, setDeletingProject }) => {
+  const [ref, hovering] = useHover();
+
+  const cardRef = React.useRef(null);
+
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const ActionMenu = () => (
+    <Menu
+      anchorEl={cardRef.current}
+      open={isOpen}
+      onClose={() => setIsOpen(false)}
+      placement="right"
+    >
+      <MenuItem
+        onClick={() => {
+          setEditingProject(project.id, project.name);
+          setIsOpen(false);
+        }}
+      >
+        <ListItemDecorator>
+          <ModeEditIcon color="info" />
+        </ListItemDecorator>
+        Edit name
+      </MenuItem>
+      <MenuItem
+        onClick={() => {
+          setDeletingProject(project.id, project.name);
+          setIsOpen(false);
+        }}
+      >
+        <ListItemDecorator>
+          <DeleteIcon color="error" />
+        </ListItemDecorator>
+        Delete project
+      </MenuItem>
+    </Menu>
+  );
+
+  return (
+    <Badge
+      key={project.id}
+      ref={ref}
+      invisible={!hovering}
+      onClick={() => setIsOpen(true)}
+      badgeContent={
+        <IconButton
+          size="sm"
+          variant="plain"
+          sx={{
+            "&:hover": {
+              bgcolor: "transparent",
+            },
+          }}
+        >
+          <MoreVertOutlinedIcon />
+        </IconButton>
+      }
+      sx={{
+        "& .MuiBadge-badge": {
+          backgroundColor: "neutral.50",
+        },
+      }}
+    >
+      <ActionMenu />
+      <Card
+        variant="outlined"
+        sx={{
+          width: "250px",
+          height: "250px",
+          padding: 0,
+          transition: "all .3s ease-in-out",
+          boxShadow: "rgba(0, 0, 0, 0.06) 0px 2px 4px",
+          ...(hovering
+            ? {
+                boxShadow: "rgba(0, 0, 0, 0.22) 0px 9px 21px",
+                transform: "translate3d(0px, -1px, 0px)",
+              }
+            : {}),
+          "&:hover": {
+            textDecoration: "none",
+          },
+        }}
+        href={`/projects/${project.id}`}
+        component={Link}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        <Box
+          display="flex"
+          width="100%"
+          bgcolor="primary.900"
+          flexDirection="column"
+          color="neutral.50"
+          padding={2}
+          height="50%"
+          justifyContent="center"
+          borderRadius={"8px 8px 0 0"}
+          sx={(theme) => ({
+            background: `linear-gradient(-45deg, ${theme.vars.palette.primary[900]}, ${theme.vars.palette.primary[500]})`,
+            fontWeight: "lg", // short-hand syntax, same as `theme.fontWeight.lg`
+          })}
+        >
+          <Typography
+            level="h1"
+            fontSize="md"
+            ref={cardRef}
+            textAlign={"center"}
+            sx={{ mb: 0.5, color: "neutral.50" }}
+          >
+            {project.name}
+          </Typography>
+        </Box>
+
+        <CardContent
+          orientation="horizontal"
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingX: 2,
+            width: "100%",
+          }}
+        >
+          <Box display="flex" flexDirection="column" width="100%">
+            <Typography
+              level="body2"
+              sx={{
+                color: "neutral.500",
+              }}
+            >
+              Created {new Date(project.createdAt).toLocaleDateString()}
+            </Typography>
+            <Typography
+              level="body2"
+              sx={{
+                textDecoration: "none",
+
+                "&:hover": {
+                  textDecoration: "none",
+                },
+              }}
+            >
+              {project.fileCount} assets
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
+    </Badge>
   );
 };

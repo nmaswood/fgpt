@@ -227,7 +227,7 @@ const EditProjectModal: React.FC<{
           gap: 1,
         }}
       >
-        <Typography>Edit deal name</Typography>
+        <Typography level="h6">Edit deal name</Typography>
         <Box
           display="flex"
           width="100%"
@@ -290,13 +290,13 @@ const DeleteProjectModal: React.FC<{
           gap: 1,
         }}
       >
-        <Typography>Delete deal</Typography>
+        <Typography level="h6">Delete deal</Typography>
         <Box
           display="flex"
           width="100%"
           height="100%"
           flexDirection="column"
-          gap={3}
+          gap={1}
         >
           <Input
             placeholder="Type DELETE to confirm"
