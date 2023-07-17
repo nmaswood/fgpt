@@ -29,7 +29,7 @@ const columns: GridColDef<LoadedFile>[] = [
     minWidth: 300,
     renderCell: ({ row }) => {
       return (
-        <Link component={NextLink} href={`files/${row.id}`}>
+        <Link component={NextLink} href={`/files/${row.id}`}>
           {row.fileName}
         </Link>
       );
