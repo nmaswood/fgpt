@@ -123,16 +123,19 @@ export const SelectedProject: React.FC<{
       (dashboard as any).openModal();
     }
   };
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
 
   React.useEffect(() => {
     return () => {
       // dumb hack to get around uppy bug
       // I hope this works
-      if (window.location.pathname.includes("files")) {
+      console.log(mounted);
+      if (mounted) {
         uppy.close();
       }
     };
-  }, [uppy]);
+  }, [uppy, mounted]);
 
   return (
     <Box
