@@ -58,6 +58,7 @@ const jwtCheck = expressjwt({
     rateLimit: true,
     jwksRequestsPerMinute: 5,
     jwksUri: SETTINGS.auth.jwksUri,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   }) as any,
 
   issuer: SETTINGS.auth.issuer,
@@ -190,12 +191,7 @@ async function start() {
     "/api/v1/output",
     jwtCheck,
     addUser,
-    new LLMOutputRouter(
-      questionStore,
-      mlService,
-      textChunkStore,
-      fileRenderService,
-    ).init(),
+    new LLMOutputRouter(questionStore, fileRenderService).init(),
   );
 
   if (SETTINGS.debug.includeRouter) {

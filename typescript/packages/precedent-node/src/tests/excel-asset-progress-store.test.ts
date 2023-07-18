@@ -95,11 +95,13 @@ test("getProgress#success", async () => {
     projectId,
     fileReferenceId,
     config: {
-      version: "1",
       organizationId,
       projectId,
       type: "analyze-table",
-      model: "gpt",
+      analysis: {
+        type: "code",
+        model: "gpt",
+      },
       fileReferenceId,
       source: null,
     },
@@ -131,11 +133,13 @@ test("getProgress#fail", async () => {
     projectId,
     fileReferenceId,
     config: {
-      version: "1",
       organizationId,
       projectId,
       type: "analyze-table",
-      model: "gpt",
+      analysis: {
+        type: "code",
+        model: "gpt",
+      },
       fileReferenceId,
       source: null,
     },

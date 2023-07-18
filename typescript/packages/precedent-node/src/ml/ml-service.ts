@@ -32,17 +32,6 @@ export interface AskQuestion {
   question: string;
 }
 
-export interface PlaygroundRequest {
-  text: string;
-  jsonSchema: Record<string, unknown>;
-  prompt: string;
-  functionName: string;
-}
-
-export interface PlaygroundResponse {
-  raw: Record<string, unknown>;
-}
-
 export interface MLServiceClient {
   ping: () => Promise<"pong">;
   getEmbedding: (query: string) => Promise<number[]>;
@@ -50,7 +39,6 @@ export interface MLServiceClient {
   askQuestion(args: AskQuestion): Promise<string>;
   askQuestionStreaming(args: AskQuestionStreamingArgs): Promise<void>;
   getTitleStreaming(args: GenerateTitleStreamingArgs): Promise<void>;
-  playGround(args: PlaygroundRequest): Promise<PlaygroundResponse>;
   tokenLength(text: string): Promise<TokenLength>;
 }
 
@@ -96,6 +84,7 @@ export class MLServiceClientImpl implements MLServiceClient {
     onEnd,
     history,
   }: AskQuestionStreamingArgs): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await this.client.post<any>(
       "/chat/ask-question-streaming",
       {
@@ -145,16 +134,6 @@ export class MLServiceClientImpl implements MLServiceClient {
     });
   }
 
-  async playGround(args: PlaygroundRequest): Promise<PlaygroundResponse> {
-    const response = await this.client.post<unknown>("/playground", {
-      text: args.text,
-      prompt: args.prompt,
-      json_schema: args.jsonSchema,
-      function_name: args.functionName,
-    });
-    return ZPlaygroundResponse.parse(response.data);
-  }
-
   async tokenLength(text: string): Promise<TokenLength> {
     const response = await this.client.post<unknown>("/text/token-length", {
       text,
@@ -172,8 +151,4 @@ export type TokenLength = z.infer<typeof ZTokenLengthResponse>;
 
 const ZAskQuestionResponse = z.object({
   data: z.string(),
-});
-
-const ZPlaygroundResponse = z.object({
-  raw: z.record(z.unknown()),
 });

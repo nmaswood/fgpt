@@ -11,6 +11,7 @@ export * from "./jobs/llm-output-handler";
 export * from "./jobs/table-handler";
 export * from "./jobs/task-executor";
 export * from "./jobs/text-chunk-handler";
+export * from "./jobs/thumbnail-handler";
 export * from "./jobs/text-extraction-handler";
 export * from "./llm-outputs/misc-output-store";
 export * from "./llm-outputs/question-store";

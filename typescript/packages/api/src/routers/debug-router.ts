@@ -26,7 +26,6 @@ export class DebugRouter {
           fileReferenceId: file.id,
           config: {
             type: "extract-table",
-            version: "1",
             organizationId: file.organizationId,
             projectId: file.projectId,
             fileReferenceId: file.id,

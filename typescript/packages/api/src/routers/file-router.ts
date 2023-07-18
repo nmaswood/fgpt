@@ -104,7 +104,6 @@ export class FileRouter {
           projectId,
           fileReferenceId: fileReference.id,
           config: {
-            version: "1",
             organizationId: req.user.organizationId,
             projectId: req.body.projectId,
             type: "ingest-file",

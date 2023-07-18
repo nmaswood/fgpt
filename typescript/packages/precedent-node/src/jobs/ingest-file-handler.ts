@@ -24,7 +24,17 @@ export class IngestFileHandlerImpl implements IngestFileHandler {
             projectId,
             fileReferenceId,
             config: {
-              version: "1",
+              organizationId,
+              projectId,
+              type: "thumbnail",
+              fileReferenceId,
+            },
+          },
+          {
+            organizationId,
+            projectId,
+            fileReferenceId,
+            config: {
               organizationId,
               projectId,
               type: "text-extraction",
@@ -36,7 +46,6 @@ export class IngestFileHandlerImpl implements IngestFileHandler {
             projectId,
             fileReferenceId,
             config: {
-              version: "1",
               organizationId,
               projectId,
               type: "extract-table",

@@ -80,7 +80,6 @@ test("insertMany", async () => {
       projectId: project.id,
       fileReferenceId: undefined,
       config: {
-        version: "1",
         organizationId: user.organizationId,
         projectId: project.id,
         type: "text-extraction",
@@ -100,7 +99,6 @@ test("insert", async () => {
     projectId: project.id,
     fileReferenceId: undefined,
     config: {
-      version: "1",
       organizationId: user.organizationId,
       projectId: project.id,
       type: "text-extraction",
@@ -119,7 +117,6 @@ test("get", async () => {
     projectId: project.id,
     fileReferenceId: undefined,
     config: {
-      version: "1",
       organizationId: user.organizationId,
       projectId: project.id,
       type: "text-extraction",
@@ -142,7 +139,6 @@ test("getAndSetToInProgress", async () => {
       projectId: project.id,
       fileReferenceId: undefined,
       config: {
-        version: "1",
         organizationId: user.organizationId,
         projectId: project.id,
         type: "text-extraction",
@@ -154,7 +150,6 @@ test("getAndSetToInProgress", async () => {
       projectId: project.id,
       fileReferenceId: undefined,
       config: {
-        version: "1",
         organizationId: user.organizationId,
         projectId: project.id,
         type: "text-extraction",
@@ -176,7 +171,6 @@ test("setToSuceeded", async () => {
 
     fileReferenceId: undefined,
     config: {
-      version: "1",
       organizationId: user.organizationId,
       projectId: project.id,
       type: "text-extraction",
@@ -197,7 +191,6 @@ test("setToInProgress", async () => {
 
     fileReferenceId: undefined,
     config: {
-      version: "1",
       organizationId: user.organizationId,
       projectId: project.id,
       type: "text-extraction",
@@ -220,7 +213,6 @@ test("setToFailed", async () => {
 
     fileReferenceId: undefined,
     config: {
-      version: "1",
       organizationId: user.organizationId,
       projectId: project.id,
       type: "text-extraction",
@@ -241,7 +233,6 @@ test("setToQueued", async () => {
 
     fileReferenceId: undefined,
     config: {
-      version: "1",
       organizationId: user.organizationId,
       projectId: project.id,
       type: "text-extraction",
@@ -263,7 +254,6 @@ test("getByFileReferenceId", async () => {
       projectId: project.id,
       fileReferenceId: fileReferenceId1,
       config: {
-        version: "1",
         organizationId: user.organizationId,
         projectId: project.id,
         type: "text-extraction",
@@ -275,7 +265,6 @@ test("getByFileReferenceId", async () => {
       projectId: project.id,
       fileReferenceId: fileReferenceId2,
       config: {
-        version: "1",
         organizationId: user.organizationId,
         projectId: project.id,
         type: "text-extraction",

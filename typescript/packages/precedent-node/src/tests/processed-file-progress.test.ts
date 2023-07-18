@@ -113,7 +113,6 @@ test("getProgress#pending", async () => {
       projectId,
       fileReferenceId,
       config: {
-        version: "1",
         organizationId,
         projectId,
         type: "text-chunk",
@@ -127,7 +126,6 @@ test("getProgress#pending", async () => {
       projectId,
       fileReferenceId,
       config: {
-        version: "1",
         organizationId,
         projectId,
         type: "text-chunk",
@@ -168,7 +166,6 @@ test("getProgress#has_failure", async () => {
       projectId,
       fileReferenceId,
       config: {
-        version: "1",
         organizationId,
         projectId,
         type: "text-chunk",
@@ -182,7 +179,6 @@ test("getProgress#has_failure", async () => {
       projectId,
       fileReferenceId,
       config: {
-        version: "1",
         organizationId,
         projectId,
         type: "text-chunk",
@@ -231,7 +227,6 @@ test("getProgress#complete", async () => {
       projectId,
       fileReferenceId,
       config: {
-        version: "1",
         organizationId,
         projectId,
         type: "text-chunk",
@@ -245,7 +240,6 @@ test("getProgress#complete", async () => {
       projectId,
       fileReferenceId,
       config: {
-        version: "1",
         organizationId,
         projectId,
         type: "text-chunk",
@@ -259,7 +253,6 @@ test("getProgress#complete", async () => {
       projectId,
       fileReferenceId,
       config: {
-        version: "1",
         organizationId,
         projectId,
         type: "gen-embeddings",
@@ -274,7 +267,6 @@ test("getProgress#complete", async () => {
       projectId,
       fileReferenceId,
       config: {
-        version: "1",
         organizationId,
         projectId,
         type: "llm-outputs",
@@ -289,7 +281,6 @@ test("getProgress#complete", async () => {
       projectId,
       fileReferenceId,
       config: {
-        version: "1",
         organizationId,
         projectId,
         type: "extract-table",
@@ -301,13 +292,15 @@ test("getProgress#complete", async () => {
       projectId,
       fileReferenceId,
       config: {
-        version: "1",
         organizationId,
         projectId,
         type: "analyze-table",
         fileReferenceId,
         source: null,
-        model: "gpt",
+        analysis: {
+          type: "code",
+          model: "gpt",
+        },
       },
     },
   ]);

@@ -51,6 +51,7 @@ export class PSqlExcelProgressStore implements ExcelProgressStore {
         case "ingest-file":
         case "text-extraction":
         case "text-chunk":
+        case "thumbnail":
           break;
         default:
           assertNever(task.config);

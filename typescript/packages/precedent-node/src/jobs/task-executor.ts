@@ -8,6 +8,7 @@ import { ReportHandler } from "./llm-output-handler";
 import { TableHandler } from "./table-handler";
 import { TextChunkHandler } from "./text-chunk-handler";
 import { TextExtractionHandler } from "./text-extraction-handler";
+import { ThumbnailHandler } from "./thumbnail-handler";
 
 export interface TaskExecutor {
   execute(task: Task): Promise<void>;
@@ -23,6 +24,7 @@ export class TaskExecutorImpl implements TaskExecutor {
     private readonly reportHandler: ReportHandler,
     private readonly tableHandler: TableHandler,
     private readonly ingestFileHandler: IngestFileHandler,
+    private readonly thumbnailHandler: ThumbnailHandler,
     private readonly claudeReportGeneration: boolean,
   ) {}
 
@@ -47,7 +49,6 @@ export class TaskExecutorImpl implements TaskExecutor {
           fileReferenceId: config.fileReferenceId,
           config: {
             type: "text-chunk",
-            version: "1",
             organizationId,
             projectId,
             fileReferenceId: config.fileReferenceId,
@@ -63,7 +64,6 @@ export class TaskExecutorImpl implements TaskExecutor {
             fileReferenceId: config.fileReferenceId,
             config: {
               type: "text-chunk",
-              version: "1",
               organizationId,
               projectId,
               fileReferenceId: config.fileReferenceId,
@@ -98,7 +98,6 @@ export class TaskExecutorImpl implements TaskExecutor {
               fileReferenceId: config.fileReferenceId,
               config: {
                 type: "gen-embeddings",
-                version: "1",
                 organizationId,
                 projectId,
                 fileReferenceId: config.fileReferenceId,
@@ -118,7 +117,6 @@ export class TaskExecutorImpl implements TaskExecutor {
               fileReferenceId: config.fileReferenceId,
               config: {
                 type: "llm-outputs",
-                version: "1",
                 organizationId,
                 projectId,
                 fileReferenceId: config.fileReferenceId,
@@ -137,7 +135,6 @@ export class TaskExecutorImpl implements TaskExecutor {
               fileReferenceId: config.fileReferenceId,
               config: {
                 type: "long-form",
-                version: "1",
                 organizationId,
                 projectId,
                 fileReferenceId: config.fileReferenceId,
@@ -246,6 +243,11 @@ export class TaskExecutorImpl implements TaskExecutor {
             throw new Error("Not implemented");
           }
         }
+        break;
+      }
+
+      case "thumbnail": {
+        await this.thumbnailHandler.forPdf();
         break;
       }
 

@@ -1,17 +1,10 @@
-import {
-  FileRenderService,
-  MLServiceClient,
-  QuestionStore,
-  TextChunkStore,
-} from "@fgpt/precedent-node";
+import { FileRenderService, QuestionStore } from "@fgpt/precedent-node";
 import express from "express";
 import { z } from "zod";
 
 export class LLMOutputRouter {
   constructor(
     private readonly questionStore: QuestionStore,
-    private readonly mlService: MLServiceClient,
-    private readonly chunkStore: TextChunkStore,
     private readonly fileToRenderService: FileRenderService,
   ) {}
   init() {
@@ -26,24 +19,6 @@ export class LLMOutputRouter {
           body.textChunkId,
         );
         res.json({ questions });
-      },
-    );
-
-    router.post(
-      "/playground",
-      async (req: express.Request, res: express.Response) => {
-        const body = ZPlaygroundRequest.parse(req.body);
-
-        const chunk = await this.chunkStore.getTextChunkById(body.textChunkId);
-
-        const response = await this.mlService.playGround({
-          text: chunk.chunkText,
-          prompt: body.prompt,
-          jsonSchema: body.jsonSchema,
-          functionName: body.functionName,
-        });
-
-        res.json({ response });
       },
     );
 
@@ -100,13 +75,6 @@ const ZFileToRenderRequest = z.object({
 
 const ZSampleFileRequest = z.object({
   fileReferenceId: z.string(),
-});
-
-const ZPlaygroundRequest = z.object({
-  textChunkId: z.string(),
-  prompt: z.string(),
-  functionName: z.string(),
-  jsonSchema: z.record(z.any()),
 });
 
 const ZChunkRequest = z.object({

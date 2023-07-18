@@ -14,6 +14,7 @@ export const ZTaskType = z.enum([
   "extract-table",
   "analyze-table",
   "long-form",
+  "thumbnail",
 ]);
 
 export const ZTaskStatus = z.enum([
@@ -25,7 +26,6 @@ export const ZTaskStatus = z.enum([
 
 export const ZIngestFileConfig = z.object({
   type: z.literal("ingest-file"),
-  version: z.literal("1"),
   organizationId: z.string(),
   projectId: z.string(),
   fileReferenceId: z.string(),
@@ -36,7 +36,6 @@ export type IngestFileConfig = z.infer<typeof ZIngestFileConfig>;
 
 export const ZTextExtractionConfig = z.object({
   type: z.literal("text-extraction"),
-  version: z.literal("1"),
   organizationId: z.string(),
   projectId: z.string(),
   fileReferenceId: z.string(),
@@ -46,7 +45,6 @@ export type TextExtractionConfig = z.infer<typeof ZTextExtractionConfig>;
 
 export const ZTextChunkConfig = z.object({
   type: z.literal("text-chunk"),
-  version: z.literal("1"),
   organizationId: z.string(),
   projectId: z.string(),
   fileReferenceId: z.string(),
@@ -58,7 +56,6 @@ export type TextChunkConfig = z.infer<typeof ZTextChunkConfig>;
 
 export const ZGenEmbeddingsConfig = z.object({
   type: z.literal("gen-embeddings"),
-  version: z.literal("1"),
   organizationId: z.string(),
   projectId: z.string(),
   fileReferenceId: z.string(),
@@ -70,7 +67,6 @@ export type GenEmbeddingsConfig = z.infer<typeof ZGenEmbeddingsConfig>;
 
 export const ZLLMOutputsConfig = z.object({
   type: z.literal("llm-outputs"),
-  version: z.literal("1"),
   organizationId: z.string(),
   projectId: z.string(),
   fileReferenceId: z.string(),
@@ -81,7 +77,6 @@ export const ZLLMOutputsConfig = z.object({
 
 export const ZLongFormReportConfig = z.object({
   type: z.literal("long-form"),
-  version: z.literal("1"),
   organizationId: z.string(),
   projectId: z.string(),
   fileReferenceId: z.string(),
@@ -94,7 +89,6 @@ export type LongFormReportConfig = z.infer<typeof ZLongFormReportConfig>;
 
 export const ZExtractTableConfig = z.object({
   type: z.literal("extract-table"),
-  version: z.literal("1"),
   organizationId: z.string(),
   projectId: z.string(),
   fileReferenceId: z.string(),
@@ -122,7 +116,6 @@ export type TableAnalysis = z.infer<typeof ZTableAnalysis>;
 
 export const ZAnalyzeTableConfig = z.object({
   type: z.literal("analyze-table"),
-  version: z.literal("1"),
   organizationId: z.string(),
   projectId: z.string(),
   fileReferenceId: z.string(),
@@ -140,6 +133,20 @@ export interface AnalyzeTableConfig {
   analysis: TableAnalysis;
 }
 
+export interface ThumbnailConfig {
+  type: "thumbnail";
+  organizationId: string;
+  projectId: string;
+  fileReferenceId: string;
+}
+
+export const ZThumbnailConfig = z.object({
+  type: z.literal("thumbnail"),
+  organizationId: z.string(),
+  projectId: z.string(),
+  fileReferenceId: z.string(),
+});
+
 export type TaskConfig =
   | IngestFileConfig
   | TextExtractionConfig
@@ -148,7 +155,8 @@ export type TaskConfig =
   | LLMOutputsConfig
   | ExtractTableConfig
   | LongFormReportConfig
-  | AnalyzeTableConfig;
+  | AnalyzeTableConfig
+  | ThumbnailConfig;
 
 function analysis(row: z.infer<typeof ZAnalyzeTableConfig>): TableAnalysis {
   if (row.analysis) {
@@ -176,6 +184,7 @@ export const ZTaskConfig = z
     ZExtractTableConfig,
     ZLongFormReportConfig,
     ZAnalyzeTableConfig,
+    ZThumbnailConfig,
   ])
   .transform((row): TaskConfig => {
     switch (row.type) {
@@ -193,6 +202,7 @@ export const ZTaskConfig = z
       case "llm-outputs":
       case "extract-table":
       case "long-form":
+      case "thumbnail":
         return row;
       default:
         assertNever(row);

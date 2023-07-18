@@ -33,6 +33,7 @@ import {
   axiosClientForMlService,
   PineconeVectorService,
   MLReportServiceImpl,
+  ThumbnailHandlerImpl,
 } from "@fgpt/precedent-node";
 import { SETTINGS, Settings } from "./settings";
 import { MainRouter } from "./router";
@@ -77,6 +78,7 @@ async function start(settings: Settings) {
   const vectorService = new PineconeVectorService(springtimeClient);
   const mlServiceClient = new MLServiceClientImpl(springtimeClient);
   const mlReportService = new MLReportServiceImpl(springtimeClient);
+  const thumbnailHandler = new ThumbnailHandlerImpl();
 
   const questionStore = new PsqlQuestionStore(pool);
   const miscOutputStore = new PsqlMiscOutputStore(pool);
@@ -128,6 +130,7 @@ async function start(settings: Settings) {
     reportHandler,
     tableHandler,
     ingestFileHandler,
+    thumbnailHandler,
     SETTINGS.claudeReportGeneration,
   );
 

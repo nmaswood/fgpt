@@ -101,6 +101,7 @@ export class PSqlProcessedFileProgressStore
           break;
         case "ingest-file":
         case "text-extraction":
+        case "thumbnail":
           break;
 
         default:
