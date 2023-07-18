@@ -1,10 +1,10 @@
 import { useUser } from "@auth0/nextjs-auth0/client";
-import ArrowBackIcon from "@mui/icons-material/ArrowBackOutlined";
 import LogoutIcon from "@mui/icons-material/LogoutOutlined";
 import AdminIcon from "@mui/icons-material/SupervisorAccountOutlined";
 import {
   Avatar,
   Box,
+  Breadcrumbs,
   IconButton,
   Link,
   ListItemDecorator,
@@ -12,7 +12,6 @@ import {
   MenuItem,
   Typography,
 } from "@mui/joy";
-import { useRouter } from "next/router";
 import React from "react";
 
 import { useFetchMe } from "../hooks/use-fetch-me";
@@ -21,7 +20,6 @@ import { ImpersonateService } from "../services/impersonate-service";
 export const Navbar: React.FC<{ projectName?: string | undefined }> = ({
   projectName,
 }) => {
-  const router = useRouter();
   return (
     <Box
       display="flex"
@@ -32,37 +30,42 @@ export const Navbar: React.FC<{ projectName?: string | undefined }> = ({
       overflow="auto"
       bgcolor="primary.800"
       paddingX={2}
-      paddingY={2}
       justifyContent="space-between"
     >
-      <Box display="flex" height="100%" alignItems="center" gap={1}>
+      <Breadcrumbs
+        size="lg"
+        aria-label="breadcrumbs"
+        color="neutral.0"
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          ".MuiBreadcrumbs-separator": {
+            color: "white",
+          },
+        }}
+      >
+        <Typography
+          component={Link}
+          href="/"
+          level="h5"
+          sx={{
+            color: "white",
+          }}
+        >
+          Deals
+        </Typography>
         {projectName && (
-          <>
-            <IconButton
-              variant="soft"
-              size="sm"
-              onClick={() => router.push("/")}
-              sx={{
-                color: "neutral.200",
-                backgroundColor: "transparent",
-                "&:hover": {
-                  backgroundColor: "transparent",
-                },
-              }}
-            >
-              <ArrowBackIcon />
-            </IconButton>
-            <Typography
-              level="body1"
-              sx={{
-                color: "white",
-              }}
-            >
-              {projectName}
-            </Typography>
-          </>
+          <Typography
+            level="h5"
+            sx={{
+              color: "white",
+            }}
+          >
+            {projectName}
+          </Typography>
         )}
-      </Box>
+      </Breadcrumbs>
+
       <DisplayUser />
     </Box>
   );

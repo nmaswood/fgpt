@@ -50,7 +50,7 @@ const Index: React.FC = () => {
       maxWidth="100%"
       overflow="auto"
       flexDirection="column"
-      bgcolor="background.backdrop"
+      bgcolor="background.body"
     >
       <Navbar />
 

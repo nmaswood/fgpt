@@ -117,7 +117,7 @@ export const JOY_THEME = extendTheme({
     light: {
       palette: {
         background: {
-          backdrop: "#f2f2f2",
+          body: "#f2f2f2",
         },
         //background: "#f2f2f2",
         primary: {

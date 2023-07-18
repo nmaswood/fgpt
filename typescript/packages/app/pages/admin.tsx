@@ -11,6 +11,7 @@ import {
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
+import { Navbar } from "../src/components/navbar";
 import { useFetchMe } from "../src/hooks/use-fetch-me";
 import { useFetchUsers } from "../src/hooks/use-fetch-users";
 import { ImpersonateService } from "../src/services/impersonate-service";
@@ -40,6 +41,7 @@ const Admin: React.FC = () => {
       padding={2}
     >
       <>
+        <Navbar />
         <Typography level="h3">Admin</Typography>
 
         {user && <AdminInner />}

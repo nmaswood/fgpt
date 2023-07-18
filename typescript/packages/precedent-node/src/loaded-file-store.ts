@@ -1,4 +1,4 @@
-import { Cursor, LoadedFile } from "@fgpt/precedent-iso";
+import { Cursor, getFileType, LoadedFile } from "@fgpt/precedent-iso";
 import { DatabasePool, DatabasePoolConnection, sql } from "slonik";
 import { z } from "zod";
 
@@ -83,5 +83,6 @@ const ZLoadedFileRow = z
       claude100kTokenLength: row.claude_100k_length ?? undefined,
       fullyChunked: Boolean(row.fully_chunked),
       fullyEmbedded: Boolean(row.fully_embedded),
+      fileType: getFileType(row.content_type),
     }),
   );

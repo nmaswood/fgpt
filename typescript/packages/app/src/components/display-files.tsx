@@ -1,6 +1,6 @@
-import { LoadedFile } from "@fgpt/precedent-iso";
+import { assertNever, FileType, LoadedFile } from "@fgpt/precedent-iso";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
-import { Box, IconButton, Link, Typography } from "@mui/joy";
+import { Box, Chip, IconButton, Link, Typography } from "@mui/joy";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Uppy from "@uppy/core";
 import NextLink from "next/link";
@@ -51,19 +51,19 @@ export const DisplayFiles: React.FC<{
 
 const columns: GridColDef<LoadedFile>[] = [
   {
-    field: "type",
+    field: "fileType",
     headerName: "Type",
     renderCell: ({ row }) => {
-      return (
-        <Link component={NextLink} href={`/files/${row.id}`}>
-          {""}
-        </Link>
-      );
+      if (!row.fileType) {
+        return null;
+      }
+      return <ChipForFileType f={row.fileType} />;
     },
   },
   {
     field: "fileName",
-    headerName: "File name",
+    headerName: "Name",
+    minWidth: 300,
     renderCell: ({ row }) => {
       return (
         <Link component={NextLink} href={`/files/${row.id}`}>
@@ -106,3 +106,45 @@ const columns: GridColDef<LoadedFile>[] = [
     },
   },
 ];
+
+const ChipForFileType: React.FC<{ f: FileType }> = ({ f }) => {
+  switch (f) {
+    case "excel":
+      return (
+        <Chip
+          size="sm"
+          color="success"
+          sx={(theme) => ({
+            backgroundColor: "transparent",
+            color: theme.palette.success.solidColor,
+            ".MuiTypography-root": {
+              fontSize: 12,
+              fontWeight: 700,
+              color: theme.palette.success.solidColor,
+            },
+            ".MuiChip-label": {
+              color: theme.palette.success.solidColor,
+            },
+            "&:before": {
+              content: "''",
+              position: "absolute",
+              top: "0px",
+              right: "0px",
+              bottom: "0px",
+              left: "0px",
+              opacity: 0.15,
+              background: theme.palette.success.solidColor,
+              borderRadius: 16,
+            },
+          })}
+        >
+          <Typography>XLS</Typography>
+        </Chip>
+      );
+    case "pdf":
+      return <Chip color="danger">PDF</Chip>;
+
+    default:
+      assertNever(f);
+  }
+};

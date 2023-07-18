@@ -40,7 +40,6 @@ export const DisplayProjects: React.FC<{
       height="100%"
       overflow="auto"
     >
-      <Typography level="h2">Deals</Typography>
       {projectsLoading && (
         <Box
           display="flex"

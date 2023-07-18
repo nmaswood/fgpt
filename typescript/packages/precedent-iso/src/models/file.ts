@@ -1,3 +1,5 @@
+import { FileType } from "../file-type";
+
 export interface FileReference {
   id: string;
   fileName: string;
@@ -15,6 +17,7 @@ export interface LoadedFile {
   fileSize: number | undefined;
   createdAt: Date;
   contentType: string;
+  fileType: FileType | undefined;
   extractedTextLength: number | undefined;
   gpt4TokenLength: number | undefined;
   claude100kTokenLength: number | undefined;
