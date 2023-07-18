@@ -280,14 +280,16 @@ function useHover<T extends HTMLElement>(): UseHoverType<T> {
       if (node) {
         node.addEventListener("mouseover", handleMouseOver);
         node.addEventListener("mouseout", handleMouseOut);
-
-        return () => {
-          node.removeEventListener("mouseover", handleMouseOver);
-          node.removeEventListener("mouseout", handleMouseOut);
-        };
       }
+      return () => {
+        if (!node) {
+          return;
+        }
+        node.removeEventListener("mouseover", handleMouseOver);
+        node.removeEventListener("mouseout", handleMouseOut);
+      };
     },
-    [ref.current], // Recall only if ref changes
+    [], // Recall only if ref changes
   );
 
   return [ref, value];

@@ -10,7 +10,6 @@ import {
   ModalDialog,
   Typography,
 } from "@mui/joy";
-import { Snackbar } from "@mui/material";
 import { useRouter } from "next/router";
 import * as React from "react";
 
@@ -74,7 +73,7 @@ const Index: React.FC = () => {
         projects={projects}
       />
       {modal.type === "create" && (
-        <FormDialog
+        <CreateProjectModal
           onClose={closeModal}
           projectNames={projectNames}
           onCreate={async (name: string) => {
@@ -135,7 +134,7 @@ function errorDisplayName(error: InputError) {
 
 type InputError = "too_long" | "too_short" | "already_exists";
 
-const FormDialog: React.FC<{
+const CreateProjectModal: React.FC<{
   onClose: () => void;
   projectNames: Set<string>;
   onCreate: (name: string) => Promise<void>;
@@ -166,7 +165,12 @@ const FormDialog: React.FC<{
             type="text"
             color="primary"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              if (error) {
+                setError(undefined);
+              }
+              setName(e.target.value);
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
@@ -184,22 +188,17 @@ const FormDialog: React.FC<{
               onClick={onSubmit}
               variant="solid"
               color="primary"
+              disabled={name.length === 0}
             >
               Create deal
             </Button>
           </ButtonGroup>
+          {error && (
+            <Alert variant="soft" size="sm" color="warning">
+              {errorDisplayName(error)}
+            </Alert>
+          )}
         </Box>
-        {error && (
-          <Snackbar
-            open={true}
-            autoHideDuration={5_000}
-            onClose={() => setError(undefined)}
-            message={errorDisplayName(error)}
-            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          >
-            <Alert sx={{ width: "100%" }}>{errorDisplayName(error)}</Alert>
-          </Snackbar>
-        )}
       </ModalDialog>
     </Modal>
   );
@@ -211,15 +210,25 @@ const EditProjectModal: React.FC<{
   projectName: string;
   projectNames: Set<string>;
 }> = ({ closeModal, projectName, projectId, projectNames }) => {
-  const [text, setText] = React.useState("");
+  const [text, setText] = React.useState(projectName);
+  const [error, setError] = React.useState<InputError | undefined>(undefined);
   const { trigger, isMutating } = useEditProject();
   const trimmed = text.trim();
 
-  const isDisabled =
-    trimmed.length <= 3 ||
-    isMutating ||
-    trimmed === projectName ||
-    projectNames.has(trimmed);
+  const onSubmit = async () => {
+    const error = validate(projectNames)(trimmed);
+    if (error) {
+      setError(error);
+      return;
+    }
+
+    await trigger({
+      id: projectId,
+      name: trimmed,
+    });
+    closeModal();
+  };
+
   return (
     <Modal open onClose={closeModal} keepMounted>
       <ModalDialog
@@ -235,19 +244,19 @@ const EditProjectModal: React.FC<{
           height="100%"
           flexDirection="column"
           gap={1}
+          position="relative"
         >
           <Input
             value={text}
             onChange={(e) => {
+              if (error) {
+                setError(undefined);
+              }
               setText(e.target.value);
             }}
             onKeyDown={async (e) => {
-              if (e.key === "Enter" && !isDisabled) {
-                await trigger({
-                  id: projectId,
-                  name: trimmed,
-                });
-                closeModal();
+              if (e.key === "Enter") {
+                await onSubmit();
               }
             }}
             autoFocus
@@ -258,18 +267,22 @@ const EditProjectModal: React.FC<{
               Cancel
             </Button>
             <Button
-              disabled={isDisabled}
+              disabled={trimmed === projectName || trimmed.length === 0}
+              color="primary"
+              variant="solid"
               onClick={async () => {
-                await trigger({
-                  id: projectId,
-                  name: trimmed,
-                });
-                closeModal();
+                await onSubmit();
               }}
+              loading={isMutating}
             >
               Change name
             </Button>
           </ButtonGroup>
+          {error && (
+            <Alert variant="soft" size="sm" color="warning">
+              {errorDisplayName(error)}
+            </Alert>
+          )}
         </Box>
       </ModalDialog>
     </Modal>
