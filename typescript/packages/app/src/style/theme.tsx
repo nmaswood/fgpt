@@ -90,19 +90,6 @@ export const THEME = materialExtendTheme({
   },
 });
 
-declare module "@mui/material/styles" {
-  interface Theme {
-    status: {
-      danger: string;
-    };
-    palette: {
-      primary: {
-        main: string;
-      };
-    };
-  }
-}
-
 export const JOY_THEME = extendTheme({
   components: {
     JoyIconButton: {

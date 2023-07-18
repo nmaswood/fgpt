@@ -2,18 +2,17 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBackOutlined";
 import AssessmentIcon from "@mui/icons-material/AssessmentOutlined";
 import AutoModeOutlinedIcon from "@mui/icons-material/AutoModeOutlined";
 import BoltIcon from "@mui/icons-material/BoltOutlined";
-import ConstructionIcon from "@mui/icons-material/ConstructionOutlined";
 import MenuIcon from "@mui/icons-material/MenuOutlined";
 import TableViewIcon from "@mui/icons-material/TableViewOutlined";
 import {
   Box,
+  CircularProgress,
   IconButton,
   ListItemDecorator,
   Tab,
   TabList,
   Tabs,
 } from "@mui/joy";
-import { Skeleton } from "@mui/material";
 import { useRouter } from "next/router";
 import React from "react";
 
@@ -23,7 +22,6 @@ import { DisplayFileChat } from "../../src/components/file/display-file-chat";
 import { DisplayProgress } from "../../src/components/file/display-progress";
 import { DisplayFileReport } from "../../src/components/file/report";
 import { useTabState } from "../../src/components/file/use-tab-state";
-import { ViewByChunk } from "../../src/components/file/view-by-chunk";
 import { useFetchFileToRender } from "../../src/hooks/use-fetch-file-to-render";
 import { useFetchToken } from "../../src/hooks/use-fetch-token";
 
@@ -74,16 +72,7 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
             </IconButton>
           </Box>
 
-          {file ? (
-            <DisplayAsset fileToRender={file} />
-          ) : (
-            <Skeleton
-              variant="rectangular"
-              width="100%"
-              height="100%"
-              animation={false}
-            />
-          )}
+          {file ? <DisplayAsset fileToRender={file} /> : <CircularProgress />}
         </Box>
       )}
       <Box
@@ -129,14 +118,6 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
                   Table
                 </Tab>
               )}
-              {file && file.type === "pdf" && (
-                <Tab value="debug">
-                  <ListItemDecorator>
-                    <ConstructionIcon />
-                  </ListItemDecorator>
-                  Debug
-                </Tab>
-              )}
             </TabList>
           </Tabs>
         </Box>
@@ -158,7 +139,6 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
             />
           )}
 
-          {tab === "debug" && <ViewByChunk fileId={fileId} />}
           {tab === "tables" && file && file.type == "pdf" && file.derived && (
             <DisplayDerived derived={file.derived} />
           )}

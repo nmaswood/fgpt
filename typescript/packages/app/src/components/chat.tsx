@@ -19,7 +19,6 @@ import {
   Table,
   Typography,
 } from "@mui/joy";
-import { Collapse } from "@mui/material";
 import NextLink from "next/link";
 import React from "react";
 
@@ -333,14 +332,8 @@ const RenderChatEntryFromServer: React.FC<{
               />
             </IconButton>
           </Box>
-          <Collapse
-            in={open}
-            timeout="auto"
-            unmountOnExit
-            sx={{ width: "100%", paddingLeft: 7 }}
-          >
-            <DisplayContextForId id={chatEntry.id} />
-          </Collapse>
+
+          {open && <DisplayContextForId id={chatEntry.id} />}
         </Box>
       </ListItem>
     </>
