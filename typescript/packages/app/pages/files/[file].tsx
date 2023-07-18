@@ -72,7 +72,19 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
             </IconButton>
           </Box>
 
-          {file ? <DisplayAsset fileToRender={file} /> : <CircularProgress />}
+          {file ? (
+            <DisplayAsset fileToRender={file} />
+          ) : (
+            <Box
+              display="flex"
+              width="100%"
+              height="100%"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <CircularProgress />
+            </Box>
+          )}
         </Box>
       )}
       <Box
