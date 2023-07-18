@@ -40,6 +40,7 @@ export const useFetchSheets = (id: string, signedUrl: string) => {
       });
     };
     workerRef.current?.postMessage(signedUrl);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, signedUrl]);
   return record[id];
 };

@@ -1,4 +1,3 @@
-import "@uppy/core/dist/style.min.css";
 import "@uppy/dashboard/dist/style.min.css";
 
 import { MAX_FILE_SIZE_BYTES } from "@fgpt/precedent-iso";
@@ -28,6 +27,7 @@ import { useFetchFiles } from "../hooks/use-fetch-files";
 import { useFetchChats } from "../hooks/use-list-chats";
 import { useSampleForProject } from "../hooks/use-sample-questions";
 import { DisplayChat } from "./chat";
+import { DataRoomSummary } from "./data-room-summary";
 import { DisplayFiles } from "./display-files";
 import { UploadFilesButton } from "./upload-files-button";
 
@@ -271,7 +271,10 @@ const SelectedProjectInner: React.FC<{
               maxHeight="100%"
               overflow="auto"
               padding={4}
+              flexDirection="column"
+              gap={2}
             >
+              <DataRoomSummary />
               <DisplayFiles
                 files={files}
                 uppy={uppy}
