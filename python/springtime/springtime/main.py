@@ -24,6 +24,7 @@ from springtime.services.sheet_processor import (
     GPT_SHEET_PROCESSOR,
 )
 from springtime.services.table_analyzer import TableAnalyzerImpl
+from springtime.services.thumbnail_service import FitzThumbnailService
 from springtime.services.vector_service import PineconeVectorService
 
 from .settings import SETTINGS
@@ -35,6 +36,8 @@ logger.info("Starting server")
 OBJECT_STORE = GCSObjectStore()
 ANTHROPIC_CLIENT = AnthropicClient()
 TABLE_EXTRACTOR = TabulaTableExtractor(OBJECT_STORE)
+
+THUMBNAIL_SERVICE = FitzThumbnailService()
 
 GPT_EXCEL_ANALYZER = OpenAIExcelAnalyzer(SETTINGS.reports_openai_model)
 CLAUDE_EXCEL_ANALYZER = ClaudeExcelAnalyzer(ANTHROPIC_CLIENT)
@@ -62,7 +65,9 @@ GPT_ANALYSIS_SERVICE = GPTAnalysisService(
 
 app.include_router(ChatRouter(CHAT_SERVICE).get_router())
 app.include_router(ReportRouter(REPORT_SERVICE, LONG_FORM_REPORT_SERVICE).get_router())
-app.include_router(PdfRouter(TABLE_EXTRACTOR, OBJECT_STORE).get_router())
+app.include_router(
+    PdfRouter(TABLE_EXTRACTOR, OBJECT_STORE, THUMBNAIL_SERVICE).get_router(),
+)
 app.include_router(
     TableRouter(
         GPT_TABLE_ANALYZER,
@@ -97,9 +102,6 @@ async def secure_svc_to_svc(request: Request, call_next):
         return JSONResponse(status_code=401, content="Not authorized")
 
     return await call_next(request)
-
-
-# TODO disable reload in prod
 
 
 def start():

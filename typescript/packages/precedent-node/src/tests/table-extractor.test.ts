@@ -1,13 +1,14 @@
+import axios from "axios";
 import { expect, test } from "vitest";
 
 import { HttpTabularDataService } from "../tabular-data-service/tabular-data-service";
 import { TEST_SETTINGS } from "./test-settings";
 
 async function setup() {
-  const tableExtractor = new HttpTabularDataService(
-    TEST_SETTINGS.springtimeUri,
-    "test",
-  );
+  const client = axios.create({
+    baseURL: TEST_SETTINGS.springtimeUri,
+  });
+  const tableExtractor = new HttpTabularDataService(client);
   return { tableExtractor };
 }
 

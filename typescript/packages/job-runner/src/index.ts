@@ -81,10 +81,7 @@ async function start(settings: Settings) {
   const questionStore = new PsqlQuestionStore(pool);
   const miscOutputStore = new PsqlMiscOutputStore(pool);
 
-  const tabularDataService = new HttpTabularDataService(
-    settings.mlServiceUri,
-    settings.serviceToServiceSecret,
-  );
+  const tabularDataService = new HttpTabularDataService(springtimeClient);
 
   const excelAssetStore = new PsqlExcelAssetStore(pool);
   const excelOutputStore = new PsqlExcelOutputStore(pool);

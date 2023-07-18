@@ -22,6 +22,7 @@ export * from "./message-bus-service";
 export * from "./ml/ml-client";
 export * from "./ml/ml-report-service";
 export * from "./ml/ml-service";
+export * from "./ml/thumbnail-service";
 export * from "./ml/vector-service";
 export * from "./object-store/object-store";
 export * from "./processed-file-progress-store";

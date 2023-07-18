@@ -11,7 +11,8 @@ def thumbnail_service():
     return FitzThumbnailService()
 
 
-PDF = os.path.join(os.path.dirname(__file__), "American-casinos-CIM.pdf")
+DIR = os.path.dirname(__file__)
+PDF = os.path.join(DIR, "../data", "American-casinos-CIM.pdf")
 
 
 def test_get_thumbnail(thumbnail_service: ThumbnailService):
@@ -20,3 +21,4 @@ def test_get_thumbnail(thumbnail_service: ThumbnailService):
             file_path=PDF,
             output_dir=tmp_dir,
         )
+        breakpoint()

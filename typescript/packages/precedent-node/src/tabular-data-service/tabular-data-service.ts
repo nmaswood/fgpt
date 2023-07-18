@@ -4,7 +4,7 @@ import {
   AnalyzeTableModel,
   assertNever,
 } from "@fgpt/precedent-iso";
-import axios, { AxiosInstance } from "axios";
+import { AxiosInstance } from "axios";
 import z from "zod";
 
 export interface ExtractArguments {
@@ -43,17 +43,8 @@ export interface TabularDataService {
 }
 
 export class HttpTabularDataService implements TabularDataService {
-  #client: AxiosInstance;
   OUTPUT_PREFIX = "excel_artefacts";
-
-  constructor(baseURL: string, serviceToServiceSecret: string) {
-    this.#client = axios.create({
-      baseURL,
-      headers: {
-        "X-Service-To-Service-Secret": serviceToServiceSecret,
-      },
-    });
-  }
+  constructor(private readonly client: AxiosInstance) {}
 
   async extract({
     title,
@@ -61,7 +52,7 @@ export class HttpTabularDataService implements TabularDataService {
     objectPath,
     outputPrefix,
   }: ExtractArguments): Promise<ExtractionResponse> {
-    const response = await this.#client.post<unknown>("/pdf/extract-tables", {
+    const response = await this.client.post<unknown>("/pdf/extract-tables", {
       bucket,
       object_path: objectPath,
       output_prefix: outputPrefix,
@@ -90,7 +81,7 @@ export class HttpTabularDataService implements TabularDataService {
     bucket,
     objectPath,
   }: AnalyzeArguments): Promise<AnalyzeServiceResponse> {
-    const response = await this.#client.post<unknown>("/excel/analyze-code", {
+    const response = await this.client.post<unknown>("/excel/analyze-code", {
       bucket,
       object_path: objectPath,
     });
@@ -102,7 +93,7 @@ export class HttpTabularDataService implements TabularDataService {
     bucket,
     objectPath,
   }: AnalyzeArguments): Promise<AnalyzeResponse> {
-    const response = await this.#client.post<unknown>("/excel/analyze-gpt", {
+    const response = await this.client.post<unknown>("/excel/analyze-gpt", {
       bucket,
       object_path: objectPath,
     });
@@ -114,7 +105,7 @@ export class HttpTabularDataService implements TabularDataService {
     bucket,
     objectPath,
   }: AnalyzeArguments): Promise<AnalyzeResponse> {
-    const response = await this.#client.post<unknown>("/excel/analyze-claude", {
+    const response = await this.client.post<unknown>("/excel/analyze-claude", {
       bucket,
       object_path: objectPath,
     });
