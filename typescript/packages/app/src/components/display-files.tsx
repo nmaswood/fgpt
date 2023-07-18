@@ -1,11 +1,11 @@
 import { assertNever, FileType, LoadedFile } from "@fgpt/precedent-iso";
-import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
-import { Box, Chip, IconButton, Link, Typography } from "@mui/joy";
+import { Box, Chip, Link, Typography } from "@mui/joy";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Uppy from "@uppy/core";
 import NextLink from "next/link";
 import React from "react";
 
+import { RenderActionMenu } from "./render-action-menu";
 import { UploadFilesButton } from "./upload-files-button";
 
 export const DisplayFiles: React.FC<{
@@ -97,17 +97,9 @@ const columns: GridColDef<LoadedFile>[] = [
     headerName: "",
     flex: 1,
     align: "right",
-    renderCell: () => <RenderActionMenu />,
+    renderCell: ({ row }) => <RenderActionMenu fileReferenceId={row.id} />,
   },
 ];
-
-const RenderActionMenu: React.FC = () => {
-  return (
-    <IconButton variant="plain">
-      <MoreVertOutlinedIcon />
-    </IconButton>
-  );
-};
 
 const ChipForFileType: React.FC<{ f: FileType }> = ({ f }) => {
   switch (f) {
