@@ -102,16 +102,12 @@ test("paginate", async () => {
     },
   );
 
-  await chunkStore.setManyEmbeddings(
-    textChunkGroup.id,
-
-    [
-      {
-        chunkId: textChunk.id,
-        embedding: [1, 2, 3],
-      },
-    ],
-  );
+  await chunkStore.setManyEmbeddings([
+    {
+      chunkId: textChunk.id,
+      embedding: [1, 2, 3],
+    },
+  ]);
 
   const [loadedFile] = await loadedFileStore.paginate({
     projectId: textChunk.projectId,
