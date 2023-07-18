@@ -1,3 +1,6 @@
+import "@uppy/core/dist/style.min.css";
+import "@uppy/dashboard/dist/style.min.css";
+
 import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 import { Box } from "@mui/joy";
 import { useRouter } from "next/router";
