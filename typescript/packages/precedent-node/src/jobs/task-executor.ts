@@ -247,7 +247,7 @@ export class TaskExecutorImpl implements TaskExecutor {
       }
 
       case "thumbnail": {
-        await this.thumbnailHandler.forPdf();
+        await this.thumbnailHandler.forPdf(config.fileReferenceId);
         break;
       }
 

@@ -34,6 +34,7 @@ import {
   PineconeVectorService,
   MLReportServiceImpl,
   ThumbnailHandlerImpl,
+  ThumbnailServiceImpl,
 } from "@fgpt/precedent-node";
 import { SETTINGS, Settings } from "./settings";
 import { MainRouter } from "./router";
@@ -74,11 +75,15 @@ async function start(settings: Settings) {
     baseURL: SETTINGS.mlServiceUri,
     serviceToServiceSecret: SETTINGS.serviceToServiceSecret,
   });
+  const thumbnailService = new ThumbnailServiceImpl(springtimeClient);
 
   const vectorService = new PineconeVectorService(springtimeClient);
   const mlServiceClient = new MLServiceClientImpl(springtimeClient);
   const mlReportService = new MLReportServiceImpl(springtimeClient);
-  const thumbnailHandler = new ThumbnailHandlerImpl();
+  const thumbnailHandler = new ThumbnailHandlerImpl(
+    fileReferenceStore,
+    thumbnailService,
+  );
 
   const questionStore = new PsqlQuestionStore(pool);
   const miscOutputStore = new PsqlMiscOutputStore(pool);

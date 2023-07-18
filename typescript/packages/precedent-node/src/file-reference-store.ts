@@ -21,6 +21,7 @@ export interface FileReferenceStore {
   list(projectId: string): Promise<FileReference[]>;
   insert(args: InsertFileReference): Promise<FileReference>;
   insertMany(args: InsertFileReference[]): Promise<FileReference[]>;
+  setThumbnailPath(fileReferenceId: string, path: string): Promise<void>;
 }
 
 const FIELDS = sql.fragment` id, file_name, organization_id, project_id, content_type, path, bucket_name, uploaded_at`;
@@ -41,9 +42,8 @@ export class PsqlFileReferenceStore implements FileReferenceStore {
       return [];
     }
     const uniq = [...new Set(fileIds)];
-    return this.pool.connect(async (cnx) => {
-      const { rows } = await cnx.query(
-        sql.type(ZFileReferenceRow)`
+    const { rows } = await this.pool.query(
+      sql.type(ZFileReferenceRow)`
 SELECT
     ${FIELDS}
 FROM
@@ -51,15 +51,13 @@ FROM
 WHERE
     id IN (${sql.join(uniq, sql.fragment`, `)})
 `,
-      );
-      return Array.from(rows);
-    });
+    );
+    return Array.from(rows);
   }
 
   async list(projectId: string): Promise<FileReference[]> {
-    return this.pool.connect(async (cnx) => {
-      const { rows } = await cnx.query(
-        sql.type(ZFileReferenceRow)`
+    const { rows } = await this.pool.query(
+      sql.type(ZFileReferenceRow)`
 SELECT
     ${FIELDS}
 FROM
@@ -67,9 +65,8 @@ FROM
 WHERE
     project_id = ${projectId}
 `,
-      );
-      return Array.from(rows);
-    });
+    );
+    return Array.from(rows);
   }
 
   async insert(args: InsertFileReference): Promise<FileReference> {
@@ -85,9 +82,7 @@ WHERE
       return [];
     }
 
-    return this.pool.connect((cnx) =>
-      cnx.transaction((trx) => this.#insertMany(trx, args)),
-    );
+    return this.pool.transaction((trx) => this.#insertMany(trx, args));
   }
 
   async #insertMany(
@@ -101,11 +96,11 @@ WHERE
 
     const count = await trx.oneFirst(sql.type(ZCountRow)`
 SELECT
-    COUNT(*) as count
+    file_count as count
 FROM
-    file_reference
+    project
 where
-    project_id = ${arg.projectId}
+    id = ${arg.projectId}
 `);
     if (count >= MAX_FILE_COUNT) {
       throw new Error("too many files for this project");
@@ -145,6 +140,19 @@ INSERT INTO file_reference (file_name, bucket_name, content_type, organization_i
     );
 
     return Array.from(resp.rows);
+  }
+
+  async setThumbnailPath(fileReferenceId: string, path: string): Promise<void> {
+    await this.pool.query(
+      sql.unsafe`
+UPDATE
+    file_reference
+SET
+    thumbnail_path = ${path}
+WHERE
+    id = ${fileReferenceId}
+`,
+    );
   }
 }
 

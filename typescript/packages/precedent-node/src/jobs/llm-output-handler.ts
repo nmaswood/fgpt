@@ -81,9 +81,7 @@ export class ReportHandlerImpl implements ReportHandler {
     );
 
     LOGGER.info(
-      `Skipping ${
-        allChunkIdsSeen.size - toProcess.length
-      } chunks already processed`,
+      `Skipping ${allChunkIdsSeen.size} chunks as they have already been processed`,
     );
 
     for (const textChunkId of toProcess) {

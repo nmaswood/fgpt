@@ -135,15 +135,11 @@ export interface AnalyzeTableConfig {
 
 export interface ThumbnailConfig {
   type: "thumbnail";
-  organizationId: string;
-  projectId: string;
   fileReferenceId: string;
 }
 
 export const ZThumbnailConfig = z.object({
   type: z.literal("thumbnail"),
-  organizationId: z.string(),
-  projectId: z.string(),
   fileReferenceId: z.string(),
 });
 

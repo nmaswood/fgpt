@@ -108,3 +108,18 @@ test("getMany", async () => {
   expect(fromListRes.contentType).toBe("application/pdf");
   expect(fromListRes.id).toBeDefined();
 });
+
+test("setThumbnailPath", async () => {
+  const { project, fileReferenceStore } = await setup();
+
+  const { id } = await fileReferenceStore.insert({
+    fileName: "test-file-name.pdf",
+    organizationId: project.organizationId,
+    projectId: project.id,
+    bucketName: "test-bucket",
+    contentType: "application/pdf",
+    path: "my-path/foo",
+  });
+
+  await fileReferenceStore.setThumbnailPath(id, "some-made-up-path");
+});

@@ -24,8 +24,6 @@ export class IngestFileHandlerImpl implements IngestFileHandler {
             projectId,
             fileReferenceId,
             config: {
-              organizationId,
-              projectId,
               type: "thumbnail",
               fileReferenceId,
             },

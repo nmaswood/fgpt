@@ -127,10 +127,8 @@ where
   }
 
   async addToFileCount(id: string, delta: number): Promise<Project> {
-    return this.pool.connect(async (cnx) => {
-      const project = await cnx.one(
-        sql.type(ZProjectRow)`
-
+    return this.pool.one(
+      sql.type(ZProjectRow)`
 UPDATE
     Project
 SET
@@ -140,16 +138,12 @@ WHERE
 RETURNING
     ${PROJECT_FIELDS}
 `,
-      );
-
-      return project;
-    });
+    );
   }
 
   async update({ id, name }: UpdateProject): Promise<Project> {
-    return this.pool.connect(async (cnx) => {
-      const project = await cnx.one(
-        sql.type(ZProjectRow)`
+    return this.pool.one(
+      sql.type(ZProjectRow)`
 UPDATE
     Project
 SET
@@ -159,10 +153,7 @@ WHERE
 RETURNING
     ${PROJECT_FIELDS}
 `,
-      );
-
-      return project;
-    });
+    );
   }
 }
 
