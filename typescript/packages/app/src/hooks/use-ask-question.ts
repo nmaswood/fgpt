@@ -26,7 +26,7 @@ export const useAskQuestion = (
       try {
         setLoading(true);
         const res = await fetch(
-          `/${CLIENT_SETTINGS.publicApiEndpoint}/api/v1/chat/chat`,
+          `${CLIENT_SETTINGS.publicApiEndpoint}/api/v1/chat/chat`,
           {
             method: "POST",
             body: JSON.stringify({
