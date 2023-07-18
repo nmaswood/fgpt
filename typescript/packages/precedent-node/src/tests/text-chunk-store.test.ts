@@ -196,7 +196,7 @@ test("setManyEmbeddings", async () => {
   expect(t1.hasEmbedding).toEqual(false);
   expect(t2.hasEmbedding).toEqual(false);
 
-  const [t1Prime] = await chunkStore.setManyEmbeddings(textChunkGroup.id, [
+  const [t1Prime] = await chunkStore.setManyEmbeddings([
     {
       chunkId: t1.id,
       embedding: [1, 2, 3],
@@ -207,7 +207,7 @@ test("setManyEmbeddings", async () => {
 
   await chunkStore.getTextChunkGroup(textChunkGroup.id);
 
-  const [t2Prime] = await chunkStore.setManyEmbeddings(textChunkGroup.id, [
+  const [t2Prime] = await chunkStore.setManyEmbeddings([
     {
       chunkId: t2.id,
       embedding: [1, 2, 3],
@@ -246,16 +246,12 @@ test("getEmbedding", async () => {
     },
   );
 
-  await chunkStore.setManyEmbeddings(
-    textChunkGroup.id,
-
-    [
-      {
-        chunkId: textChunk.id,
-        embedding: [1, 2, 3],
-      },
-    ],
-  );
+  await chunkStore.setManyEmbeddings([
+    {
+      chunkId: textChunk.id,
+      embedding: [1, 2, 3],
+    },
+  ]);
 
   const embedding = await chunkStore.getEmbedding(textChunk.id);
 

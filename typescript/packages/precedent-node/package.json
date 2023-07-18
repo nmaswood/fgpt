@@ -38,10 +38,9 @@
     "@google-cloud/storage": "^6.12.0",
     "axios": "^1.4.0",
     "cheerio": "^1.0.0-rc.12",
-    "google-auth-library": "^8.9.0",
-    "lodash.chunk": "^4.2.0",
-    "lodash.keyby": "^4.6.0",
+    "lodash": "^4.17.21",
     "pino": "^8.14.1",
+    "slonik": "^34.0.1",
     "zod": "^3.21.4"
   }
 }

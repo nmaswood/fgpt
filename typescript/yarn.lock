@@ -508,13 +508,11 @@ __metadata:
     lodash: ^4.17.21
     multer: ^1.4.5-lts.1
     pino: ^8.14.1
-    pino-http: ^8.3.3
     pino-pretty: ^10.0.1
     prettier: ^3.0.0
     slonik: ^34.0.1
     typescript: ^5.1.6
     vitest: ^0.33.0
-    xlsx: ^0.18.5
     zod: ^3.21.4
   languageName: unknown
   linkType: soft
@@ -530,7 +528,6 @@ __metadata:
     "@fortune-sheet/react": ^0.18.3
     "@mui/icons-material": ^5.14.0
     "@mui/joy": ^5.0.0-alpha.87
-    "@mui/lab": ^5.0.0-alpha.136
     "@mui/material": ^5.14.0
     "@mui/x-data-grid": ^6.10.0
     "@next/eslint-plugin-next": ^13.4.10
@@ -553,7 +550,6 @@ __metadata:
     eslint-plugin-react: ^7.32.2
     eslint-plugin-react-hooks: ^4.6.0
     eslint-plugin-simple-import-sort: ^10.0.0
-    lodash.uniqby: ^4.7.0
     next: ^13.4.10
     prettier: ^3.0.0
     react: ^18.2.0
@@ -580,7 +576,6 @@ __metadata:
     "@types/prettier": ^2.7.3
     "@typescript-eslint/eslint-plugin": ^6.0.0
     "@typescript-eslint/parser": ^6.0.0
-    axios: ^1.4.0
     concurrently: ^8.2.0
     dotenv: ^16.3.1
     eslint: ^8.45.0
@@ -633,11 +628,10 @@ __metadata:
     eslint: ^8.45.0
     eslint-plugin-simple-import-sort: ^10.0.0
     eslint-plugin-sql: ^2.3.2
-    google-auth-library: ^8.9.0
-    lodash.chunk: ^4.2.0
-    lodash.keyby: ^4.6.0
+    lodash: ^4.17.21
     pino: ^8.14.1
     prettier: ^3.0.0
+    slonik: ^34.0.1
     typescript: ^5.1.6
     vitest: ^0.33.0
     zod: ^3.21.4
@@ -964,36 +958,6 @@ __metadata:
     "@types/react":
       optional: true
   checksum: a573a72b9352102dab48c0521f70e220ff96c5c57ddae22035eb3d8ce661df698f6fc8800297bc8d2b117282735f11b3dd2b6754a187524fce7861cbdeccbe64
-  languageName: node
-  linkType: hard
-
-"@mui/lab@npm:^5.0.0-alpha.136":
-  version: 5.0.0-alpha.136
-  resolution: "@mui/lab@npm:5.0.0-alpha.136"
-  dependencies:
-    "@babel/runtime": ^7.22.5
-    "@mui/base": 5.0.0-beta.7
-    "@mui/system": ^5.14.0
-    "@mui/types": ^7.2.4
-    "@mui/utils": ^5.13.7
-    clsx: ^1.2.1
-    prop-types: ^15.8.1
-    react-is: ^18.2.0
-  peerDependencies:
-    "@emotion/react": ^11.5.0
-    "@emotion/styled": ^11.3.0
-    "@mui/material": ^5.0.0
-    "@types/react": ^17.0.0 || ^18.0.0
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
-  peerDependenciesMeta:
-    "@emotion/react":
-      optional: true
-    "@emotion/styled":
-      optional: true
-    "@types/react":
-      optional: true
-  checksum: 69188272072f1555b3de5706eb65e7f966524bbf1e2a1479764b4dfbb362747370cf637ca664aa22f383ffd38ec474ef7811487956f23b749f587344c039e82d
   languageName: node
   linkType: hard
 
@@ -4243,16 +4207,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gcp-metadata@npm:^5.3.0":
-  version: 5.3.0
-  resolution: "gcp-metadata@npm:5.3.0"
-  dependencies:
-    gaxios: ^5.0.0
-    json-bigint: ^1.0.0
-  checksum: 891ea0b902a17f33d7bae753830d23962b63af94ed071092c30496e7d26f8128ba9af43c3d38474bea29cb32a884b4bcb5720ce8b9de4a7e1108475d3d7ae219
-  languageName: node
-  linkType: hard
-
 "get-caller-file@npm:^2.0.5":
   version: 2.0.5
   resolution: "get-caller-file@npm:2.0.5"
@@ -4401,23 +4355,6 @@ __metadata:
     jws: ^4.0.0
     lru-cache: ^6.0.0
   checksum: 4552805466679e258febc4c0621d401d510df267f2f105957b8925b79c1454d9a2e5d53af211dd90a1848658f608babac7f5bc2f3c536c441ba32ba3641d335d
-  languageName: node
-  linkType: hard
-
-"google-auth-library@npm:^8.9.0":
-  version: 8.9.0
-  resolution: "google-auth-library@npm:8.9.0"
-  dependencies:
-    arrify: ^2.0.0
-    base64-js: ^1.3.0
-    ecdsa-sig-formatter: ^1.0.11
-    fast-text-encoding: ^1.0.0
-    gaxios: ^5.0.0
-    gcp-metadata: ^5.3.0
-    gtoken: ^6.1.0
-    jws: ^4.0.0
-    lru-cache: ^6.0.0
-  checksum: 8e0bc5f1e91804523786413bf4358e4c5ad94b1e873c725ddd03d0f1c242e2b38e26352c0f375334fbc1d94110f761b304aa0429de49b4a27ebc3875a5b56644
   languageName: node
   linkType: hard
 
@@ -5287,24 +5224,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.chunk@npm:^4.2.0":
-  version: 4.2.0
-  resolution: "lodash.chunk@npm:4.2.0"
-  checksum: 6286c6d06814fbeda502164015c42ef53a9194e6ebaac52ec2b41e83344aefe7bc3d94fdfec525adcd2c66cefdf05dc333b6a1128e4de739797342315c17cbc7
-  languageName: node
-  linkType: hard
-
 "lodash.clonedeep@npm:^4.5.0":
   version: 4.5.0
   resolution: "lodash.clonedeep@npm:4.5.0"
   checksum: 92c46f094b064e876a23c97f57f81fbffd5d760bf2d8a1c61d85db6d1e488c66b0384c943abee4f6af7debf5ad4e4282e74ff83177c9e63d8ff081a4837c3489
-  languageName: node
-  linkType: hard
-
-"lodash.keyby@npm:^4.6.0":
-  version: 4.6.0
-  resolution: "lodash.keyby@npm:4.6.0"
-  checksum: 9dd96cc8b83e05a71dc328f8e489056105bc84b57b4d7f8155d6bf5744dcdb0a5534acdf6e4e89e5ddf71f2bc6b93969b12c6da09d69fdf3b1cca65a8ed61e2b
   languageName: node
   linkType: hard
 
@@ -5326,13 +5249,6 @@ __metadata:
   version: 4.1.1
   resolution: "lodash.throttle@npm:4.1.1"
   checksum: 129c0a28cee48b348aef146f638ef8a8b197944d4e9ec26c1890c19d9bf5a5690fe11b655c77a4551268819b32d27f4206343e30c78961f60b561b8608c8c805
-  languageName: node
-  linkType: hard
-
-"lodash.uniqby@npm:^4.7.0":
-  version: 4.7.0
-  resolution: "lodash.uniqby@npm:4.7.0"
-  checksum: 659264545a95726d1493123345aad8cbf56e17810fa9a0b029852c6d42bc80517696af09d99b23bef1845d10d95e01b8b4a1da578f22aeba7a30d3e0022a4938
   languageName: node
   linkType: hard
 
@@ -6438,18 +6354,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino-http@npm:^8.3.3":
-  version: 8.3.3
-  resolution: "pino-http@npm:8.3.3"
-  dependencies:
-    get-caller-file: ^2.0.5
-    pino: ^8.0.0
-    pino-std-serializers: ^6.0.0
-    process-warning: ^2.0.0
-  checksum: 6d9fb4f9230dce04d934b3d6179b2b9a14654e8e0e6cb7344cd1d8baeb53d5c42e1d169dffe350379bfeb9e41b59dc0ec417fe86eb01d49a21e2bac031c2803e
-  languageName: node
-  linkType: hard
-
 "pino-pretty@npm:^10.0.1":
   version: 10.0.1
   resolution: "pino-pretty@npm:10.0.1"
@@ -6481,7 +6385,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino@npm:^8.0.0, pino@npm:^8.14.1":
+"pino@npm:^8.14.1":
   version: 8.14.1
   resolution: "pino@npm:8.14.1"
   dependencies:

@@ -31,10 +31,7 @@ export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
     );
 
     for await (const group of chunkGenerator) {
-      const byChunkId = await this.#getAndSetEmbeddingsIfNeeded(
-        textChunkGroupId,
-        group,
-      );
+      const byChunkId = await this.#getAndSetEmbeddingsIfNeeded(group);
       const payloads = group
         .map((textChunk) => {
           const vector = byChunkId[textChunk.id]?.embedding;
@@ -63,10 +60,7 @@ export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
       await this.vectorService.upsertVectors(payloads);
     }
   }
-  async #getAndSetEmbeddingsIfNeeded(
-    textChunkGroupId: string,
-    chunks: TextChunk[],
-  ) {
+  async #getAndSetEmbeddingsIfNeeded(chunks: TextChunk[]) {
     const hasNoEmbeddings = chunks.filter((c) => !c.hasEmbedding);
     const embeddings = await this.mlService.getEmbeddings({
       documents: hasNoEmbeddings.map((chunk) => chunk.chunkText),
@@ -83,10 +77,7 @@ export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
       };
     });
 
-    await this.textChunkStore.setManyEmbeddings(
-      textChunkGroupId,
-      withEmbeddings,
-    );
+    await this.textChunkStore.setManyEmbeddings(withEmbeddings);
 
     const newEmbeddings = await this.textChunkStore.getEmbeddings(
       chunks.map((c) => c.id),

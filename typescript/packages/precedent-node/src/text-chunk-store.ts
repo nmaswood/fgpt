@@ -89,10 +89,7 @@ export interface TextChunkStore {
     args: UpsertTextChunk[],
   ): Promise<TextChunk[]>;
 
-  setManyEmbeddings(
-    textChunkGroupId: string,
-    args: SetManyEmbeddings[],
-  ): Promise<TextChunk[]>;
+  setManyEmbeddings(args: SetManyEmbeddings[]): Promise<TextChunk[]>;
 
   getEmbedding(ids: string): Promise<EmbeddingResult>;
   getEmbeddings(ids: string[]): Promise<EmbeddingResult[]>;
@@ -316,24 +313,18 @@ WHERE
     return Array.from(resp.rows);
   }
 
-  async setManyEmbeddings(
-    textChunkGroupId: string,
-    args: SetManyEmbeddings[],
-  ): Promise<TextChunk[]> {
+  async setManyEmbeddings(args: SetManyEmbeddings[]): Promise<TextChunk[]> {
     if (args.length === 0) {
       return [];
     }
 
-    return this.pool.connect(async (cnx) =>
-      cnx.transaction((trx) =>
-        this.#setManyEmbeddings(trx, textChunkGroupId, args),
-      ),
+    return this.pool.transaction(async (trx) =>
+      this.#setManyEmbeddings(trx, args),
     );
   }
 
   async #setManyEmbeddings(
     trx: DatabaseTransactionConnection,
-    textChunkGroupId: string,
     args: SetManyEmbeddings[],
   ): Promise<TextChunk[]> {
     const rows = args.map(
