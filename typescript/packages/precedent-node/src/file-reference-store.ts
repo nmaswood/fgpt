@@ -96,7 +96,7 @@ WHERE
 
     const count = await trx.oneFirst(sql.type(ZCountRow)`
 SELECT
-    file_count as count
+    COALESCE(file_count, 0) as count
 FROM
     project
 where
