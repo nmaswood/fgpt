@@ -96,7 +96,6 @@ export interface TextChunkStore {
 
   getEmbedding(ids: string): Promise<EmbeddingResult>;
   getEmbeddings(ids: string[]): Promise<EmbeddingResult[]>;
-  listWithNoEmbeddings(processedFileId: string): Promise<TextChunk[]>;
 
   getTextChunkGroupByStrategy(
     fileReferenceId: string,
@@ -106,7 +105,7 @@ export interface TextChunkStore {
 
 const TEXT_CHUNK_FIELDS = sql.fragment`text_chunk.id, text_chunk.organization_id, text_chunk.project_id, text_chunk.file_reference_id, text_chunk.processed_file_id, text_chunk.chunk_order, text_chunk.chunk_text, text_chunk.embedding IS NOT NULL AS has_embedding, text_chunk_group_id`;
 
-const TEXT_CHUNK_GROUP_FIELDS = sql.fragment`text_chunk_group.id, organization_id, project_id, file_reference_id, processed_file_id, num_chunks,  fully_chunked, fully_embedded`;
+const TEXT_CHUNK_GROUP_FIELDS = sql.fragment`text_chunk_group.id, organization_id, project_id, file_reference_id, processed_file_id, num_chunks`;
 
 export class PsqlTextChunkStore implements TextChunkStore {
   constructor(private readonly pool: DatabasePool) {}
@@ -359,40 +358,7 @@ RETURNING
 `,
     );
 
-    const toReturn = Array.from(resp.rows);
-    const maxOrder = Math.max(...toReturn.map((chunk) => chunk.chunkOrder));
-
-    await trx.query(sql.unsafe`
-UPDATE
-    text_chunk_group
-SET
-    max_chunk_embedding_order_seen = GREATEST (${maxOrder}::int, max_chunk_embedding_order_seen::int),
-    fully_embedded = GREATEST (${maxOrder}::int, max_chunk_embedding_order_seen::int) = num_chunks - 1
-WHERE
-    text_chunk_group.id = ${textChunkGroupId}
-`);
-    return toReturn;
-  }
-
-  async listWithNoEmbeddings(textGroupId: string): Promise<TextChunk[]> {
-    return this.pool.connect(async (cnx) => {
-      const resp = await cnx.query(
-        sql.type(ZTextChunkRow)`
-SELECT
-    ${TEXT_CHUNK_FIELDS}
-FROM
-    text_chunk
-    JOIN text_chunk_group ON text_chunk_group.id = text_chunk.text_chunk_group_id
-WHERE
-    text_chunk_group_id = ${textGroupId}
-    AND embedding IS NULL
-    AND text_chunk_group.embeddings_will_be_generated = true
-ORDER BY
-    chunk_order ASC
-`,
-      );
-      return Array.from(resp.rows);
-    });
+    return Array.from(resp.rows);
   }
 
   async getTextChunks(ids: string[]): Promise<TextChunk[]> {
@@ -469,20 +435,8 @@ INSERT INTO text_chunk (organization_id, project_id, file_reference_id, processe
             ${TEXT_CHUNK_FIELDS}
 `,
     );
-    const maxOrder = Math.max(...args.map((c) => c.chunkOrder));
-    const toReturn = Array.from(rows);
 
-    await trx.query(sql.unsafe`
-UPDATE
-    text_chunk_group
-SET
-    max_chunk_order_seen = GREATEST (${maxOrder}::int, max_chunk_order_seen::int),
-    fully_chunked = GREATEST (${maxOrder}::int, max_chunk_order_seen::int) = num_chunks - 1
-WHERE
-    text_chunk_group.id = ${common.textChunkGroupId}
-`);
-
-    return toReturn;
+    return Array.from(rows);
   }
 }
 
@@ -494,8 +448,6 @@ const ZTextChunkGroupRow = z
     file_reference_id: z.string(),
     processed_file_id: z.string(),
     num_chunks: z.number(),
-    fully_chunked: z.boolean(),
-    fully_embedded: z.boolean(),
   })
   .transform((row) => ({
     id: row.id,
@@ -504,8 +456,6 @@ const ZTextChunkGroupRow = z
     fileReferenceId: row.file_reference_id,
     processedFileId: row.processed_file_id,
     numChunks: row.num_chunks,
-    fullyChunked: row.fully_chunked,
-    fullyEmbedded: row.fully_embedded,
   }));
 
 const ZTextChunkRow = z

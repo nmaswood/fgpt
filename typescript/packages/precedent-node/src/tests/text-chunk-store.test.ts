@@ -111,8 +111,7 @@ test("insertMany", async () => {
   const textChunkGroupAgain = await chunkStore.getTextChunkGroup(
     textChunkGroup.id,
   );
-  expect(textChunkGroupAgain.fullyChunked).toBe(false);
-  expect(textChunkGroupAgain.fullyEmbedded).toBe(false);
+
   expect(textChunkGroup.numChunks).toEqual(2);
 
   await chunkStore.upsertManyTextChunks(
@@ -132,11 +131,8 @@ test("insertMany", async () => {
     ],
   );
 
-  const textChunkGroupAgainAgain = await chunkStore.getTextChunkGroup(
-    textChunkGroup.id,
-  );
-  expect(textChunkGroupAgainAgain.fullyChunked).toBe(false);
-  expect(textChunkGroupAgainAgain.fullyEmbedded).toBe(false);
+  await chunkStore.getTextChunkGroup(textChunkGroup.id);
+
   expect(textChunkGroupAgain.numChunks).toEqual(2);
 
   await chunkStore.upsertManyTextChunks(
@@ -158,59 +154,8 @@ test("insertMany", async () => {
   const textChunkGroupFinal = await chunkStore.getTextChunkGroup(
     textChunkGroup.id,
   );
-  expect(textChunkGroupFinal.fullyChunked).toBe(true);
-  expect(textChunkGroupFinal.fullyEmbedded).toBe(false);
+
   expect(textChunkGroupFinal.numChunks).toEqual(2);
-});
-
-test("listWithNoEmbeddings", async () => {
-  const { processedFile, chunkStore } = await setup();
-
-  const textChunkGroup = await chunkStore.upsertTextChunkGroup({
-    organizationId: processedFile.organizationId,
-    projectId: processedFile.projectId,
-    fileReferenceId: processedFile.fileReferenceId,
-    processedFileId: processedFile.id,
-    numChunks: 2,
-    strategy: "greedy_v0",
-    embeddingsWillBeGenerated: true,
-  });
-
-  const [chunk1] = await chunkStore.upsertManyTextChunks(
-    {
-      organizationId: processedFile.organizationId,
-      projectId: processedFile.projectId,
-      fileReferenceId: processedFile.fileReferenceId,
-      processedFileId: processedFile.id,
-      textChunkGroupId: textChunkGroup.id,
-    },
-
-    [
-      {
-        chunkOrder: 0,
-        chunkText: "hello",
-        hash: ShaHash.forData("hello"),
-      },
-      {
-        chunkOrder: 1,
-        chunkText: "world",
-        hash: ShaHash.forData("world"),
-      },
-    ],
-  );
-
-  const results = await chunkStore.listWithNoEmbeddings(textChunkGroup.id);
-  expect(results.length).toEqual(2);
-  expect(results[1].chunkText).toEqual("world");
-  await chunkStore.setManyEmbeddings(textChunkGroup.id, [
-    {
-      chunkId: chunk1.id,
-      embedding: [1, 2, 3],
-    },
-  ]);
-  expect(
-    (await chunkStore.listWithNoEmbeddings(textChunkGroup.id)).length,
-  ).toEqual(1);
 });
 
 test("setManyEmbeddings", async () => {
@@ -260,9 +205,7 @@ test("setManyEmbeddings", async () => {
 
   expect(t1Prime.hasEmbedding).toEqual(true);
 
-  const textGroup = await chunkStore.getTextChunkGroup(textChunkGroup.id);
-
-  expect(textGroup.fullyEmbedded).toEqual(false);
+  await chunkStore.getTextChunkGroup(textChunkGroup.id);
 
   const [t2Prime] = await chunkStore.setManyEmbeddings(textChunkGroup.id, [
     {
@@ -272,9 +215,6 @@ test("setManyEmbeddings", async () => {
   ]);
 
   expect(t2Prime.hasEmbedding).toEqual(true);
-  const textGroupPrime = await chunkStore.getTextChunkGroup(textChunkGroup.id);
-
-  expect(textGroupPrime.fullyEmbedded).toEqual(true);
 });
 
 test("getEmbedding", async () => {

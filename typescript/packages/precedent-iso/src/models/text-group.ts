@@ -5,8 +5,6 @@ export interface TextChunkGroup {
   fileReferenceId: string;
   processedFileId: string;
   numChunks: number;
-  fullyChunked: boolean;
-  fullyEmbedded: boolean;
 }
 
 export interface TextChunk {
