@@ -38,6 +38,7 @@ import {
   PSqlExcelProgressStore,
   axiosClientForMlService,
   PineconeVectorService,
+  PsqlShowCaseFileStore,
 } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
 import { UserOrgRouter } from "./routers/user-org-router";
@@ -131,6 +132,7 @@ async function start() {
   );
 
   const excelProgressStore = new PSqlExcelProgressStore(taskStore);
+  const showCaseFileStore = new PsqlShowCaseFileStore(pool);
 
   const fileRenderService = new FileToRenderServiceImpl(
     fileReferenceStore,
@@ -164,6 +166,7 @@ async function start() {
       taskStore,
       loadedFileStore,
       projectStore,
+      showCaseFileStore,
     ).init(),
   );
 

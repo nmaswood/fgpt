@@ -6,6 +6,7 @@ import {
   ObjectStorageService,
   ProjectStore,
   ShaHash,
+  ShowCaseFileStore,
   TaskStore,
 } from "@fgpt/precedent-node";
 import crypto from "crypto";
@@ -31,6 +32,7 @@ export class FileRouter {
     private readonly taskStore: TaskStore,
     private readonly loadedFileStore: LoadedFileStore,
     private readonly projectStore: ProjectStore,
+    private readonly showCaseFileStore: ShowCaseFileStore,
   ) {}
   init() {
     const router = express.Router();
@@ -145,9 +147,24 @@ export class FileRouter {
         res.json({ file });
       },
     );
+
+    router.put(
+      "/show-case-file/:fileReferenceId",
+      async (req: express.Request, res: express.Response) => {
+        const params = ZSetShowCaseRequest.parse(req.params);
+        const file = await this.fileReferenceStore.get(params.fileReferenceId);
+        await this.showCaseFileStore.set(file.projectId, file.id);
+        res.json({ status: "ok" });
+      },
+    );
+
     return router;
   }
 }
+
+const ZSetShowCaseRequest = z.object({
+  fileReferenceId: z.string(),
+});
 
 const ZSingleRequest = z.object({
   fileReferenceId: z.string(),
