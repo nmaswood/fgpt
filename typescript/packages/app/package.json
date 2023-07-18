@@ -1,5 +1,6 @@
 {
   "name": "@fgpt/app",
+  "sideEffects": false,
   "private": true,
   "version": "0.0.0",
   "scripts": {
