@@ -14,13 +14,6 @@ export interface FileReference {
 export interface LoadedFile {
   id: string;
   fileName: string;
-  fileSize: number | undefined;
   createdAt: Date;
-  contentType: string;
   fileType: FileType | undefined;
-  extractedTextLength: number | undefined;
-  gpt4TokenLength: number | undefined;
-  claude100kTokenLength: number | undefined;
-  fullyChunked: boolean;
-  fullyEmbedded: boolean;
 }

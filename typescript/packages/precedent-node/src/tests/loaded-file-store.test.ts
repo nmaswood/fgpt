@@ -120,10 +120,6 @@ test("paginate", async () => {
 
   expect(loadedFile).toContain({
     fileName: "test-file-name.pdf",
-    contentType: "application/pdf",
-    fileSize: 1,
-    extractedTextLength: 2,
-    fullyChunked: true,
-    fullyEmbedded: true,
+    fileType: "pdf",
   });
 });
