@@ -1,5 +1,5 @@
 import { assertNever, RenderShowCaseFile } from "@fgpt/precedent-iso";
-import { Box, CircularProgress, Typography } from "@mui/joy";
+import { Box, Button, CircularProgress, Typography } from "@mui/joy";
 import Image from "next/image";
 
 export const DataRoomSummary: React.FC<{
@@ -20,7 +20,11 @@ export const DataRoomSummary: React.FC<{
       bgcolor="neutral.0"
       borderRadius={8}
     >
-      <Typography level="h4">Data room summary</Typography>
+      <Box display="flex" width="100%" justifyContent="space-between">
+        <Typography level="h4">Data room summary</Typography>
+        <Button disabled={true}>View full report</Button>
+      </Box>
+
       {loading && (
         <Box
           display="flex"
