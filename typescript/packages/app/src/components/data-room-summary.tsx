@@ -63,14 +63,33 @@ const Dispatch: React.FC<{ showCaseFile: RenderShowCaseFile.File }> = ({
         return null;
       }
       return (
-        <Image
-          placeholder="blur"
-          blurDataURL={BLUR_DATA_URL}
-          src={showCaseFile.url}
-          width={500}
-          height={500}
-          alt="thumbnail of CIM"
-        />
+        <Box
+          display="flex"
+          width="100%"
+          height="100%"
+          maxHeight="100%"
+          maxWidth="100%"
+          overflow="auto"
+        >
+          <Image
+            placeholder="blur"
+            blurDataURL={BLUR_DATA_URL}
+            src={showCaseFile.url}
+            width={500}
+            height={500}
+            alt="thumbnail of CIM"
+          />
+          <Box
+            display="flex"
+            width="100%"
+            height="100%"
+            maxHeight="100%"
+            maxWidth="100%"
+            overflow="auto"
+          >
+            Terms Table
+          </Box>
+        </Box>
       );
     default:
       assertNever(showCaseFile);
