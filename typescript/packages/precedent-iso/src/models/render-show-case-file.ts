@@ -1,3 +1,5 @@
+import { Term } from "./llm-outputs";
+
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace RenderShowCaseFile {
   export type File = NotSet | Set;
@@ -14,5 +16,6 @@ export namespace RenderShowCaseFile {
     type: "set";
     fileReferenceId: string;
     url: string | undefined;
+    terms: Term[];
   }
 }

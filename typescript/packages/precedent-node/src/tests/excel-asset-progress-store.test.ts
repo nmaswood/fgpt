@@ -1,11 +1,10 @@
-import { DEFAULT_STATUS } from "@fgpt/precedent-iso";
 import { sql } from "slonik";
 import { afterEach, beforeEach, expect, test } from "vitest";
 
 import { dataBasePool } from "../data-base-pool";
-import { PSqlExcelProgressStore } from "../excel-asset-progress-store";
 import { PsqlFileReferenceStore } from "../file-reference-store";
 import { NOOP_MESSAGE_BUS_SERVICE } from "../message-bus-service";
+import { ExcelProgressServiceImpl } from "../progress/excel-asset-progress-store";
 import { PSqlProjectStore } from "../project-store";
 import { PSqlTaskStore } from "../task-store";
 import { PsqlUserOrgService } from "../user-org/user-org-service";
@@ -44,7 +43,7 @@ async function setup() {
 
   const taskStore = new PSqlTaskStore(pool, NOOP_MESSAGE_BUS_SERVICE);
 
-  const progressStore = new PSqlExcelProgressStore(taskStore);
+  const progressStore = new ExcelProgressServiceImpl(taskStore);
 
   return {
     organizationId: fileReference.organizationId,
@@ -55,7 +54,7 @@ async function setup() {
   };
 }
 
-const TRUNCATE = sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference, processed_file, task, task_group CASCADE`;
+const TRUNCATE = sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference, processed_file, task CASCADE`;
 
 beforeEach(async () => {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
@@ -73,10 +72,10 @@ test("getProgress#noop", async () => {
   const { fileReferenceId, progressStore } = await setup();
   const progress = await progressStore.getProgress(fileReferenceId);
   expect(progress).toEqual({
-    type: "pending",
+    status: "pending",
     forTask: {
-      analyzeTableGPT: DEFAULT_STATUS,
-      analyzeTableClaude: DEFAULT_STATUS,
+      analyzeTableGPT: "task_does_not_exist",
+      analyzeTableClaude: "task_does_not_exist",
     },
   });
 });
@@ -111,10 +110,10 @@ test("getProgress#success", async () => {
 
   const progress = await progressStore.getProgress(fileReferenceId);
   expect(progress).toEqual({
-    type: "pending",
+    status: "pending",
     forTask: {
-      analyzeTableGPT: { type: "succeeded" },
-      analyzeTableClaude: DEFAULT_STATUS,
+      analyzeTableGPT: "succeeded",
+      analyzeTableClaude: "task_does_not_exist",
     },
   });
 });
@@ -149,10 +148,10 @@ test("getProgress#fail", async () => {
 
   const progress = await progressStore.getProgress(fileReferenceId);
   expect(progress).toEqual({
-    type: "pending",
+    status: "error",
     forTask: {
-      analyzeTableGPT: { type: "failed" },
-      analyzeTableClaude: { type: "task_does_not_exist" },
+      analyzeTableGPT: "failed",
+      analyzeTableClaude: "task_does_not_exist",
     },
   });
 });

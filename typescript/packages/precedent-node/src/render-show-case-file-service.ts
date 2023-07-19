@@ -1,6 +1,7 @@
-import { RenderShowCaseFile } from "@fgpt/precedent-iso";
+import { assertNever, Outputs, RenderShowCaseFile } from "@fgpt/precedent-iso";
 
 import { FileReferenceStore } from "./file-reference-store";
+import { MiscOutputStore } from "./llm-outputs/misc-output-store";
 import { ObjectStorageService } from "./object-store/object-store";
 import { ShowCaseFileStore } from "./show-case-file-store";
 
@@ -15,6 +16,7 @@ export class RenderShowCaseFileServiceImpl
     private readonly showCaseFileStore: ShowCaseFileStore,
     private readonly objectStore: ObjectStorageService,
     private readonly fileReferenceStore: FileReferenceStore,
+    private readonly miscValueStore: MiscOutputStore,
     private readonly bucket: string,
   ) {}
 
@@ -23,22 +25,45 @@ export class RenderShowCaseFileServiceImpl
     if (!showCaseFile) {
       return RenderShowCaseFile.NOT_SET;
     }
-    const path = await this.fileReferenceStore.getThumbnailPath(
-      showCaseFile.fileReferenceId,
-    );
-    if (!path) {
-      return {
-        type: "set",
-        url: undefined,
-        fileReferenceId: showCaseFile.fileReferenceId,
-      };
-    }
-    const value = await this.objectStore.getSignedUrl(this.bucket, path);
+    const [path, miscValues] = await Promise.all([
+      this.fileReferenceStore.getThumbnailPath(showCaseFile.fileReferenceId),
+      this.miscValueStore.getForFile(showCaseFile.fileReferenceId),
+    ]);
 
     return {
       type: "set",
-      url: value,
+      url: path
+        ? await this.objectStore.getSignedUrl(this.bucket, path)
+        : undefined,
       fileReferenceId: showCaseFile.fileReferenceId,
+
+      terms: extractTerms(miscValues),
     };
   }
+}
+
+function extractTerms(values: Outputs.MiscValue[]): Outputs.Term[] {
+  const alreadySeenTerms = new Set<string>();
+  const acc: Outputs.Term[] = [];
+  for (const value of values) {
+    switch (value.type) {
+      case "terms":
+        for (const term of value.value) {
+          if (alreadySeenTerms.has(term.termName)) {
+            continue;
+          }
+          acc.push(term);
+
+          alreadySeenTerms.add(term.termName);
+        }
+        break;
+      case "financial_summary":
+      case "long_form":
+      case "summary":
+        break;
+      default:
+        assertNever(value);
+    }
+  }
+  return acc;
 }

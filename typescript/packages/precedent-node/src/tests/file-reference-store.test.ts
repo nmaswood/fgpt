@@ -125,3 +125,38 @@ test("setThumbnailPath+getThumbnailPath", async () => {
   const value = await fileReferenceStore.getThumbnailPath(id);
   expect(value).toEqual("some-made-up-path");
 });
+
+test("setThumbnailPath+getThumbnailPath", async () => {
+  const { project, fileReferenceStore } = await setup();
+
+  const { id } = await fileReferenceStore.insert({
+    fileName: "test-file-name.pdf",
+    organizationId: project.organizationId,
+    projectId: project.id,
+    bucketName: "test-bucket",
+    contentType: "application/pdf",
+    path: "my-path/foo",
+  });
+
+  await fileReferenceStore.setThumbnailPath(id, "some-made-up-path");
+  const value = await fileReferenceStore.getThumbnailPath(id);
+  expect(value).toEqual("some-made-up-path");
+});
+
+test("setStatus", async () => {
+  const { project, fileReferenceStore } = await setup();
+
+  const file = await fileReferenceStore.insert({
+    fileName: "test-file-name.pdf",
+    organizationId: project.organizationId,
+    projectId: project.id,
+    bucketName: "test-bucket",
+    contentType: "application/pdf",
+    path: "my-path/foo",
+  });
+
+  expect(file.status).toEqual("pending");
+
+  const file2 = await fileReferenceStore.setStatus(file.id, "ready");
+  expect(file2.status).toEqual("ready");
+});

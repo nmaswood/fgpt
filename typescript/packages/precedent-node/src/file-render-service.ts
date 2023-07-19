@@ -7,13 +7,13 @@ import {
   getFileType,
 } from "@fgpt/precedent-iso";
 
-import { ExcelProgressStore } from "./excel-asset-progress-store";
 import { ExcelAssetStore } from "./excel-asset-store";
 import { ExcelOutputStore } from "./excel-output-store";
 import { FileReferenceStore } from "./file-reference-store";
 import { ReportService } from "./llm-outputs/report-service";
 import { ObjectStorageService } from "./object-store/object-store";
-import { ProcessedFileProgressStore } from "./processed-file-progress-store";
+import { ExcelProgressService } from "./progress/excel-asset-progress-store";
+import { ProcessedFileProgressService } from "./progress/processed-file-progress-store";
 
 export interface FileRenderService {
   forFile(fileReferenceId: string): Promise<FileToRender.File>;
@@ -26,8 +26,9 @@ export class FileToRenderServiceImpl implements FileRenderService {
     private readonly objectStorageService: ObjectStorageService,
     private readonly excelOutputStore: ExcelOutputStore,
     private readonly excelAssetStore: ExcelAssetStore,
-    private readonly pdfProgressStore: ProcessedFileProgressStore,
-    private readonly excelProgressStore: ExcelProgressStore,
+    private readonly pdfProgressStore: ProcessedFileProgressService,
+    private readonly excelProgressStore: ExcelProgressService,
+    private readonly longFormReport: boolean,
   ) {}
 
   async forFile(fileReferenceId: string): Promise<FileToRender.File> {
@@ -68,7 +69,12 @@ export class FileToRenderServiceImpl implements FileRenderService {
       this.excelAssetStore.list(file.id),
       this.reportService.forFileReferenceId(file.id),
       this.excelOutputStore.forDerived(file.id),
-      this.pdfProgressStore.getProgress(file.id),
+      this.pdfProgressStore.getProgress(
+        {
+          longFormReport: this.longFormReport,
+        },
+        file.id,
+      ),
     ]);
 
     return {

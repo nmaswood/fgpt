@@ -1,4 +1,9 @@
-import { FileReference, MAX_FILE_COUNT } from "@fgpt/precedent-iso";
+import {
+  FileReference,
+  FileStatus,
+  MAX_FILE_COUNT,
+  ZFileStatus,
+} from "@fgpt/precedent-iso";
 import { DatabasePool, DatabaseTransactionConnection, sql } from "slonik";
 import { z } from "zod";
 
@@ -22,10 +27,14 @@ export interface FileReferenceStore {
   insert(args: InsertFileReference): Promise<FileReference>;
   insertMany(args: InsertFileReference[]): Promise<FileReference[]>;
   setThumbnailPath(fileReferenceId: string, path: string): Promise<void>;
+  setStatus(
+    fileReferenceId: string,
+    status: FileStatus,
+  ): Promise<FileReference>;
   getThumbnailPath(fileReferenceId: string): Promise<string | undefined>;
 }
 
-const FIELDS = sql.fragment` id, file_name, organization_id, project_id, content_type, path, bucket_name, uploaded_at`;
+const FIELDS = sql.fragment` id, file_name, organization_id, project_id, content_type, path, bucket_name, uploaded_at, COALESCE(status, 'pending') as status`;
 
 export class PsqlFileReferenceStore implements FileReferenceStore {
   constructor(private readonly pool: DatabasePool) {}
@@ -41,7 +50,6 @@ export class PsqlFileReferenceStore implements FileReferenceStore {
   async getThumbnailPath(fileReferenceId: string): Promise<string | undefined> {
     const value = await this.pool.maybeOne(
       sql.type(ZThumbnailRow)`
-
 SELECT
     thumbnail_path
 FROM
@@ -170,6 +178,22 @@ WHERE
 `,
     );
   }
+
+  async setStatus(
+    fileReferenceId: string,
+    status: FileStatus,
+  ): Promise<FileReference> {
+    return this.pool.one(sql.type(ZFileReferenceRow)`
+UPDATE
+    file_reference
+SET
+    status = ${status}
+WHERE
+    id = ${fileReferenceId}
+RETURNING
+    ${FIELDS}
+`);
+  }
 }
 
 const ZFileReferenceRow = z
@@ -182,6 +206,7 @@ const ZFileReferenceRow = z
     path: z.string(),
     bucket_name: z.string(),
     uploaded_at: z.number(),
+    status: ZFileStatus,
   })
   .transform((row) => ({
     id: row.id,
@@ -192,6 +217,7 @@ const ZFileReferenceRow = z
     path: row.path,
     bucketName: row.bucket_name,
     createdAt: new Date(row.uploaded_at),
+    status: row.status,
   }));
 
 const ZThumbnailRow = z

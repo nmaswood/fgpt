@@ -34,8 +34,8 @@ import {
   PsqlExcelAssetStore,
   PsqlExcelOutputStore,
   FileToRenderServiceImpl,
-  PSqlProcessedFileProgressStore,
-  PSqlExcelProgressStore,
+  ProcessedFileProgressServiceImpl,
+  ExcelProgressServiceImpl,
   axiosClientForMlService,
   PineconeVectorService,
   PsqlShowCaseFileStore,
@@ -126,13 +126,13 @@ async function start() {
   const chatStore = new PsqlChatStore(pool);
 
   const questionStore = new PsqlQuestionStore(pool);
-  const metricsStore = new PsqlMiscOutputStore(pool);
-  const reportService = new ReportServiceImpl(questionStore, metricsStore);
-  const processedFileProgressStore = new PSqlProcessedFileProgressStore(
+  const miscOutputStore = new PsqlMiscOutputStore(pool);
+  const reportService = new ReportServiceImpl(questionStore, miscOutputStore);
+  const processedFileProgressStore = new ProcessedFileProgressServiceImpl(
     taskStore,
   );
 
-  const excelProgressStore = new PSqlExcelProgressStore(taskStore);
+  const excelProgressStore = new ExcelProgressServiceImpl(taskStore);
   const showCaseFileStore = new PsqlShowCaseFileStore(pool);
 
   const fileRenderService = new FileToRenderServiceImpl(
@@ -143,11 +143,13 @@ async function start() {
     excelAssetStore,
     processedFileProgressStore,
     excelProgressStore,
+    SETTINGS.claudeReportGeneration,
   );
   const renderShowCaseFileService = new RenderShowCaseFileServiceImpl(
     showCaseFileStore,
     objectStoreService,
     fileReferenceStore,
+    miscOutputStore,
     SETTINGS.assetBucket,
   );
 

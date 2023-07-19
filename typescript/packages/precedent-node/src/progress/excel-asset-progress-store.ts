@@ -4,15 +4,16 @@ import {
   ProgressForExcelTasks,
 } from "@fgpt/precedent-iso";
 
-import { TaskStore } from "./task-store";
+import { TaskStore } from "../task-store";
+import { statusForFile } from "./status-for-file";
 
-export interface ExcelProgressStore {
+export interface ExcelProgressService {
   getProgress(
     processedFileId: string,
   ): Promise<FileProgress<ProgressForExcelTasks>>;
 }
 
-export class PSqlExcelProgressStore implements ExcelProgressStore {
+export class ExcelProgressServiceImpl implements ExcelProgressService {
   constructor(private readonly taskStore: TaskStore) {}
   async getProgress(
     fileReferenceId: string,
@@ -20,8 +21,8 @@ export class PSqlExcelProgressStore implements ExcelProgressStore {
     const tasks = await this.taskStore.getByFileReferenceId(fileReferenceId);
 
     const forTask: ProgressForExcelTasks = {
-      analyzeTableGPT: { type: "task_does_not_exist" },
-      analyzeTableClaude: { type: "task_does_not_exist" },
+      analyzeTableGPT: "task_does_not_exist",
+      analyzeTableClaude: "task_does_not_exist",
     };
 
     for (const task of tasks) {
@@ -29,11 +30,11 @@ export class PSqlExcelProgressStore implements ExcelProgressStore {
         case "analyze-table": {
           switch (task.config.analysis?.model) {
             case "gpt": {
-              forTask.analyzeTableGPT = { type: task.status };
+              forTask.analyzeTableGPT = task.status;
               break;
             }
             case "claude": {
-              forTask.analyzeTableClaude = { type: task.status };
+              forTask.analyzeTableClaude = task.status;
               break;
             }
             case undefined:
@@ -60,8 +61,7 @@ export class PSqlExcelProgressStore implements ExcelProgressStore {
 
     return {
       forTask,
-      // just hard code for now
-      type: "pending",
+      status: statusForFile(Object.values(forTask)),
     };
   }
 }

@@ -1,4 +1,5 @@
 import {
+  FileStatusUpdater,
   LOGGER,
   TaskExecutor,
   TaskStore,
@@ -11,6 +12,7 @@ export class MainRouter {
   constructor(
     private readonly taskStore: TaskStore,
     private readonly taskExecutor: TaskExecutor,
+    private readonly fileStatusUpdater: FileStatusUpdater,
   ) {}
   init() {
     const router = express.Router();
@@ -33,9 +35,11 @@ export class MainRouter {
         await this.taskStore.setToInProgress(taskId);
         const task = await this.taskStore.get(taskId);
         LOGGER.info(task.config, "Executing task");
-        this.taskExecutor;
         await this.taskExecutor.execute(task);
         await this.taskStore.setToSuceeded(task.id);
+        if (task.config.fileReferenceId) {
+          await this.fileStatusUpdater.update(task.config.fileReferenceId);
+        }
 
         LOGGER.info({ taskId: task.id }, "completed task");
         res.status(204).send();
@@ -75,6 +79,10 @@ export class MainRouter {
         LOGGER.info({ taskId, messageId }, "Message parsed!");
         try {
           const task = await this.taskStore.setToFailed(taskId);
+          if (task && task.config.fileReferenceId) {
+            await this.fileStatusUpdater.update(task.config.fileReferenceId);
+          }
+
           LOGGER.info({ task }, "Failed task");
           res.status(204).send();
           return;

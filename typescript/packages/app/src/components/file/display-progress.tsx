@@ -6,20 +6,13 @@ import { Box, Table, Typography } from "@mui/joy";
 export const DisplayProgress: React.FC<{
   file: FileToRender.File;
 }> = ({ file }) => {
-  return (
-    <Box display="flex" width="50%" padding={2}>
-      <Dispatch file={file} />
-    </Box>
-  );
-};
-
-const Dispatch: React.FC<{
-  file: FileToRender.File;
-}> = ({ file }) => {
   const entries = Object.entries(file.progress.forTask);
   const display = getDisplayTasks(entries);
-
-  return <DisplayProgressInner tasks={display} />;
+  return (
+    <Box display="flex" width="50%" padding={2}>
+      <DisplayProgressInner tasks={display} />;
+    </Box>
+  );
 };
 
 const DisplayProgressInner: React.FC<{ tasks: DisplayTask[] }> = ({
@@ -65,7 +58,7 @@ function getDisplayTasks(
   for (const [key, value] of entries) {
     const progress = value as ProgressTaskStatus;
     const displayName = DISPLAY_NAME_MAP[key] ?? key;
-    const displayStatus = STATUS_MAP[progress.type] ?? progress.type;
+    const displayStatus = STATUS_MAP[progress] ?? "foo";
     acc.push({ displayName, displayStatus });
   }
   return acc;
@@ -82,6 +75,7 @@ const DISPLAY_NAME_MAP: Record<string, string> = {
   analyzeTable: "Analyze tables (if present)",
   analyzeTableGPT: "Analyze tables (GPT)",
   analyzeTableClaude: "Analyze tables (Claude)",
+  thumbnail: "Thumbnail generation",
 };
 
 const STATUS_MAP: Record<string, string> = {

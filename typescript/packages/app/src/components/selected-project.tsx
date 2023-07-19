@@ -29,7 +29,7 @@ import { useFetchChats } from "../hooks/use-list-chats";
 import { useSampleForProject } from "../hooks/use-sample-questions";
 import { DisplayChat } from "./chat";
 import { DataRoomSummary } from "./data-room-summary";
-import { DisplayFiles } from "./display-files";
+import { DisplayFiles } from "./display-files/display-files";
 import { UploadFilesButton } from "./upload-files-button";
 
 const ZTab = z.enum(["data", "chat"]);

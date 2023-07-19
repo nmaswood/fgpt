@@ -1,6 +1,5 @@
 export * from "./chat-store";
 export { dataBasePool } from "./data-base-pool";
-export * from "./excel-asset-progress-store";
 export * from "./excel-asset-store";
 export * from "./excel-output-store";
 export * from "./file-reference-store";
@@ -26,8 +25,10 @@ export * from "./ml/ml-service";
 export * from "./ml/thumbnail-service";
 export * from "./ml/vector-service";
 export * from "./object-store/object-store";
-export * from "./processed-file-progress-store";
 export * from "./processed-file-store";
+export * from "./progress/excel-asset-progress-store";
+export * from "./progress/file-status-updater";
+export * from "./progress/processed-file-progress-store";
 export * from "./project-store";
 export * from "./project-store";
 export * from "./render-show-case-file-service";

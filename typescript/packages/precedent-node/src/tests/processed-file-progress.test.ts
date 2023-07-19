@@ -1,12 +1,11 @@
-import { DEFAULT_STATUS } from "@fgpt/precedent-iso";
 import { sql } from "slonik";
 import { afterEach, beforeEach, expect, test } from "vitest";
 
 import { dataBasePool } from "../data-base-pool";
 import { PsqlFileReferenceStore } from "../file-reference-store";
 import { NOOP_MESSAGE_BUS_SERVICE } from "../message-bus-service";
-import { PSqlProcessedFileProgressStore } from "../processed-file-progress-store";
 import { PsqlProcessedFileStore } from "../processed-file-store";
+import { ProcessedFileProgressServiceImpl } from "../progress/processed-file-progress-store";
 import { PSqlProjectStore } from "../project-store";
 import { PSqlTaskStore } from "../task-store";
 import { PsqlUserOrgService } from "../user-org/user-org-service";
@@ -54,7 +53,7 @@ async function setup() {
   });
   const taskStore = new PSqlTaskStore(pool, NOOP_MESSAGE_BUS_SERVICE);
 
-  const progressStore = new PSqlProcessedFileProgressStore(taskStore);
+  const progressStore = new ProcessedFileProgressServiceImpl(taskStore);
 
   return {
     organizationId: fileReference.organizationId,
@@ -65,7 +64,7 @@ async function setup() {
   };
 }
 
-const TRUNCATE = sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference, processed_file, task, task_group CASCADE`;
+const TRUNCATE = sql.unsafe`TRUNCATE TABLE app_user, organization, project, file_reference, processed_file, task CASCADE`;
 
 beforeEach(async () => {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
@@ -82,18 +81,22 @@ afterEach(async () => {
 test("getProgress#no_tasks", async () => {
   const { fileReferenceId, progressStore } = await setup();
 
-  const progress = await progressStore.getProgress(fileReferenceId);
+  const progress = await progressStore.getProgress(
+    { longFormReport: true },
+    fileReferenceId,
+  );
   expect(progress).toEqual({
-    type: "pending",
+    status: "pending",
     forTask: {
-      embeddingChunk: DEFAULT_STATUS,
-      reportChunk: DEFAULT_STATUS,
-      report: DEFAULT_STATUS,
-      longFormReport: DEFAULT_STATUS,
-      longFormReportChunk: DEFAULT_STATUS,
-      upsertEmbeddings: DEFAULT_STATUS,
-      extractTable: DEFAULT_STATUS,
-      analyzeTable: DEFAULT_STATUS,
+      embeddingChunk: "task_does_not_exist",
+      reportChunk: "task_does_not_exist",
+      report: "task_does_not_exist",
+      longFormReport: "task_does_not_exist",
+      longFormReportChunk: "task_does_not_exist",
+      upsertEmbeddings: "task_does_not_exist",
+      extractTable: "task_does_not_exist",
+      analyzeTable: "task_does_not_exist",
+      thumbnail: "task_does_not_exist",
     },
   });
 });
@@ -107,7 +110,7 @@ test("getProgress#pending", async () => {
     progressStore,
   } = await setup();
 
-  const [task1, task2] = await taskStore.insertMany([
+  await taskStore.insertMany([
     {
       organizationId,
       projectId,
@@ -135,18 +138,22 @@ test("getProgress#pending", async () => {
       },
     },
   ]);
-  const progress = await progressStore.getProgress(fileReferenceId);
+  const progress = await progressStore.getProgress(
+    { longFormReport: true },
+    fileReferenceId,
+  );
   expect(progress).toEqual({
-    type: "pending",
+    status: "pending",
     forTask: {
-      embeddingChunk: { type: "queued" },
-      reportChunk: { type: "queued" },
-      report: DEFAULT_STATUS,
-      longFormReport: DEFAULT_STATUS,
-      longFormReportChunk: DEFAULT_STATUS,
-      upsertEmbeddings: DEFAULT_STATUS,
-      extractTable: DEFAULT_STATUS,
-      analyzeTable: DEFAULT_STATUS,
+      embeddingChunk: "queued",
+      reportChunk: "queued",
+      report: "task_does_not_exist",
+      longFormReport: "task_does_not_exist",
+      longFormReportChunk: "task_does_not_exist",
+      upsertEmbeddings: "task_does_not_exist",
+      extractTable: "task_does_not_exist",
+      analyzeTable: "task_does_not_exist",
+      thumbnail: "task_does_not_exist",
     },
   });
 });
@@ -191,23 +198,23 @@ test("getProgress#has_failure", async () => {
 
   await taskStore.setToFailed(task1.id);
   await taskStore.setToSuceeded(task2.id);
-  const progress = await progressStore.getProgress(fileReferenceId);
+  const progress = await progressStore.getProgress(
+    { longFormReport: true },
+    fileReferenceId,
+  );
 
   expect(progress).toEqual({
-    type: "has-failure",
+    status: "error",
     forTask: {
-      embeddingChunk: {
-        type: "failed",
-      },
-      reportChunk: {
-        type: "succeeded",
-      },
-      report: DEFAULT_STATUS,
-      longFormReport: DEFAULT_STATUS,
-      longFormReportChunk: DEFAULT_STATUS,
-      upsertEmbeddings: DEFAULT_STATUS,
-      extractTable: DEFAULT_STATUS,
-      analyzeTable: DEFAULT_STATUS,
+      embeddingChunk: "failed",
+      reportChunk: "succeeded",
+      report: "task_does_not_exist",
+      longFormReport: "task_does_not_exist",
+      longFormReportChunk: "task_does_not_exist",
+      upsertEmbeddings: "task_does_not_exist",
+      extractTable: "task_does_not_exist",
+      analyzeTable: "task_does_not_exist",
+      thumbnail: "task_does_not_exist",
     },
   });
 });
@@ -246,6 +253,20 @@ test("getProgress#complete", async () => {
         fileReferenceId,
         processedFileId: "1",
         strategy: "greedy_15k",
+      },
+    },
+
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      config: {
+        organizationId,
+        projectId,
+        type: "text-chunk",
+        fileReferenceId,
+        processedFileId: "1",
+        strategy: "greedy_125k",
       },
     },
     {
@@ -303,11 +324,37 @@ test("getProgress#complete", async () => {
         },
       },
     },
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      config: {
+        type: "thumbnail",
+        fileReferenceId,
+      },
+    },
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      config: {
+        organizationId: "1",
+        projectId: "1",
+        type: "long-form",
+        fileReferenceId,
+        processedFileId: "1",
+        textChunkGroupId: "1",
+        textChunkIds: ["1", "2"],
+      },
+    },
   ]);
 
   await Promise.all(tasks.map((t) => taskStore.setToSuceeded(t.id)));
 
-  const progress = await progressStore.getProgress(fileReferenceId);
+  const progress = await progressStore.getProgress(
+    { longFormReport: true },
+    fileReferenceId,
+  );
 
-  expect(progress.type).toEqual("succeeded");
+  expect(progress.status).toEqual("ready");
 });

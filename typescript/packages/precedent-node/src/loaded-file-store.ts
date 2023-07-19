@@ -1,4 +1,9 @@
-import { Cursor, getFileType, LoadedFile } from "@fgpt/precedent-iso";
+import {
+  Cursor,
+  getFileType,
+  LoadedFile,
+  ZFileStatus,
+} from "@fgpt/precedent-iso";
 import { DatabasePool, sql } from "slonik";
 import { z } from "zod";
 
@@ -23,7 +28,8 @@ SELECT
     file_reference.id,
     file_reference.file_name,
     file_reference.content_type,
-    file_reference.uploaded_at
+    file_reference.uploaded_at,
+    COALESCE(file_reference.status, 'pending') as status
 FROM
     file_reference
 WHERE
@@ -48,6 +54,7 @@ const ZLoadedFileRow = z
     file_name: z.string(),
     content_type: z.string(),
     uploaded_at: z.number(),
+    status: ZFileStatus,
   })
   .transform(
     (row): LoadedFile => ({
@@ -55,5 +62,6 @@ const ZLoadedFileRow = z
       fileName: row.file_name,
       createdAt: new Date(row.uploaded_at),
       fileType: getFileType(row.content_type),
+      status: row.status,
     }),
   );

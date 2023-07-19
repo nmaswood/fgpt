@@ -35,6 +35,9 @@ import {
   MLReportServiceImpl,
   ThumbnailHandlerImpl,
   ThumbnailServiceImpl,
+  FileStatusUpdaterImpl,
+  ExcelProgressServiceImpl,
+  ProcessedFileProgressServiceImpl,
 } from "@fgpt/precedent-node";
 import { SETTINGS, Settings } from "./settings";
 import { MainRouter } from "./router";
@@ -139,7 +142,20 @@ async function start(settings: Settings) {
     SETTINGS.claudeReportGeneration,
   );
 
-  const mainRouter = new MainRouter(taskStore, taskExecutor);
+  const processedFileProgressStore = new ProcessedFileProgressServiceImpl(
+    taskStore,
+  );
+
+  const excelProgressStore = new ExcelProgressServiceImpl(taskStore);
+
+  const fileStatusUpdater = new FileStatusUpdaterImpl(
+    fileReferenceStore,
+    processedFileProgressStore,
+    excelProgressStore,
+    SETTINGS.claudeReportGeneration,
+  );
+
+  const mainRouter = new MainRouter(taskStore, taskExecutor, fileStatusUpdater);
 
   app.use("/", mainRouter.init());
 

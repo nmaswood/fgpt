@@ -1,4 +1,9 @@
+import { z } from "zod";
+
 import { FileType } from "../file-type";
+
+export const ZFileStatus = z.enum(["pending", "ready", "error"]);
+export type FileStatus = z.infer<typeof ZFileStatus>;
 
 export interface FileReference {
   id: string;
@@ -9,6 +14,7 @@ export interface FileReference {
   path: string;
   bucketName: string;
   createdAt: Date;
+  status: FileStatus;
 }
 
 export interface LoadedFile {
@@ -16,4 +22,5 @@ export interface LoadedFile {
   fileName: string;
   createdAt: Date;
   fileType: FileType | undefined;
+  status: FileStatus;
 }

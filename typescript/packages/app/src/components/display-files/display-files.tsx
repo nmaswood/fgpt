@@ -1,13 +1,14 @@
-import { assertNever, FileType, LoadedFile } from "@fgpt/precedent-iso";
-import { Box, Chip, Link, Typography } from "@mui/joy";
+import { assertNever, FileStatus, LoadedFile } from "@fgpt/precedent-iso";
+import { Box, Link, Typography } from "@mui/joy";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Uppy from "@uppy/core";
 import NextLink from "next/link";
 import React from "react";
 
-import { useFetchShowCaseFile } from "../hooks/use-fetch-show-case-file";
-import { RenderActionMenu } from "./render-action-menu";
-import { UploadFilesButton } from "./upload-files-button";
+import { useFetchShowCaseFile } from "../../hooks/use-fetch-show-case-file";
+import { RenderActionMenu } from "../render-action-menu";
+import { UploadFilesButton } from "../upload-files-button";
+import { ChipForFileType } from "./chip-for-file-type";
 
 export const DisplayFiles: React.FC<{
   files: LoadedFile[];
@@ -51,7 +52,11 @@ export const DisplayFiles: React.FC<{
       field: "status",
       headerName: "Status",
       width: 150,
+      renderCell: ({ row }) => {
+        return <RenderStatus status={row.status} />;
+      },
     },
+
     {
       field: "createdAt",
       headerName: "Created at",
@@ -115,74 +120,42 @@ export const DisplayFiles: React.FC<{
   );
 };
 
-const ChipForFileType: React.FC<{ f: FileType }> = ({ f }) => {
-  switch (f) {
-    case "excel":
+const RenderStatus: React.FC<{ status: FileStatus }> = ({ status }) => {
+  switch (status) {
+    case "ready":
       return (
-        <Chip
-          size="sm"
-          color="success"
-          sx={(theme) => ({
-            backgroundColor: "transparent",
-            color: theme.palette.success.solidColor,
-            ".MuiTypography-root": {
-              fontSize: 12,
-              fontWeight: 700,
-              color: theme.palette.success.solidColor,
-            },
-            ".MuiChip-label": {
-              color: theme.palette.success.solidColor,
-            },
-            "&:before": {
-              content: "''",
-              position: "absolute",
-              top: "0px",
-              right: "0px",
-              bottom: "0px",
-              left: "0px",
-              opacity: 0.15,
-              background: theme.palette.success.solidColor,
-              borderRadius: 16,
-            },
-          })}
+        <Typography
+          sx={{
+            fontWeight: 700,
+            color: "success.solidColor",
+          }}
         >
-          <Typography>XLS</Typography>
-        </Chip>
+          Ready
+        </Typography>
       );
-    case "pdf":
+    case "error":
       return (
-        <Chip
-          size="sm"
-          color="danger"
-          sx={(theme) => ({
-            backgroundColor: "transparent",
-            color: theme.palette.danger.solidColor,
-            ".MuiTypography-root": {
-              fontSize: 12,
-              fontWeight: 700,
-              color: theme.palette.danger.solidColor,
-            },
-            ".MuiChip-label": {
-              color: theme.palette.danger.solidColor,
-            },
-            "&:before": {
-              content: "''",
-              position: "absolute",
-              top: "0px",
-              right: "0px",
-              bottom: "0px",
-              left: "0px",
-              opacity: 0.15,
-              background: theme.palette.danger.solidColor,
-              borderRadius: 16,
-            },
-          })}
+        <Typography
+          sx={{
+            fontWeight: 700,
+            color: "danger.solidColor",
+          }}
         >
-          PDF
-        </Chip>
+          Error
+        </Typography>
       );
-
+    case "pending":
+      return (
+        <Typography
+          sx={{
+            fontWeight: 700,
+            color: "neutral.600",
+          }}
+        >
+          Analyzing...
+        </Typography>
+      );
     default:
-      assertNever(f);
+      assertNever(status);
   }
 };
