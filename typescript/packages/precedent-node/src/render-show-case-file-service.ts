@@ -30,6 +30,7 @@ export class RenderShowCaseFileServiceImpl
       return {
         type: "set",
         url: undefined,
+        fileReferenceId: showCaseFile.fileReferenceId,
       };
     }
     const value = await this.objectStore.getSignedUrl(this.bucket, path);
@@ -37,6 +38,7 @@ export class RenderShowCaseFileServiceImpl
     return {
       type: "set",
       url: value,
+      fileReferenceId: showCaseFile.fileReferenceId,
     };
   }
 }

@@ -24,6 +24,7 @@ import { useCreateChat } from "../hooks/use-create-chat";
 import { useDeleteChat } from "../hooks/use-delete-chat";
 import { useEditChat } from "../hooks/use-edit-chat";
 import { useFetchFiles } from "../hooks/use-fetch-files";
+import { useFetchShowCaseFile } from "../hooks/use-fetch-show-case-file";
 import { useFetchChats } from "../hooks/use-list-chats";
 import { useSampleForProject } from "../hooks/use-sample-questions";
 import { DisplayChat } from "./chat";
@@ -130,7 +131,6 @@ export const SelectedProject: React.FC<{
     return () => {
       // dumb hack to get around uppy bug
       // I hope this works
-      console.log(mounted);
       if (mounted) {
         uppy.close();
       }
@@ -201,14 +201,10 @@ const SelectedProjectInner: React.FC<{
   value: Tab;
   uppy: Uppy;
   openUppyModal: () => void;
-}> = ({
-  token,
-  project,
+}> = ({ token, project, value, uppy, openUppyModal }) => {
+  const { data: showCaseFile, isLoading: showCaseFileLoading } =
+    useFetchShowCaseFile(project.id);
 
-  value,
-  uppy,
-  openUppyModal,
-}) => {
   const { data: files, isLoading: filesLoading } = useFetchFiles(project.id);
 
   const {
@@ -274,7 +270,10 @@ const SelectedProjectInner: React.FC<{
               flexDirection="column"
               gap={2}
             >
-              <DataRoomSummary />
+              <DataRoomSummary
+                loading={showCaseFileLoading}
+                showCaseFile={showCaseFile}
+              />
               <DisplayFiles
                 files={files}
                 uppy={uppy}

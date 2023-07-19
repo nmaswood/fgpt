@@ -12,6 +12,7 @@ export namespace RenderShowCaseFile {
 
   export interface Set {
     type: "set";
+    fileReferenceId: string;
     url: string | undefined;
   }
 }

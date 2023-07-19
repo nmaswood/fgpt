@@ -5,6 +5,7 @@ import Uppy from "@uppy/core";
 import NextLink from "next/link";
 import React from "react";
 
+import { useFetchShowCaseFile } from "../hooks/use-fetch-show-case-file";
 import { RenderActionMenu } from "./render-action-menu";
 import { UploadFilesButton } from "./upload-files-button";
 
@@ -14,6 +15,70 @@ export const DisplayFiles: React.FC<{
   openModal: () => void;
   uppy: Uppy;
 }> = ({ files, projectId, openModal, uppy }) => {
+  const { data: showCaseFile, mutate } = useFetchShowCaseFile(projectId);
+
+  const columns: GridColDef<LoadedFile>[] = [
+    {
+      field: "fileType",
+      headerName: "Type",
+      renderCell: ({ row }) => {
+        if (!row.fileType) {
+          return null;
+        }
+        return <ChipForFileType f={row.fileType} />;
+      },
+    },
+    {
+      field: "fileName",
+      headerName: "Name",
+      minWidth: 300,
+      renderCell: ({ row }) => {
+        return (
+          <Link component={NextLink} href={`/files/${row.id}`}>
+            {row.fileName}
+          </Link>
+        );
+      },
+    },
+    {
+      field: "description",
+      headerName: "Description",
+      renderCell: () => {
+        return "";
+      },
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      width: 150,
+    },
+    {
+      field: "createdAt",
+      headerName: "Created at",
+      width: 150,
+      valueGetter(params) {
+        return new Date(params.row.createdAt).toLocaleDateString();
+      },
+    },
+    {
+      field: "actions",
+      headerName: "",
+      flex: 1,
+      align: "right",
+      renderCell: ({ row }) => {
+        if (
+          row.fileType == "excel" ||
+          !showCaseFile ||
+          (showCaseFile.type === "set" &&
+            showCaseFile.fileReferenceId === row.id)
+        ) {
+          return null;
+        }
+
+        return <RenderActionMenu fileReferenceId={row.id} mutate={mutate} />;
+      },
+    },
+  ];
   return (
     <Box
       display="flex"
@@ -43,68 +108,12 @@ export const DisplayFiles: React.FC<{
         disableRowSelectionOnClick
         disableColumnFilter
         disableColumnMenu
+        hideFooter={true}
         hideFooterPagination
       />
     </Box>
   );
 };
-
-const columns: GridColDef<LoadedFile>[] = [
-  {
-    field: "fileType",
-    headerName: "Type",
-    renderCell: ({ row }) => {
-      if (!row.fileType) {
-        return null;
-      }
-      return <ChipForFileType f={row.fileType} />;
-    },
-  },
-  {
-    field: "fileName",
-    headerName: "Name",
-    minWidth: 300,
-    renderCell: ({ row }) => {
-      return (
-        <Link component={NextLink} href={`/files/${row.id}`}>
-          {row.fileName}
-        </Link>
-      );
-    },
-  },
-  {
-    field: "description",
-    headerName: "Description",
-    renderCell: () => {
-      return "";
-    },
-  },
-  {
-    field: "status",
-    headerName: "Status",
-    width: 150,
-  },
-  {
-    field: "createdAt",
-    headerName: "Created at",
-    width: 150,
-    valueGetter(params) {
-      return new Date(params.row.createdAt).toLocaleDateString();
-    },
-  },
-  {
-    field: "actions",
-    headerName: "",
-    flex: 1,
-    align: "right",
-    renderCell: ({ row }) => {
-      if (row.fileType == "excel") {
-        return null;
-      }
-      return <RenderActionMenu fileReferenceId={row.id} />;
-    },
-  },
-];
 
 const ChipForFileType: React.FC<{ f: FileType }> = ({ f }) => {
   switch (f) {

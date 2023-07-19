@@ -2,14 +2,15 @@ import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import { IconButton, Menu, MenuItem } from "@mui/joy";
 import React from "react";
 
-import { useSetCIM } from "../hooks/use-set-cim";
+import { useSetShowCaseFile } from "../hooks/use-set-show-case-file";
 
-export const RenderActionMenu: React.FC<{ fileReferenceId: string }> = ({
-  fileReferenceId,
-}) => {
+export const RenderActionMenu: React.FC<{
+  fileReferenceId: string;
+  mutate: () => void;
+}> = ({ fileReferenceId, mutate }) => {
   const buttonRef = React.useRef(null);
   const [open, setOpen] = React.useState(false);
-  const { trigger, isMutating } = useSetCIM();
+  const { trigger, isMutating } = useSetShowCaseFile();
 
   return (
     <>
@@ -25,6 +26,7 @@ export const RenderActionMenu: React.FC<{ fileReferenceId: string }> = ({
         <MenuItem
           onClick={async () => {
             await trigger({ fileReferenceId });
+            mutate();
             setOpen(false);
           }}
           disabled={isMutating}
