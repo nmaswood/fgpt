@@ -101,7 +101,7 @@ const Dispatch: React.FC<{ showCaseFile: RenderShowCaseFile.File }> = ({
               overflow="auto"
               gap={3}
               width="320px"
-              height="407px"
+              height="100%"
             >
               <Box
                 width="100%"
