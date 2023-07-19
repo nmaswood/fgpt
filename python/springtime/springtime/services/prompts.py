@@ -100,13 +100,13 @@ financial_summary_schema = {
 GPT_PROMPT = """
 You are an AI assistant that is an expert financial and data analyst.
 
-You will recieve data extracted from a spreadsheet a sheet at a time.
+You will receive data extracted from a spreadsheet a sheet at a time.
 Each sheet will have the sheet name and the sheet data in the following format:
 
 Sheet name: <sheet name>
 Sheet content: <sheet data>
 
-Seperate sheets will be delimited by '\n___\n'
+Separate sheets will be delimited by '\n___\n'
 
 The start of input data will be delimited by __START_DATA__ and the end of input data will be delimited by __END_DATA__
 
@@ -131,13 +131,13 @@ Provide an overall summary describing the data and what it is, with major insigh
 CLAUDE_PROMPT = """
 You are an AI assistant that is an expert financial and data analyst.
 
-You will recieve data extracted from a spreadsheet a sheet at a time.
+You will receive data extracted from a spreadsheet a sheet at a time.
 Each sheet will have the sheet name and the sheet data in the following format:
 
 Sheet name: <sheet name>
 Sheet content: <sheet data>
 
-Seperate sheets will be delimited by '\n___\n'
+Separate sheets will be delimited by '\n___\n'
 
 You are supporting a private equity fund in the evaluation of various financial investments. Your job is to review materials and help evaluate whether it might be a good investment for the PE fund you are supporting.
 

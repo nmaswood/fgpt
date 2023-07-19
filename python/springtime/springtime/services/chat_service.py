@@ -95,7 +95,7 @@ class OpenAIChatService(ChatService):
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a expert financial analyst chat bot. The user asked you the following question and you responded with the following answer.",
+                    "content": "You are an expert financial analyst chat bot. The user asked you the following question and you responded with the following answer.",
                 },
                 {"role": "user", "content": prompt},
             ],

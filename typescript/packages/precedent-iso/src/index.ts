@@ -15,6 +15,7 @@ export * from "./models/organization";
 export * from "./models/progress";
 export * from "./models/project";
 export * from "./models/render-file";
+export * from "./models/render-show-case-file";
 export * from "./models/sql-helpers";
 export * from "./models/task";
 export * from "./models/text-group";

@@ -30,6 +30,7 @@ export * from "./processed-file-progress-store";
 export * from "./processed-file-store";
 export * from "./project-store";
 export * from "./project-store";
+export * from "./render-show-case-file-service";
 export * from "./sha-hash";
 export * from "./show-case-file-store";
 export * from "./tabular-data-service/tabular-data-service";

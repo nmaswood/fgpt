@@ -109,7 +109,7 @@ test("getMany", async () => {
   expect(fromListRes.id).toBeDefined();
 });
 
-test("setThumbnailPath", async () => {
+test("setThumbnailPath+getThumbnailPath", async () => {
   const { project, fileReferenceStore } = await setup();
 
   const { id } = await fileReferenceStore.insert({
@@ -122,4 +122,6 @@ test("setThumbnailPath", async () => {
   });
 
   await fileReferenceStore.setThumbnailPath(id, "some-made-up-path");
+  const value = await fileReferenceStore.getThumbnailPath(id);
+  expect(value).toEqual("some-made-up-path");
 });

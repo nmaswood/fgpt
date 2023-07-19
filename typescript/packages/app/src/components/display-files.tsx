@@ -97,7 +97,12 @@ const columns: GridColDef<LoadedFile>[] = [
     headerName: "",
     flex: 1,
     align: "right",
-    renderCell: ({ row }) => <RenderActionMenu fileReferenceId={row.id} />,
+    renderCell: ({ row }) => {
+      if (row.fileType == "excel") {
+        return null;
+      }
+      return <RenderActionMenu fileReferenceId={row.id} />;
+    },
   },
 ];
 

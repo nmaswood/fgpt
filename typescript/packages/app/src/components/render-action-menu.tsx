@@ -1,6 +1,7 @@
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import { IconButton, Menu, MenuItem } from "@mui/joy";
 import React from "react";
+
 import { useSetCIM } from "../hooks/use-set-cim";
 
 export const RenderActionMenu: React.FC<{ fileReferenceId: string }> = ({
@@ -19,7 +20,7 @@ export const RenderActionMenu: React.FC<{ fileReferenceId: string }> = ({
         anchorEl={buttonRef.current}
         open={open}
         onClose={() => setOpen(false)}
-        placement="bottom-end"
+        placement="left-end"
       >
         <MenuItem
           onClick={async () => {

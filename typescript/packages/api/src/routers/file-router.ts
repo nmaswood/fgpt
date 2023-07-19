@@ -5,6 +5,7 @@ import {
   LoadedFileStore,
   ObjectStorageService,
   ProjectStore,
+  RenderShowCaseFileService,
   ShaHash,
   ShowCaseFileStore,
   TaskStore,
@@ -33,6 +34,7 @@ export class FileRouter {
     private readonly loadedFileStore: LoadedFileStore,
     private readonly projectStore: ProjectStore,
     private readonly showCaseFileStore: ShowCaseFileStore,
+    private readonly renderShowCaseFileService: RenderShowCaseFileService,
   ) {}
   init() {
     const router = express.Router();
@@ -144,6 +146,17 @@ export class FileRouter {
       async (req: express.Request, res: express.Response) => {
         const params = ZSingleRequest.parse(req.params);
         const file = await this.fileReferenceStore.get(params.fileReferenceId);
+        res.json({ file });
+      },
+    );
+
+    router.get(
+      "/show-case-file/:fileReferenceId",
+      async (req: express.Request, res: express.Response) => {
+        const params = ZSetShowCaseRequest.parse(req.params);
+        const file = await this.renderShowCaseFileService.get(
+          params.fileReferenceId,
+        );
         res.json({ file });
       },
     );

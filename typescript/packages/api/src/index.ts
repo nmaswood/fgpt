@@ -39,6 +39,7 @@ import {
   axiosClientForMlService,
   PineconeVectorService,
   PsqlShowCaseFileStore,
+  RenderShowCaseFileServiceImpl,
 } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
 import { UserOrgRouter } from "./routers/user-org-router";
@@ -143,6 +144,12 @@ async function start() {
     processedFileProgressStore,
     excelProgressStore,
   );
+  const renderShowCaseFileService = new RenderShowCaseFileServiceImpl(
+    showCaseFileStore,
+    objectStoreService,
+    fileReferenceStore,
+    SETTINGS.assetBucket,
+  );
 
   app.use(cors({ origin: SETTINGS.corsOrigin }));
 
@@ -167,6 +174,7 @@ async function start() {
       loadedFileStore,
       projectStore,
       showCaseFileStore,
+      renderShowCaseFileService,
     ).init(),
   );
 

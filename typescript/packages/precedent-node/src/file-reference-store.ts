@@ -22,6 +22,7 @@ export interface FileReferenceStore {
   insert(args: InsertFileReference): Promise<FileReference>;
   insertMany(args: InsertFileReference[]): Promise<FileReference[]>;
   setThumbnailPath(fileReferenceId: string, path: string): Promise<void>;
+  getThumbnailPath(fileReferenceId: string): Promise<string | undefined>;
 }
 
 const FIELDS = sql.fragment` id, file_name, organization_id, project_id, content_type, path, bucket_name, uploaded_at`;
@@ -35,6 +36,21 @@ export class PsqlFileReferenceStore implements FileReferenceStore {
       throw new Error("file not found");
     }
     return file;
+  }
+
+  async getThumbnailPath(fileReferenceId: string): Promise<string | undefined> {
+    const value = await this.pool.maybeOne(
+      sql.type(ZThumbnailRow)`
+
+SELECT
+    thumbnail_path
+FROM
+    file_reference
+WHERE
+    id = ${fileReferenceId}
+`,
+    );
+    return value ?? undefined;
   }
 
   async getMany(fileIds: string[]): Promise<FileReference[]> {
@@ -177,3 +193,9 @@ const ZFileReferenceRow = z
     bucketName: row.bucket_name,
     createdAt: new Date(row.uploaded_at),
   }));
+
+const ZThumbnailRow = z
+  .object({
+    thumbnail_path: z.string().nullable(),
+  })
+  .transform((row) => row.thumbnail_path ?? undefined);

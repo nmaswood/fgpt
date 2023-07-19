@@ -70,7 +70,7 @@ Each sheet will have the sheet name and the sheet data in the following format:
 Sheet name: <sheet name>
 Sheet content: <sheet data>
 
-Seperate sheets will be delimited by '\n___\n'
+Separate sheets will be delimited by '\n___\n'
 
 * Data will be available in the local file system at the path data.xlsx
 * Do not initialize the pandas dataframes with parsed data instead access data by referring to data by its sheet name
