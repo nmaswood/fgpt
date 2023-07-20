@@ -19,6 +19,7 @@ from springtime.services.embeddings_service import OpenAIEmbeddingsService
 from springtime.services.excel_analyzer import ClaudeExcelAnalyzer, OpenAIExcelAnalyzer
 from springtime.services.long_form_report_service import ClaudeLongformReportService
 from springtime.services.report_service import OpenAIReportService
+from springtime.services.scan_service import OpenAIScanService
 from springtime.services.sheet_processor import (
     CLAUDE_SHEET_PROCESSOR,
     GPT_SHEET_PROCESSOR,
@@ -40,6 +41,7 @@ TABLE_EXTRACTOR = TabulaTableExtractor(OBJECT_STORE)
 THUMBNAIL_SERVICE = FitzThumbnailService()
 
 GPT_EXCEL_ANALYZER = OpenAIExcelAnalyzer(SETTINGS.reports_openai_model)
+SCAN_SERVICE = OpenAIScanService(SETTINGS.reports_openai_model)
 CLAUDE_EXCEL_ANALYZER = ClaudeExcelAnalyzer(ANTHROPIC_CLIENT)
 
 GPT_TABLE_ANALYZER = TableAnalyzerImpl(GPT_EXCEL_ANALYZER, GPT_SHEET_PROCESSOR)
@@ -64,7 +66,9 @@ GPT_ANALYSIS_SERVICE = GPTAnalysisService(
 
 
 app.include_router(ChatRouter(CHAT_SERVICE).get_router())
-app.include_router(ReportRouter(REPORT_SERVICE, LONG_FORM_REPORT_SERVICE).get_router())
+app.include_router(
+    ReportRouter(REPORT_SERVICE, LONG_FORM_REPORT_SERVICE, SCAN_SERVICE).get_router(),
+)
 app.include_router(
     PdfRouter(TABLE_EXTRACTOR, OBJECT_STORE, THUMBNAIL_SERVICE).get_router(),
 )
