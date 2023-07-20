@@ -20,6 +20,8 @@ export namespace FileToRender {
     signedUrl: string;
     report: Report | undefined;
     projectId: string;
+    projectName: string;
+    fileName: string;
     derived: DerivedTable | undefined;
     progress: FileProgress<ProgressForPdfTasks>;
   }
@@ -30,6 +32,8 @@ export namespace FileToRender {
     type: "excel";
     id: string;
     projectId: string;
+    projectName: string;
+    fileName: string;
     signedUrl: string;
     output: ExcelOutputToRender;
     progress: FileProgress<ProgressForExcelTasks>;

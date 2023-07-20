@@ -12,11 +12,11 @@ import {
   ListItemContent,
   Option,
   Select,
-  Table,
   Typography,
 } from "@mui/joy";
 import React from "react";
 
+import { TermsTable } from "../terms-table";
 import { ReportType } from "./report-type";
 
 export const DisplayFileReport: React.FC<{
@@ -162,32 +162,7 @@ const ChatGPTReport: React.FC<{
     <>
       {terms.length > 0 && (
         <Box display="flex" flexDirection="column" gap={1}>
-          <Typography level="h4">Terms</Typography>
-
-          <Table variant="outlined">
-            <thead>
-              <tr>
-                <th>
-                  <Typography>Term</Typography>
-                </th>
-                <th>
-                  <Typography>Value</Typography>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {terms.map((term, index) => (
-                <tr key={index}>
-                  <td scope="row">
-                    <Typography>{term.termName}</Typography>
-                  </td>
-                  <td>
-                    <Typography>{term.termValue}</Typography>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+          <TermsTable terms={terms} />
         </Box>
       )}
 

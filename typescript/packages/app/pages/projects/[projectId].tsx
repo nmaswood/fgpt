@@ -34,7 +34,7 @@ const DisplayProject: React.FC = () => {
       flexDirection="column"
       bgcolor="background.body"
     >
-      <Navbar projectName={project?.name} />
+      <Navbar project={project} />
       <Box
         display="flex"
         width="100%"

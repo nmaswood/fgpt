@@ -17,9 +17,15 @@ import React from "react";
 import { useFetchMe } from "../hooks/use-fetch-me";
 import { ImpersonateService } from "../services/impersonate-service";
 
-export const Navbar: React.FC<{ projectName?: string | undefined }> = ({
-  projectName,
-}) => {
+export const Navbar: React.FC<{
+  project?:
+    | {
+        id: string;
+        name: string;
+      }
+    | undefined;
+  fileName?: string | undefined;
+}> = ({ project, fileName }) => {
   return (
     <Box
       display="flex"
@@ -54,14 +60,26 @@ export const Navbar: React.FC<{ projectName?: string | undefined }> = ({
         >
           Deals
         </Typography>
-        {projectName && (
+        {project && (
+          <Typography
+            level="h5"
+            component={Link}
+            href={`/projects/${project.id}`}
+            sx={{
+              color: "white",
+            }}
+          >
+            {project.name}
+          </Typography>
+        )}
+        {fileName && (
           <Typography
             level="h5"
             sx={{
               color: "white",
             }}
           >
-            {projectName}
+            {fileName}
           </Typography>
         )}
       </Breadcrumbs>

@@ -143,6 +143,7 @@ async function start() {
     excelAssetStore,
     processedFileProgressStore,
     excelProgressStore,
+    projectStore,
     SETTINGS.claudeReportGeneration,
   );
   const renderShowCaseFileService = new RenderShowCaseFileServiceImpl(

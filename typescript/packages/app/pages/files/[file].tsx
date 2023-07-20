@@ -1,13 +1,10 @@
-import ArrowBackIcon from "@mui/icons-material/ArrowBackOutlined";
 import AssessmentIcon from "@mui/icons-material/AssessmentOutlined";
 import AutoModeOutlinedIcon from "@mui/icons-material/AutoModeOutlined";
 import BoltIcon from "@mui/icons-material/BoltOutlined";
-import MenuIcon from "@mui/icons-material/MenuOutlined";
 import TableViewIcon from "@mui/icons-material/TableViewOutlined";
 import {
   Box,
   CircularProgress,
-  IconButton,
   ListItemDecorator,
   Tab,
   TabList,
@@ -22,6 +19,7 @@ import { DisplayFileChat } from "../../src/components/file/display-file-chat";
 import { DisplayProgress } from "../../src/components/file/display-progress";
 import { DisplayFileReport } from "../../src/components/file/report";
 import { useTabState } from "../../src/components/file/use-tab-state";
+import { Navbar } from "../../src/components/navbar";
 import { useFetchFileToRender } from "../../src/hooks/use-fetch-file-to-render";
 import { useFetchToken } from "../../src/hooks/use-fetch-token";
 
@@ -35,7 +33,14 @@ export default function DisplayFile() {
   })();
 
   return (
-    <Box display="flex" width="100%" height="100%">
+    <Box
+      display="flex"
+      width="100%"
+      height="100%"
+      maxHeight="100%"
+      maxWidth="100%"
+      overflow="auto"
+    >
       {fileId && token && <ForFileId fileId={fileId} token={token} />}
     </Box>
   );
@@ -47,31 +52,38 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
 }) => {
   const { data: file } = useFetchFileToRender(fileId);
 
-  const [showAsset, setShowAsset] = React.useState(true);
-
   const [tab, setTab] = useTabState();
-
-  const router = useRouter();
 
   return (
     <Box
-      sx={{
-        display: "flex",
-        width: "100%",
-        height: "100%",
-        maxHeight: "100%",
-        maxWidth: "100%",
-        overflow: "auto",
-      }}
+      display="flex"
+      width="100%"
+      height="100%"
+      maxHeight="100%"
+      maxWidth="100%"
+      overflow="auto"
+      flexDirection="column"
     >
-      {showAsset && (
+      <Navbar
+        project={
+          file
+            ? {
+                id: file.projectId,
+                name: file.projectName,
+              }
+            : undefined
+        }
+        fileName={file ? file.fileName : undefined}
+      />
+      <Box
+        display="flex"
+        width="100%"
+        height="100%"
+        maxHeight="100%"
+        maxWidth="100%"
+        overflow="auto"
+      >
         <Box display="flex" width="100%" height="100%" flexDirection="column">
-          <Box display="flex" width="100%" height="auto" padding={1}>
-            <IconButton onClick={() => router.back()}>
-              <ArrowBackIcon />
-            </IconButton>
-          </Box>
-
           {file ? (
             <DisplayAsset fileToRender={file} />
           ) : (
@@ -86,74 +98,74 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
             </Box>
           )}
         </Box>
-      )}
-      <Box
-        height="100%"
-        width="100%"
-        maxHeight="100%"
-        maxWidth="100%"
-        display="flex"
-        flexDirection="column"
-      >
-        <Box display="flex" gap={3} paddingLeft={1}>
-          <IconButton onClick={() => setShowAsset((prev) => !prev)}>
-            <MenuIcon />
-          </IconButton>
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
-          <Tabs value={tab} onChange={(_, newValue) => setTab(newValue as any)}>
-            <TabList>
-              <Tab value="progress">
-                <ListItemDecorator>
-                  <AutoModeOutlinedIcon />
-                </ListItemDecorator>
-                Progress
-              </Tab>
-              <Tab value="report">
-                <ListItemDecorator>
-                  <AssessmentIcon />
-                </ListItemDecorator>
-                Report
-              </Tab>
-              {file && file.type === "pdf" && (
-                <Tab value="chat">
-                  <ListItemDecorator>
-                    <BoltIcon />
-                  </ListItemDecorator>
-                  Chat
-                </Tab>
-              )}
-              {file && file.type === "pdf" && file.derived && (
-                <Tab value="tables">
-                  <ListItemDecorator>
-                    <TableViewIcon />
-                  </ListItemDecorator>
-                  Table
-                </Tab>
-              )}
-            </TabList>
-          </Tabs>
-        </Box>
         <Box
-          display="flex"
-          width="100%"
           height="100%"
+          width="100%"
           maxHeight="100%"
           maxWidth="100%"
+          display="flex"
           flexDirection="column"
         >
-          {tab === "progress" && file && <DisplayProgress file={file} />}
-          {tab === "report" && file && <DisplayFileReport file={file} />}
-          {tab === "chat" && file && (
-            <DisplayFileChat
-              fileReferenceId={fileId}
-              projectId={file.projectId}
-              token={token}
-            />
-          )}
+          <Box display="flex" gap={3} paddingLeft={1}>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
+            <Tabs
+              value={tab}
+              onChange={(_, newValue) => setTab(newValue as any)}
+            >
+              <TabList>
+                <Tab value="progress">
+                  <ListItemDecorator>
+                    <AutoModeOutlinedIcon />
+                  </ListItemDecorator>
+                  Progress
+                </Tab>
+                <Tab value="report">
+                  <ListItemDecorator>
+                    <AssessmentIcon />
+                  </ListItemDecorator>
+                  Report
+                </Tab>
+                {file && file.type === "pdf" && (
+                  <Tab value="chat">
+                    <ListItemDecorator>
+                      <BoltIcon />
+                    </ListItemDecorator>
+                    Chat
+                  </Tab>
+                )}
+                {file && file.type === "pdf" && file.derived && (
+                  <Tab value="tables">
+                    <ListItemDecorator>
+                      <TableViewIcon />
+                    </ListItemDecorator>
+                    Table
+                  </Tab>
+                )}
+              </TabList>
+            </Tabs>
+          </Box>
+          <Box
+            display="flex"
+            width="100%"
+            height="100%"
+            maxHeight="100%"
+            maxWidth="100%"
+            flexDirection="column"
+          >
+            {tab === "progress" && file && <DisplayProgress file={file} />}
+            {tab === "report" && file && <DisplayFileReport file={file} />}
+            {tab === "chat" && file && (
+              <DisplayFileChat
+                fileReferenceId={fileId}
+                projectId={file.projectId}
+                token={token}
+              />
+            )}
 
-          {tab === "tables" && file && file.type == "pdf" && file.derived && (
-            <DisplayDerived derived={file.derived} />
-          )}
+            {tab === "tables" && file && file.type == "pdf" && file.derived && (
+              <DisplayDerived derived={file.derived} />
+            )}
+          </Box>
         </Box>
       </Box>
     </Box>

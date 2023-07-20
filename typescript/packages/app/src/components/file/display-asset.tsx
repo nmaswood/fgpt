@@ -21,9 +21,9 @@ export const DisplayAsset: React.FC<{
     case "pdf":
       return (
         <object
-          data={fileToRender.signedUrl}
+          data={`${fileToRender.signedUrl}#toolbar=0&view=FitH&zoom=page-width`}
           type="application/pdf"
-          style={{ width: "100%", height: "100%", minWidth: "50%" }}
+          style={{ width: "100%", height: "100%" }}
         />
       );
     case undefined:

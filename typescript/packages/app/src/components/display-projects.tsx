@@ -18,6 +18,8 @@ import {
 } from "@mui/joy";
 import React from "react";
 
+import { useHover } from "./use-hover";
+
 export const DisplayProjects: React.FC<{
   openCreateProjects: () => void;
   projectsLoading: boolean;
@@ -263,34 +265,3 @@ const ProjectCard: React.FC<{
     </Badge>
   );
 };
-
-type UseHoverType<T extends HTMLElement> = [React.RefObject<T>, boolean];
-
-function useHover<T extends HTMLElement>(): UseHoverType<T> {
-  const [value, setValue] = React.useState(false);
-
-  const ref = React.useRef<T>(null);
-
-  const handleMouseOver = () => setValue(true);
-  const handleMouseOut = () => setValue(false);
-
-  React.useEffect(
-    () => {
-      const node = ref.current;
-      if (node) {
-        node.addEventListener("mouseover", handleMouseOver);
-        node.addEventListener("mouseout", handleMouseOut);
-      }
-      return () => {
-        if (!node) {
-          return;
-        }
-        node.removeEventListener("mouseover", handleMouseOver);
-        node.removeEventListener("mouseout", handleMouseOut);
-      };
-    },
-    [], // Recall only if ref changes
-  );
-
-  return [ref, value];
-}

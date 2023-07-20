@@ -1,12 +1,21 @@
 import { assertNever, RenderShowCaseFile } from "@fgpt/precedent-iso";
-import { Term } from "@fgpt/precedent-iso/src/models/llm-outputs";
+import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
-import { Alert, Box, Button, CircularProgress, Typography } from "@mui/joy";
-import { DataGrid,GridColDef } from "@mui/x-data-grid";
+import {
+  Alert,
+  Badge,
+  Box,
+  Button,
+  CircularProgress,
+  Typography,
+} from "@mui/joy";
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 
 import { BLUR_DATA_URL } from "./make-blur-data-url";
+import { TermsTable } from "./terms-table";
+import { useHover } from "./use-hover";
 
 export const DataRoomSummary: React.FC<{
   loading: boolean;
@@ -22,7 +31,6 @@ export const DataRoomSummary: React.FC<{
       paddingBottom={4}
       maxHeight="100%"
       overflow="auto"
-      gap={3}
       bgcolor="neutral.0"
       borderRadius={8}
     >
@@ -63,6 +71,7 @@ export const DataRoomSummary: React.FC<{
 const Dispatch: React.FC<{ showCaseFile: RenderShowCaseFile.File }> = ({
   showCaseFile,
 }) => {
+  const [ref, hovering] = useHover();
   switch (showCaseFile.type) {
     case "not_set":
       return (
@@ -88,55 +97,65 @@ const Dispatch: React.FC<{ showCaseFile: RenderShowCaseFile.File }> = ({
           maxWidth="100%"
           overflow="auto"
           gap={3}
+          paddingTop={2}
         >
-          {!showCaseFile.url && (
-            <Box
-              display="flex"
-              overflow="auto"
-              gap={3}
-              width="320px"
-              height="100%"
-            >
+          <Badge
+            ref={ref as any}
+            invisible={!hovering}
+            component={Link}
+            badgeContent={<OpenInNewOutlinedIcon />}
+            href={`/files/${showCaseFile.fileReferenceId}`}
+          >
+            {!showCaseFile.url && (
               <Box
-                width="100%"
+                display="flex"
+                overflow="auto"
+                gap={3}
+                width="320px"
                 height="100%"
+                component={Box}
+              >
+                <Box
+                  width="100%"
+                  height="100%"
+                  display="flex"
+                  borderRadius={8}
+                  border="1px solid #E5E5E5"
+                  boxShadow="rgba(0, 0, 0, 0.06) 0px 2px 4px"
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <PictureAsPdfOutlinedIcon
+                    color="error"
+                    sx={{
+                      fontSize: 36,
+                      color: "danger.solidColor",
+                    }}
+                  />
+                </Box>
+              </Box>
+            )}
+            {showCaseFile.url && (
+              <Box
                 display="flex"
                 borderRadius={8}
+                width="345px"
                 border="1px solid #E5E5E5"
                 boxShadow="rgba(0, 0, 0, 0.06) 0px 2px 4px"
-                justifyContent="center"
-                alignItems="center"
+                position="relative"
+                minHeight="200px"
               >
-                <PictureAsPdfOutlinedIcon
-                  color="error"
-                  sx={{
-                    fontSize: 36,
-                    color: "danger.solidColor",
-                  }}
+                <Image
+                  placeholder="blur"
+                  fill
+                  blurDataURL={BLUR_DATA_URL}
+                  src={showCaseFile.url}
+                  alt="thumbnail of CIM"
+                  sizes="100vw"
                 />
               </Box>
-            </Box>
-          )}
-          {showCaseFile.url && (
-            <Box
-              display="flex"
-              borderRadius={8}
-              width="345px"
-              border="1px solid #E5E5E5"
-              boxShadow="rgba(0, 0, 0, 0.06) 0px 2px 4px"
-              position="relative"
-              minHeight="200px"
-            >
-              <Image
-                placeholder="blur"
-                fill
-                blurDataURL={BLUR_DATA_URL}
-                src={showCaseFile.url}
-                alt="thumbnail of CIM"
-                sizes="100vw"
-              />
-            </Box>
-          )}
+            )}
+          </Badge>
           <Box
             display="flex"
             width="100%"
@@ -167,63 +186,4 @@ const Dispatch: React.FC<{ showCaseFile: RenderShowCaseFile.File }> = ({
     default:
       assertNever(showCaseFile);
   }
-};
-
-const TermsTable: React.FC<{
-  terms: Term[];
-}> = ({ terms }) => {
-  const columns: GridColDef<Term>[] = [
-    {
-      field: "termName",
-      headerName: "Term name",
-      minWidth: 250,
-      renderCell: ({ row }) => {
-        return (
-          <Typography
-            sx={{
-              color: "#666666",
-              fontWeight: 700,
-              fontSize: "12px",
-            }}
-          >
-            {row.termName}
-          </Typography>
-        );
-      },
-    },
-    {
-      flex: 1,
-      field: "termValue",
-      headerName: "Term value",
-      renderCell: ({ row }) => {
-        return (
-          <Typography
-            sx={{
-              fontWeight: 400,
-              fontSize: "14px",
-            }}
-          >
-            {row.termValue}
-          </Typography>
-        );
-      },
-    },
-  ];
-
-  return (
-    <DataGrid
-      getRowId={(row) => row.termName}
-      rows={terms}
-      columns={columns}
-      disableRowSelectionOnClick
-      disableColumnFilter
-      disableColumnMenu
-      hideFooterSelectedRowCount
-      hideFooter={true}
-      hideFooterPagination
-      slots={{
-        columnHeaders: () => null,
-      }}
-    />
-  );
 };
