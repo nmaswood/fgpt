@@ -1,4 +1,5 @@
 import abc
+import re
 
 import openai
 from loguru import logger
@@ -22,6 +23,9 @@ class ScanService(abc.ABC):
         return ScanResult(description="")
 
 
+LIMIT = 7000
+
+
 class OpenAIScanService(ScanService):
     def __init__(self, model: OpenAIModel) -> None:
         self.model = model
@@ -32,18 +36,21 @@ class OpenAIScanService(ScanService):
         file_name: str,
         text: str,
     ) -> ScanResult:
+        processed_text = first_chunk(text, LIMIT)
+        with_out_white_space = remove_extra_whitespace(processed_text)
+
         response = openai.ChatCompletion.create(
             model=self.model,
             messages=[
                 {
                     "role": "system",
-                    "content": "You are an expert financial analyst. You will be given an excerpt from a file a has uploaded. Your job is to write a verry concise description of the file. Do not respond with anything except the description",
+                    "content": "You are an expert financial analyst. You will be given an excerpt from a document. Provide a 1 line description of the document. Do not respond with anything except the description",
                 },
                 {
                     "role": "user",
                     "content": f"""
 file name: {file_name}
-file excerpt: {text}
+file excerpt: {with_out_white_space}
                  """,
                 },
             ],
@@ -55,3 +62,22 @@ file excerpt: {text}
         first_choice = choices[0]
         description = first_choice["message"]["content"]
         return ScanResult(description=description)
+
+
+def remove_extra_whitespace(s: str) -> str:
+    return re.sub(r"\n+", "\n", s.replace("\n ", "\n")).strip()
+
+
+def first_chunk(s: str, maxlength: int):
+    gen = get_chunks(s, maxlength)
+    return next(gen)
+
+
+def get_chunks(s: str, maxlength: int):
+    start = 0
+    end = 0
+    while start + maxlength < len(s) and end != -1:
+        end = s.rfind(" ", start, start + maxlength + 1)
+        yield s[start:end]
+        start = end + 1
+    yield s[start:]

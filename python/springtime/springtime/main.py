@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from loguru import logger
 
 from springtime.excel.table_extractor import TabulaTableExtractor
+from springtime.models.open_ai import OpenAIModel
 from springtime.object_store.object_store import GCSObjectStore
 from springtime.routers.chat_router import ChatRouter
 from springtime.routers.embeddings_router import EmbeddingsRouter
@@ -41,7 +42,7 @@ TABLE_EXTRACTOR = TabulaTableExtractor(OBJECT_STORE)
 THUMBNAIL_SERVICE = FitzThumbnailService()
 
 GPT_EXCEL_ANALYZER = OpenAIExcelAnalyzer(SETTINGS.reports_openai_model)
-SCAN_SERVICE = OpenAIScanService(SETTINGS.reports_openai_model)
+SCAN_SERVICE = OpenAIScanService(OpenAIModel.gpt3_16k)
 CLAUDE_EXCEL_ANALYZER = ClaudeExcelAnalyzer(ANTHROPIC_CLIENT)
 
 GPT_TABLE_ANALYZER = TableAnalyzerImpl(GPT_EXCEL_ANALYZER, GPT_SHEET_PROCESSOR)

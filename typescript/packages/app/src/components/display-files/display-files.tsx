@@ -48,8 +48,12 @@ export const DisplayFiles: React.FC<{
       },
     },
     {
+      minWidth: 500,
       field: "description",
       headerName: "Description",
+      renderCell: ({ row }) => {
+        return <RenderDescription description={row.description ?? ""} />;
+      },
     },
     {
       field: "status",
@@ -118,8 +122,22 @@ export const DisplayFiles: React.FC<{
         disableColumnMenu
         hideFooter={true}
         hideFooterPagination
+        getRowHeight={() => "auto"}
       />
     </Box>
+  );
+};
+const RenderDescription: React.FC<{ description: string }> = ({
+  description,
+}) => {
+  return (
+    <Typography
+      sx={{
+        textWrap: "wrap",
+      }}
+    >
+      {description}
+    </Typography>
   );
 };
 
