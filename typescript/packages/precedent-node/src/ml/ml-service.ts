@@ -32,8 +32,17 @@ export interface AskQuestion {
   question: string;
 }
 
+export interface ScanArgs {
+  fileName: string;
+  text: string;
+}
+export interface ScanResponse {
+  description: string;
+}
+
 export interface MLServiceClient {
   ping: () => Promise<"pong">;
+  scan: (args: ScanArgs) => Promise<ScanResponse>;
   getEmbedding: (query: string) => Promise<number[]>;
   getEmbeddings: (args: GetEmbeddingsArgs) => Promise<GetEmbeddingsResponse>;
   askQuestion(args: AskQuestion): Promise<string>;
@@ -49,6 +58,14 @@ export class MLServiceClientImpl implements MLServiceClient {
     await this.client.get<unknown>("/ping");
     return "pong";
   }
+  async scan({ fileName, text }: ScanArgs): Promise<ScanResponse> {
+    const response = await this.client.post<unknown>("/report/scan", {
+      file_name: fileName,
+      text,
+    });
+
+    return ZScanResponse.parse(response.data);
+  }
 
   async getEmbeddings(args: GetEmbeddingsArgs): Promise<GetEmbeddingsResponse> {
     if (args.documents.length === 0) {
@@ -58,8 +75,7 @@ export class MLServiceClientImpl implements MLServiceClient {
       "/embeddings/embedding-for-documents",
       { documents: args.documents },
     );
-    const parsed = ZEmbeddingsResponse.parse(response.data);
-    return parsed;
+    return ZEmbeddingsResponse.parse(response.data);
   }
 
   async getEmbedding(query: string): Promise<number[]> {
@@ -73,8 +89,7 @@ export class MLServiceClientImpl implements MLServiceClient {
       question,
     });
 
-    const parsed = ZAskQuestionResponse.parse(response.data);
-    return parsed.data;
+    return ZAskQuestionResponse.parse(response.data).data;
   }
 
   async askQuestionStreaming({
@@ -113,6 +128,7 @@ export class MLServiceClientImpl implements MLServiceClient {
     onData,
     onEnd,
   }: GenerateTitleStreamingArgs): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await this.client.post<any>(
       "/chat/get-title-streaming",
       {
@@ -145,6 +161,10 @@ export class MLServiceClientImpl implements MLServiceClient {
 const ZTokenLengthResponse = z.object({
   gpt4: z.number(),
   claude100k: z.number(),
+});
+
+const ZScanResponse = z.object({
+  description: z.string(),
 });
 
 export type TokenLength = z.infer<typeof ZTokenLengthResponse>;
