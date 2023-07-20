@@ -107,10 +107,9 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
           flexDirection="column"
         >
           <Box display="flex" gap={3} paddingLeft={1}>
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
             <Tabs
               value={tab}
-              onChange={(_, newValue) => setTab(newValue as any)}
+              onChange={(_, newValue) => setTab(newValue as any)} // eslint-disable-line @typescript-eslint/no-explicit-any
             >
               <TabList>
                 <Tab value="progress">

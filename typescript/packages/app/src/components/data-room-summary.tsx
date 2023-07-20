@@ -100,7 +100,7 @@ const Dispatch: React.FC<{ showCaseFile: RenderShowCaseFile.File }> = ({
           paddingTop={2}
         >
           <Badge
-            ref={ref as any}
+            ref={ref as any} // eslint-disable-line @typescript-eslint/no-explicit-any
             invisible={!hovering}
             component={Link}
             badgeContent={<OpenInNewOutlinedIcon />}
