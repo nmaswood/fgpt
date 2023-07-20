@@ -53,6 +53,7 @@ export class ExcelProgressServiceImpl implements ExcelProgressService {
         case "text-extraction":
         case "text-chunk":
         case "thumbnail":
+        case "scan":
           break;
         default:
           assertNever(task.config);

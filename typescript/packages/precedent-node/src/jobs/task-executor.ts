@@ -251,6 +251,10 @@ export class TaskExecutorImpl implements TaskExecutor {
         break;
       }
 
+      case "scan": {
+        break;
+      }
+
       default:
         assertNever(config);
     }

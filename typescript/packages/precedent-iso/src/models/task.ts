@@ -15,6 +15,7 @@ export const ZTaskType = z.enum([
   "analyze-table",
   "long-form",
   "thumbnail",
+  "scan",
 ]);
 
 export const ZTaskStatus = z.enum([
@@ -143,6 +144,16 @@ export const ZThumbnailConfig = z.object({
   fileReferenceId: z.string(),
 });
 
+export interface ScanConfig {
+  type: "scan";
+  fileReferenceId: string;
+}
+
+export const ZScanConfig = z.object({
+  type: z.literal("scan"),
+  fileReferenceId: z.string(),
+});
+
 export type TaskConfig =
   | IngestFileConfig
   | TextExtractionConfig
@@ -152,7 +163,8 @@ export type TaskConfig =
   | ExtractTableConfig
   | LongFormReportConfig
   | AnalyzeTableConfig
-  | ThumbnailConfig;
+  | ThumbnailConfig
+  | ScanConfig;
 
 function analysis(row: z.infer<typeof ZAnalyzeTableConfig>): TableAnalysis {
   if (row.analysis) {
@@ -181,6 +193,7 @@ export const ZTaskConfig = z
     ZLongFormReportConfig,
     ZAnalyzeTableConfig,
     ZThumbnailConfig,
+    ZScanConfig,
   ])
   .transform((row): TaskConfig => {
     switch (row.type) {
@@ -199,6 +212,7 @@ export const ZTaskConfig = z
       case "extract-table":
       case "long-form":
       case "thumbnail":
+      case "scan":
         return row;
       default:
         assertNever(row);

@@ -92,6 +92,7 @@ export class ProcessedFileProgressServiceImpl
         }
         case "ingest-file":
         case "text-extraction":
+        case "scan":
           break;
 
         default:
