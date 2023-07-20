@@ -1,14 +1,8 @@
 import { assertNever, RenderShowCaseFile } from "@fgpt/precedent-iso";
 import { Term } from "@fgpt/precedent-iso/src/models/llm-outputs";
 import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Table,
-  Typography,
-} from "@mui/joy";
+import { Alert, Box, Button, CircularProgress, Typography } from "@mui/joy";
+import { DataGrid,GridColDef } from "@mui/x-data-grid";
 import Image from "next/image";
 import React from "react";
 
@@ -127,16 +121,19 @@ const Dispatch: React.FC<{ showCaseFile: RenderShowCaseFile.File }> = ({
             <Box
               display="flex"
               borderRadius={8}
+              width="345px"
               border="1px solid #E5E5E5"
               boxShadow="rgba(0, 0, 0, 0.06) 0px 2px 4px"
+              position="relative"
+              minHeight="200px"
             >
               <Image
                 placeholder="blur"
+                fill
                 blurDataURL={BLUR_DATA_URL}
                 src={showCaseFile.url}
-                width={320}
-                height={407}
                 alt="thumbnail of CIM"
+                sizes="100vw"
               />
             </Box>
           )}
@@ -175,64 +172,58 @@ const Dispatch: React.FC<{ showCaseFile: RenderShowCaseFile.File }> = ({
 const TermsTable: React.FC<{
   terms: Term[];
 }> = ({ terms }) => {
-  return (
-    <Table
-      variant="outlined"
-      sx={{
-        display: "inline-block",
-        borderRadius: 8,
-        border: "1px solid #E5E5E5",
-        background: "#FFF",
-      }}
-    >
-      <colgroup>
-        <col
-          style={{
-            width: "35%",
-          }}
-        />
-        <col
-          style={{
-            width: "65%",
-          }}
-        />
-      </colgroup>
-
-      <tbody>
-        {terms.map((term, index) => (
-          <tr
-            key={index}
-            style={{
-              padding: "8px",
-              height: "40px",
+  const columns: GridColDef<Term>[] = [
+    {
+      field: "termName",
+      headerName: "Term name",
+      minWidth: 250,
+      renderCell: ({ row }) => {
+        return (
+          <Typography
+            sx={{
+              color: "#666666",
+              fontWeight: 700,
+              fontSize: "12px",
             }}
           >
-            <td
-              scope="row"
-              style={{
-                padding: "8px",
-              }}
-            >
-              <Typography
-                fontWeight={700}
-                sx={{
-                  padding: 1,
-                  color: "#666",
-                }}
-              >
-                {term.termName}
-              </Typography>
-            </td>
-            <td
-              style={{
-                padding: "8px",
-              }}
-            >
-              <Typography fontWeight={400}>{term.termValue}</Typography>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </Table>
+            {row.termName}
+          </Typography>
+        );
+      },
+    },
+    {
+      flex: 1,
+      field: "termValue",
+      headerName: "Term value",
+      renderCell: ({ row }) => {
+        return (
+          <Typography
+            sx={{
+              fontWeight: 400,
+              fontSize: "14px",
+            }}
+          >
+            {row.termValue}
+          </Typography>
+        );
+      },
+    },
+  ];
+
+  return (
+    <DataGrid
+      getRowId={(row) => row.termName}
+      rows={terms}
+      columns={columns}
+      disableRowSelectionOnClick
+      disableColumnFilter
+      disableColumnMenu
+      hideFooterSelectedRowCount
+      hideFooter={true}
+      hideFooterPagination
+      slots={{
+        columnHeaders: () => null,
+      }}
+    />
   );
 };
