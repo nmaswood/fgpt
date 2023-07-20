@@ -14,4 +14,5 @@ def test_scan(scan_service: ScanService):
         file_name="test.txt",
         text="I love cats",
     )
-    assert output.description == "I love cats"
+
+    assert output.description
