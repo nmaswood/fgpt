@@ -35,7 +35,13 @@ export const DisplayFiles: React.FC<{
       minWidth: 300,
       renderCell: ({ row }) => {
         return (
-          <Link component={NextLink} href={`/files/${row.id}`}>
+          <Link
+            component={NextLink}
+            href={`/files/${row.id}`}
+            sx={{
+              textWrap: "wrap",
+            }}
+          >
             {row.fileName}
           </Link>
         );
