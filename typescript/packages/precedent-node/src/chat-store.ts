@@ -133,7 +133,6 @@ RETURNING
     }: InsertChatEntry,
   ): Promise<ChatEntry> {
     await trx.query(sql.type(ZCountRow)`
-
 UPDATE
     chat
 SET

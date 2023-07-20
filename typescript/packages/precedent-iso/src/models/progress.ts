@@ -22,6 +22,8 @@ export interface ProgressForPdfTasks {
 
   longFormReportChunk?: ProgressTaskStatus;
   longFormReport?: ProgressTaskStatus;
+
+  scan: ProgressTaskStatus;
 }
 
 export interface ProgressForExcelTasks {

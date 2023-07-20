@@ -50,9 +50,6 @@ export const DisplayFiles: React.FC<{
     {
       field: "description",
       headerName: "Description",
-      renderCell: () => {
-        return "";
-      },
     },
     {
       field: "status",

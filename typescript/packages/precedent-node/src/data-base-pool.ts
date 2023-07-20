@@ -23,6 +23,7 @@ const createResultParserInterceptor = (): Interceptor => {
       if (!validationResult.success) {
         throw new SchemaValidationError(
           actualQuery,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           row as any,
           validationResult.error.issues,
         );

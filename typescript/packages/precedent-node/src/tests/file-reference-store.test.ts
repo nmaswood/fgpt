@@ -143,7 +143,7 @@ test("setThumbnailPath+getThumbnailPath", async () => {
   expect(value).toEqual("some-made-up-path");
 });
 
-test("setStatus", async () => {
+test("update", async () => {
   const { project, fileReferenceStore } = await setup();
 
   const file = await fileReferenceStore.insert({
@@ -157,6 +157,14 @@ test("setStatus", async () => {
 
   expect(file.status).toEqual("pending");
 
-  const file2 = await fileReferenceStore.setStatus(file.id, "ready");
+  const file2 = await fileReferenceStore.update({
+    id: file.id,
+    status: "ready",
+  });
   expect(file2.status).toEqual("ready");
+
+  await fileReferenceStore.update({
+    id: file.id,
+    description: "i love cats",
+  });
 });

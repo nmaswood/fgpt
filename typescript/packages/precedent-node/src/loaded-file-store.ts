@@ -29,6 +29,7 @@ SELECT
     file_reference.file_name,
     file_reference.content_type,
     file_reference.uploaded_at,
+    file_reference.description,
     COALESCE(file_reference.status, 'pending') as status
 FROM
     file_reference
@@ -55,6 +56,7 @@ const ZLoadedFileRow = z
     content_type: z.string(),
     uploaded_at: z.number(),
     status: ZFileStatus,
+    description: z.string().nullable(),
   })
   .transform(
     (row): LoadedFile => ({
@@ -63,5 +65,6 @@ const ZLoadedFileRow = z
       createdAt: new Date(row.uploaded_at),
       fileType: getFileType(row.content_type),
       status: row.status,
+      description: row.description ?? undefined,
     }),
   );

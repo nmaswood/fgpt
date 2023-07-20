@@ -147,11 +147,13 @@ export const ZThumbnailConfig = z.object({
 export interface ScanConfig {
   type: "scan";
   fileReferenceId: string;
+  processedFileId: string;
 }
 
 export const ZScanConfig = z.object({
   type: z.literal("scan"),
   fileReferenceId: z.string(),
+  processedFileId: z.string(),
 });
 
 export type TaskConfig =

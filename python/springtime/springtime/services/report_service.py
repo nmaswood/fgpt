@@ -112,7 +112,8 @@ class OpenAIReportService(ReportService):
             function_name="parse_terms",
         )
         response = self.call_function(req)
-        terms_from_model = Terms(**response)
+        terms = [t for t in response["terms"] if "term_value" in t]
+        terms_from_model = Terms(terms=terms)
         return [
             term
             for term in terms_from_model.terms

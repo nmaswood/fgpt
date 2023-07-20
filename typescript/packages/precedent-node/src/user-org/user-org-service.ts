@@ -24,7 +24,6 @@ export class PsqlUserOrgService implements UserOrgService {
 
   async get(id: string): Promise<User> {
     return this.pool.one(sql.type(ZUserRow)`
-
 SELECT
     ${USER_FIELDS}
 FROM

@@ -13,7 +13,8 @@ export interface CreateProjectArgs {
 
 export interface UpdateProject {
   id: string;
-  name: string;
+  name?: string;
+  description?: string;
 }
 
 export interface ProjectStore {
@@ -141,13 +142,14 @@ RETURNING
     );
   }
 
-  async update({ id, name }: UpdateProject): Promise<Project> {
+  async update({ id, name, description }: UpdateProject): Promise<Project> {
     return this.pool.one(
       sql.type(ZProjectRow)`
 UPDATE
     Project
 SET
-    name = ${name}
+    name = COALESCE(${name ?? null}, name),
+    description = COALESCE(${description ?? null}, description)
 WHERE
     id = ${id}
 RETURNING

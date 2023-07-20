@@ -54,7 +54,7 @@ class ReportRouter:
 
         @router.post("/scan")
         async def scan_route(req: ScanRequest):
-            return self.scan_service.scan(req.text)
+            return self.scan_service.scan(file_name=req.file_name, text=req.text)
 
         @router.post("/long-form")
         async def long_form_route(req: LongFormReportRequest):

@@ -38,6 +38,7 @@ import {
   FileStatusUpdaterImpl,
   ExcelProgressServiceImpl,
   ProcessedFileProgressServiceImpl,
+  ScanHandlerImpl,
 } from "@fgpt/precedent-node";
 import { SETTINGS, Settings } from "./settings";
 import { MainRouter } from "./router";
@@ -130,6 +131,12 @@ async function start(settings: Settings) {
 
   const ingestFileHandler = new IngestFileHandlerImpl(taskStore);
 
+  const scanHandler = new ScanHandlerImpl(
+    mlServiceClient,
+    fileReferenceStore,
+    processedFileStore,
+  );
+
   const taskExecutor = new TaskExecutorImpl(
     taskService,
     textExtractionHandler,
@@ -139,6 +146,7 @@ async function start(settings: Settings) {
     tableHandler,
     ingestFileHandler,
     thumbnailHandler,
+    scanHandler,
     SETTINGS.claudeReportGeneration,
   );
 

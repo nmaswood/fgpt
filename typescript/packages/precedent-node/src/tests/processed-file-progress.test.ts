@@ -96,6 +96,7 @@ test("getProgress#no_tasks", async () => {
       upsertEmbeddings: "task_does_not_exist",
       extractTable: "task_does_not_exist",
       analyzeTable: "task_does_not_exist",
+      scan: "task_does_not_exist",
       thumbnail: "task_does_not_exist",
     },
   });
@@ -154,6 +155,8 @@ test("getProgress#pending", async () => {
       extractTable: "task_does_not_exist",
       analyzeTable: "task_does_not_exist",
       thumbnail: "task_does_not_exist",
+
+      scan: "task_does_not_exist",
     },
   });
 });
@@ -215,6 +218,7 @@ test("getProgress#has_failure", async () => {
       extractTable: "task_does_not_exist",
       analyzeTable: "task_does_not_exist",
       thumbnail: "task_does_not_exist",
+      scan: "task_does_not_exist",
     },
   });
 });
@@ -331,6 +335,16 @@ test("getProgress#complete", async () => {
       config: {
         type: "thumbnail",
         fileReferenceId,
+      },
+    },
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      config: {
+        type: "scan",
+        fileReferenceId,
+        processedFileId: "1",
       },
     },
     {

@@ -5,6 +5,7 @@ import { CreateTask, Task, TaskStore } from "../task-store";
 import { EmbeddingsHandler } from "./generate-embeddings-handler";
 import { IngestFileHandler } from "./ingest-file-handler";
 import { ReportHandler } from "./llm-output-handler";
+import { ScanHandler } from "./scan-handler";
 import { TableHandler } from "./table-handler";
 import { TextChunkHandler } from "./text-chunk-handler";
 import { TextExtractionHandler } from "./text-extraction-handler";
@@ -25,6 +26,7 @@ export class TaskExecutorImpl implements TaskExecutor {
     private readonly tableHandler: TableHandler,
     private readonly ingestFileHandler: IngestFileHandler,
     private readonly thumbnailHandler: ThumbnailHandler,
+    private readonly scanHandler: ScanHandler,
     private readonly claudeReportGeneration: boolean,
   ) {}
 
@@ -74,6 +76,17 @@ export class TaskExecutorImpl implements TaskExecutor {
         } else {
           LOGGER.info("Skipping greedy_125k chunking");
         }
+
+        taskConfig.push({
+          organizationId: config.organizationId,
+          projectId: config.projectId,
+          fileReferenceId: config.fileReferenceId,
+          config: {
+            type: "scan",
+            fileReferenceId: config.fileReferenceId,
+            processedFileId,
+          },
+        });
 
         await this.taskStore.insertMany(taskConfig);
 
@@ -252,6 +265,10 @@ export class TaskExecutorImpl implements TaskExecutor {
       }
 
       case "scan": {
+        await this.scanHandler.scan({
+          fileReferenceId: config.fileReferenceId,
+          processedFileId: config.processedFileId,
+        });
         break;
       }
 

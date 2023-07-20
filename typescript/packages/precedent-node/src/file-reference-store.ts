@@ -9,6 +9,12 @@ import { z } from "zod";
 
 import { ZCountRow } from "./sql/models";
 
+export interface UpdateFileArgs {
+  id: string;
+  description?: string;
+  status?: FileStatus;
+}
+
 export interface InsertFileReference {
   fileName: string;
   organizationId: string;
@@ -23,14 +29,12 @@ export interface InsertFileReference {
 export interface FileReferenceStore {
   get(fileId: string): Promise<FileReference>;
   getMany(fileIds: string[]): Promise<FileReference[]>;
+  update(args: UpdateFileArgs): Promise<FileReference>;
   list(projectId: string): Promise<FileReference[]>;
   insert(args: InsertFileReference): Promise<FileReference>;
   insertMany(args: InsertFileReference[]): Promise<FileReference[]>;
   setThumbnailPath(fileReferenceId: string, path: string): Promise<void>;
-  setStatus(
-    fileReferenceId: string,
-    status: FileStatus,
-  ): Promise<FileReference>;
+
   getThumbnailPath(fileReferenceId: string): Promise<string | undefined>;
 }
 
@@ -179,17 +183,19 @@ WHERE
     );
   }
 
-  async setStatus(
-    fileReferenceId: string,
-    status: FileStatus,
-  ): Promise<FileReference> {
+  async update({
+    id,
+    status,
+    description,
+  }: UpdateFileArgs): Promise<FileReference> {
     return this.pool.one(sql.type(ZFileReferenceRow)`
 UPDATE
     file_reference
 SET
-    status = ${status}
+    status = COALESCE(${status ?? null}, status),
+    description = COALESCE(${description ?? null}, description)
 WHERE
-    id = ${fileReferenceId}
+    id = ${id}
 RETURNING
     ${FIELDS}
 `);

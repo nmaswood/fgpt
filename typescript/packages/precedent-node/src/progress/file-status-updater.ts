@@ -19,7 +19,10 @@ export class FileStatusUpdaterImpl implements FileStatusUpdater {
 
   async update(fileReferenceId: string) {
     const status = await this.#status(fileReferenceId);
-    await this.fileReferenceStore.setStatus(fileReferenceId, status);
+    await this.fileReferenceStore.update({
+      id: fileReferenceId,
+      status,
+    });
   }
 
   async #status(fileReferenceId: string) {

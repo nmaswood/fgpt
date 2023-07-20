@@ -23,4 +23,5 @@ export interface LoadedFile {
   createdAt: Date;
   fileType: FileType | undefined;
   status: FileStatus;
+  description: string | undefined;
 }

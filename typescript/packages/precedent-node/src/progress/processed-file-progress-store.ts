@@ -34,6 +34,7 @@ export class ProcessedFileProgressServiceImpl
       report: "task_does_not_exist",
       upsertEmbeddings: "task_does_not_exist",
       extractTable: "task_does_not_exist",
+      scan: "task_does_not_exist",
       analyzeTable: "task_does_not_exist",
       thumbnail: "task_does_not_exist",
       ...(options.longFormReport
@@ -90,9 +91,13 @@ export class ProcessedFileProgressServiceImpl
           forTask.thumbnail = task.status;
           break;
         }
+
+        case "scan": {
+          forTask.scan = task.status;
+          break;
+        }
         case "ingest-file":
         case "text-extraction":
-        case "scan":
           break;
 
         default:
