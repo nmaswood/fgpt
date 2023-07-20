@@ -78,16 +78,18 @@ export const DisplayFiles: React.FC<{
       flex: 1,
       align: "right",
       renderCell: ({ row }) => {
-        if (
-          row.fileType == "excel" ||
-          !showCaseFile ||
-          (showCaseFile.type === "set" &&
-            showCaseFile.fileReferenceId === row.id)
-        ) {
-          return null;
-        }
-
-        return <RenderActionMenu fileReferenceId={row.id} mutate={mutate} />;
+        return (
+          <RenderActionMenu
+            fileReferenceId={row.id}
+            mutate={mutate}
+            hidden={
+              row.fileType == "excel" ||
+              !showCaseFile ||
+              (showCaseFile.type === "set" &&
+                showCaseFile.fileReferenceId === row.id)
+            }
+          />
+        );
       },
     },
   ];

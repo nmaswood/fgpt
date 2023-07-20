@@ -5,16 +5,23 @@ import React from "react";
 import { useSetShowCaseFile } from "../hooks/use-set-show-case-file";
 
 export const RenderActionMenu: React.FC<{
+  // stupid hack to keep the height consistent
+  hidden: boolean;
   fileReferenceId: string;
   mutate: () => void;
-}> = ({ fileReferenceId, mutate }) => {
+}> = ({ hidden, fileReferenceId, mutate }) => {
   const buttonRef = React.useRef(null);
   const [open, setOpen] = React.useState(false);
   const { trigger, isMutating } = useSetShowCaseFile();
 
   return (
     <>
-      <IconButton ref={buttonRef} variant="plain" onClick={() => setOpen(true)}>
+      <IconButton
+        ref={buttonRef}
+        variant="plain"
+        onClick={() => setOpen(true)}
+        style={{ visibility: hidden ? "hidden" : "visible" }}
+      >
         <MoreVertOutlinedIcon />
       </IconButton>
       <Menu
