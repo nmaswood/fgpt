@@ -21,4 +21,3 @@ def test_get_thumbnail(thumbnail_service: ThumbnailService):
             file_path=PDF,
             output_dir=tmp_dir,
         )
-        breakpoint()

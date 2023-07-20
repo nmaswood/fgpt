@@ -108,6 +108,7 @@ export const ForExcelValue: React.FC<{ chunk: AnalyzeResponseChunk }> = ({
       maxWidth="100%"
       maxHeight="100%"
       padding={2}
+      overflow="auto"
     >
       <Typography level="h6">{formatSheetNames(chunk.sheetNames)}</Typography>
       <Typography whiteSpace="pre-wrap">{chunk.content}</Typography>
@@ -125,7 +126,14 @@ const ForPDF: React.FC<{ report: Outputs.Report | undefined }> = ({
 
   const hasClaude = report.longForm.length > 0;
   return (
-    <Box display="flex" flexDirection="column" gap={1} padding={2}>
+    <Box
+      display="flex"
+      flexDirection="column"
+      gap={1}
+      padding={2}
+      maxHeight="100%"
+      overflow="auto"
+    >
       {hasClaude && (
         <Select
           value={value}
@@ -159,9 +167,15 @@ const ChatGPTReport: React.FC<{
   report: Outputs.Report;
 }> = ({ report: { summaries, financialSummary, terms } }) => {
   return (
-    <>
+    <Box display="flex" flexDirection="column" maxHeight="100%" overflow="auto">
       {terms.length > 0 && (
-        <Box display="flex" flexDirection="column" gap={1}>
+        <Box
+          display="flex"
+          flexDirection="column"
+          gap={1}
+          maxHeight="100%"
+          overflow="auto"
+        >
           <TermsTable terms={terms} />
         </Box>
       )}
@@ -218,7 +232,7 @@ const ChatGPTReport: React.FC<{
           </List>
         </>
       )}
-    </>
+    </Box>
   );
 };
 

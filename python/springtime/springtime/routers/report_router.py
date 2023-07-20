@@ -48,8 +48,7 @@ class ReportRouter:
 
         @router.post("/llm-output")
         async def llm_output_route(req: LLMOutputRequest):
-            res = self.report_service.generate_output(req.text)
-            return res
+            return self.report_service.generate_output(req.text)
 
         @router.post("/long-form")
         async def long_form_route(req: LongFormReportRequest):

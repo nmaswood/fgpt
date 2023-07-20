@@ -107,7 +107,7 @@ class OpenAIReportService(ReportService):
     def get_terms(self, text: str) -> list[Term]:
         req = CallFunctionRequest(
             text=text,
-            prompt="You are an expert financial analyst. Parse the document for the requested information. If the information is not available, return 'Not Available'",
+            prompt="You are an expert financial analyst. Parse the document for the requested information. If the information is not available, do not return anything. Do not output the name of the term, only the value.",
             json_schema=terms_schema,
             function_name="parse_terms",
         )
@@ -116,7 +116,7 @@ class OpenAIReportService(ReportService):
         return [
             term
             for term in terms_from_model.terms
-            if term.term_value != "Not Available"
+            if term.term_value != "Not Available" and len(term.term_value.strip()) > 0
         ]
 
     def get_summaries(self, text: str) -> list[str]:
@@ -142,7 +142,6 @@ class OpenAIReportService(ReportService):
             function_call={"name": req.function_name},
             temperature=0,
         )
-
         res = completion.choices[0].message.function_call.arguments
 
         return json.loads(res)

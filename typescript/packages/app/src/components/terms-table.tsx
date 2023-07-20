@@ -1,5 +1,5 @@
 import { Outputs } from "@fgpt/precedent-iso";
-import { Typography } from "@mui/joy";
+import { Box, Typography } from "@mui/joy";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 
 export const TermsTable: React.FC<{
@@ -28,18 +28,8 @@ export const TermsTable: React.FC<{
       flex: 1,
       field: "termValue",
       headerName: "Term value",
-      renderCell: ({ row }) => {
-        return (
-          <Typography
-            sx={{
-              fontWeight: 400,
-              fontSize: "14px",
-            }}
-          >
-            {row.termValue}
-          </Typography>
-        );
-      },
+      minWidth: 250,
+      renderCell: ({ row }) => <RenderTermValue termValue={row.termValue} />,
     },
   ];
 
@@ -59,6 +49,29 @@ export const TermsTable: React.FC<{
       slots={{
         columnHeaders: () => null,
       }}
+      getRowHeight={() => "auto"}
     />
+  );
+};
+
+const RenderTermValue: React.FC<{ termValue: string }> = ({ termValue }) => {
+  return (
+    <Box
+      display="flex"
+      maxHeight="100%"
+      maxWidth="100%"
+      overflow="auto"
+      padding={2}
+    >
+      <Typography
+        whiteSpace="pre-wrap"
+        sx={{
+          fontWeight: 400,
+          fontSize: "14px",
+        }}
+      >
+        {termValue}
+      </Typography>
+    </Box>
   );
 };
