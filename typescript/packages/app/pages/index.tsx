@@ -51,7 +51,7 @@ const Index: React.FC = () => {
       flexDirection="column"
       bgcolor="background.body"
     >
-      <Navbar />
+      <Navbar loading={false} />
 
       <DisplayProjects
         openCreateProjects={() => setModal({ type: "create" })}
