@@ -41,7 +41,7 @@ const Admin: React.FC = () => {
       padding={2}
     >
       <>
-        <Navbar />
+        <Navbar loading={false} />
         <Typography level="h3">Admin</Typography>
 
         {user && <AdminInner />}

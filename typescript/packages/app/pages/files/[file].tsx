@@ -65,6 +65,7 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
       flexDirection="column"
     >
       <Navbar
+        loading={!file}
         project={
           file
             ? {

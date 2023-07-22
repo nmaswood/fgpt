@@ -106,7 +106,6 @@ export const JOY_THEME = extendTheme({
         background: {
           body: "#f2f2f2",
         },
-        //background: "#f2f2f2",
         primary: {
           ...PURPLE,
         },

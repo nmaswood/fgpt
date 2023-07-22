@@ -2,72 +2,35 @@ import { assertNever, FileType } from "@fgpt/precedent-iso";
 import { Chip, Typography } from "@mui/joy";
 
 export const ChipForFileType: React.FC<{ f: FileType }> = ({ f }) => {
+  return (
+    <Chip
+      size="sm"
+      color="danger"
+      sx={(theme) => ({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        background: (theme.palette.neutral as any)["75"],
+        ".MuiTypography-root": {
+          fontSize: 12,
+          fontWeight: 700,
+          color: theme.palette.neutral[600],
+        },
+        ".MuiChip-label": {
+          color: theme.palette.neutral[600],
+        },
+      })}
+    >
+      {copyForFileType(f)}
+    </Chip>
+  );
+};
+
+function copyForFileType(f: FileType): "PDF" | "XLS" {
   switch (f) {
     case "excel":
-      return (
-        <Chip
-          size="sm"
-          color="success"
-          sx={(theme) => ({
-            backgroundColor: "transparent",
-            color: theme.palette.success.solidColor,
-            ".MuiTypography-root": {
-              fontSize: 12,
-              fontWeight: 700,
-              color: theme.palette.success.solidColor,
-            },
-            ".MuiChip-label": {
-              color: theme.palette.success.solidColor,
-            },
-            "&:before": {
-              content: "''",
-              position: "absolute",
-              top: "0px",
-              right: "0px",
-              bottom: "0px",
-              left: "0px",
-              opacity: 0.15,
-              background: theme.palette.success.solidColor,
-              borderRadius: 16,
-            },
-          })}
-        >
-          <Typography>XLS</Typography>
-        </Chip>
-      );
+      return "XLS";
     case "pdf":
-      return (
-        <Chip
-          size="sm"
-          color="danger"
-          sx={(theme) => ({
-            backgroundColor: "transparent",
-            color: theme.palette.danger.solidColor,
-            ".MuiTypography-root": {
-              fontSize: 12,
-              fontWeight: 700,
-              color: theme.palette.danger.solidColor,
-            },
-            ".MuiChip-label": {
-              color: theme.palette.danger.solidColor,
-            },
-            "&:before": {
-              content: "''",
-              position: "absolute",
-              top: "0px",
-              right: "0px",
-              bottom: "0px",
-              left: "0px",
-              opacity: 0.15,
-              background: theme.palette.danger.solidColor,
-              borderRadius: 16,
-            },
-          })}
-        >
-          PDF
-        </Chip>
-      );
+      return "PDF";
     default:
       assertNever(f);
   }
-};
+}

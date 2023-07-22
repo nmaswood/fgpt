@@ -4,6 +4,8 @@ import { MAX_FILE_SIZE_BYTES } from "@fgpt/precedent-iso";
 import { Project } from "@fgpt/precedent-iso";
 import BoltIcon from "@mui/icons-material/BoltOutlined";
 import CollectionsIcon from "@mui/icons-material/CollectionsOutlined";
+import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
+
 import {
   Box,
   CircularProgress,
@@ -11,6 +13,12 @@ import {
   Tab,
   TabList,
   Tabs,
+  ToggleButtonGroup,
+  IconButton,
+  List,
+  ListItemButton,
+  ListItem,
+  ListDivider,
 } from "@mui/joy";
 import Uppy from "@uppy/core";
 import Dashboard from "@uppy/dashboard";
@@ -18,6 +26,7 @@ import XHRUpload from "@uppy/xhr-upload";
 import { useRouter } from "next/router";
 import React from "react";
 import { z } from "zod";
+import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 
 import { CLIENT_SETTINGS } from "../client-settings";
 import { useCreateChat } from "../hooks/use-create-chat";
@@ -31,6 +40,7 @@ import { DisplayChat } from "./chat";
 import { DataRoomSummary } from "./data-room-summary";
 import { DisplayFiles } from "./display-files/display-files";
 import { UploadFilesButton } from "./upload-files-button";
+import { ChatOutlined } from "@mui/icons-material";
 
 const ZTab = z.enum(["data", "chat"]);
 type Tab = z.infer<typeof ZTab>;
@@ -140,36 +150,50 @@ export const SelectedProject: React.FC<{
   return (
     <Box
       display="flex"
-      flexDirection="column"
       height="100%"
       width="100%"
       maxHeight="100%"
       overflow="auto"
     >
-      <Box
-        display="flex"
-        paddingX={2}
-        paddingTop={1}
-        marginBottom={1 / 2}
-        justifyContent="space-between"
-      >
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
-        <Tabs value={tab} onChange={(_, newValue) => setTab(newValue as any)}>
-          <TabList>
-            <Tab value="data">
+      <Box display="flex">
+        <List
+          variant="outlined"
+          size="sm"
+          sx={{
+            width: "40px",
+            "&.MuiList-root": {
+              borderRadius: 0,
+            },
+          }}
+        >
+          <ListItem>
+            <ListItemButton
+              onClick={() => setTab("data")}
+              selected={tab === "data"}
+            >
               <ListItemDecorator>
-                <CollectionsIcon />
+                <FolderOutlinedIcon fontSize="small" />
               </ListItemDecorator>
-              Data
-            </Tab>
-            <Tab value="chat">
+            </ListItemButton>
+          </ListItem>
+          <ListDivider
+            sx={{
+              margin: 0,
+            }}
+          />
+          <ListItem>
+            <ListItemButton
+              onClick={() => setTab("chat")}
+              selected={tab === "chat"}
+            >
               <ListItemDecorator>
-                <BoltIcon />
+                <ChatOutlined fontSize="small" />
               </ListItemDecorator>
-              Chat
-            </Tab>
-          </TabList>
-        </Tabs>
+            </ListItemButton>
+          </ListItem>
+
+          <ListDivider />
+        </List>
       </Box>
       {loading && (
         <Box
@@ -266,7 +290,8 @@ const SelectedProjectInner: React.FC<{
               height="100%"
               maxHeight="100%"
               overflow="auto"
-              padding={4}
+              paddingY={2}
+              paddingX={3}
               flexDirection="column"
               gap={2}
             >

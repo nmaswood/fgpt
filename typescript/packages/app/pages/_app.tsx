@@ -40,7 +40,7 @@ export default function App({ Component, pageProps }: AppProps) {
           >
             <Box
               width="100%"
-              height="62px"
+              height="48px"
               bgcolor="primary.800"
               position="absolute"
               zIndex={-100}

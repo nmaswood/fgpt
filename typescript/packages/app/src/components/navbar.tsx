@@ -13,11 +13,13 @@ import {
   Typography,
 } from "@mui/joy";
 import React from "react";
+import Image from "next/image";
 
 import { useFetchMe } from "../hooks/use-fetch-me";
 import { ImpersonateService } from "../services/impersonate-service";
 
 export const Navbar: React.FC<{
+  loading: boolean;
   project?:
     | {
         id: string;
@@ -25,11 +27,11 @@ export const Navbar: React.FC<{
       }
     | undefined;
   fileName?: string | undefined;
-}> = ({ project, fileName }) => {
+}> = ({ project, fileName, loading }) => {
   return (
     <Box
       display="flex"
-      height="62px"
+      height="48px"
       width="100%"
       maxHeight="100%"
       maxWidth="100%"
@@ -38,51 +40,64 @@ export const Navbar: React.FC<{
       paddingX={2}
       justifyContent="space-between"
     >
-      <Breadcrumbs
-        size="lg"
-        aria-label="breadcrumbs"
-        color="neutral.0"
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          ".MuiBreadcrumbs-separator": {
-            color: "white",
-          },
-        }}
-      >
-        <Typography
-          component={Link}
-          href="/"
-          level="h5"
-          sx={{
-            color: "white",
-          }}
-        >
-          Deals
-        </Typography>
-        {project && (
-          <Typography
-            level="h5"
-            component={Link}
-            href={`/projects/${project.id}`}
+      <Box display="flex" alignItems="center">
+        <Image
+          priority
+          src="/paredo-icon.svg"
+          height={18}
+          width={18}
+          alt="Paredo icon"
+        />
+        {!loading && (
+          <Breadcrumbs
+            size="lg"
+            aria-label="breadcrumbs"
+            color="neutral.0"
             sx={{
-              color: "white",
+              paddingLeft: 1,
+              paddingY: 0,
+              display: "flex",
+              alignItems: "center",
+              ".MuiBreadcrumbs-separator": {
+                color: "white",
+              },
             }}
           >
-            {project.name}
-          </Typography>
+            <Typography
+              component={Link}
+              href="/"
+              level="body1"
+              sx={{
+                color: "white",
+              }}
+            >
+              Deals
+            </Typography>
+            {project && (
+              <Typography
+                level="body1"
+                component={Link}
+                href={`/projects/${project.id}`}
+                sx={{
+                  color: "white",
+                }}
+              >
+                {project.name}
+              </Typography>
+            )}
+            {fileName && (
+              <Typography
+                level="body1"
+                sx={{
+                  color: "white",
+                }}
+              >
+                {fileName}
+              </Typography>
+            )}
+          </Breadcrumbs>
         )}
-        {fileName && (
-          <Typography
-            level="h5"
-            sx={{
-              color: "white",
-            }}
-          >
-            {fileName}
-          </Typography>
-        )}
-      </Breadcrumbs>
+      </Box>
 
       <DisplayUser />
     </Box>

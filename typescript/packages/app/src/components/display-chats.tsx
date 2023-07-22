@@ -9,6 +9,7 @@ import {
   Button,
   ButtonGroup,
   CircularProgress,
+  Divider,
   IconButton,
   Input,
   List,
@@ -47,9 +48,17 @@ export const DisplayChatList: React.FC<{
       maxHeight="100%"
       overflow="auto"
       width="100%"
-      padding={2}
+      sx={(theme) => ({
+        border: `1px solid ${theme.vars.palette.neutral[100]}`,
+        borderRadius: 8,
+      })}
     >
       <Button
+        sx={{
+          borderTopLeftRadius: 8,
+          borderTopRightRadius: 8,
+          borderRadius: 0,
+        }}
         loading={isMutating}
         startDecorator={<AddIcon />}
         onClick={async () => {
@@ -64,9 +73,11 @@ export const DisplayChatList: React.FC<{
       >
         New chat
       </Button>
+      <Divider />
 
       <List
-        sx={{ height: "100%" }}
+        sx={{ height: "100%", maxHeight: "100%", overflow: "auto" }}
+        size="sm"
         onKeyDown={(e) => {
           switch (e.key) {
             case "ArrowDown":
@@ -172,9 +183,13 @@ const ListItemEntry: React.FC<{
           key={chat.id}
           selected={isSelected}
           onClick={() => setSelectedChatId(chat.id)}
+          sx={{
+            gap: 1,
+          }}
         >
           {isEditing && (
             <Input
+              size="sm"
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => {
@@ -190,6 +205,7 @@ const ListItemEntry: React.FC<{
           <ButtonGroup>
             {isSelected && !isEditing && (
               <IconButton
+                size="sm"
                 disabled={isLoading}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -202,29 +218,32 @@ const ListItemEntry: React.FC<{
 
             {isSelected && !isEditing && (
               <IconButton
+                size="sm"
                 disabled={isLoading}
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete(chat.id);
                 }}
               >
-                <DeleteIcon />
+                <DeleteIcon fontSize="small" />
               </IconButton>
             )}
             {isEditing && (
               <IconButton
+                size="sm"
                 disabled={isLoading}
                 onClick={(e) => {
                   e.stopPropagation();
                   onSubmit();
                 }}
               >
-                <CheckIcon />
+                <CheckIcon fontSize="small" />
               </IconButton>
             )}
 
             {isEditing && (
               <IconButton
+                size="sm"
                 disabled={isLoading}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -232,7 +251,7 @@ const ListItemEntry: React.FC<{
                   setName(chat.name ?? "");
                 }}
               >
-                <CloseIcon />
+                <CloseIcon fontSize="small" />
               </IconButton>
             )}
           </ButtonGroup>

@@ -1,5 +1,6 @@
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { assertNever, Chat, ChatEntry } from "@fgpt/precedent-iso";
+import Image from "next/image";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeftOutlined";
 import ErrorIcon from "@mui/icons-material/ErrorOutlined";
 import InsertCommentIcon from "@mui/icons-material/InsertCommentOutlined";
@@ -194,10 +195,11 @@ export const DisplayChat: React.FC<{
     >
       <Box
         display="grid"
-        width="400px"
+        width="300px"
         height="100%"
         overflow="auto"
         maxHeight="100%"
+        padding={2}
       >
         <DisplayChatList
           chats={chats}
@@ -217,6 +219,7 @@ export const DisplayChat: React.FC<{
         height="100%"
         flexDirection="column"
         gap={2}
+        padding={2}
       >
         {questions.length > 0 && (
           <DisplayQuestions
@@ -268,15 +271,11 @@ export const DisplayChat: React.FC<{
             }}
             endDecorator={
               <IconButton
+                size="sm"
                 disabled={trimmed.length === 0 || loading || isMutating}
                 onClick={() => submit()}
               >
-                <SendIcon
-                  sx={{
-                    transform: "rotate(-45deg) scale(0.8)",
-                    paddingBottom: 1,
-                  }}
-                />
+                <SendIcon fontSize="small" />
               </IconButton>
             }
           />
@@ -314,7 +313,7 @@ const RenderChatEntryFromServer: React.FC<{
             <Box display="flex" width="56" height="40" marginRight={2}>
               <ResponseAvatar state={"data"} />
             </Box>
-            <Typography sx={{ whiteSpace: "pre-line" }}>
+            <Typography level="body2" sx={{ whiteSpace: "pre-line" }}>
               {chatEntry.answer}
             </Typography>
             <IconButton
@@ -418,12 +417,14 @@ const RenderChatEntryFromClient: React.FC<{
             <ResponseAvatar state={"data"} />
           </Box>
           {q.state.type === "rendered" && (
-            <Typography sx={{ whiteSpace: "pre-line" }}>
+            <Typography level="body1" sx={{ whiteSpace: "pre-line" }}>
               {q.state.value}
             </Typography>
           )}
           {q.state.type === "rendering" && (
-            <Typography sx={{ whiteSpace: "pre-line" }}>{text}</Typography>
+            <Typography level="body1" sx={{ whiteSpace: "pre-line" }}>
+              {text}
+            </Typography>
           )}
 
           {q.state.type === "rendering" && text.length === 0 && (
@@ -450,8 +451,18 @@ const ResponseAvatar: React.FC<{ state: "error" | "data" }> = ({ state }) => {
       );
     case "data":
       return (
-        <Avatar color="primary">
-          <InsertCommentIcon color="primary" />
+        <Avatar
+          sx={{
+            bgcolor: "primary.500",
+          }}
+        >
+          <Image
+            priority
+            src="/paredo-icon.svg"
+            height={18}
+            width={18}
+            alt="Paredo icon"
+          />
         </Avatar>
       );
     default:
@@ -465,8 +476,17 @@ const DisplayQuestions: React.FC<{
   disabled: boolean;
 }> = ({ questions, askQuestion, disabled }) => {
   return (
-    <Box display="flex" width="100%" maxHeight="120px" overflow="auto">
-      <List>
+    <Box
+      display="flex"
+      width="100%"
+      maxHeight="120px"
+      overflow="auto"
+      borderRadius={8}
+      sx={(theme) => ({
+        border: `1px solid ${theme.vars.palette.neutral[100]}`,
+      })}
+    >
+      <List size="sm">
         {questions.map((question, idx) => {
           return (
             <ListItemButton
@@ -474,6 +494,9 @@ const DisplayQuestions: React.FC<{
               disabled={disabled}
               onClick={() => askQuestion(question)}
             >
+              <ListItemDecorator>
+                <SendIcon fontSize="small" color="primary" />
+              </ListItemDecorator>
               <ListItem>
                 <ListItemContent>{question}</ListItemContent>
               </ListItem>
@@ -501,7 +524,9 @@ const UserAvatarWithResponse: React.FC<{
           <Avatar src={picture} />
         </ListItemDecorator>
       )}
-      <ListItemContent>{text}</ListItemContent>
+      <ListItemContent>
+        <Typography level="body1">{text}</Typography>
+      </ListItemContent>
     </ListItem>
   );
 };

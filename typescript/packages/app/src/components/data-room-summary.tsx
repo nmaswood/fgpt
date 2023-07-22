@@ -35,9 +35,14 @@ export const DataRoomSummary: React.FC<{
       borderRadius={8}
     >
       <Box display="flex" width="100%" justifyContent="space-between">
-        <Typography level="h4">Data room summary</Typography>
+        <Typography level="h4">Data Room Summary</Typography>
         {showCaseFile && showCaseFile.type == "set" && (
-          <Button disabled={true}>View full report</Button>
+          <Button
+            component={Link}
+            href={`/files/${showCaseFile.fileReferenceId}`}
+          >
+            View full report
+          </Button>
         )}
       </Box>
 
@@ -152,6 +157,9 @@ const Dispatch: React.FC<{ showCaseFile: RenderShowCaseFile.File }> = ({
                   src={showCaseFile.url}
                   alt="thumbnail of CIM"
                   sizes="100vw"
+                  style={{
+                    borderRadius: "8px",
+                  }}
                 />
               </Box>
             )}
