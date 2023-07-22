@@ -1,9 +1,7 @@
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { assertNever, Chat, ChatEntry } from "@fgpt/precedent-iso";
-import Image from "next/image";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeftOutlined";
 import ErrorIcon from "@mui/icons-material/ErrorOutlined";
-import InsertCommentIcon from "@mui/icons-material/InsertCommentOutlined";
 import SendIcon from "@mui/icons-material/SendOutlined";
 import {
   Avatar,
@@ -20,6 +18,7 @@ import {
   Table,
   Typography,
 } from "@mui/joy";
+import Image from "next/image";
 import NextLink from "next/link";
 import React from "react";
 
@@ -219,7 +218,8 @@ export const DisplayChat: React.FC<{
         height="100%"
         flexDirection="column"
         gap={2}
-        padding={2}
+        paddingY={2}
+        paddingRight={2}
       >
         {questions.length > 0 && (
           <DisplayQuestions
@@ -249,13 +249,7 @@ export const DisplayChat: React.FC<{
             </List>
           )}
         </Box>
-        <Box
-          display="flex"
-          width="100%"
-          paddingBottom={10}
-          position="sticky"
-          bottom={0}
-        >
+        <Box display="flex" width="100%" position="sticky" bottom={0}>
           <Input
             placeholder="Send a message..."
             fullWidth

@@ -1,5 +1,5 @@
 import { assertNever, FileType } from "@fgpt/precedent-iso";
-import { Chip, Typography } from "@mui/joy";
+import { Chip } from "@mui/joy";
 
 export const ChipForFileType: React.FC<{ f: FileType }> = ({ f }) => {
   return (

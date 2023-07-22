@@ -2,23 +2,16 @@ import "@uppy/dashboard/dist/style.min.css";
 
 import { MAX_FILE_SIZE_BYTES } from "@fgpt/precedent-iso";
 import { Project } from "@fgpt/precedent-iso";
-import BoltIcon from "@mui/icons-material/BoltOutlined";
-import CollectionsIcon from "@mui/icons-material/CollectionsOutlined";
-import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
-
+import { ChatOutlined } from "@mui/icons-material";
+import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import {
   Box,
   CircularProgress,
-  ListItemDecorator,
-  Tab,
-  TabList,
-  Tabs,
-  ToggleButtonGroup,
-  IconButton,
   List,
-  ListItemButton,
-  ListItem,
   ListDivider,
+  ListItem,
+  ListItemButton,
+  ListItemDecorator,
 } from "@mui/joy";
 import Uppy from "@uppy/core";
 import Dashboard from "@uppy/dashboard";
@@ -26,7 +19,6 @@ import XHRUpload from "@uppy/xhr-upload";
 import { useRouter } from "next/router";
 import React from "react";
 import { z } from "zod";
-import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 
 import { CLIENT_SETTINGS } from "../client-settings";
 import { useCreateChat } from "../hooks/use-create-chat";
@@ -40,7 +32,6 @@ import { DisplayChat } from "./chat";
 import { DataRoomSummary } from "./data-room-summary";
 import { DisplayFiles } from "./display-files/display-files";
 import { UploadFilesButton } from "./upload-files-button";
-import { ChatOutlined } from "@mui/icons-material";
 
 const ZTab = z.enum(["data", "chat"]);
 type Tab = z.infer<typeof ZTab>;

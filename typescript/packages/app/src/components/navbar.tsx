@@ -12,8 +12,8 @@ import {
   MenuItem,
   Typography,
 } from "@mui/joy";
-import React from "react";
 import Image from "next/image";
+import React from "react";
 
 import { useFetchMe } from "../hooks/use-fetch-me";
 import { ImpersonateService } from "../services/impersonate-service";
