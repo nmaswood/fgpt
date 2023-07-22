@@ -124,13 +124,13 @@ frozenlist = ">=1.1.0"
 
 [[package]]
 name = "anthropic"
-version = "0.3.5"
+version = "0.3.6"
 description = "Client library for the anthropic API"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "anthropic-0.3.5-py3-none-any.whl", hash = "sha256:38a0aeef126092e1f84e46a8982a552c5de3ec643582ad39fc68a07dde7d2acd"},
-    {file = "anthropic-0.3.5.tar.gz", hash = "sha256:ec0488232d19a4c048ee2ddd135de31d62c549f2d169891a6d0a05947335474a"},
+    {file = "anthropic-0.3.6-py3-none-any.whl", hash = "sha256:45036a96f38598be82237c12d77d7aefe814a3bceb9da0bc6721a381c29821b1"},
+    {file = "anthropic-0.3.6.tar.gz", hash = "sha256:6e644c84ad9375dc12e07b36aab1862ca4db98eb1750e08acfe4847e62afe0dd"},
 ]
 
 [package.dependencies]
@@ -261,13 +261,13 @@ files = [
 
 [[package]]
 name = "certifi"
-version = "2023.5.7"
+version = "2023.7.22"
 description = "Python package for providing Mozilla's CA Bundle."
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "certifi-2023.5.7-py3-none-any.whl", hash = "sha256:c6c2e98f5c7869efca1f8916fed228dd91539f9f1b444c314c06eef02980c716"},
-    {file = "certifi-2023.5.7.tar.gz", hash = "sha256:0f0d56dc5a6ad56fd4ba36484d6cc34451e1c6548c61daad8c320169f91eddc7"},
+    {file = "certifi-2023.7.22-py3-none-any.whl", hash = "sha256:92d6037539857d8206b8f6ae472e8b77db8058fec5937a1ef3f54304089edbb9"},
+    {file = "certifi-2023.7.22.tar.gz", hash = "sha256:539cc1d13202e33ca466e88b2807e29f4c13049d6d87031a3c110744495cb082"},
 ]
 
 [[package]]
@@ -1374,13 +1374,13 @@ files = [
 
 [[package]]
 name = "pyright"
-version = "1.1.317"
+version = "1.1.318"
 description = "Command line wrapper for pyright"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pyright-1.1.317-py3-none-any.whl", hash = "sha256:9cf24f83fe8f2cf00773068e06ce771f03331590c7d5e771546f81d7f60efaba"},
-    {file = "pyright-1.1.317.tar.gz", hash = "sha256:74da4d3e2dcfe66a2d1d1001e16431ec17aac0ad35b03c0410f7379c2cb5c7f0"},
+    {file = "pyright-1.1.318-py3-none-any.whl", hash = "sha256:056c1b2e711c3526e32919de1684ae599d34b7ec27e94398858a43f56ac9ba9b"},
+    {file = "pyright-1.1.318.tar.gz", hash = "sha256:69dcf9c32d5be27d531750de627e76a7cadc741d333b547c09044278b508db7b"},
 ]
 
 [package.dependencies]
