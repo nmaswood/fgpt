@@ -1,4 +1,3 @@
-import googlecloudprofiler
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -35,15 +34,7 @@ from .settings import SETTINGS
 app = FastAPI()
 
 logger.info("Starting server")
-if SETTINGS.tracing_enabled:
-    logger.info("Profiling enabled")
-    googlecloudprofiler.start(
-        service="springtime",
-        service_version="1.0.1",
-        verbose=2,
-    )
-else:
-    logger.info("Profiling disabled")
+
 
 OBJECT_STORE = GCSObjectStore()
 ANTHROPIC_CLIENT = AnthropicClient()

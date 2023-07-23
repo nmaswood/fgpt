@@ -25,7 +25,6 @@ httpx = "^0.24.1"
 anthropic = "^0.3.2"
 pymupdf = "^1.22.5"
 pillow = "^10.0.0"
-google-cloud-profiler = "^4.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
