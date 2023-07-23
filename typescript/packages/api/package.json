@@ -5,6 +5,7 @@
   "dependencies": {
     "@fgpt/precedent-iso": "workspace:^",
     "@fgpt/precedent-node": "workspace:^",
+    "@google-cloud/profiler": "^5.0.4",
     "@types/lodash": "^4.14.195",
     "@types/multer": "^1.4.7",
     "cors": "^2.8.5",

@@ -95,7 +95,16 @@ resource "google_sql_database_instance" "instance" {
       ipv4_enabled                                  = true
       private_network                               = google_compute_network.vpc_network.id
       enable_private_path_for_google_cloud_services = true
+      require_ssl                                   = true
     }
+
+    insights_config {
+      query_insights_enabled = true
+      query_string_length    = 4500
+
+    }
+
+
   }
   deletion_protection = "false"
 
