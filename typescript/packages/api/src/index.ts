@@ -52,13 +52,13 @@ import { LLMOutputRouter } from "./routers/llm-output.router";
 import { DebugRouter } from "./routers/debug-router";
 import { AdminRouter } from "./routers/admin-router";
 import { ensureAdmin } from "./middleware/admin-middleware";
-import profile from "@google-cloud/profiler";
+import * as profiler from "@google-cloud/profiler";
 
 LOGGER.info("Server starting ...");
 
 if (SETTINGS.tracingEnabled) {
   LOGGER.info("Profile enabled");
-  profile.start({
+  profiler.start({
     serviceContext: {
       service: "api",
       version: "1.0.0",
