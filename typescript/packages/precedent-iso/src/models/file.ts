@@ -15,6 +15,7 @@ export interface FileReference {
   bucketName: string;
   createdAt: Date;
   status: FileStatus;
+  description: string | undefined;
 }
 
 export interface LoadedFile {

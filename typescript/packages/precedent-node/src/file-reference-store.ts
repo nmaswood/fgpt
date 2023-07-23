@@ -38,7 +38,7 @@ export interface FileReferenceStore {
   getThumbnailPath(fileReferenceId: string): Promise<string | undefined>;
 }
 
-const FIELDS = sql.fragment` id, file_name, organization_id, project_id, content_type, path, bucket_name, uploaded_at, COALESCE(status, 'pending') as status`;
+const FIELDS = sql.fragment` id, file_name, organization_id, project_id, content_type, path, bucket_name, uploaded_at, COALESCE(status, 'pending') as status, description`;
 
 export class PsqlFileReferenceStore implements FileReferenceStore {
   constructor(private readonly pool: DatabasePool) {}
@@ -70,7 +70,7 @@ WHERE
       return [];
     }
     const uniq = [...new Set(fileIds)];
-    const { rows } = await this.pool.query(
+    const rows = await this.pool.any(
       sql.type(ZFileReferenceRow)`
 SELECT
     ${FIELDS}
@@ -84,7 +84,7 @@ WHERE
   }
 
   async list(projectId: string): Promise<FileReference[]> {
-    const { rows } = await this.pool.query(
+    const rows = await this.pool.any(
       sql.type(ZFileReferenceRow)`
 SELECT
     ${FIELDS}
@@ -213,18 +213,22 @@ const ZFileReferenceRow = z
     bucket_name: z.string(),
     uploaded_at: z.number(),
     status: ZFileStatus,
+    description: z.string().nullable(),
   })
-  .transform((row) => ({
-    id: row.id,
-    fileName: row.file_name,
-    organizationId: row.organization_id,
-    projectId: row.project_id,
-    contentType: row.content_type,
-    path: row.path,
-    bucketName: row.bucket_name,
-    createdAt: new Date(row.uploaded_at),
-    status: row.status,
-  }));
+  .transform(
+    (row): FileReference => ({
+      id: row.id,
+      fileName: row.file_name,
+      organizationId: row.organization_id,
+      projectId: row.project_id,
+      contentType: row.content_type,
+      path: row.path,
+      bucketName: row.bucket_name,
+      createdAt: new Date(row.uploaded_at),
+      status: row.status,
+      description: row.description ?? undefined,
+    }),
+  );
 
 const ZThumbnailRow = z
   .object({

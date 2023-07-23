@@ -58,15 +58,16 @@ export class FileToRenderServiceImpl implements FileRenderService {
       signedUrl,
       projectId: file.projectId,
       output: transformOutput(output.map((row) => row.output)),
+      status: file.status,
+      description: file.description,
     };
   }
 
   async #forPDF(file: FileReference): Promise<FileToRender.PDFFile> {
-    const [signedUrl, [derived], report, output, project] = await Promise.all([
+    const [signedUrl, [derived], report, project] = await Promise.all([
       this.objectStorageService.getSignedUrl(file.bucketName, file.path),
       this.excelAssetStore.list(file.id),
       this.reportService.forFileReferenceId(file.id),
-      this.excelOutputStore.forDerived(file.id),
       this.projectStore.get(file.projectId),
     ]);
 
@@ -78,19 +79,15 @@ export class FileToRenderServiceImpl implements FileRenderService {
       projectId: file.projectId,
       projectName: project?.name ?? file.projectId,
       report,
-      derived: derived
-        ? await (async () => {
-            const signedUrl = await this.objectStorageService.getSignedUrl(
-              derived.bucketName,
-              derived.path,
-            );
-            return {
-              id: derived.id,
-              signedUrl,
-              output: transformOutput(output.map((row) => row.output)),
-            };
-          })()
+      derivedSignedUrl: derived
+        ? await this.objectStorageService.getSignedUrl(
+            derived.bucketName,
+            derived.path,
+          )
         : undefined,
+
+      status: file.status,
+      description: file.description,
     };
   }
 }

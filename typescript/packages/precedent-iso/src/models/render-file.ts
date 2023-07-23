@@ -1,14 +1,9 @@
 import { AnalyzeResponseChunk } from "./excel";
+import { FileStatus } from "./file";
 import { Report } from "./llm-outputs";
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace FileToRender {
-  export interface DerivedTable {
-    id: string;
-    signedUrl: string;
-    output: ExcelOutputToRender;
-  }
-
   export interface PDFFile {
     type: "pdf";
     id: string;
@@ -17,7 +12,9 @@ export namespace FileToRender {
     projectId: string;
     projectName: string;
     fileName: string;
-    derived: DerivedTable | undefined;
+    derivedSignedUrl: string | undefined;
+    status: FileStatus;
+    description: string | undefined;
   }
 
   export type File = PDFFile | ExcelFile;
@@ -30,6 +27,9 @@ export namespace FileToRender {
     fileName: string;
     signedUrl: string;
     output: ExcelOutputToRender;
+    status: FileStatus;
+
+    description: string | undefined;
   }
 }
 
