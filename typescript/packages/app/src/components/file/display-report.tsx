@@ -2,16 +2,23 @@ import {
   AnalyzeResponseChunk,
   assertNever,
   ExcelOutputToRender,
+  FileStatus,
   FileToRender,
   Outputs,
 } from "@fgpt/precedent-iso";
+import ArrowDropDown from "@mui/icons-material/ArrowDropDownOutlined";
+import ArrowRight from "@mui/icons-material/ArrowRightOutlined";
 import {
   Box,
+  Button,
   Chip,
   Divider,
   List,
   ListItem,
   ListItemContent,
+  ListItemDecorator,
+  Menu,
+  MenuItem,
   Option,
   Select,
   Typography,
@@ -37,8 +44,8 @@ export const DisplayFileReport: React.FC<{
       gap={2}
       bgcolor="#F5F5F5"
     >
-      <Baz />
-      <Bar />
+      <ForOverview status={file.status} description={file.description} />
+      <ForReport />
       <Dispatch file={file} />
     </Box>
   );
@@ -55,7 +62,7 @@ const Dispatch: React.FC<{ file: FileToRender.File }> = ({ file }) => {
   }
 };
 
-export const ForExcelOutput: React.FC<{ output: ExcelOutputToRender }> = ({
+const ForExcelOutput: React.FC<{ output: ExcelOutputToRender }> = ({
   output: { claude, gpt },
 }) => {
   const hasBoth = gpt.length > 0 && claude.length > 0;
@@ -92,9 +99,7 @@ export const ForExcelOutput: React.FC<{ output: ExcelOutputToRender }> = ({
   );
 };
 
-export const ForExcel: React.FC<{ chunks: AnalyzeResponseChunk[] }> = ({
-  chunks,
-}) => {
+const ForExcel: React.FC<{ chunks: AnalyzeResponseChunk[] }> = ({ chunks }) => {
   return (
     <>
       {chunks.map((chunk, i) => (
@@ -104,7 +109,7 @@ export const ForExcel: React.FC<{ chunks: AnalyzeResponseChunk[] }> = ({
   );
 };
 
-export const ForExcelValue: React.FC<{ chunk: AnalyzeResponseChunk }> = ({
+const ForExcelValue: React.FC<{ chunk: AnalyzeResponseChunk }> = ({
   chunk,
 }) => {
   return (
@@ -163,7 +168,10 @@ const PdfReport: React.FC<{ report: Outputs.Report | undefined }> = ({
   );
 };
 
-const Baz = () => {
+const ForOverview: React.FC<{
+  status: FileStatus;
+  description: string | undefined;
+}> = ({ status, description }) => {
   return (
     <Box
       display="flex"
@@ -187,17 +195,21 @@ const Baz = () => {
         >
           Overview
         </Typography>
-        <StatusBubble />
+        <StatusBubble status={status} />
       </Box>
       <Divider />
-      <Box display="flex" padding={2}>
-        <Typography>I love cats</Typography>
-      </Box>
+
+      {description && (
+        <Box display="flex" padding={2}>
+          <Typography>Description</Typography>
+          <Typography>{description}</Typography>
+        </Box>
+      )}
     </Box>
   );
 };
 
-const Bar = () => {
+const ForReport = () => {
   return (
     <Box
       display="flex"
@@ -231,6 +243,7 @@ const Bar = () => {
           <Option value="gpt4">GPT-4</Option>
           <Option value="claude">Claude</Option>
         </Select>
+        <DownloadButton />
       </Box>
       <Divider />
       <Box display="flex" padding={2}>
@@ -240,10 +253,10 @@ const Bar = () => {
   );
 };
 
-const StatusBubble = () => {
+const StatusBubble: React.FC<{ status: FileStatus }> = ({ status }) => {
   return (
     <Box>
-      <Chip>Ready</Chip>
+      <Chip>{status}</Chip>
     </Box>
   );
 };
@@ -340,3 +353,47 @@ function formatSheetNames(sheetNames: string[]): string {
 
   return `${first} to ${last}`;
 }
+
+const OPTIONS = ["Download Asset", "Download Extracted Tables"];
+const DownloadButton: React.FC = () => {
+  const [size, setSize] = React.useState("Medium");
+  const buttonRef = React.useRef(null);
+  const [open, setOpen] = React.useState(false);
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  return (
+    <div>
+      <Button
+        ref={buttonRef}
+        variant="outlined"
+        onClick={() => {
+          setOpen(!open);
+        }}
+        endDecorator={<ArrowDropDown />}
+      >
+        Download
+      </Button>
+      <Menu anchorEl={buttonRef.current} open={open} onClose={handleClose}>
+        {OPTIONS.map((item: string) => (
+          <MenuItem
+            key={item}
+            role="menuitemradio"
+            aria-checked={item === size ? "true" : "false"}
+            onClick={() => {
+              setSize(item);
+              handleClose();
+            }}
+          >
+            <ListItemDecorator>
+              {item === size && <ArrowRight />}
+            </ListItemDecorator>{" "}
+            {item}
+          </MenuItem>
+        ))}
+      </Menu>
+    </div>
+  );
+};

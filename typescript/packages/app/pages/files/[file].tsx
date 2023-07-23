@@ -1,4 +1,3 @@
-import { ChatOutlined } from "@mui/icons-material";
 import AssessmentIcon from "@mui/icons-material/AssessmentOutlined";
 import AutoModeOutlinedIcon from "@mui/icons-material/AutoModeOutlined";
 import {
@@ -16,7 +15,7 @@ import React from "react";
 import { DisplayAsset } from "../../src/components/file/display-asset";
 import { DisplayFileChat } from "../../src/components/file/display-file-chat";
 import { DisplayProgress } from "../../src/components/file/display-progress";
-import { DisplayFileReport } from "../../src/components/file/report";
+import { DisplayFileReport } from "../../src/components/file/display-report";
 import { useTabState } from "../../src/components/file/use-tab-state";
 import { Navbar } from "../../src/components/navbar";
 import { useFetchFileToRender } from "../../src/hooks/use-fetch-file-to-render";
