@@ -42,8 +42,19 @@ import {
 } from "@fgpt/precedent-node";
 import { SETTINGS, Settings } from "./settings";
 import { MainRouter } from "./router";
+import * as profiler from "@google-cloud/profiler";
 
 LOGGER.info("Server starting...");
+
+if (SETTINGS.tracingEnabled) {
+  LOGGER.info("Profile enabled");
+  profiler.start({
+    serviceContext: {
+      service: "api",
+      version: "1.0.0",
+    },
+  });
+}
 
 async function start(settings: Settings) {
   const app = express();

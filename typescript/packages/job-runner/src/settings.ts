@@ -17,6 +17,7 @@ const ZSettings = z.object({
   }),
 
   serviceToServiceSecret: z.string(),
+  tracingEnabled: z.boolean(),
 
   claudeReportGeneration: z.boolean(),
 });
@@ -45,4 +46,5 @@ export const SETTINGS = ZSettings.parse({
 
   claudeReportGeneration:
     process.env["CLAUDE_REPORT_GENERATION"]?.toLowerCase() === "true",
+  tracingEnabled: process.env["TRACING_ENABLED"]?.toLowerCase() === "true",
 });

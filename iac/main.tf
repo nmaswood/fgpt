@@ -617,6 +617,11 @@ resource "google_cloud_run_v2_service" "job_runner_server" {
         value = var.service_to_service_secret
       }
 
+      env {
+        name  = "TRACING_ENABLED"
+        value = "true"
+      }
+
 
       volume_mounts {
         name       = "cloudsql"
@@ -900,6 +905,12 @@ resource "google_service_account" "cloud_run_service_account" {
 resource "google_project_iam_member" "cloudrun_service_account_sql_role" {
   project = var.project
   role    = "roles/cloudsql.client"
+  member  = "serviceAccount:${google_service_account.cloud_run_service_account.email}"
+}
+
+resource "google_project_iam_member" "cloudrun_service_agent" {
+  project = var.project
+  role    = "roles/cloudprofiler.agent"
   member  = "serviceAccount:${google_service_account.cloud_run_service_account.email}"
 }
 

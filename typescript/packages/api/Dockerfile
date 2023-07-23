@@ -17,8 +17,8 @@ COPY packages/precedent-node packages/precedent-node
 COPY packages/api packages/api
 
 
-RUN YARN_ENABLE_INLINE_BUILDS=true yarn workspaces focus @fgpt/api  && \
-    YARN_ENABLE_INLINE_BUILDS=true yarn workspaces foreach -tvp --include @fgpt/api --include @fgpt/precedent-iso --include @fgpt/precedent-node run build && \
+RUN yarn workspaces focus @fgpt/api  && \
+    yarn workspaces foreach -tvp --include @fgpt/api --include @fgpt/precedent-iso --include @fgpt/precedent-node run build && \
     yarn cache clean;
 
 WORKDIR "/usr/src/target/packages/api"

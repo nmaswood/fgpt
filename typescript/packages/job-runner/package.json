@@ -5,6 +5,7 @@
   "dependencies": {
     "@fgpt/precedent-iso": "workspace:^",
     "@fgpt/precedent-node": "workspace:^",
+    "@google-cloud/profiler": "^5.0.4",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-async-errors": "^3.1.1",

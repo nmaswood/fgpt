@@ -2,7 +2,8 @@ FROM node:18-bullseye-slim AS build
 
 WORKDIR /usr/src/target
 
-RUN apt-get update && apt-get install -y ca-certificates
+RUN apt-get update && apt-get install -y ca-certificates build-essential python3 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*;
 
 RUN yarn set version berry && \
     yarn plugin import workspace-tools && \
