@@ -6,6 +6,7 @@
     "@fgpt/precedent-iso": "workspace:^",
     "@fgpt/precedent-node": "workspace:^",
     "@google-cloud/profiler": "^5.0.4",
+    "@google-cloud/trace-agent": "^7.1.2",
     "@types/lodash": "^4.14.195",
     "@types/multer": "^1.4.7",
     "cors": "^2.8.5",

@@ -1,61 +1,13 @@
 import * as dotenv from "dotenv";
 
 dotenv.config();
-import "express-async-errors"; // eslint-disable-line
-
-import cors from "cors";
-import express from "express";
-import { expressjwt } from "express-jwt";
-
-import { expressJwtSecret } from "jwks-rsa";
-
-import { LOGGER } from "./logger";
-import { errorLogger } from "./middleware/error-logger";
-import { errorResponder } from "./middleware/error-responder";
-import { invalidPathHandler } from "./middleware/invalid-path-handler";
+// eslint-disable-next-line simple-import-sort/imports
 import { SETTINGS } from "./settings";
-import { dataBasePool } from "./sql";
-import helmet from "helmet";
 
-import {
-  GoogleCloudStorageService,
-  MLServiceClientImpl,
-  PsqlFileReferenceStore,
-  PSqlProjectStore,
-  PSqlTaskStore,
-  PsqlTextChunkStore,
-  PsqlUserOrgService,
-  PsqlLoadedFileStore,
-  PsqlChatStore,
-  PsqlQuestionStore,
-  ReportServiceImpl,
-  PsqlMiscOutputStore,
-  PubsubMessageBusService,
-  PsqlExcelAssetStore,
-  PsqlExcelOutputStore,
-  FileToRenderServiceImpl,
-  ProcessedFileProgressServiceImpl,
-  ExcelProgressServiceImpl,
-  axiosClientForMlService,
-  PineconeVectorService,
-  PsqlShowCaseFileStore,
-  RenderShowCaseFileServiceImpl,
-  FileStatusServiceImpl,
-} from "@fgpt/precedent-node";
-import { UserInformationMiddleware } from "./middleware/user-information-middleware";
-import { UserOrgRouter } from "./routers/user-org-router";
-import { ProjectRouter } from "./routers/project-router";
-import { FileRouter } from "./routers/file-router";
-import { ChatRouter } from "./routers/chat-router";
-import { TextGroupRouter } from "./routers/text-group-router";
-import { LLMOutputRouter } from "./routers/llm-output.router";
-import { DebugRouter } from "./routers/debug-router";
-import { AdminRouter } from "./routers/admin-router";
-import { ensureAdmin } from "./middleware/admin-middleware";
 import * as profiler from "@google-cloud/profiler";
+import * as tracer from "@google-cloud/trace-agent";
 
-LOGGER.info("Server starting ...");
-
+import "express-async-errors"; // eslint-disable-line
 if (SETTINGS.tracingEnabled) {
   LOGGER.info("Profile enabled");
   profiler.start({
@@ -64,7 +16,57 @@ if (SETTINGS.tracingEnabled) {
       version: "1.0.0",
     },
   });
+  tracer.start();
 }
+
+import {
+  axiosClientForMlService,
+  ExcelProgressServiceImpl,
+  FileStatusServiceImpl,
+  FileToRenderServiceImpl,
+  GoogleCloudStorageService,
+  MLServiceClientImpl,
+  PineconeVectorService,
+  ProcessedFileProgressServiceImpl,
+  PsqlChatStore,
+  PsqlExcelAssetStore,
+  PsqlExcelOutputStore,
+  PsqlFileReferenceStore,
+  PsqlLoadedFileStore,
+  PsqlMiscOutputStore,
+  PSqlProjectStore,
+  PsqlQuestionStore,
+  PsqlShowCaseFileStore,
+  PSqlTaskStore,
+  PsqlTextChunkStore,
+  PsqlUserOrgService,
+  PubsubMessageBusService,
+  RenderShowCaseFileServiceImpl,
+  ReportServiceImpl,
+} from "@fgpt/precedent-node";
+import cors from "cors";
+import express from "express";
+import { expressjwt } from "express-jwt";
+import helmet from "helmet";
+import { expressJwtSecret } from "jwks-rsa";
+
+import { LOGGER } from "./logger";
+import { ensureAdmin } from "./middleware/admin-middleware";
+import { errorLogger } from "./middleware/error-logger";
+import { errorResponder } from "./middleware/error-responder";
+import { invalidPathHandler } from "./middleware/invalid-path-handler";
+import { UserInformationMiddleware } from "./middleware/user-information-middleware";
+import { AdminRouter } from "./routers/admin-router";
+import { ChatRouter } from "./routers/chat-router";
+import { DebugRouter } from "./routers/debug-router";
+import { FileRouter } from "./routers/file-router";
+import { LLMOutputRouter } from "./routers/llm-output.router";
+import { ProjectRouter } from "./routers/project-router";
+import { TextGroupRouter } from "./routers/text-group-router";
+import { UserOrgRouter } from "./routers/user-org-router";
+import { dataBasePool } from "./sql";
+
+LOGGER.info("Server starting ...");
 
 const jwtCheck = expressjwt({
   secret: expressJwtSecret({
