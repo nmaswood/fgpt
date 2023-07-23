@@ -40,8 +40,10 @@ WHERE
 
   async getForFile(fileReferenceId: string): Promise<Outputs.MiscValue[]> {
     const result = await this.pool.any(sql.type(ZGetMetricsForFile)`
+
 SELECT
-    metrics, text_chunk.chunk_order as chunk_order
+    metrics,
+    text_chunk.chunk_order as chunk_order
 FROM
     text_chunk_metrics
     JOIN text_chunk ON text_chunk.id = text_chunk_metrics.text_chunk_id

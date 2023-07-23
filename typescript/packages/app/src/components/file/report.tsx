@@ -7,6 +7,8 @@ import {
 } from "@fgpt/precedent-iso";
 import {
   Box,
+  Chip,
+  Divider,
   List,
   ListItem,
   ListItemContent,
@@ -31,7 +33,12 @@ export const DisplayFileReport: React.FC<{
       maxHeight="100%"
       overflow="auto"
       flexDirection="column"
+      padding={2}
+      gap={2}
+      bgcolor="#F5F5F5"
     >
+      <Baz />
+      <Bar />
       <Dispatch file={file} />
     </Box>
   );
@@ -40,7 +47,7 @@ export const DisplayFileReport: React.FC<{
 const Dispatch: React.FC<{ file: FileToRender.File }> = ({ file }) => {
   switch (file.type) {
     case "pdf":
-      return <ForPDF report={file.report} />;
+      return <PdfReport report={file.report} />;
     case "excel":
       return <ForExcelOutput output={file.output} />;
     default:
@@ -116,7 +123,7 @@ export const ForExcelValue: React.FC<{ chunk: AnalyzeResponseChunk }> = ({
   );
 };
 
-const ForPDF: React.FC<{ report: Outputs.Report | undefined }> = ({
+const PdfReport: React.FC<{ report: Outputs.Report | undefined }> = ({
   report,
 }) => {
   const [value, setValue] = React.useState<ReportType>("gpt4");
@@ -156,6 +163,91 @@ const ForPDF: React.FC<{ report: Outputs.Report | undefined }> = ({
   );
 };
 
+const Baz = () => {
+  return (
+    <Box
+      display="flex"
+      width="100%"
+      maxHeight="100%"
+      overflow="auto"
+      minHeight="200px"
+      sx={(theme) => ({
+        border: `1px solid ${theme.vars.palette.neutral[100]}`,
+      })}
+      flexDirection="column"
+      borderRadius={8}
+      bgcolor="neutral.0"
+    >
+      <Box display="flex" gap={2} padding={2}>
+        <Typography
+          level="h4"
+          sx={{
+            fontWeight: 700,
+          }}
+        >
+          Overview
+        </Typography>
+        <StatusBubble />
+      </Box>
+      <Divider />
+      <Box display="flex" padding={2}>
+        <Typography>I love cats</Typography>
+      </Box>
+    </Box>
+  );
+};
+
+const Bar = () => {
+  return (
+    <Box
+      display="flex"
+      width="100%"
+      maxHeight="100%"
+      overflow="auto"
+      minHeight="200px"
+      sx={(theme) => ({
+        border: `1px solid ${theme.vars.palette.neutral[100]}`,
+      })}
+      flexDirection="column"
+      borderRadius={8}
+      bgcolor="white"
+    >
+      <Box display="flex" gap={2} padding={2}>
+        <Typography
+          level="h4"
+          sx={{
+            fontWeight: 700,
+          }}
+        >
+          Report
+        </Typography>
+
+        <Select
+          value={"claude"}
+          sx={{
+            width: "fit-content",
+          }}
+        >
+          <Option value="gpt4">GPT-4</Option>
+          <Option value="claude">Claude</Option>
+        </Select>
+      </Box>
+      <Divider />
+      <Box display="flex" padding={2}>
+        <Typography>I love cats</Typography>
+      </Box>
+    </Box>
+  );
+};
+
+const StatusBubble = () => {
+  return (
+    <Box>
+      <Chip>Ready</Chip>
+    </Box>
+  );
+};
+
 const ClaudeReport: React.FC<{
   longForm: string[];
 }> = ({ longForm }) => {
@@ -182,7 +274,7 @@ const ChatGPTReport: React.FC<{
 
       {summaries.length > 0 && (
         <>
-          <Typography level="h4">Summary</Typography>
+          <Typography level="h5">Summary</Typography>
 
           <List sx={{ listStyleType: "disc" }}>
             {summaries.map((summary, idx) => (

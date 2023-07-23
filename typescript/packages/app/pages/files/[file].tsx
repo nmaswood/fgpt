@@ -83,21 +83,6 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
         maxWidth="100%"
         overflow="auto"
       >
-        <Box display="flex" width="100%" height="100%" flexDirection="column">
-          {file ? (
-            <DisplayAsset fileToRender={file} />
-          ) : (
-            <Box
-              display="flex"
-              width="100%"
-              height="100%"
-              justifyContent="center"
-              alignItems="center"
-            >
-              <CircularProgress />
-            </Box>
-          )}
-        </Box>
         <Box
           height="100%"
           width="100%"
@@ -184,6 +169,28 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
               />
             )}
           </Box>
+        </Box>
+        <Box
+          display="flex"
+          width="100%"
+          height="100%"
+          flexDirection="column"
+          padding={2}
+          bgcolor="neutral.100"
+        >
+          {file ? (
+            <DisplayAsset fileToRender={file} />
+          ) : (
+            <Box
+              display="flex"
+              width="100%"
+              height="100%"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <CircularProgress />
+            </Box>
+          )}
         </Box>
       </Box>
     </Box>

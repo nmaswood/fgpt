@@ -59,7 +59,7 @@ export const Navbar: React.FC<{
               display: "flex",
               alignItems: "center",
               ".MuiBreadcrumbs-separator": {
-                color: "white",
+                color: "neutral.0",
               },
             }}
           >
@@ -68,7 +68,8 @@ export const Navbar: React.FC<{
               href="/"
               level="body1"
               sx={{
-                color: "white",
+                color: "neutral.0",
+                ...(project || fileName ? { opacity: 0.75 } : {}),
               }}
             >
               Deals
@@ -79,7 +80,8 @@ export const Navbar: React.FC<{
                 component={Link}
                 href={`/projects/${project.id}`}
                 sx={{
-                  color: "white",
+                  color: "neutral.0",
+                  ...(fileName ? { opacity: 0.75 } : {}),
                 }}
               >
                 {project.name}
@@ -89,7 +91,7 @@ export const Navbar: React.FC<{
               <Typography
                 level="body1"
                 sx={{
-                  color: "white",
+                  color: "neutral.0",
                 }}
               >
                 {fileName}

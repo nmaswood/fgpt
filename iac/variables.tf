@@ -99,7 +99,11 @@ variable "auth0_api_identifier" {
 variable "auth0_secret" {}
 
 variable "auth0_logo_uri" {
-  default = "https://storage.googleapis.com/nasr-public/fgpt-logo.svg"
+  default = "https://storage.googleapis.com/nasr-public/paredo-logo.svg"
+}
+
+variable "auth0_client_name" {
+  default = "Paredo"
 }
 
 // ML SERVICE

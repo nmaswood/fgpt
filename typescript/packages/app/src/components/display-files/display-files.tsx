@@ -108,7 +108,14 @@ export const DisplayFiles: React.FC<{
       borderRadius={8}
     >
       <Box display="flex" width="100%" justifyContent="space-between">
-        <Typography level="h4">Data Room Files</Typography>
+        <Typography
+          level="h4"
+          sx={{
+            fontWeight: 700,
+          }}
+        >
+          Data Room Files
+        </Typography>
         <UploadFilesButton
           uppy={uppy}
           openModal={openModal}

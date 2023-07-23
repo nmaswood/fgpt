@@ -35,13 +35,20 @@ export const DataRoomSummary: React.FC<{
       borderRadius={8}
     >
       <Box display="flex" width="100%" justifyContent="space-between">
-        <Typography level="h4">Data Room Summary</Typography>
+        <Typography
+          level="h4"
+          sx={{
+            fontWeight: 700,
+          }}
+        >
+          Data Room Summary
+        </Typography>
         {showCaseFile && showCaseFile.type == "set" && (
           <Button
             component={Link}
             href={`/files/${showCaseFile.fileReferenceId}`}
           >
-            View full report
+            View summary
           </Button>
         )}
       </Box>

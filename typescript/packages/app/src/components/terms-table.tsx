@@ -14,7 +14,7 @@ export const TermsTable: React.FC<{
         return (
           <Typography
             sx={{
-              color: "#666666",
+              color: "neutral.600",
               fontWeight: 700,
               fontSize: "12px",
             }}
@@ -68,6 +68,7 @@ const RenderTermValue: React.FC<{ termValue: string }> = ({ termValue }) => {
         sx={{
           fontWeight: 400,
           fontSize: "14px",
+          color: "neutral.1000",
         }}
       >
         {termValue}

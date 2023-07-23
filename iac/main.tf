@@ -774,7 +774,7 @@ provider "auth0" {
 }
 
 resource "auth0_client" "frontend" {
-  name        = var.project_slug
+  name        = var.auth0_client_name
   description = "Frontend app"
   app_type    = "spa"
   callbacks = [
@@ -800,9 +800,13 @@ resource "auth0_branding" "my_brand" {
   logo_url = var.auth0_logo_uri
 
   colors {
-    primary         = "#635dff"
-    page_background = "#635dff"
+    primary         = "#2B1657"
+    page_background = "#2B1657"
   }
+  font {
+    url = "https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/fonts/lato-normal/lato-normal.woff2"
+  }
+
 }
 
 
