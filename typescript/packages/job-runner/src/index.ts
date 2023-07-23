@@ -50,7 +50,7 @@ if (SETTINGS.tracingEnabled) {
   LOGGER.info("Profile enabled");
   profiler.start({
     serviceContext: {
-      service: "api",
+      service: "job-runner",
       version: "1.0.0",
     },
   });
