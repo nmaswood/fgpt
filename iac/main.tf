@@ -909,11 +909,20 @@ resource "google_project_iam_member" "cloudrun_service_account_sql_role" {
   member  = "serviceAccount:${google_service_account.cloud_run_service_account.email}"
 }
 
-resource "google_project_iam_member" "cloudrun_service_agent" {
+resource "google_project_iam_member" "cloudrun_service_profile_agent" {
   project = var.project
   role    = "roles/cloudprofiler.agent"
   member  = "serviceAccount:${google_service_account.cloud_run_service_account.email}"
 }
+
+resource "google_project_iam_member" "cloudrun_service_trace_agent" {
+  project = var.project
+  role    = "roles/cloudtrace.agent"
+  member  = "serviceAccount:${google_service_account.cloud_run_service_account.email}"
+}
+
+
+
 
 resource "google_project_iam_member" "cloudrun_service_account_storage_role" {
   project = var.project

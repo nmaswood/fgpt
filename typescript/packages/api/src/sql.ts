@@ -1,3 +1,4 @@
+import { LOGGER } from "@fgpt/precedent-node";
 import { createPool } from "slonik";
 import {
   type Interceptor,
@@ -21,6 +22,13 @@ const createResultParserInterceptor = (): Interceptor => {
       const validationResult = resultParser.safeParse(row);
 
       if (!validationResult.success) {
+        LOGGER.error(
+          {
+            actualQuery,
+            row,
+          },
+          "Schema validation error",
+        );
         throw new SchemaValidationError(
           actualQuery,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
