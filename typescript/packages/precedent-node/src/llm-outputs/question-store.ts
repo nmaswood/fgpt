@@ -61,18 +61,20 @@ LIMIT ${limit}
   }
 
   async getForFile(fileReferenceId: string): Promise<string[]> {
-    const result = await this.pool.query(sql.type(ZGetForFile)`
+    const result = await this.pool.any(sql.type(ZGetForFileWithOrder)`
 SELECT
-    question
+    question, text_chunk.chunk_order as chunk_order
 FROM
     text_chunk_question
     JOIN text_chunk ON text_chunk.id = text_chunk_question.text_chunk_id
 WHERE
     text_chunk_question.file_reference_id = ${fileReferenceId}
-ORDER BY
-    text_chunk.chunk_order DESC
 `);
-    return result.rows.map((row) => row.question);
+
+    const sorted = Array.from(result).sort(
+      (a, b) => a.chunk_order - b.chunk_order,
+    );
+    return sorted.map((row) => row.question);
   }
 
   async getForChunk(chunkId: string): Promise<string[]> {
@@ -153,3 +155,13 @@ const ZQuestionRow = z
 const ZGetForFile = z.object({
   question: z.string(),
 });
+
+const ZGetForFileWithOrder = z
+  .object({
+    question: z.string(),
+    chunk_order: z.number(),
+  })
+  .transform((row) => ({
+    question: row.question,
+    chunk_order: row.chunk_order,
+  }));

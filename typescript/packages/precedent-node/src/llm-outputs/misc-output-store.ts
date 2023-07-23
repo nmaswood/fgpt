@@ -39,20 +39,21 @@ WHERE
   }
 
   async getForFile(fileReferenceId: string): Promise<Outputs.MiscValue[]> {
-    const result = await this.pool.query(sql.type(
-      z.object({ metrics: ZMiscValue }),
-    )`
+    const result = await this.pool.any(sql.type(ZGetMetricsForFile)`
 SELECT
-    metrics
+    metrics, text_chunk.chunk_order as chunk_order
 FROM
     text_chunk_metrics
     JOIN text_chunk ON text_chunk.id = text_chunk_metrics.text_chunk_id
 WHERE
     text_chunk_metrics.file_reference_id = ${fileReferenceId}
-ORDER BY
-    text_chunk.chunk_order ASC
 `);
-    return result.rows.map((row) => row.metrics);
+
+    const sorted = Array.from(result).sort(
+      (a, b) => a.chunkOrder - b.chunkOrder,
+    );
+
+    return sorted.map((row) => row.metrics);
   }
 
   async insertMany(
@@ -124,6 +125,16 @@ const ZMiscValue = z.discriminatedUnion("type", [
     value: z.string(),
   }),
 ]);
+
+const ZGetMetricsForFile = z
+  .object({
+    metrics: ZMiscValue,
+    chunk_order: z.number(),
+  })
+  .transform((row) => ({
+    metrics: row.metrics,
+    chunkOrder: row.chunk_order,
+  }));
 
 const ZMetricsRow = z
   .object({

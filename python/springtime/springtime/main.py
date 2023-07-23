@@ -34,6 +34,13 @@ from .settings import SETTINGS
 app = FastAPI()
 
 logger.info("Starting server")
+if SETTINGS.tracing_enabled:
+    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
+    from springtime.tracer import init_tracing
+
+    init_tracing()
+    FastAPIInstrumentor.instrument_app(app)
 
 
 OBJECT_STORE = GCSObjectStore()
