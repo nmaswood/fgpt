@@ -5,11 +5,8 @@
   "dependencies": {
     "@fgpt/precedent-iso": "workspace:^",
     "@fgpt/precedent-node": "workspace:^",
-    "@google-cloud/opentelemetry-cloud-trace-exporter": "^2.1.0",
     "@google-cloud/profiler": "^5.0.4",
-    "@opentelemetry/api": "^1.4.1",
-    "@opentelemetry/sdk-trace-base": "^1.15.0",
-    "@opentelemetry/sdk-trace-node": "^1.15.0",
+    "@google-cloud/trace-agent": "^7.1.2",
     "@types/lodash": "^4.14.195",
     "@types/multer": "^1.4.7",
     "cors": "^2.8.5",

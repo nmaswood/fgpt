@@ -3,9 +3,9 @@ import * as dotenv from "dotenv";
 dotenv.config();
 // eslint-disable-next-line simple-import-sort/imports
 import { SETTINGS } from "./settings";
-import { tracerInit } from "./tracer";
 
 import * as profiler from "@google-cloud/profiler";
+import * as tracer from "@google-cloud/trace-agent";
 
 import "express-async-errors"; // eslint-disable-line
 if (SETTINGS.tracingEnabled) {
@@ -15,7 +15,7 @@ if (SETTINGS.tracingEnabled) {
       version: "1.0.0",
     },
   });
-  tracerInit();
+  tracer.start();
 }
 
 import {
