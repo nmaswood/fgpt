@@ -131,7 +131,6 @@ export const SelectedProject: React.FC<{
   React.useEffect(() => {
     return () => {
       // dumb hack to get around uppy bug
-      // I hope this works
       if (mounted) {
         uppy.close();
       }

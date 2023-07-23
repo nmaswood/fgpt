@@ -1,20 +1,19 @@
+import { ChatOutlined } from "@mui/icons-material";
 import AssessmentIcon from "@mui/icons-material/AssessmentOutlined";
 import AutoModeOutlinedIcon from "@mui/icons-material/AutoModeOutlined";
-import BoltIcon from "@mui/icons-material/BoltOutlined";
-import TableViewIcon from "@mui/icons-material/TableViewOutlined";
 import {
   Box,
   CircularProgress,
+  List,
+  ListDivider,
+  ListItem,
+  ListItemButton,
   ListItemDecorator,
-  Tab,
-  TabList,
-  Tabs,
 } from "@mui/joy";
 import { useRouter } from "next/router";
 import React from "react";
 
 import { DisplayAsset } from "../../src/components/file/display-asset";
-import { DisplayDerived } from "../../src/components/file/display-derived";
 import { DisplayFileChat } from "../../src/components/file/display-file-chat";
 import { DisplayProgress } from "../../src/components/file/display-progress";
 import { DisplayFileReport } from "../../src/components/file/report";
@@ -105,44 +104,65 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
           maxHeight="100%"
           maxWidth="100%"
           display="flex"
-          flexDirection="column"
         >
-          <Box display="flex" gap={3} paddingLeft={1}>
-            <Tabs
-              value={tab}
-              onChange={(_, newValue) => setTab(newValue as any)} // eslint-disable-line @typescript-eslint/no-explicit-any
+          <Box display="flex" gap={3}>
+            <List
+              variant="outlined"
+              size="sm"
+              sx={{
+                width: "40px",
+                "&.MuiList-root": {
+                  borderRadius: 0,
+                },
+              }}
             >
-              <TabList>
-                <Tab value="progress">
-                  <ListItemDecorator>
-                    <AutoModeOutlinedIcon />
-                  </ListItemDecorator>
-                  Progress
-                </Tab>
-                <Tab value="report">
+              <ListItem>
+                <ListItemButton
+                  onClick={() => setTab("report")}
+                  selected={tab === "report"}
+                >
                   <ListItemDecorator>
                     <AssessmentIcon />
                   </ListItemDecorator>
-                  Report
-                </Tab>
-                {file && file.type === "pdf" && (
-                  <Tab value="chat">
-                    <ListItemDecorator>
-                      <BoltIcon />
-                    </ListItemDecorator>
-                    Chat
-                  </Tab>
-                )}
-                {file && file.type === "pdf" && file.derived && (
-                  <Tab value="tables">
-                    <ListItemDecorator>
-                      <TableViewIcon />
-                    </ListItemDecorator>
-                    Table
-                  </Tab>
-                )}
-              </TabList>
-            </Tabs>
+                </ListItemButton>
+              </ListItem>
+              <ListDivider
+                sx={{
+                  margin: 0,
+                }}
+              />
+              <ListItem>
+                <ListItemButton
+                  onClick={() => setTab("chat")}
+                  selected={tab === "chat"}
+                >
+                  <ListItemDecorator>
+                    <ChatOutlined fontSize="small" />
+                  </ListItemDecorator>
+                </ListItemButton>
+              </ListItem>
+
+              <ListDivider
+                sx={{
+                  margin: 0,
+                }}
+              />
+              <ListItem>
+                <ListItemButton
+                  onClick={() => setTab("progress")}
+                  selected={tab === "progress"}
+                >
+                  <ListItemDecorator>
+                    <AutoModeOutlinedIcon />
+                  </ListItemDecorator>
+                </ListItemButton>
+              </ListItem>
+              <ListDivider
+                sx={{
+                  margin: 0,
+                }}
+              />
+            </List>
           </Box>
           <Box
             display="flex"
@@ -160,10 +180,6 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
                 projectId={file.projectId}
                 token={token}
               />
-            )}
-
-            {tab === "tables" && file && file.type == "pdf" && file.derived && (
-              <DisplayDerived derived={file.derived} />
             )}
           </Box>
         </Box>
