@@ -7,7 +7,6 @@ import ModeEditIcon from "@mui/icons-material/ModeEditOutlined";
 import {
   Box,
   Button,
-  ButtonGroup,
   CircularProgress,
   Divider,
   IconButton,
@@ -184,7 +183,7 @@ const ListItemEntry: React.FC<{
           selected={isSelected}
           onClick={() => setSelectedChatId(chat.id)}
           sx={{
-            gap: 1,
+            gap: 1 / 2,
           }}
         >
           {isEditing && (
@@ -202,59 +201,59 @@ const ListItemEntry: React.FC<{
             />
           )}
           {!isEditing && <ListItemContent>{chat.name}</ListItemContent>}
-          <ButtonGroup>
-            {isSelected && !isEditing && (
-              <IconButton
-                size="sm"
-                disabled={isLoading}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsEditing(true);
-                }}
-              >
-                <ModeEditIcon />
-              </IconButton>
-            )}
+          {isSelected && !isEditing && (
+            <IconButton
+              size="sm"
+              variant="plain"
+              disabled={isLoading}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsEditing(true);
+              }}
+            >
+              <ModeEditIcon />
+            </IconButton>
+          )}
 
-            {isSelected && !isEditing && (
-              <IconButton
-                size="sm"
-                disabled={isLoading}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(chat.id);
-                }}
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            )}
-            {isEditing && (
-              <IconButton
-                size="sm"
-                disabled={isLoading}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSubmit();
-                }}
-              >
-                <CheckIcon fontSize="small" />
-              </IconButton>
-            )}
+          {isSelected && !isEditing && (
+            <IconButton
+              size="sm"
+              variant="plain"
+              disabled={isLoading}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(chat.id);
+              }}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          )}
+          {isEditing && (
+            <IconButton
+              size="sm"
+              disabled={isLoading}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSubmit();
+              }}
+            >
+              <CheckIcon fontSize="small" />
+            </IconButton>
+          )}
 
-            {isEditing && (
-              <IconButton
-                size="sm"
-                disabled={isLoading}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsEditing(false);
-                  setName(chat.name ?? "");
-                }}
-              >
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            )}
-          </ButtonGroup>
+          {isEditing && (
+            <IconButton
+              size="sm"
+              disabled={isLoading}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsEditing(false);
+                setName(chat.name ?? "");
+              }}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          )}
         </ListItemButton>
       )}
     </ListItem>

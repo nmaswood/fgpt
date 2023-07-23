@@ -181,58 +181,9 @@ export class TaskExecutorImpl implements TaskExecutor {
       }
 
       case "extract-table": {
-        const res = await this.tableHandler.extractTable({
+        await this.tableHandler.extractTable({
           fileReferenceId: config.fileReferenceId,
         });
-
-        const { source, fileReferenceId } = res
-          ? {
-              source: {
-                type: "derived",
-                excelAssetId: res.excelAssetId,
-              } as const,
-              fileReferenceId: res.fileReferenceId,
-            }
-          : {
-              source: null,
-              fileReferenceId: config.fileReferenceId,
-            };
-
-        await this.taskStore.insertMany([
-          {
-            organizationId,
-            projectId,
-            fileReferenceId,
-            config: {
-              type: "analyze-table",
-              organizationId,
-              projectId,
-              fileReferenceId,
-              source,
-              analysis: {
-                type: "text",
-                model: "gpt",
-              },
-            },
-          },
-          {
-            organizationId,
-            projectId,
-            fileReferenceId,
-            config: {
-              type: "analyze-table",
-              organizationId,
-              projectId,
-              fileReferenceId,
-              source,
-              analysis: {
-                type: "text",
-                model: "claude",
-              },
-            },
-          },
-        ]);
-
         break;
       }
 
