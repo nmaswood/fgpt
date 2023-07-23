@@ -99,9 +99,10 @@ resource "google_sql_database_instance" "instance" {
     }
 
     insights_config {
-      query_insights_enabled = true
-      query_string_length    = 4500
-
+      query_insights_enabled  = true
+      query_string_length     = 4500
+      record_client_address   = true
+      record_application_tags = true
     }
 
 

@@ -9,7 +9,6 @@ import * as tracer from "@google-cloud/trace-agent";
 
 import "express-async-errors"; // eslint-disable-line
 if (SETTINGS.tracingEnabled) {
-  LOGGER.info("Profile enabled");
   profiler.start({
     serviceContext: {
       service: "api",
