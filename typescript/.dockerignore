@@ -1,6 +1,7 @@
 scaffold
 Makefile
 app.yaml
+Makefile
 
 **/node_modules/
 **/.git
