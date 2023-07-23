@@ -40,6 +40,7 @@ import {
   PineconeVectorService,
   PsqlShowCaseFileStore,
   RenderShowCaseFileServiceImpl,
+  FileStatusServiceImpl,
 } from "@fgpt/precedent-node";
 import { UserInformationMiddleware } from "./middleware/user-information-middleware";
 import { UserOrgRouter } from "./routers/user-org-router";
@@ -141,10 +142,7 @@ async function start() {
     objectStoreService,
     excelOutputStore,
     excelAssetStore,
-    processedFileProgressStore,
-    excelProgressStore,
     projectStore,
-    SETTINGS.claudeReportGeneration,
   );
   const renderShowCaseFileService = new RenderShowCaseFileServiceImpl(
     showCaseFileStore,
@@ -152,6 +150,13 @@ async function start() {
     fileReferenceStore,
     miscOutputStore,
     SETTINGS.assetBucket,
+  );
+
+  const fileStatusUpdater = new FileStatusServiceImpl(
+    fileReferenceStore,
+    processedFileProgressStore,
+    excelProgressStore,
+    SETTINGS.claudeReportGeneration,
   );
 
   app.use(cors({ origin: SETTINGS.corsOrigin }));
@@ -178,6 +183,7 @@ async function start() {
       projectStore,
       showCaseFileStore,
       renderShowCaseFileService,
+      fileStatusUpdater,
     ).init(),
   );
 

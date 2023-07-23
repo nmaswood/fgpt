@@ -1,6 +1,7 @@
 import { getFileType } from "@fgpt/precedent-iso";
 import {
   FileReferenceStore,
+  FileStatusService,
   InsertFileReference,
   LoadedFileStore,
   ObjectStorageService,
@@ -35,6 +36,7 @@ export class FileRouter {
     private readonly projectStore: ProjectStore,
     private readonly showCaseFileStore: ShowCaseFileStore,
     private readonly renderShowCaseFileService: RenderShowCaseFileService,
+    private readonly fileStatusService: FileStatusService,
   ) {}
   init() {
     const router = express.Router();
@@ -168,6 +170,17 @@ export class FileRouter {
         const file = await this.fileReferenceStore.get(params.fileReferenceId);
         await this.showCaseFileStore.set(file.projectId, file.id);
         res.json({ status: "ok" });
+      },
+    );
+
+    router.get(
+      "/progress/:fileReferenceId",
+      async (req: express.Request, res: express.Response) => {
+        const params = ZSetShowCaseRequest.parse(req.params);
+        const progress = await this.fileStatusService.progress(
+          params.fileReferenceId,
+        );
+        res.json({ progress: progress.forTask });
       },
     );
 

@@ -172,7 +172,9 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
             maxWidth="100%"
             flexDirection="column"
           >
-            {tab === "progress" && file && <DisplayProgress file={file} />}
+            {tab === "progress" && file && (
+              <DisplayProgress fileReferenceId={file.id} />
+            )}
             {tab === "report" && file && <DisplayFileReport file={file} />}
             {tab === "chat" && file && (
               <DisplayFileChat

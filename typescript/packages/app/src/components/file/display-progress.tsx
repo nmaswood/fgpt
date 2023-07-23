@@ -1,23 +1,29 @@
-// write a component that displays the progress of a pdf download
-
-import { FileToRender, ProgressTaskStatus } from "@fgpt/precedent-iso";
+import {
+  ProgressForExcelTasks,
+  ProgressForPdfTasks,
+  ProgressTaskStatus,
+} from "@fgpt/precedent-iso";
 import { Box, Table, Typography } from "@mui/joy";
 
+import { useFetchProgress } from "../../hooks/use-fetch-progress";
+
 export const DisplayProgress: React.FC<{
-  file: FileToRender.File;
-}> = ({ file }) => {
-  const entries = Object.entries(file.progress.forTask);
-  const display = getDisplayTasks(entries);
+  fileReferenceId: string;
+}> = ({ fileReferenceId }) => {
+  const { data } = useFetchProgress(fileReferenceId);
+
   return (
-    <Box display="flex" width="50%" padding={2}>
-      <DisplayProgressInner tasks={display} />;
+    <Box display="flex" width="100%" padding={2}>
+      {data && <DisplayProgressInner progress={data} />}
     </Box>
   );
 };
 
-const DisplayProgressInner: React.FC<{ tasks: DisplayTask[] }> = ({
-  tasks,
-}) => {
+const DisplayProgressInner: React.FC<{
+  progress: ProgressForPdfTasks | ProgressForExcelTasks;
+}> = ({ progress }) => {
+  const entries = Object.entries(progress);
+  const tasks = getDisplayTasks(entries);
   return (
     <Table variant="outlined">
       <thead>

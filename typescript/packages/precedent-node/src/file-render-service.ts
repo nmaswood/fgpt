@@ -12,8 +12,6 @@ import { ExcelOutputStore } from "./excel-output-store";
 import { FileReferenceStore } from "./file-reference-store";
 import { ReportService } from "./llm-outputs/report-service";
 import { ObjectStorageService } from "./object-store/object-store";
-import { ExcelProgressService } from "./progress/excel-asset-progress-store";
-import { ProcessedFileProgressService } from "./progress/processed-file-progress-store";
 import { ProjectStore } from "./project-store";
 
 export interface FileRenderService {
@@ -27,10 +25,7 @@ export class FileToRenderServiceImpl implements FileRenderService {
     private readonly objectStorageService: ObjectStorageService,
     private readonly excelOutputStore: ExcelOutputStore,
     private readonly excelAssetStore: ExcelAssetStore,
-    private readonly pdfProgressStore: ProcessedFileProgressService,
-    private readonly excelProgressStore: ExcelProgressService,
     private readonly projectStore: ProjectStore,
-    private readonly longFormReport: boolean,
   ) {}
 
   async forFile(fileReferenceId: string): Promise<FileToRender.File> {
@@ -50,10 +45,9 @@ export class FileToRenderServiceImpl implements FileRenderService {
   }
 
   async #forExcel(file: FileReference): Promise<FileToRender.ExcelFile> {
-    const [output, signedUrl, progress, project] = await Promise.all([
+    const [output, signedUrl, project] = await Promise.all([
       this.excelOutputStore.forDirectUpload(file.id),
       this.objectStorageService.getSignedUrl(file.bucketName, file.path),
-      this.excelProgressStore.getProgress(file.id),
       this.projectStore.get(file.projectId),
     ]);
     return {
@@ -64,26 +58,17 @@ export class FileToRenderServiceImpl implements FileRenderService {
       signedUrl,
       projectId: file.projectId,
       output: transformOutput(output.map((row) => row.output)),
-      progress,
     };
   }
 
   async #forPDF(file: FileReference): Promise<FileToRender.PDFFile> {
-    const [signedUrl, [derived], report, output, progress, project] =
-      await Promise.all([
-        this.objectStorageService.getSignedUrl(file.bucketName, file.path),
-        this.excelAssetStore.list(file.id),
-        this.reportService.forFileReferenceId(file.id),
-        this.excelOutputStore.forDerived(file.id),
-        this.pdfProgressStore.getProgress(
-          {
-            longFormReport: this.longFormReport,
-          },
-          file.id,
-        ),
-
-        this.projectStore.get(file.projectId),
-      ]);
+    const [signedUrl, [derived], report, output, project] = await Promise.all([
+      this.objectStorageService.getSignedUrl(file.bucketName, file.path),
+      this.excelAssetStore.list(file.id),
+      this.reportService.forFileReferenceId(file.id),
+      this.excelOutputStore.forDerived(file.id),
+      this.projectStore.get(file.projectId),
+    ]);
 
     return {
       type: "pdf",
@@ -93,7 +78,6 @@ export class FileToRenderServiceImpl implements FileRenderService {
       projectId: file.projectId,
       projectName: project?.name ?? file.projectId,
       report,
-      progress,
       derived: derived
         ? await (async () => {
             const signedUrl = await this.objectStorageService.getSignedUrl(

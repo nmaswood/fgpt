@@ -1,10 +1,5 @@
 import { AnalyzeResponseChunk } from "./excel";
 import { Report } from "./llm-outputs";
-import {
-  FileProgress,
-  ProgressForExcelTasks,
-  ProgressForPdfTasks,
-} from "./progress";
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace FileToRender {
@@ -23,7 +18,6 @@ export namespace FileToRender {
     projectName: string;
     fileName: string;
     derived: DerivedTable | undefined;
-    progress: FileProgress<ProgressForPdfTasks>;
   }
 
   export type File = PDFFile | ExcelFile;
@@ -36,7 +30,6 @@ export namespace FileToRender {
     fileName: string;
     signedUrl: string;
     output: ExcelOutputToRender;
-    progress: FileProgress<ProgressForExcelTasks>;
   }
 }
 

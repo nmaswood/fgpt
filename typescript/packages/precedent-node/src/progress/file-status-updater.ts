@@ -1,39 +1,49 @@
-import { assertNever, getFileType } from "@fgpt/precedent-iso";
+import {
+  assertNever,
+  FileProgress,
+  getFileType,
+  ProgressForExcelTasks,
+  ProgressForPdfTasks,
+} from "@fgpt/precedent-iso";
 
 import { FileReferenceStore } from "../file-reference-store";
 import { ExcelProgressService } from "./excel-asset-progress-store";
 import { ProcessedFileProgressService } from "./processed-file-progress-store";
 
-export interface FileStatusUpdater {
+export interface FileStatusService {
   update: (fileReferenceId: string) => Promise<void>;
+  progress: (
+    fileReferenceId: string,
+  ) => Promise<FileProgress<ProgressForPdfTasks | ProgressForExcelTasks>>;
 }
 
 // TODO solve race condition
-export class FileStatusUpdaterImpl implements FileStatusUpdater {
+export class FileStatusServiceImpl implements FileStatusService {
   constructor(
     private readonly fileReferenceStore: FileReferenceStore,
     private readonly processedFileProgressStore: ProcessedFileProgressService,
-    private readonly ExcelProgressStore: ExcelProgressService,
+    private readonly excelProgressStore: ExcelProgressService,
     private readonly longFormReport: boolean,
   ) {}
 
   async update(fileReferenceId: string) {
-    const status = await this.#status(fileReferenceId);
+    const progress = await this.progress(fileReferenceId);
+
     await this.fileReferenceStore.update({
       id: fileReferenceId,
-      status,
+      status: progress.status,
     });
   }
 
-  async #status(fileReferenceId: string) {
+  async progress(fileReferenceId: string) {
     const file = await this.fileReferenceStore.get(fileReferenceId);
     const type = getFileType(file.contentType);
     switch (type) {
       case "excel": {
-        const excelProgress = await this.ExcelProgressStore.getProgress(
+        const excelProgress = await this.excelProgressStore.getProgress(
           fileReferenceId,
         );
-        return excelProgress.status;
+        return excelProgress;
       }
       case "pdf": {
         const processedFileProgress =
@@ -42,10 +52,10 @@ export class FileStatusUpdaterImpl implements FileStatusUpdater {
             fileReferenceId,
           );
 
-        return processedFileProgress.status;
+        return processedFileProgress;
       }
       case undefined:
-        throw new Error("unknown file");
+        throw new Error("unknown file type");
       default:
         assertNever(type);
     }

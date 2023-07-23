@@ -35,7 +35,7 @@ import {
   MLReportServiceImpl,
   ThumbnailHandlerImpl,
   ThumbnailServiceImpl,
-  FileStatusUpdaterImpl,
+  FileStatusServiceImpl,
   ExcelProgressServiceImpl,
   ProcessedFileProgressServiceImpl,
   ScanHandlerImpl,
@@ -156,14 +156,14 @@ async function start(settings: Settings) {
 
   const excelProgressStore = new ExcelProgressServiceImpl(taskStore);
 
-  const fileStatusUpdater = new FileStatusUpdaterImpl(
+  const fileStatusService = new FileStatusServiceImpl(
     fileReferenceStore,
     processedFileProgressStore,
     excelProgressStore,
     SETTINGS.claudeReportGeneration,
   );
 
-  const mainRouter = new MainRouter(taskStore, taskExecutor, fileStatusUpdater);
+  const mainRouter = new MainRouter(taskStore, taskExecutor, fileStatusService);
 
   app.use("/", mainRouter.init());
 
