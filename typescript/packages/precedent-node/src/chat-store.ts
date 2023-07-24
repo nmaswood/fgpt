@@ -53,7 +53,7 @@ export interface ChatStore {
   getChatEntry(chatId: string): Promise<ChatEntry>;
   listChatEntries(chatId: string): Promise<ChatEntry[]>;
 
-  deleteChat(chatId: string): Promise<void>;
+  deleteChat(chatId: string): Promise<boolean>;
   listChatHistory(chatId: string): Promise<ChatHistory[]>;
   getContext(chatEntryId: string): Promise<ChatContext[]>;
 }
@@ -82,11 +82,11 @@ WHERE
   ): Promise<Chat> {
     const count = await trx.oneFirst(sql.type(ZCountRow)`
 SELECT
-    COUNT(*) as count
+  COALESCE(chat_count, 0) as count
 FROM
-    chat
+  PROJECT
 WHERE
-    project_id = ${chat.projectId}
+    id = ${chat.projectId}
 `);
     if (count === MAX_CHAT_LIMIT) {
       throw new Error("max limit reached");
@@ -228,16 +228,17 @@ WHERE
     return Array.from(result.rows);
   }
 
-  async deleteChat(chatId: string): Promise<void> {
-    await this.pool.transaction(async (trx) => {
+  async deleteChat(chatId: string): Promise<boolean> {
+    return this.pool.transaction(async (trx) => {
       await trx.query(sql.unsafe`
 DELETE FROM chat_entry
 where chat_id = ${chatId}
 `);
-      await trx.query(sql.unsafe`
+      const { rowCount } = await trx.query(sql.unsafe`
 DELETE FROM chat
 where id = ${chatId}
 `);
+      return rowCount > 0;
     });
   }
 

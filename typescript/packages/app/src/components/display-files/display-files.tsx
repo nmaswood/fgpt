@@ -5,6 +5,8 @@ import Uppy from "@uppy/core";
 import NextLink from "next/link";
 import React from "react";
 
+import { format } from "fecha";
+
 import { useFetchShowCaseFile } from "../../hooks/use-fetch-show-case-file";
 import { RenderActionMenu } from "../render-action-menu";
 import { UploadFilesButton } from "../upload-files-button";
@@ -66,10 +68,10 @@ export const DisplayFiles: React.FC<{
 
     {
       field: "createdAt",
-      headerName: "Created at",
+      headerName: "Created on",
       width: 150,
       valueGetter(params) {
-        return new Date(params.row.createdAt).toLocaleDateString();
+        return format(new Date(params.row.createdAt), "MMMM Do, YYYY");
       },
     },
     {

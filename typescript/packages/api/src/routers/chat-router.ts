@@ -3,6 +3,7 @@ import {
   ChatStore,
   FileReferenceStore,
   MLServiceClient,
+  ProjectStore,
   TextChunkStore,
   VectorService,
 } from "@fgpt/precedent-node";
@@ -19,6 +20,7 @@ export class ChatRouter {
     private readonly mlClient: MLServiceClient,
     private readonly textChunkStore: TextChunkStore,
     private readonly chatStore: ChatStore,
+    private readonly projectStore: ProjectStore,
     private readonly fileReferenceStore: FileReferenceStore,
     private readonly vectorService: VectorService,
   ) {}
@@ -75,15 +77,21 @@ export class ChatRouter {
           name: body.name,
         });
 
+        await this.projectStore.addToChatCount(value.projectId, 1);
+
         res.json({ chat });
       },
     );
 
     router.delete(
-      "/delete-chat/:chatId",
+      "/delete-chat",
       async (req: express.Request, res: express.Response) => {
-        const body = ZDeleteChatRequest.parse(req.params);
-        await this.chatStore.deleteChat(body.chatId);
+        const body = ZDeleteChatRequest.parse(req.body);
+        const deleted = await this.chatStore.deleteChat(body.chatId);
+
+        if (deleted) {
+          await this.projectStore.addToChatCount(body.projectId, -1);
+        }
         res.json({ status: "ok" });
       },
     );
@@ -264,6 +272,7 @@ const ZCreateChatRequest = z.object({
 
 const ZDeleteChatRequest = z.object({
   chatId: z.string(),
+  projectId: z.string(),
 });
 
 const ZContextRequest = z.object({

@@ -3,6 +3,8 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import ModeEditIcon from "@mui/icons-material/ModeEditOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
+import { format } from "fecha";
+
 import {
   Badge,
   Box,
@@ -150,7 +152,7 @@ const ProjectCard: React.FC<{
         <ListItemDecorator>
           <DeleteIcon color="error" />
         </ListItemDecorator>
-        Delete project
+        Delete deal
       </MenuItem>
     </Menu>
   );
@@ -248,7 +250,8 @@ const ProjectCard: React.FC<{
                 color: "neutral.500",
               }}
             >
-              Created {new Date(project.createdAt).toLocaleDateString()}
+              Created{" "}
+              {format(new Date(project.createdAt), "[on] MMMM Do, YYYY")}
             </Typography>
             <Typography
               level="body2"
@@ -260,7 +263,7 @@ const ProjectCard: React.FC<{
                 },
               }}
             >
-              {project.fileCount} assets
+              {copyForAssets(project.fileCount)}
             </Typography>
           </Box>
         </CardContent>
@@ -268,3 +271,10 @@ const ProjectCard: React.FC<{
     </Badge>
   );
 };
+
+function copyForAssets(fileCount: number): string {
+  if (fileCount === 1) {
+    return "1 asset";
+  }
+  return `${fileCount} assets`;
+}

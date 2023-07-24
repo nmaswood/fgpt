@@ -207,6 +207,7 @@ async function start() {
       mlService,
       textChunkStore,
       chatStore,
+      projectStore,
       fileReferenceStore,
       vectorService,
     ).init(),

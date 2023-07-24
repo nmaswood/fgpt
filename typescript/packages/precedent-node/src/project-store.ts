@@ -26,9 +26,10 @@ export interface ProjectStore {
   deleteMany: (ids: string[]) => Promise<number>;
   update: (args: UpdateProject) => Promise<Project>;
   addToFileCount: (projectId: string, delta: number) => Promise<Project>;
+  addToChatCount: (projectId: string, delta: number) => Promise<Project>;
 }
 
-const PROJECT_FIELDS = sql.fragment`id, organization_id, name, file_count, created_at`;
+const PROJECT_FIELDS = sql.fragment`id, organization_id, name, file_count, chat_count, created_at`;
 
 export class PSqlProjectStore implements ProjectStore {
   constructor(private readonly pool: DatabasePool) {}
@@ -142,6 +143,21 @@ RETURNING
     );
   }
 
+  async addToChatCount(id: string, delta: number): Promise<Project> {
+    return this.pool.one(
+      sql.type(ZProjectRow)`
+UPDATE
+    Project
+SET
+    chat_count = COALESCE(chat_count, 0) + ${delta}
+WHERE
+    id = ${id}
+RETURNING
+    ${PROJECT_FIELDS}
+`,
+    );
+  }
+
   async update({ id, name, description }: UpdateProject): Promise<Project> {
     return this.pool.one(
       sql.type(ZProjectRow)`
@@ -166,11 +182,15 @@ const ZProjectRow = z
     name: z.string(),
     file_count: z.number().nullable(),
     created_at: z.number(),
+    chat_count: z.number().nullable(),
   })
-  .transform((v) => ({
-    id: v.id,
-    organizationId: v.organization_id,
-    name: v.name,
-    fileCount: v.file_count ?? 0,
-    createdAt: new Date(v.created_at),
-  }));
+  .transform(
+    (v): Project => ({
+      id: v.id,
+      organizationId: v.organization_id,
+      name: v.name,
+      fileCount: v.file_count ?? 0,
+      chatCount: v.chat_count ?? 0,
+      createdAt: new Date(v.created_at),
+    }),
+  );

@@ -11,8 +11,15 @@ export const useDeleteChat = (location: ChatLocation, projectId: string) => {
     "/api/proxy/v1/chat/delete-chat",
     { id: string }
   >("/api/proxy/v1/chat/delete-chat", async (url: string, args) => {
-    const res = await fetch(`${url}/${args.arg.id}`, {
+    const res = await fetch(url, {
       method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        chatId: args.arg.id,
+        projectId,
+      }),
     });
     await res.json();
     mutate();
