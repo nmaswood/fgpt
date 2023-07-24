@@ -1,0 +1,8 @@
+.projects-grid {
+  justify-content: center;
+}
+@media (min-width: 961px) {
+  .projects-grid {
+    justify-content: start;
+  }
+}

@@ -18,6 +18,8 @@ import {
 } from "@mui/joy";
 import React from "react";
 
+import styles from "./display-projects.module.css";
+
 import { useHover } from "./use-hover";
 
 export const DisplayProjects: React.FC<{
@@ -60,6 +62,7 @@ export const DisplayProjects: React.FC<{
           gridTemplateColumns="repeat( auto-fit, 250px )"
           gridAutoRows="auto"
           gap="1rem"
+          className={styles["projects-grid"]}
           justifyContent="start"
           maxHeight="100%"
           overflow="auto"
