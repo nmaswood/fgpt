@@ -207,7 +207,6 @@ const ForFileId: React.FC<{ fileId: string }> = ({ fileId }) => {
           </Box>
         </Box>
         <Box
-          display="flex"
           width="100%"
           height="100%"
           flexDirection="column"

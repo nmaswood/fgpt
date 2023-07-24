@@ -64,7 +64,6 @@ export const DisplayProjects: React.FC<{
           gridAutoRows="auto"
           gap="1rem"
           className={styles["projects-grid"]}
-          justifyContent="start"
           maxHeight="100%"
           overflow="auto"
           paddingTop={3}
