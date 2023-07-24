@@ -41,13 +41,6 @@ export const Navbar: React.FC<{
       justifyContent="space-between"
     >
       <Box display="flex" alignItems="center">
-        <Image
-          priority
-          src="/paredo-icon.svg"
-          height={18}
-          width={18}
-          alt="Paredo icon"
-        />
         {!loading && (
           <Breadcrumbs
             size="lg"
@@ -68,11 +61,28 @@ export const Navbar: React.FC<{
               href="/"
               level="body1"
               sx={{
-                color: "neutral.0",
-                ...(project || fileName ? { opacity: 0.75 } : {}),
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
               }}
             >
-              Deals
+              <Image
+                priority
+                src="/paredo-icon.svg"
+                height={18}
+                width={18}
+                alt="Paredo icon"
+                color="white"
+              />
+              <span
+                style={{
+                  color: "white",
+
+                  ...(project || fileName ? { opacity: 0.75 } : {}),
+                }}
+              >
+                Deals
+              </span>
             </Typography>
             {project && (
               <Typography
