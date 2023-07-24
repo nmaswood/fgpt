@@ -44,15 +44,17 @@ export const DataRoomSummary: React.FC<{
           Data Room Summary
         </Typography>
         {showCaseFile && showCaseFile.type == "set" && (
-          <Button
-            component={Link}
-            href={`/files/${showCaseFile.fileReferenceId}`}
-            sx={{
-              textWrap: "nowrap",
-            }}
-          >
-            View summary
-          </Button>
+          <Box>
+            <Button
+              component={Link}
+              href={`/files/${showCaseFile.fileReferenceId}`}
+              sx={{
+                textWrap: "nowrap",
+              }}
+            >
+              View summary
+            </Button>
+          </Box>
         )}
       </Box>
 
