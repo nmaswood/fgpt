@@ -187,9 +187,10 @@ const DisplayUser = () => {
               }}
             >
               <ListItemDecorator>
-                <LogoutIcon />
+                <LogoutIcon fontSize="small" />
               </ListItemDecorator>
-              Logout
+
+              <Typography level="body2">Logout</Typography>
             </MenuItem>
             {isSuperAdmin && (
               <MenuItem
@@ -203,9 +204,9 @@ const DisplayUser = () => {
                 }}
               >
                 <ListItemDecorator>
-                  <AdminIcon />
+                  <AdminIcon fontSize="small" />
                 </ListItemDecorator>
-                Admin
+                <Typography level="body2">Admin</Typography>
               </MenuItem>
             )}
           </Menu>

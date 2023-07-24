@@ -173,13 +173,14 @@ const ListItemEntry: React.FC<{
     <ListItem
       sx={{
         width: "100%",
+        minHeight: "35px",
         display: "flex",
         justifyContent: "space-between",
       }}
     >
       {waitingForTitle && (
         <Box display="flex" width="100%" justifyContent="center">
-          <CircularProgress />
+          <CircularProgress size="sm" />
         </Box>
       )}
       {!waitingForTitle && (
@@ -221,6 +222,8 @@ const ListItemEntry: React.FC<{
               <ModeEditIcon />
             </IconButton>
           )}
+
+          {/* temp hack to get the height right*/}
 
           {isSelected && !isEditing && (
             <IconButton

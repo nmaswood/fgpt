@@ -261,6 +261,7 @@ export const DisplayChat: React.FC<{
         </Box>
         <Box display="flex" width="100%" position="sticky" bottom={0}>
           <Input
+            size="sm"
             placeholder="Send a message..."
             fullWidth
             value={input}
@@ -276,6 +277,12 @@ export const DisplayChat: React.FC<{
             endDecorator={
               <IconButton
                 size="sm"
+                variant="plain"
+                sx={{
+                  ":hover": {
+                    bgcolor: "transparent",
+                  },
+                }}
                 disabled={trimmed.length === 0 || loading || isMutating}
                 onClick={() => submit()}
               >
@@ -435,7 +442,7 @@ const RenderChatEntryFromClient: React.FC<{
           )}
 
           {q.state.type === "rendering" && text.length === 0 && (
-            <CircularProgress />
+            <CircularProgress size="sm" />
           )}
         </Box>
       </ListItem>
