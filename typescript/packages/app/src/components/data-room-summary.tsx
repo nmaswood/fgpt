@@ -47,6 +47,9 @@ export const DataRoomSummary: React.FC<{
           <Button
             component={Link}
             href={`/files/${showCaseFile.fileReferenceId}`}
+            sx={{
+              textWrap: "nowrap",
+            }}
           >
             View summary
           </Button>

@@ -7,7 +7,6 @@ import {
   Outputs,
 } from "@fgpt/precedent-iso";
 import ArrowDropDown from "@mui/icons-material/ArrowDropDownOutlined";
-import ArrowRight from "@mui/icons-material/ArrowRightOutlined";
 import {
   Box,
   Button,
@@ -16,7 +15,6 @@ import {
   List,
   ListItem,
   ListItemContent,
-  ListItemDecorator,
   Menu,
   MenuItem,
   Option,
@@ -45,29 +43,40 @@ export const DisplayFileReport: React.FC<{
       bgcolor="#F5F5F5"
     >
       <ForOverview status={file.status} description={file.description} />
-      <ForReport />
-      <Dispatch file={file} />
+      <ForReport file={file} />
     </Box>
   );
 };
 
-const Dispatch: React.FC<{ file: FileToRender.File }> = ({ file }) => {
+const Dispatch: React.FC<{
+  file: FileToRender.File;
+  reportType: ReportType;
+  setReportType: (reportType: ReportType) => void;
+}> = ({ file, reportType, setReportType }) => {
   switch (file.type) {
     case "pdf":
-      return <PdfReport report={file.report} />;
+      if (!file.report) {
+        return null;
+      }
+      return (
+        <PdfReport
+          report={file.report}
+          reportType={reportType}
+          setReportType={setReportType}
+        />
+      );
     case "excel":
-      return <ForExcelOutput output={file.output} />;
+      return <ForExcelOutput output={file.output} reportType={reportType} />;
     default:
       assertNever(file);
   }
 };
 
-const ForExcelOutput: React.FC<{ output: ExcelOutputToRender }> = ({
-  output: { claude, gpt },
-}) => {
-  const hasBoth = gpt.length > 0 && claude.length > 0;
-  const [value, setValue] = React.useState<ReportType>("gpt4");
-  const output = value == "gpt4" ? gpt : claude;
+const ForExcelOutput: React.FC<{
+  output: ExcelOutputToRender;
+  reportType: ReportType;
+}> = ({ output: { claude, gpt }, reportType }) => {
+  const output = reportType == "gpt4" ? gpt : claude;
   return (
     <Box
       display="flex"
@@ -78,22 +87,6 @@ const ForExcelOutput: React.FC<{ output: ExcelOutputToRender }> = ({
       overflow="auto"
       flexDirection="column"
     >
-      {hasBoth && (
-        <Select
-          value={value}
-          sx={{
-            width: "fit-content",
-          }}
-          onChange={(_, newValue) => {
-            if (newValue) {
-              setValue(newValue);
-            }
-          }}
-        >
-          <Option value="gpt4">GPT-4</Option>
-          <Option value="claude">Claude</Option>
-        </Select>
-      )}
       <ForExcel chunks={output} />
     </Box>
   );
@@ -128,15 +121,11 @@ const ForExcelValue: React.FC<{ chunk: AnalyzeResponseChunk }> = ({
   );
 };
 
-const PdfReport: React.FC<{ report: Outputs.Report | undefined }> = ({
-  report,
-}) => {
-  const [value, setValue] = React.useState<ReportType>("gpt4");
-  if (!report) {
-    return null;
-  }
-
-  const hasClaude = report.longForm.length > 0;
+const PdfReport: React.FC<{
+  report: Outputs.Report;
+  reportType: ReportType;
+  setReportType: (reportType: ReportType) => void;
+}> = ({ report, reportType }) => {
   return (
     <Box
       display="flex"
@@ -146,24 +135,8 @@ const PdfReport: React.FC<{ report: Outputs.Report | undefined }> = ({
       maxHeight="100%"
       overflow="auto"
     >
-      {hasClaude && (
-        <Select
-          value={value}
-          sx={{
-            width: "fit-content",
-          }}
-          onChange={(_, newValue) => {
-            if (newValue) {
-              setValue(newValue);
-            }
-          }}
-        >
-          <Option value="gpt4">GPT-4</Option>
-          <Option value="claude">Claude</Option>
-        </Select>
-      )}
-      {value === "claude" && <ClaudeReport longForm={report.longForm} />}
-      {value === "gpt4" && <ChatGPTReport report={report} />}
+      {reportType === "claude" && <ClaudeReport longForm={report.longForm} />}
+      {reportType === "gpt4" && <ChatGPTReport report={report} />}
     </Box>
   );
 };
@@ -176,6 +149,7 @@ const ForOverview: React.FC<{
     <Box
       display="flex"
       width="100%"
+      height="100%"
       maxHeight="100%"
       overflow="auto"
       minHeight="200px"
@@ -186,7 +160,7 @@ const ForOverview: React.FC<{
       borderRadius={8}
       bgcolor="neutral.0"
     >
-      <Box display="flex" gap={2} padding={2}>
+      <Box display="flex" gap={2} padding={2} alignItems="center">
         <Typography
           level="h4"
           sx={{
@@ -200,20 +174,38 @@ const ForOverview: React.FC<{
       <Divider />
 
       {description && (
-        <Box display="flex" padding={2}>
-          <Typography>Description</Typography>
-          <Typography>{description}</Typography>
+        <Box
+          display="flex"
+          padding={2}
+          flexDirection="column"
+          gap={1}
+          flexShrink={0}
+        >
+          <Typography
+            level="h6"
+            sx={{
+              fontWeight: 700,
+              fontSize: "16px",
+            }}
+          >
+            Description
+          </Typography>
+          <Typography whiteSpace="pre-wrap">{description}</Typography>
         </Box>
       )}
     </Box>
   );
 };
 
-const ForReport = () => {
+const ForReport: React.FC<{
+  file: FileToRender.File;
+}> = ({ file }) => {
+  const [reportType, setReportType] = React.useState<ReportType>("gpt4");
   return (
     <Box
       display="flex"
       width="100%"
+      height="100%"
       maxHeight="100%"
       overflow="auto"
       minHeight="200px"
@@ -224,39 +216,106 @@ const ForReport = () => {
       borderRadius={8}
       bgcolor="white"
     >
-      <Box display="flex" gap={2} padding={2}>
-        <Typography
-          level="h4"
-          sx={{
-            fontWeight: 700,
-          }}
-        >
-          Report
-        </Typography>
+      <Box display="flex" gap={2} padding={2} justifyContent="space-between">
+        <Box display="flex" gap={2}>
+          <Typography
+            level="h4"
+            sx={{
+              fontWeight: 700,
+            }}
+          >
+            Report
+          </Typography>
+          <Select
+            size="sm"
+            value={reportType}
+            sx={{
+              width: "fit-content",
+            }}
+            onChange={(_, newValue) => {
+              if (newValue) {
+                setReportType(newValue);
+              }
+            }}
+          >
+            <Option value="gpt4">GPT-4</Option>
+            <Option value="claude">Claude</Option>
+          </Select>
+        </Box>
 
-        <Select
-          value={"claude"}
-          sx={{
-            width: "fit-content",
-          }}
-        >
-          <Option value="gpt4">GPT-4</Option>
-          <Option value="claude">Claude</Option>
-        </Select>
-        <DownloadButton />
+        <DownloadButton
+          signedUrl={file.signedUrl}
+          extractedTablesSignedUrl={
+            file.type === "pdf" && file.derivedSignedUrl
+          }
+        />
       </Box>
       <Divider />
       <Box display="flex" padding={2}>
-        <Typography>I love cats</Typography>
+        <Dispatch
+          file={file}
+          reportType={reportType}
+          setReportType={setReportType}
+        />
       </Box>
     </Box>
   );
 };
 
 const StatusBubble: React.FC<{ status: FileStatus }> = ({ status }) => {
+  const Inner = () => {
+    switch (status) {
+      case "pending":
+        return (
+          <Chip
+            size="sm"
+            sx={{
+              background: "#fff",
+              color: "neutral.600",
+              border: "1px solid #E5E5E5",
+              fontWeight: 700,
+            }}
+          >
+            Analyzing
+          </Chip>
+        );
+      case "ready":
+        return (
+          <Chip
+            size="sm"
+            sx={{
+              background: "#fff",
+              color: "success.solidColor",
+              border: "1px solid #E5E5E5",
+              fontWeight: 700,
+            }}
+          >
+            Ready
+          </Chip>
+        );
+      case "error":
+        return (
+          <Chip
+            size="sm"
+            sx={{
+              background: "#fff",
+              color: "danger.solidColor",
+              border: "1px solid #E5E5E5",
+              fontWeight: 700,
+            }}
+          >
+            Error
+          </Chip>
+        );
+
+      default:
+        assertNever(status);
+    }
+  };
+
   return (
     <Box>
-      <Chip>{status}</Chip>
+      <Inner />
     </Box>
   );
 };
@@ -287,11 +346,25 @@ const ChatGPTReport: React.FC<{
 
       {summaries.length > 0 && (
         <>
-          <Typography level="h5">Summary</Typography>
+          <Typography
+            level="h5"
+            sx={{
+              fontSize: "16px",
+              fontWeight: 700,
+            }}
+          >
+            Summary
+          </Typography>
 
-          <List sx={{ listStyleType: "disc" }}>
+          <List sx={{ listStyleType: "disc", pl: 4 }}>
             {summaries.map((summary, idx) => (
-              <ListItem key={idx}>
+              <ListItem
+                key={idx}
+                sx={{
+                  paddingX: 0,
+                  display: "list-item",
+                }}
+              >
                 <ListItemContent>{summary}</ListItemContent>
               </ListItem>
             ))}
@@ -354,9 +427,10 @@ function formatSheetNames(sheetNames: string[]): string {
   return `${first} to ${last}`;
 }
 
-const OPTIONS = ["Download Asset", "Download Extracted Tables"];
-const DownloadButton: React.FC = () => {
-  const [size, setSize] = React.useState("Medium");
+const DownloadButton: React.FC<{
+  signedUrl: string;
+  extractedTablesSignedUrl: string | undefined;
+}> = () => {
   const buttonRef = React.useRef(null);
   const [open, setOpen] = React.useState(false);
 
@@ -377,22 +451,21 @@ const DownloadButton: React.FC = () => {
         Download
       </Button>
       <Menu anchorEl={buttonRef.current} open={open} onClose={handleClose}>
-        {OPTIONS.map((item: string) => (
-          <MenuItem
-            key={item}
-            role="menuitemradio"
-            aria-checked={item === size ? "true" : "false"}
-            onClick={() => {
-              setSize(item);
-              handleClose();
-            }}
-          >
-            <ListItemDecorator>
-              {item === size && <ArrowRight />}
-            </ListItemDecorator>{" "}
-            {item}
-          </MenuItem>
-        ))}
+        <MenuItem
+          component="a"
+          onClick={() => {
+            handleClose();
+          }}
+        >
+          Download asset
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleClose();
+          }}
+        >
+          Download extracted tables
+        </MenuItem>
       </Menu>
     </div>
   );
