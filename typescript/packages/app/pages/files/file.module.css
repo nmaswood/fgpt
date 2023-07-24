@@ -1,2 +1,9 @@
 .display-asset {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .display-asset {
+    display: block;
+  }
 }

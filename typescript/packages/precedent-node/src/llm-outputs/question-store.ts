@@ -62,7 +62,6 @@ LIMIT ${limit}
 
   async getForFile(fileReferenceId: string): Promise<string[]> {
     const result = await this.pool.any(sql.type(ZGetForFileWithOrder)`
-
 SELECT
     question,
     text_chunk.chunk_order as chunk_order

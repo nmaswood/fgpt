@@ -207,7 +207,6 @@ ORDER BY
 
   async getChatEntry(chatEntryId: string): Promise<ChatEntry> {
     return this.pool.one(sql.type(ZChatEntryRow)`
-
 SELECT
     ${CHAT_ENTRY_FIELDS}
 FROM

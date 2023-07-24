@@ -19,7 +19,6 @@ import {
 import React from "react";
 
 import styles from "./display-projects.module.css";
-
 import { useHover } from "./use-hover";
 
 export const DisplayProjects: React.FC<{

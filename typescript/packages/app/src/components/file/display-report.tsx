@@ -6,6 +6,7 @@ import {
   FileToRender,
   Outputs,
 } from "@fgpt/precedent-iso";
+import { Term } from "@fgpt/precedent-iso/src/models/llm-outputs";
 import ArrowDropDown from "@mui/icons-material/ArrowDropDownOutlined";
 import {
   Box,
@@ -29,6 +30,7 @@ import { ReportType } from "./report-type";
 export const DisplayFileReport: React.FC<{
   file: FileToRender.File;
 }> = ({ file }) => {
+  const terms = file.type === "pdf" ? file.report?.terms ?? [] : [];
   return (
     <Box
       display="flex"
@@ -42,7 +44,11 @@ export const DisplayFileReport: React.FC<{
       gap={2}
       bgcolor="#F5F5F5"
     >
-      <ForOverview status={file.status} description={file.description} />
+      <ForOverview
+        status={file.status}
+        description={file.description}
+        terms={terms}
+      />
       <ForReport file={file} />
     </Box>
   );
@@ -131,7 +137,6 @@ const PdfReport: React.FC<{
       display="flex"
       flexDirection="column"
       gap={1}
-      padding={2}
       maxHeight="100%"
       overflow="auto"
     >
@@ -144,7 +149,8 @@ const PdfReport: React.FC<{
 const ForOverview: React.FC<{
   status: FileStatus;
   description: string | undefined;
-}> = ({ status, description }) => {
+  terms: Term[];
+}> = ({ status, description, terms }) => {
   return (
     <Box
       display="flex"
@@ -172,6 +178,18 @@ const ForOverview: React.FC<{
         <StatusBubble status={status} />
       </Box>
       <Divider />
+      {terms.length > 0 && (
+        <Box
+          display="flex"
+          flexDirection="column"
+          gap={1}
+          maxHeight="50%"
+          overflow="auto"
+          padding={2}
+        >
+          <TermsTable terms={terms} />
+        </Box>
+      )}
 
       {description && (
         <Box
@@ -246,7 +264,7 @@ const ForReport: React.FC<{
         <DownloadButton
           signedUrl={file.signedUrl}
           extractedTablesSignedUrl={
-            file.type === "pdf" && file.derivedSignedUrl
+            file.type === "pdf" ? file.derivedSignedUrl : undefined
           }
         />
       </Box>
@@ -329,21 +347,9 @@ const ClaudeReport: React.FC<{
 
 const ChatGPTReport: React.FC<{
   report: Outputs.Report;
-}> = ({ report: { summaries, financialSummary, terms } }) => {
+}> = ({ report: { summaries, financialSummary } }) => {
   return (
     <Box display="flex" flexDirection="column" maxHeight="100%" overflow="auto">
-      {terms.length > 0 && (
-        <Box
-          display="flex"
-          flexDirection="column"
-          gap={1}
-          maxHeight="100%"
-          overflow="auto"
-        >
-          <TermsTable terms={terms} />
-        </Box>
-      )}
-
       {summaries.length > 0 && (
         <>
           <Typography
@@ -374,7 +380,15 @@ const ChatGPTReport: React.FC<{
 
       {financialSummary.financialSummaries.length > 0 && (
         <>
-          <Typography>Financial Summary</Typography>
+          <Typography
+            level="h5"
+            sx={{
+              fontSize: "16px",
+              fontWeight: 700,
+            }}
+          >
+            Financial Summary
+          </Typography>
           <List sx={{ listStyleType: "disc" }}>
             {financialSummary.financialSummaries.map((summary, idx) => (
               <ListItem key={idx}>
@@ -387,7 +401,15 @@ const ChatGPTReport: React.FC<{
 
       {financialSummary.investmentRisks.length > 0 && (
         <>
-          <Typography>Investment risks</Typography>
+          <Typography
+            level="h5"
+            sx={{
+              fontSize: "16px",
+              fontWeight: 700,
+            }}
+          >
+            Investment Risks
+          </Typography>
           <List sx={{ listStyleType: "disc" }}>
             {financialSummary.investmentRisks.map((risk, idx) => (
               <ListItem key={idx}>
@@ -400,7 +422,15 @@ const ChatGPTReport: React.FC<{
 
       {financialSummary.investmentMerits.length > 0 && (
         <>
-          <Typography>Investment merits</Typography>
+          <Typography
+            level="h5"
+            sx={{
+              fontSize: "16px",
+              fontWeight: 700,
+            }}
+          >
+            Investment Merits
+          </Typography>
           <List sx={{ listStyleType: "disc" }}>
             {financialSummary.investmentMerits.map((merit, idx) => (
               <ListItem key={idx}>

@@ -21,6 +21,7 @@ import { useTabState } from "../../src/components/file/use-tab-state";
 import { Navbar } from "../../src/components/navbar";
 import { useFetchFileToRender } from "../../src/hooks/use-fetch-file-to-render";
 import { useFetchToken } from "../../src/hooks/use-fetch-token";
+import styles from "./file.module.css";
 
 export default function DisplayFile() {
   const router = useRouter();
@@ -177,6 +178,7 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
           flexDirection="column"
           padding={2}
           bgcolor="neutral.100"
+          className={styles["display-asset"]}
         >
           {file ? (
             <DisplayAsset fileToRender={file} />
