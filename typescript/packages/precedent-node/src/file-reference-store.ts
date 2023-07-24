@@ -22,8 +22,8 @@ export interface InsertFileReference {
   bucketName: string;
   path: string;
   contentType: string;
-  sha256?: string;
-  fileSize?: number;
+  sha256: string;
+  fileSize: number;
 }
 
 export interface FileReferenceStore {
@@ -38,7 +38,7 @@ export interface FileReferenceStore {
   getThumbnailPath(fileReferenceId: string): Promise<string | undefined>;
 }
 
-const FIELDS = sql.fragment` id, file_name, organization_id, project_id, content_type, path, bucket_name, uploaded_at, COALESCE(status, 'pending') as status, description`;
+const FIELDS = sql.fragment` id, file_name, organization_id, project_id, content_type, path, bucket_name, uploaded_at, COALESCE(status, 'pending') as status, description, file_size`;
 
 export class PsqlFileReferenceStore implements FileReferenceStore {
   constructor(private readonly pool: DatabasePool) {}
@@ -214,6 +214,7 @@ const ZFileReferenceRow = z
     uploaded_at: z.number(),
     status: ZFileStatus,
     description: z.string().nullable(),
+    file_size: z.number().nullable(),
   })
   .transform(
     (row): FileReference => ({
@@ -227,6 +228,7 @@ const ZFileReferenceRow = z
       createdAt: new Date(row.uploaded_at),
       status: row.status,
       description: row.description ?? undefined,
+      fileSize: row.file_size ?? undefined,
     }),
   );
 

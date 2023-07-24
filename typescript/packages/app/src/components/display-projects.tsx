@@ -38,7 +38,8 @@ export const DisplayProjects: React.FC<{
     <Box
       display="flex"
       flexDirection="column"
-      padding={2}
+      paddingBottom={2}
+      paddingX={2}
       maxHeight="100%"
       height="100%"
       overflow="auto"
@@ -65,7 +66,7 @@ export const DisplayProjects: React.FC<{
           justifyContent="start"
           maxHeight="100%"
           overflow="auto"
-          paddingY={3}
+          paddingTop={3}
         >
           <Card
             onClick={openCreateProjects}

@@ -38,14 +38,23 @@ const Admin: React.FC = () => {
       maxWidth="100%"
       overflow="auto"
       flexDirection="column"
-      padding={2}
     >
-      <>
-        <Navbar loading={false} />
+      <Navbar loading={false} />
+      <Box
+        display="flex"
+        height="100%"
+        width="100%"
+        maxHeight="100%"
+        maxWidth="100%"
+        overflow="auto"
+        flexDirection="column"
+        padding={2}
+        gap={2}
+      >
         <Typography level="h3">Admin</Typography>
 
         {user && <AdminInner />}
-      </>
+      </Box>
     </Box>
   );
 };

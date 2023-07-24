@@ -29,7 +29,8 @@ import { ReportType } from "./report-type";
 
 export const DisplayFileReport: React.FC<{
   file: FileToRender.File;
-}> = ({ file }) => {
+  showAdminOnly: boolean;
+}> = ({ file, showAdminOnly }) => {
   const terms = file.type === "pdf" ? file.report?.terms ?? [] : [];
   return (
     <Box
@@ -51,7 +52,7 @@ export const DisplayFileReport: React.FC<{
           terms={terms}
         />
       )}
-      <ForReport file={file} />
+      <ForReport file={file} showAdminOnly={showAdminOnly} />
     </Box>
   );
 };
@@ -219,7 +220,8 @@ const ForOverview: React.FC<{
 
 const ForReport: React.FC<{
   file: FileToRender.File;
-}> = ({ file }) => {
+  showAdminOnly: boolean;
+}> = ({ file, showAdminOnly }) => {
   const [reportType, setReportType] = React.useState<ReportType>("claude");
   return (
     <Box
@@ -246,24 +248,27 @@ const ForReport: React.FC<{
           >
             Report
           </Typography>
-          <Select
-            size="sm"
-            value={reportType}
-            sx={{
-              width: "fit-content",
-            }}
-            onChange={(_, newValue) => {
-              if (newValue) {
-                setReportType(newValue);
-              }
-            }}
-          >
-            <Option value="gpt4">GPT-4</Option>
-            <Option value="claude">Claude</Option>
-          </Select>
+          {showAdminOnly && (
+            <Select
+              size="sm"
+              value={reportType}
+              sx={{
+                width: "fit-content",
+              }}
+              onChange={(_, newValue) => {
+                if (newValue) {
+                  setReportType(newValue);
+                }
+              }}
+            >
+              <Option value="gpt4">GPT-4</Option>
+              <Option value="claude">Claude</Option>
+            </Select>
+          )}
         </Box>
 
         <DownloadButton
+          fileName={file.fileName}
           signedUrl={file.signedUrl}
           extractedTablesSignedUrl={
             file.type === "pdf" ? file.derivedSignedUrl : undefined
@@ -343,7 +348,7 @@ const StatusBubble: React.FC<{ status: FileStatus }> = ({ status }) => {
 const ClaudeReport: React.FC<{
   longForm: string[];
 }> = ({ longForm }) => {
-  const allText = longForm.join("\n");
+  const allText = longForm.join("\n").trim();
   return <Typography whiteSpace="pre-wrap"> {allText}</Typography>;
 };
 
@@ -460,15 +465,24 @@ function formatSheetNames(sheetNames: string[]): string {
 }
 
 const DownloadButton: React.FC<{
+  fileName: string;
   signedUrl: string;
   extractedTablesSignedUrl: string | undefined;
-}> = ({ extractedTablesSignedUrl }) => {
+}> = ({ signedUrl, extractedTablesSignedUrl }) => {
   const buttonRef = React.useRef(null);
   const [open, setOpen] = React.useState(false);
 
   const handleClose = () => {
     setOpen(false);
   };
+
+  if (!extractedTablesSignedUrl) {
+    return (
+      <Button component="a" href={signedUrl} target="_blank">
+        Download Asset
+      </Button>
+    );
+  }
 
   return (
     <div>
@@ -485,17 +499,18 @@ const DownloadButton: React.FC<{
       <Menu anchorEl={buttonRef.current} open={open} onClose={handleClose}>
         <MenuItem
           component="a"
-          onClick={() => {
-            handleClose();
-          }}
+          href={signedUrl}
+          target="_blank"
+          onClick={() => handleClose()}
         >
           Download asset
         </MenuItem>
         {extractedTablesSignedUrl && (
           <MenuItem
-            onClick={() => {
-              handleClose();
-            }}
+            component="a"
+            href={extractedTablesSignedUrl}
+            target="_blank"
+            onClick={() => handleClose()}
           >
             Download extracted tables
           </MenuItem>

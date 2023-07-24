@@ -1,39 +1,48 @@
 import "@fortune-sheet/react/dist/index.css";
 
-import { assertNever, FileToRender } from "@fgpt/precedent-iso";
+import { assertNever, FileType, SizeBallpark } from "@fgpt/precedent-iso";
 import { Workbook } from "@fortune-sheet/react";
-import { LinearProgress } from "@mui/joy";
+import { Alert,Box, LinearProgress } from "@mui/joy";
 import React from "react";
 
 import { useFetchSheets } from "../../hooks/use-fetch-sheets";
 
 export const DisplayAsset: React.FC<{
-  fileToRender: FileToRender.File;
-}> = ({ fileToRender }) => {
-  switch (fileToRender.type) {
+  fileType: FileType;
+  signedUrl: string;
+  fileId: string;
+  ballpark: SizeBallpark;
+}> = ({ signedUrl, fileId, fileType, ballpark }) => {
+  switch (fileType) {
     case "excel":
-      return (
-        <DisplayExcelFile
-          id={fileToRender.id}
-          signedUrl={fileToRender.signedUrl}
-        />
-      );
+      if (ballpark === "over_ten") {
+        return (
+          <Box
+            display="flex"
+            height="100%"
+            width="100%"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Alert>File is too large to render. Please download to view</Alert>
+          </Box>
+        );
+      }
+      return <DisplayExcelFile id={fileId} signedUrl={signedUrl} />;
     case "pdf":
       return (
         <object
-          data={`${fileToRender.signedUrl}#toolbar=0&view=FitH&zoom=page-width`}
+          data={`${signedUrl}#toolbar=0&view=FitH&zoom=page-width`}
           type="application/pdf"
           style={{ width: "100%", height: "100%" }}
         />
       );
-    case undefined:
-      throw new Error("illegal state");
     default:
-      assertNever(fileToRender);
+      assertNever(fileType);
   }
 };
 
-export const DisplayExcelFile: React.FC<{
+const DisplayExcelFile: React.FC<{
   id: string;
   signedUrl: string;
 }> = ({ id, signedUrl }) => {

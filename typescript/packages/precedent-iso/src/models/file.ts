@@ -16,6 +16,7 @@ export interface FileReference {
   createdAt: Date;
   status: FileStatus;
   description: string | undefined;
+  fileSize: number | undefined;
 }
 
 export interface LoadedFile {

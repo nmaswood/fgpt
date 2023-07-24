@@ -1,3 +1,4 @@
+import { FileType } from "../file-type";
 import { AnalyzeResponseChunk } from "./excel";
 import { FileStatus } from "./file";
 import { Report } from "./llm-outputs";
@@ -36,4 +37,13 @@ export namespace FileToRender {
 export interface ExcelOutputToRender {
   gpt: AnalyzeResponseChunk[];
   claude: AnalyzeResponseChunk[];
+}
+
+export type SizeBallpark = "unknown" | "under_five" | "under_ten" | "over_ten";
+
+export interface DisplayFile {
+  signedUrl: string;
+  size: number | undefined;
+  type: FileType | undefined;
+  ballpark: SizeBallpark;
 }

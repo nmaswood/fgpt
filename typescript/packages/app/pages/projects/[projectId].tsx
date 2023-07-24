@@ -35,19 +35,12 @@ const DisplayProject: React.FC = () => {
       bgcolor="background.body"
     >
       <Navbar loading={!project} project={project} />
-      <Box
-        display="flex"
-        width="100%"
-        height="100%"
-        maxHeight="100%"
-        overflow="auto"
-      >
-        <SelectedProject
-          token={token}
-          loading={isTokenLoading || isProjectLoading}
-          project={project}
-        />
-      </Box>
+
+      <SelectedProject
+        token={token}
+        loading={isTokenLoading || isProjectLoading}
+        project={project}
+      />
     </Box>
   );
 };

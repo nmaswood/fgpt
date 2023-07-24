@@ -66,14 +66,25 @@ export const Navbar: React.FC<{
                 gap: 1,
               }}
             >
-              <Image
-                priority
-                src="/paredo-icon.svg"
-                height={18}
-                width={18}
-                alt="Paredo icon"
-                color="white"
-              />
+              <Box
+                display="flex"
+                alignItems="center"
+                sx={{
+                  transition: "transform 0.3s ease",
+                  ":hover": {
+                    transform: "rotate(3.142rad)",
+                  },
+                }}
+              >
+                <Image
+                  priority
+                  src="/paredo-icon.svg"
+                  height={18}
+                  width={18}
+                  alt="Paredo icon"
+                  color="white"
+                />
+              </Box>
               <span
                 style={{
                   color: "white",
@@ -145,6 +156,10 @@ const DisplayUser = () => {
               src={auth0User.picture ?? ""}
               sx={{
                 borderRadius: 6,
+                transition: "transform 0.3s ease",
+                ":hover": {
+                  transform: "scale(1.1)",
+                },
               }}
               size="sm"
             >
@@ -161,6 +176,11 @@ const DisplayUser = () => {
             <MenuItem
               component={Link}
               href="/api/auth/logout"
+              sx={{
+                ":hover": {
+                  textDecoration: "none",
+                },
+              }}
               onClick={() => {
                 ImpersonateService.clear();
                 handleClose();
@@ -172,7 +192,16 @@ const DisplayUser = () => {
               Logout
             </MenuItem>
             {isSuperAdmin && (
-              <MenuItem component={Link} href="/admin" onClick={handleClose}>
+              <MenuItem
+                component={Link}
+                href="/admin"
+                onClick={handleClose}
+                sx={{
+                  ":hover": {
+                    textDecoration: "none",
+                  },
+                }}
+              >
                 <ListItemDecorator>
                   <AdminIcon />
                 </ListItemDecorator>

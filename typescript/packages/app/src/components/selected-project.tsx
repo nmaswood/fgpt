@@ -11,7 +11,7 @@ import {
   ListDivider,
   ListItem,
   ListItemButton,
-  ListItemDecorator,
+  Typography,
 } from "@mui/joy";
 import Uppy from "@uppy/core";
 import Dashboard from "@uppy/dashboard";
@@ -158,12 +158,23 @@ export const SelectedProject: React.FC<{
         >
           <ListItem>
             <ListItemButton
+              orientation="vertical"
               onClick={() => setTab("data")}
               selected={tab === "data"}
             >
-              <ListItemDecorator>
-                <FolderOutlinedIcon fontSize="small" />
-              </ListItemDecorator>
+              <FolderOutlinedIcon fontSize="small" />
+              <Typography
+                sx={{
+                  fontSize: "10px",
+                  ...(tab === "data"
+                    ? {
+                        color: "primary.600",
+                      }
+                    : {}),
+                }}
+              >
+                Data
+              </Typography>
             </ListItemButton>
           </ListItem>
           <ListDivider
@@ -175,10 +186,21 @@ export const SelectedProject: React.FC<{
             <ListItemButton
               onClick={() => setTab("chat")}
               selected={tab === "chat"}
+              orientation="vertical"
             >
-              <ListItemDecorator>
-                <ChatOutlined fontSize="small" />
-              </ListItemDecorator>
+              <ChatOutlined fontSize="small" />
+              <Typography
+                sx={{
+                  fontSize: "10px",
+                  ...(tab === "chat"
+                    ? {
+                        color: "primary.600",
+                      }
+                    : {}),
+                }}
+              >
+                Chat
+              </Typography>
             </ListItemButton>
           </ListItem>
 

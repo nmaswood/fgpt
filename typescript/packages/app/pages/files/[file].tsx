@@ -8,7 +8,7 @@ import {
   ListDivider,
   ListItem,
   ListItemButton,
-  ListItemDecorator,
+  Typography,
 } from "@mui/joy";
 import { useRouter } from "next/router";
 import React from "react";
@@ -19,40 +19,32 @@ import { DisplayProgress } from "../../src/components/file/display-progress";
 import { DisplayFileReport } from "../../src/components/file/display-report";
 import { useTabState } from "../../src/components/file/use-tab-state";
 import { Navbar } from "../../src/components/navbar";
+import { useFetchDisplayFile } from "../../src/hooks/use-fetch-display-file";
 import { useFetchFileToRender } from "../../src/hooks/use-fetch-file-to-render";
+import { useFetchMe } from "../../src/hooks/use-fetch-me";
 import { useFetchToken } from "../../src/hooks/use-fetch-token";
 import styles from "./file.module.css";
 
 export default function DisplayFile() {
   const router = useRouter();
 
-  const { data: token } = useFetchToken();
   const fileId = (() => {
     const fileId = router.query.file;
     return typeof fileId === "string" ? fileId : undefined;
   })();
 
-  return (
-    <Box
-      display="flex"
-      width="100%"
-      height="100%"
-      maxHeight="100%"
-      maxWidth="100%"
-      overflow="auto"
-    >
-      {fileId && token && <ForFileId fileId={fileId} token={token} />}
-    </Box>
-  );
+  return <>{fileId && <ForFileId fileId={fileId} />}</>;
 }
 
-const ForFileId: React.FC<{ fileId: string; token: string }> = ({
-  fileId,
-  token,
-}) => {
+const ForFileId: React.FC<{ fileId: string }> = ({ fileId }) => {
   const { data: file } = useFetchFileToRender(fileId);
+  const { data: token } = useFetchToken();
+  const { data: displayFile } = useFetchDisplayFile(fileId);
+  const { data: user } = useFetchMe();
 
   const [tab, setTab] = useTabState();
+
+  const showAdminOnly = (user && user.role === "superadmin") ?? false;
 
   return (
     <Box
@@ -106,10 +98,21 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
                 <ListItemButton
                   onClick={() => setTab("report")}
                   selected={tab === "report"}
+                  orientation="vertical"
                 >
-                  <ListItemDecorator>
-                    <AssessmentIcon />
-                  </ListItemDecorator>
+                  <AssessmentIcon />
+                  <Typography
+                    sx={{
+                      fontSize: "10px",
+                      ...(tab === "report"
+                        ? {
+                            color: "primary.600",
+                          }
+                        : {}),
+                    }}
+                  >
+                    Report
+                  </Typography>
                 </ListItemButton>
               </ListItem>
               <ListDivider
@@ -117,37 +120,67 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
                   margin: 0,
                 }}
               />
-              <ListItem>
-                <ListItemButton
-                  onClick={() => setTab("chat")}
-                  selected={tab === "chat"}
-                >
-                  <ListItemDecorator>
-                    <ChatOutlined fontSize="small" />
-                  </ListItemDecorator>
-                </ListItemButton>
-              </ListItem>
+              {file && file.type === "pdf" && (
+                <>
+                  <ListItem>
+                    <ListItemButton
+                      onClick={() => setTab("chat")}
+                      selected={tab === "chat"}
+                      orientation="vertical"
+                    >
+                      <ChatOutlined fontSize="small" />
+                      <Typography
+                        sx={{
+                          fontSize: "10px",
+                          ...(tab === "chat"
+                            ? {
+                                color: "primary.600",
+                              }
+                            : {}),
+                        }}
+                      >
+                        Chat
+                      </Typography>
+                    </ListItemButton>
+                  </ListItem>
 
-              <ListDivider
-                sx={{
-                  margin: 0,
-                }}
-              />
-              <ListItem>
-                <ListItemButton
-                  onClick={() => setTab("progress")}
-                  selected={tab === "progress"}
-                >
-                  <ListItemDecorator>
-                    <AutoModeOutlinedIcon />
-                  </ListItemDecorator>
-                </ListItemButton>
-              </ListItem>
-              <ListDivider
-                sx={{
-                  margin: 0,
-                }}
-              />
+                  <ListDivider
+                    sx={{
+                      margin: 0,
+                    }}
+                  />
+                </>
+              )}
+              {showAdminOnly && (
+                <>
+                  <ListItem>
+                    <ListItemButton
+                      onClick={() => setTab("progress")}
+                      selected={tab === "progress"}
+                      orientation="vertical"
+                    >
+                      <AutoModeOutlinedIcon />
+                      <Typography
+                        sx={{
+                          fontSize: "10px",
+                          ...(tab === "progress"
+                            ? {
+                                color: "primary.600",
+                              }
+                            : {}),
+                        }}
+                      >
+                        Progress
+                      </Typography>
+                    </ListItemButton>
+                  </ListItem>
+                  <ListDivider
+                    sx={{
+                      margin: 0,
+                    }}
+                  />
+                </>
+              )}
             </List>
           </Box>
           <Box
@@ -161,8 +194,10 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
             {tab === "progress" && file && (
               <DisplayProgress fileReferenceId={file.id} />
             )}
-            {tab === "report" && file && <DisplayFileReport file={file} />}
-            {tab === "chat" && file && (
+            {tab === "report" && file && (
+              <DisplayFileReport file={file} showAdminOnly={showAdminOnly} />
+            )}
+            {tab === "chat" && file && token && (
               <DisplayFileChat
                 fileReferenceId={fileId}
                 projectId={file.projectId}
@@ -180,8 +215,13 @@ const ForFileId: React.FC<{ fileId: string; token: string }> = ({
           bgcolor="neutral.100"
           className={styles["display-asset"]}
         >
-          {file ? (
-            <DisplayAsset fileToRender={file} />
+          {displayFile && displayFile.type ? (
+            <DisplayAsset
+              fileType={displayFile.type}
+              signedUrl={displayFile.signedUrl}
+              ballpark={displayFile.ballpark}
+              fileId={fileId}
+            />
           ) : (
             <Box
               display="flex"

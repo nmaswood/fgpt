@@ -7,6 +7,7 @@ import {
   Avatar,
   Box,
   CircularProgress,
+  Divider,
   IconButton,
   Input,
   Link,
@@ -234,17 +235,26 @@ export const DisplayChat: React.FC<{
           height="100%"
           maxHeight="100%"
           overflow="auto"
+          bgcolor="neutral.0"
+          borderRadius={8}
         >
           {(filtered.length > 0 || chatEntries.length > 0) && (
             <List sx={{ width: "100%" }}>
               {chatEntries.map((chatEntry) => (
-                <RenderChatEntryFromServer
-                  key={chatEntry.id}
-                  chatEntry={chatEntry}
-                />
+                <React.Fragment key={chatEntry.id}>
+                  <RenderChatEntryFromServer
+                    key={chatEntry.id}
+                    chatEntry={chatEntry}
+                  />
+
+                  <Divider />
+                </React.Fragment>
               ))}
               {filtered.map((q) => (
-                <RenderChatEntryFromClient key={q.id} q={q} text={text} />
+                <React.Fragment key={q.id}>
+                  <RenderChatEntryFromClient q={q} text={text} />
+                  <Divider />
+                </React.Fragment>
               ))}
             </List>
           )}
@@ -294,6 +304,7 @@ const RenderChatEntryFromServer: React.FC<{
         text={chatEntry.question}
         picture={picture ?? undefined}
       />
+      <Divider />
 
       <ListItem
         sx={{
@@ -399,6 +410,8 @@ const RenderChatEntryFromClient: React.FC<{
         picture={picture ?? undefined}
       />
 
+      <Divider />
+
       <ListItem
         sx={{
           display: "flex",
@@ -478,6 +491,8 @@ const DisplayQuestions: React.FC<{
       borderRadius={8}
       sx={(theme) => ({
         border: `1px solid ${theme.vars.palette.neutral[100]}`,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        bgcolor: (theme.vars.palette.neutral as any)[0],
       })}
     >
       <List size="sm">
@@ -519,7 +534,7 @@ const UserAvatarWithResponse: React.FC<{
         </ListItemDecorator>
       )}
       <ListItemContent>
-        <Typography level="body1">{text}</Typography>
+        <Typography level="body2">{text}</Typography>
       </ListItemContent>
     </ListItem>
   );

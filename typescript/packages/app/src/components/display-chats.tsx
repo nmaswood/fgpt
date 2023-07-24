@@ -75,7 +75,12 @@ export const DisplayChatList: React.FC<{
       <Divider />
 
       <List
-        sx={{ height: "100%", maxHeight: "100%", overflow: "auto" }}
+        sx={{
+          height: "100%",
+          maxHeight: "100%",
+          overflow: "auto",
+          bgcolor: "neutral.0",
+        }}
         size="sm"
         onKeyDown={(e) => {
           switch (e.key) {
@@ -200,7 +205,9 @@ const ListItemEntry: React.FC<{
               autoFocus
             />
           )}
-          {!isEditing && <ListItemContent>{chat.name}</ListItemContent>}
+          {!isEditing && (
+            <ListItemContent>{chat.name || "Nameless chat"}</ListItemContent>
+          )}
           {isSelected && !isEditing && (
             <IconButton
               size="sm"
