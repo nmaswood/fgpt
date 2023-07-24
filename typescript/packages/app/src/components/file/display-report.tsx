@@ -44,11 +44,13 @@ export const DisplayFileReport: React.FC<{
       gap={2}
       bgcolor="#F5F5F5"
     >
-      <ForOverview
-        status={file.status}
-        description={file.description}
-        terms={terms}
-      />
+      {file.type === "pdf" && (
+        <ForOverview
+          status={file.status}
+          description={file.description}
+          terms={terms}
+        />
+      )}
       <ForReport file={file} />
     </Box>
   );
@@ -218,7 +220,7 @@ const ForOverview: React.FC<{
 const ForReport: React.FC<{
   file: FileToRender.File;
 }> = ({ file }) => {
-  const [reportType, setReportType] = React.useState<ReportType>("gpt4");
+  const [reportType, setReportType] = React.useState<ReportType>("claude");
   return (
     <Box
       display="flex"
@@ -460,7 +462,7 @@ function formatSheetNames(sheetNames: string[]): string {
 const DownloadButton: React.FC<{
   signedUrl: string;
   extractedTablesSignedUrl: string | undefined;
-}> = () => {
+}> = ({ extractedTablesSignedUrl }) => {
   const buttonRef = React.useRef(null);
   const [open, setOpen] = React.useState(false);
 
@@ -489,13 +491,15 @@ const DownloadButton: React.FC<{
         >
           Download asset
         </MenuItem>
-        <MenuItem
-          onClick={() => {
-            handleClose();
-          }}
-        >
-          Download extracted tables
-        </MenuItem>
+        {extractedTablesSignedUrl && (
+          <MenuItem
+            onClick={() => {
+              handleClose();
+            }}
+          >
+            Download extracted tables
+          </MenuItem>
+        )}
       </Menu>
     </div>
   );
