@@ -4,7 +4,11 @@ export interface ObjectStorageService {
   upload(bucketName: string, fileName: string, data: Buffer): Promise<void>;
   download(bucketName: string, fileName: string): Promise<Buffer>;
   listFiles(bucketName: string, prefix: string): Promise<CloudFile[]>;
-  getSignedUrl(bucketName: string, fileName: string): Promise<string>;
+  getSignedUrl(
+    bucketName: string,
+    path: string,
+    fileName?: string,
+  ): Promise<string>;
 }
 
 export interface CloudFile {
@@ -61,12 +65,17 @@ export class GoogleCloudStorageService implements ObjectStorageService {
     }));
   }
 
-  async getSignedUrl(bucketName: string, fileName: string): Promise<string> {
+  async getSignedUrl(
+    bucketName: string,
+    path: string,
+    fileName?: string,
+  ): Promise<string> {
     const bucket = this.#storage.bucket(bucketName);
-    const resp = await bucket.file(fileName).getSignedUrl({
+    const resp = await bucket.file(path).getSignedUrl({
       version: "v4",
       action: "read",
       expires: getTruncatedTime(),
+      ...(fileName ? { promptSaveAs: fileName } : {}),
     });
 
     return resp[0];

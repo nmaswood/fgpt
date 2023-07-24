@@ -6,6 +6,7 @@ import {
   FileToRender,
   getFileType,
 } from "@fgpt/precedent-iso";
+import { parse } from "path";
 
 import { ExcelAssetStore } from "./excel-asset-store";
 import { ExcelOutputStore } from "./excel-output-store";
@@ -47,7 +48,11 @@ export class FileToRenderServiceImpl implements FileRenderService {
   async #forExcel(file: FileReference): Promise<FileToRender.ExcelFile> {
     const [output, signedUrl, project] = await Promise.all([
       this.excelOutputStore.forDirectUpload(file.id),
-      this.objectStorageService.getSignedUrl(file.bucketName, file.path),
+      this.objectStorageService.getSignedUrl(
+        file.bucketName,
+        file.path,
+        file.fileName,
+      ),
       this.projectStore.get(file.projectId),
     ]);
     return {
@@ -65,7 +70,11 @@ export class FileToRenderServiceImpl implements FileRenderService {
 
   async #forPDF(file: FileReference): Promise<FileToRender.PDFFile> {
     const [signedUrl, [derived], report, project] = await Promise.all([
-      this.objectStorageService.getSignedUrl(file.bucketName, file.path),
+      this.objectStorageService.getSignedUrl(
+        file.bucketName,
+        file.path,
+        file.fileName,
+      ),
       this.excelAssetStore.list(file.id),
       this.reportService.forFileReferenceId(file.id),
       this.projectStore.get(file.projectId),
@@ -83,6 +92,7 @@ export class FileToRenderServiceImpl implements FileRenderService {
         ? await this.objectStorageService.getSignedUrl(
             derived.bucketName,
             derived.path,
+            `${parse(file.fileName).name}.xlsx`,
           )
         : undefined,
 
