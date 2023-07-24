@@ -81,10 +81,11 @@ WHERE
     chat: InsertChat,
   ): Promise<Chat> {
     const count = await trx.oneFirst(sql.type(ZCountRow)`
+
 SELECT
-  COALESCE(chat_count, 0) as count
+    COALESCE(chat_count, 0) as count
 FROM
-  PROJECT
+    PROJECT
 WHERE
     id = ${chat.projectId}
 `);

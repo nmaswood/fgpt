@@ -3,8 +3,6 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import ModeEditIcon from "@mui/icons-material/ModeEditOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
-import { format } from "fecha";
-
 import {
   Badge,
   Box,
@@ -18,6 +16,7 @@ import {
   MenuItem,
   Typography,
 } from "@mui/joy";
+import { format } from "fecha";
 import React from "react";
 
 import styles from "./display-projects.module.css";
