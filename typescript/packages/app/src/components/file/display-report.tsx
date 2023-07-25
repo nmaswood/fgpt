@@ -103,6 +103,26 @@ const ForExcelOutput: React.FC<{
 };
 
 const ForExcel: React.FC<{ chunks: AnalyzeResponseChunk[] }> = ({ chunks }) => {
+  const allHTML = chunks.map((chunk) => chunk.sanitizedHtml).filter(isNotNull);
+  if (allHTML.length) {
+    return (
+      <Box>
+        {allHTML.map((html, idx) => (
+          <Box
+            key={idx}
+            dangerouslySetInnerHTML={{ __html: html }}
+            sx={(theme) => ({
+              "& *": {
+                fontSize: "16px",
+                fontFamily: theme.vars.fontFamily.body,
+              },
+            })}
+          />
+        ))}
+      </Box>
+    );
+  }
+
   return (
     <>
       {chunks.map((chunk, i) => (
