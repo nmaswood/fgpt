@@ -20,11 +20,9 @@ export interface AskQuestionStreamingArgs {
   onEnd: () => void;
 }
 
-export interface GenerateTitleStreamingArgs {
+export interface GenerateTitleArgs {
   question: string;
   answer: string;
-  onData: (resp: string) => void;
-  onEnd: () => void;
 }
 
 export interface AskQuestion {
@@ -47,7 +45,7 @@ export interface MLServiceClient {
   getEmbeddings: (args: GetEmbeddingsArgs) => Promise<GetEmbeddingsResponse>;
   askQuestion(args: AskQuestion): Promise<string>;
   askQuestionStreaming(args: AskQuestionStreamingArgs): Promise<void>;
-  getTitleStreaming(args: GenerateTitleStreamingArgs): Promise<void>;
+  getTitle(args: GenerateTitleArgs): Promise<string>;
   tokenLength(text: string): Promise<TokenLength>;
 }
 
@@ -122,32 +120,13 @@ export class MLServiceClientImpl implements MLServiceClient {
     });
   }
 
-  async getTitleStreaming({
-    question,
-    answer,
-    onData,
-    onEnd,
-  }: GenerateTitleStreamingArgs): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = await this.client.post<any>(
-      "/chat/get-title-streaming",
-      {
-        question,
-        answer,
-      },
-      {
-        responseType: "stream",
-      },
-    );
-    const stream = response.data;
-
-    stream.on("data", (data: Buffer) => {
-      onData(data.toString());
+  async getTitle({ question, answer }: GenerateTitleArgs): Promise<string> {
+    const response = await this.client.post<unknown>("/chat/get-title", {
+      question,
+      answer,
     });
 
-    stream.on("end", () => {
-      onEnd();
-    });
+    return ZGetTitleResponse.parse(response.data).title;
   }
 
   async tokenLength(text: string): Promise<TokenLength> {
@@ -171,4 +150,8 @@ export type TokenLength = z.infer<typeof ZTokenLengthResponse>;
 
 const ZAskQuestionResponse = z.object({
   data: z.string(),
+});
+
+const ZGetTitleResponse = z.object({
+  title: z.string(),
 });

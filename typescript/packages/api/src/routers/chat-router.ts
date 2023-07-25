@@ -173,7 +173,6 @@ export class ChatRouter {
         setStreamingCookies(res);
 
         const answerBuffer: string[] = [];
-        const titleBuffer: string[] = [];
 
         await this.mlClient.askQuestionStreaming({
           context: justText.join("\n"),
@@ -185,13 +184,6 @@ export class ChatRouter {
             answerBuffer.push(resp);
           },
           onEnd: async () => {
-            if (shouldGenerateName) {
-              res.write("__REFRESH__");
-            } else {
-              res.end();
-              return;
-            }
-
             const answer = answerBuffer.join("");
             await this.chatStore.insertChatEntry({
               organizationId: req.user.organizationId,
@@ -207,23 +199,20 @@ export class ChatRouter {
                 text: byId[doc.id]?.chunkText ?? "",
               })),
             });
+            if (shouldGenerateName) {
+              res.write("__REFRESH__");
+              const name = await this.mlClient.getTitle({
+                question: args.question,
+                answer,
+              });
 
-            await this.mlClient.getTitleStreaming({
-              question: args.question,
-              answer,
-              onData: (resp) => {
-                titleBuffer.push(resp);
-              },
-              onEnd: async () => {
-                const name = titleBuffer.join("");
-                await this.chatStore.updateChat({
-                  chatId: args.chatId,
-                  name,
-                });
+              await this.chatStore.updateChat({
+                chatId: args.chatId,
+                name,
+              });
+            }
 
-                res.end();
-              },
-            });
+            res.end();
           },
         });
       },

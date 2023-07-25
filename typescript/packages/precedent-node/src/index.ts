@@ -16,7 +16,6 @@ export * from "./jobs/thumbnail-handler";
 export * from "./llm-outputs/misc-output-store";
 export * from "./llm-outputs/question-store";
 export * from "./llm-outputs/report-service";
-export * from "./llm-outputs/summary-store";
 export * from "./loaded-file-store";
 export * from "./logger";
 export * from "./message-bus-service";

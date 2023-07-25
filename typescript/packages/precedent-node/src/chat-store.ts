@@ -38,7 +38,7 @@ export interface UpdateChatEntry {
   answer: string;
 }
 
-const CHAT_FIELDS = sql.fragment`chat.id as chat_id, chat.name as chat_name, chat.file_reference_id as file_reference_id`;
+const CHAT_FIELDS = sql.fragment`chat.id as chat_id, chat.name as chat_name, chat.file_reference_id as file_reference_id, COALESCE(chat_entry_count, 0) as chat_entry_count`;
 const CHAT_ENTRY_FIELDS = sql.fragment`chat_entry.id as chat_entry_id, question_v2 as question, answer`;
 
 export interface ChatStore {
@@ -81,7 +81,6 @@ WHERE
     chat: InsertChat,
   ): Promise<Chat> {
     const count = await trx.oneFirst(sql.type(ZCountRow)`
-
 SELECT
     COALESCE(chat_count, 0) as count
 FROM
@@ -285,12 +284,14 @@ const ZChatRow = z
     chat_id: z.string(),
     chat_name: z.string().nullable(),
     file_reference_id: z.string().nullable(),
+    chat_entry_count: z.number(),
   })
   .transform(
     (row): Chat => ({
       id: row.chat_id,
       name: row.chat_name ?? undefined,
       fileReferenceId: row.file_reference_id ?? undefined,
+      entryCount: row.chat_entry_count,
     }),
   );
 

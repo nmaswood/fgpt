@@ -21,6 +21,10 @@ class GetTitleRequest(BaseModel):
     answer: str
 
 
+class GetTitleResponse(BaseModel):
+    title: str
+
+
 class ChatRouter:
     def __init__(self, chat_service: ChatService) -> None:
         self.chat_service = chat_service
@@ -35,13 +39,11 @@ class ChatRouter:
                 req.question,
                 req.history,
             )
-            response = StreamingResponse(content=stream, media_type="text/event-stream")
-            return response
+            return StreamingResponse(content=stream, media_type="text/event-stream")
 
-        @router.post("/get-title-streaming")
-        async def get_title_streaming_route(req: GetTitleRequest):
-            stream = self.chat_service.get_title(req.question, req.answer)
-            response = StreamingResponse(content=stream, media_type="text/event-stream")
-            return response
+        @router.post("/get-title")
+        async def get_title_route(req: GetTitleRequest) -> GetTitleResponse:
+            title = self.chat_service.get_title(req.question, req.answer)
+            return GetTitleResponse(title=title)
 
         return router
