@@ -1,3 +1,3 @@
-# api
+# job-runner
 
-FGPT Node api server
+Task runner

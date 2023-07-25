@@ -194,8 +194,14 @@ resource "google_cloudbuild_trigger" "build-api" {
     _PROJECT_SLUG = var.project_slug
   }
 
-  filename       = "cloudbuild/build-api.cloudbuild.yaml"
-  included_files = ["typescript/packages/**"]
+  filename = "cloudbuild/build-api.cloudbuild.yaml"
+  included_files = [
+    "typescript/packages/yarn.lock",
+    "typescript/packages/tsconfig.base.json",
+    "typescript/packages/precedent-iso/**",
+    "typescript/packages/precedent-node/**",
+    "typescript/packages/api/**",
+  ]
 }
 
 resource "google_cloudbuild_trigger" "build-job-runner" {
@@ -217,8 +223,14 @@ resource "google_cloudbuild_trigger" "build-job-runner" {
     _PROJECT_SLUG = var.project_slug
   }
 
-  filename       = "cloudbuild/build-job-runner.cloudbuild.yaml"
-  included_files = ["typescript/packages/**"]
+  filename = "cloudbuild/build-job-runner.cloudbuild.yaml"
+  included_files = [
+    "typescript/packages/yarn.lock",
+    "typescript/packages/tsconfig.base.json",
+    "typescript/packages/precedent-iso/**",
+    "typescript/packages/precedent-node/**",
+    "typescript/packages/job-runner/**",
+  ]
 }
 
 resource "google_cloudbuild_trigger" "build-springtime" {
