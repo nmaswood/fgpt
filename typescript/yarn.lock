@@ -497,7 +497,7 @@ __metadata:
     "@google-cloud/profiler": ^5.0.5
     "@google-cloud/trace-agent": ^7.1.2
     "@types/cors": ^2.8.13
-    "@types/eslint": ^8.44.0
+    "@types/eslint": ^8.44.1
     "@types/express": ^4.17.17
     "@types/lodash": ^4.14.195
     "@types/multer": ^1.4.7
@@ -519,7 +519,7 @@ __metadata:
     lodash: ^4.17.21
     multer: ^1.4.5-lts.1
     pino: ^8.14.1
-    pino-pretty: ^10.1.0
+    pino-pretty: ^10.2.0
     prettier: ^3.0.0
     slonik: ^34.0.1
     typescript: ^5.1.6
@@ -538,11 +538,11 @@ __metadata:
     "@fgpt/precedent-iso": "workspace:^"
     "@fortune-sheet/react": ^0.18.3
     "@mui/icons-material": ^5.14.1
-    "@mui/joy": ^5.0.0-alpha.88
-    "@mui/material": ^5.14.1
+    "@mui/joy": ^5.0.0-alpha.89
+    "@mui/material": ^5.14.2
     "@mui/x-data-grid": ^6.10.1
     "@next/eslint-plugin-next": ^13.4.12
-    "@types/eslint": ^8.44.0
+    "@types/eslint": ^8.44.1
     "@types/node": ^20.4.4
     "@types/prettier": ^2.7.3
     "@types/react": ^18.2.16
@@ -583,7 +583,7 @@ __metadata:
     "@fgpt/precedent-node": "workspace:^"
     "@google-cloud/profiler": ^5.0.5
     "@types/cors": ^2.8.13
-    "@types/eslint": ^8.44.0
+    "@types/eslint": ^8.44.1
     "@types/express": ^4.17.17
     "@types/node": ^20.4.4
     "@types/prettier": ^2.7.3
@@ -597,7 +597,7 @@ __metadata:
     express: ^4.18.2
     express-async-errors: ^3.1.1
     pino: ^8.14.1
-    pino-pretty: ^10.1.0
+    pino-pretty: ^10.2.0
     prettier: ^3.0.0
     slonik: ^34.0.1
     typescript: ^5.1.6
@@ -610,7 +610,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@fgpt/precedent-iso@workspace:packages/precedent-iso"
   dependencies:
-    "@types/eslint": ^8.44.0
+    "@types/eslint": ^8.44.1
     "@types/prettier": ^2.7.3
     "@typescript-eslint/eslint-plugin": ^6.2.0
     "@typescript-eslint/parser": ^6.2.0
@@ -631,7 +631,7 @@ __metadata:
     "@fgpt/precedent-iso": "workspace:^"
     "@google-cloud/pubsub": ^3.7.2
     "@google-cloud/storage": ^6.12.0
-    "@types/eslint": ^8.44.0
+    "@types/eslint": ^8.44.1
     "@types/lodash": ^4.14.195
     "@types/prettier": ^2.7.3
     "@typescript-eslint/eslint-plugin": ^6.2.0
@@ -1025,10 +1025,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/core-downloads-tracker@npm:^5.14.1":
-  version: 5.14.1
-  resolution: "@mui/core-downloads-tracker@npm:5.14.1"
-  checksum: 8de805bb200ca9f6bc12574faeea5c550b2f7b1fdaf7dd2ad052fc06277c1490f7006f0ac7eaaad5eab02d011951bd588ee0d28838c78cc789e10bf22603941f
+"@mui/core-downloads-tracker@npm:^5.14.2":
+  version: 5.14.2
+  resolution: "@mui/core-downloads-tracker@npm:5.14.2"
+  checksum: ea8032d101b190c2eb5bc67378a9142a56c15d6341ef6f9ad244921f1ba042e301328a132ecfc7a1473a09c56b11333b83859d12e50c12d1ee7a6a26eff27e36
   languageName: node
   linkType: hard
 
@@ -1048,13 +1048,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/joy@npm:^5.0.0-alpha.88":
-  version: 5.0.0-alpha.88
-  resolution: "@mui/joy@npm:5.0.0-alpha.88"
+"@mui/joy@npm:^5.0.0-alpha.89":
+  version: 5.0.0-alpha.89
+  resolution: "@mui/joy@npm:5.0.0-alpha.89"
   dependencies:
     "@babel/runtime": ^7.22.6
     "@mui/base": 5.0.0-beta.8
-    "@mui/core-downloads-tracker": ^5.14.1
+    "@mui/core-downloads-tracker": ^5.14.2
     "@mui/system": ^5.14.1
     "@mui/types": ^7.2.4
     "@mui/utils": ^5.14.1
@@ -1075,17 +1075,17 @@ __metadata:
       optional: true
     "@types/react":
       optional: true
-  checksum: aca8c03195aff56ae115dc85e673f49f283c950fc006c11df77a8e4875c6fd8ba35265b60ff406c71d92036401d6c092ee4e9f2606b0683041657eaf16ac0cd7
+  checksum: eaa76b83148cb2f96256cea453e2402687392377da9a7c882af10ef8f98fe4b9384d34bc739dd660628c28dd768f8405797ae230c5f13b39fa4ae3ba3bd410c5
   languageName: node
   linkType: hard
 
-"@mui/material@npm:^5.14.1":
-  version: 5.14.1
-  resolution: "@mui/material@npm:5.14.1"
+"@mui/material@npm:^5.14.2":
+  version: 5.14.2
+  resolution: "@mui/material@npm:5.14.2"
   dependencies:
     "@babel/runtime": ^7.22.6
     "@mui/base": 5.0.0-beta.8
-    "@mui/core-downloads-tracker": ^5.14.1
+    "@mui/core-downloads-tracker": ^5.14.2
     "@mui/system": ^5.14.1
     "@mui/types": ^7.2.4
     "@mui/utils": ^5.14.1
@@ -1108,7 +1108,7 @@ __metadata:
       optional: true
     "@types/react":
       optional: true
-  checksum: a7eea3ecde7d8d36f3450c36fb200146b223004ead715d969e535a601bdb0fabb0cb284406e5beda781c6e3a294682b32fdeffe0178a7faf52fc09fe9995f965
+  checksum: 271ccb56133c43b98338240dfa169c781c8dc9e8cc6e51188d539b30f1744957bda903d24684e532f213184f2522b5120457ceb3fc85e97ba84c1df637dce66a
   languageName: node
   linkType: hard
 
@@ -1609,13 +1609,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/eslint@npm:^8.44.0":
-  version: 8.44.0
-  resolution: "@types/eslint@npm:8.44.0"
+"@types/eslint@npm:^8.44.1":
+  version: 8.44.1
+  resolution: "@types/eslint@npm:8.44.1"
   dependencies:
     "@types/estree": "*"
     "@types/json-schema": "*"
-  checksum: 2655f409a4ecdd64bb9dd9eb6715e7a2ac30c0e7f902b414e10dbe9d6d497baa5a0f13105e1f7bd5ad7a913338e2ab4bed1faf192a7a0d27d1acd45ba79d3f69
+  checksum: 8b45be72d3c22a1ee0b1cc7e7fb0e34e32bbf959e6b7e0e46d160c17894aedf159c1db5c85750f10068884c741eebc37a1cc7ea659de23a8df0c9a3203e2ff9d
   languageName: node
   linkType: hard
 
@@ -6747,9 +6747,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino-pretty@npm:^10.1.0":
-  version: 10.1.0
-  resolution: "pino-pretty@npm:10.1.0"
+"pino-pretty@npm:^10.2.0":
+  version: 10.2.0
+  resolution: "pino-pretty@npm:10.2.0"
   dependencies:
     colorette: ^2.0.7
     dateformat: ^4.6.3
@@ -6767,7 +6767,7 @@ __metadata:
     strip-json-comments: ^3.1.1
   bin:
     pino-pretty: bin.js
-  checksum: 543a658b0b1d00a0dce5d1015a4fa581ea2b8b4937d3cbef6d03cc9c0bbc2425493d302adbab3a03aa20d0a9c102222b378336a2241e6c493a086c21ad3288d3
+  checksum: 8e8220ab647d11e05349adde37aac116dab1a96ce479297820475b7e2246ea5e56e3764b625c5877821ae66dcea62bdda563cc49eccbd4628c80952998068f48
   languageName: node
   linkType: hard
 

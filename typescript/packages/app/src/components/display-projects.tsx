@@ -125,6 +125,7 @@ const ProjectCard: React.FC<{
 
   const ActionMenu = () => (
     <Menu
+      size="sm"
       anchorEl={cardRef.current}
       open={isOpen}
       onClose={() => setIsOpen(false)}
@@ -137,7 +138,7 @@ const ProjectCard: React.FC<{
         }}
       >
         <ListItemDecorator>
-          <ModeEditIcon color="info" />
+          <ModeEditIcon color="info" fontSize="small" />
         </ListItemDecorator>
         Edit name
       </MenuItem>
@@ -148,7 +149,7 @@ const ProjectCard: React.FC<{
         }}
       >
         <ListItemDecorator>
-          <DeleteIcon color="error" />
+          <DeleteIcon color="error" fontSize="small" />
         </ListItemDecorator>
         Delete deal
       </MenuItem>
