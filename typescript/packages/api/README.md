@@ -1,3 +1,3 @@
 # api
 
-FGPT Node api server
+FGPT Node API server
