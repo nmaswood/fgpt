@@ -32,8 +32,7 @@ export class MainRouter {
       LOGGER.info({ taskId, messageId }, "Message parsed!");
 
       try {
-        await this.taskStore.setToInProgress(taskId);
-        const task = await this.taskStore.get(taskId);
+        const task = await this.taskStore.setToInProgress(taskId);
         LOGGER.info(task.config, "Executing task");
         await this.taskExecutor.execute(task);
         await this.taskStore.setToSuceeded(task.id);
@@ -41,18 +40,12 @@ export class MainRouter {
           await this.fileStatusService.update(task.config.fileReferenceId);
         }
 
-        LOGGER.info({ taskId: task.id }, "completed task");
         res.status(204).send();
-        LOGGER.info("Just sent a 204");
+        LOGGER.info({ taskId: task.id }, "Completed task and sent 204");
         return;
       } catch (e) {
-        LOGGER.error("Could not execute task");
-        LOGGER.error(e);
-
-        // this will put it back into the queue
-        // if it has failed too many times the dead letter queue will fail it.
+        LOGGER.error(e, "Could not execute task");
         await this.taskStore.setToQueued(taskId);
-
         res.status(500).send();
 
         return;

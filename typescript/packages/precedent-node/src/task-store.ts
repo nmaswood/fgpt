@@ -40,7 +40,7 @@ export interface TaskStore {
   getByFileReferenceId(fileReferenceId: string): Promise<Task[]>;
   insert(config: CreateTask): Promise<Task>;
   insertMany(configs: CreateTask[]): Promise<Task[]>;
-  setToInProgress(taskId: string): Promise<Task | undefined>;
+  setToInProgress(taskId: string): Promise<Task>;
   setToSuceeded(taskId: string): Promise<Task | undefined>;
   setToFailed(taskId: string): Promise<Task | undefined>;
   setToQueued(taskId: string): Promise<Task | undefined>;
