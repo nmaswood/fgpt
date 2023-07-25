@@ -1,4 +1,4 @@
-import { DisplayFile, getFileType, SizeBallpark } from "@fgpt/precedent-iso";
+import { DisplayFile, getFileType } from "@fgpt/precedent-iso";
 import {
   FileReferenceStore,
   FileStatusService,
@@ -142,8 +142,6 @@ export class FileRouter {
         const display: DisplayFile = {
           signedUrl,
           type: getFileType(file.contentType),
-          size: file.fileSize,
-          ballpark: getBallpark(file.fileSize),
         };
 
         res.json(display);
@@ -231,15 +229,3 @@ const getFile = (req: express.Request) => {
 
   return ZFile.parse(file);
 };
-
-function getBallpark(size: number | undefined): SizeBallpark {
-  if (!size) {
-    return "unknown";
-  }
-  if (size <= 5_000_000) {
-    return "under_five";
-  } else if (size <= 10_000_000) {
-    return "under_ten";
-  }
-  return "over_ten";
-}

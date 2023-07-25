@@ -24,7 +24,6 @@
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@fgpt/precedent-iso": "workspace:^",
-    "@fortune-sheet/react": "^0.18.3",
     "@mui/icons-material": "^5.14.1",
     "@mui/joy": "^5.0.0-alpha.89",
     "@mui/material": "^5.14.2",

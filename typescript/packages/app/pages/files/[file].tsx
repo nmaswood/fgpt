@@ -3,7 +3,6 @@ import AssessmentIcon from "@mui/icons-material/AssessmentOutlined";
 import AutoModeOutlinedIcon from "@mui/icons-material/AutoModeOutlined";
 import {
   Box,
-  CircularProgress,
   List,
   ListDivider,
   ListItem,
@@ -45,6 +44,8 @@ const ForFileId: React.FC<{ fileId: string }> = ({ fileId }) => {
   const [tab, setTab] = useTabState();
 
   const showAdminOnly = (user && user.role === "superadmin") ?? false;
+
+  const isExcel = (file && file.type === "excel") ?? false;
 
   return (
     <Box
@@ -206,33 +207,20 @@ const ForFileId: React.FC<{ fileId: string }> = ({ fileId }) => {
             )}
           </Box>
         </Box>
-        <Box
-          width="100%"
-          height="100%"
-          flexDirection="column"
-          padding={2}
-          bgcolor="neutral.100"
-          className={styles["display-asset"]}
-        >
-          {displayFile && displayFile.type ? (
-            <DisplayAsset
-              fileType={displayFile.type}
-              signedUrl={displayFile.signedUrl}
-              ballpark={displayFile.ballpark}
-              fileId={fileId}
-            />
-          ) : (
-            <Box
-              display="flex"
-              width="100%"
-              height="100%"
-              justifyContent="center"
-              alignItems="center"
-            >
-              <CircularProgress />
-            </Box>
-          )}
-        </Box>
+        {!isExcel && (
+          <Box
+            width="100%"
+            height="100%"
+            flexDirection="column"
+            padding={2}
+            bgcolor="neutral.100"
+            className={styles["display-asset"]}
+          >
+            {displayFile && displayFile.type === "pdf" && (
+              <DisplayAsset signedUrl={displayFile.signedUrl} />
+            )}
+          </Box>
+        )}
       </Box>
     </Box>
   );

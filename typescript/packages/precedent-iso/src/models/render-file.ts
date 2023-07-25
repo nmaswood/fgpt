@@ -39,11 +39,7 @@ export interface ExcelOutputToRender {
   claude: AnalyzeResponseChunk[];
 }
 
-export type SizeBallpark = "unknown" | "under_five" | "under_ten" | "over_ten";
-
 export interface DisplayFile {
   signedUrl: string;
-  size: number | undefined;
   type: FileType | undefined;
-  ballpark: SizeBallpark;
 }
