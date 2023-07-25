@@ -90,6 +90,7 @@ const ZAnalyzeOutput = z.object({
     .object({
       sheetNames: z.array(z.string()),
       content: z.string(),
+      sanitizedHtml: z.string().optional(),
     })
     .array(),
   model: ZAnalyzeTableModel.optional(),
@@ -119,7 +120,12 @@ const ZExcelOutputRow = z
             type: "direct-upload",
           },
       output: {
-        ...row.output,
+        type: "v0_chunks",
+        value: row.output.value.map((chunk) => ({
+          sheetNames: chunk.sheetNames,
+          content: chunk.content,
+          sanitizedHtml: chunk.sanitizedHtml,
+        })),
         model: row.output.model ?? "gpt",
       },
     }),

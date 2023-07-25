@@ -21,17 +21,11 @@ export type ExcelSource = z.infer<typeof ZExcelSource>;
 export interface AnalyzeResponseChunk {
   content: string;
   sheetNames: string[];
+  sanitizedHtml: string | undefined;
 }
 
 export interface AnalyzeOutput {
   type: "v0_chunks";
   value: AnalyzeResponseChunk[];
   model: AnalyzeTableModel;
-}
-
-export interface AnalyzeServiceChunk {
-  parsable: boolean;
-  code: string;
-  prompt: string;
-  sheetNames: string[];
 }

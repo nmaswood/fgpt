@@ -6,6 +6,7 @@ import pydantic
 from loguru import logger
 
 from springtime.services.anthropic_client import AnthropicClient
+from springtime.services.html import html_from_text
 
 
 class LongformReport(pydantic.BaseModel):
@@ -22,21 +23,8 @@ class LongformReportService(abc.ABC):
 BASE_PROMPT = (
     "You are an expert financial analyst. Your job is to review materials and evaluate whether it might be a good investment for the PE fund you are supporting."
     "I will provide you a document after you answer OK. The document start after _START_DOCUMENT_ and end after _END_DOCUMENT_.  Read the document and provide key investment merits, investment risks, financial summary and transaction details from the document."
-    "Please output unrendered markdown. Headers should be designated with #. Highlight key phrases in bold. Do not speak in the first person. Use bullets for list items and not '-'. Do not output anything except the report."
+    "Please output unrendered markdown. Headers should be designated with #. Do not speak in the first person. Do not output anything except the report."
 )
-
-
-TAGS = set(bleach.ALLOWED_ATTRIBUTES) | {
-    "h1",
-    "h2",
-    "h3",
-    "h4",
-    "h5",
-    "h6",
-    "p",
-    "ul",
-    "li",
-}
 
 
 class ClaudeLongformReportService(LongformReportService):
@@ -60,16 +48,8 @@ Assistant:"""
         raw = self._client.complete(
             prompt,
         ).strip()
-        sanitized_html = self._generate_markdown(raw)
+        sanitized_html = html_from_text(raw)
         return LongformReport(
             raw=raw,
             sanitized_html=sanitized_html,
         )
-
-    def _generate_markdown(self, text: str) -> str | None:
-        try:
-            m = markdown.markdown(text)
-            return bleach.clean(m, tags=TAGS)
-        except Exception as e:
-            logger.error(f"Error generating markdown: {e}")
-            return None

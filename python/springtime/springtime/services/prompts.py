@@ -151,6 +151,8 @@ For example:
 * $1,100,000 should be formatted as $1.1M
 * $600,000 should be formatted as $0.6M
 * $1,420,000,000 should be formatted as $1.4B
+
+Please output unrendered markdown. Headers should be designated with #. Do not speak in the first person. Do not output anything except the report.
 """
 
 CLAUDE_PROMPT = """
@@ -205,4 +207,6 @@ For example:
 * $1,100,000 should be formatted as $1.1M
 * $600,000 should be formatted as $0.6M
 * $1,420,000,000 should be formatted as $1.4B
+
+Please output unrendered markdown. Headers should be designated with #. Do not speak in the first person. Do not output anything except the report.
 """

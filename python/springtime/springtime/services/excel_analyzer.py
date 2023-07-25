@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from springtime.models.open_ai import CompletionResponse, OpenAIModel
 from springtime.services.anthropic_client import AnthropicClient
 from springtime.services.format_sheet import format_sheet
+from springtime.services.html import html_from_text
 from springtime.services.prompts import CLAUDE_PROMPT, GPT_PROMPT
 from springtime.services.sheet_processor import PreprocessedSheet
 
@@ -13,6 +14,7 @@ from springtime.services.sheet_processor import PreprocessedSheet
 class ResponseWithPrompt(BaseModel):
     prompt: str
     content: str
+    sanitized_html: str | None
 
 
 class ExcelAnalyzer(abc.ABC):
@@ -29,9 +31,12 @@ class OpenAIExcelAnalyzer(ExcelAnalyzer):
         table_content = "\n---\n".join([format_sheet(sheet) for sheet in sheets])
         response = self._chat_completion(table_content)
 
+        content = response.choices[0].message.content
+
         return ResponseWithPrompt(
             prompt=table_content,
-            content=response.choices[0].message.content,
+            content=content,
+            sanitized_html=html_from_text(content),
         )
 
     def _chat_completion(self, table: str) -> CompletionResponse:
@@ -67,7 +72,9 @@ __END_DATA__
 
 Assistant:
 """
+        content = self.anthropic_client.complete(prompt=prompt).strip()
         return ResponseWithPrompt(
             prompt=prompt,
-            content=self.anthropic_client.complete(prompt=prompt),
+            content=content,
+            sanitized_html=html_from_text(content),
         )

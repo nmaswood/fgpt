@@ -1,6 +1,5 @@
 import {
   AnalyzeResponseChunk,
-  AnalyzeServiceChunk,
   AnalyzeTableModel,
   assertNever,
 } from "@fgpt/precedent-iso";
@@ -25,10 +24,6 @@ export interface AnalyzeArguments {
 
 export interface AnalyzeResponse {
   responses: AnalyzeResponseChunk[];
-}
-
-export interface AnalyzeServiceResponse {
-  responses: AnalyzeServiceChunk[];
 }
 
 export interface TabularDataService {
@@ -105,10 +100,14 @@ const ZAnalyzeResponseChunk = z
   .object({
     sheet_names: z.string().array(),
     content: z.string(),
+    prompt: z.string(),
+    sanitized_html: z.string().nullable(),
   })
   .transform((row) => ({
     sheetNames: row.sheet_names,
     content: row.content,
+    prompt: row.prompt,
+    sanitizedHtml: row.sanitized_html ?? undefined,
   }));
 
 const ZAnalyzeResponse = z.object({
