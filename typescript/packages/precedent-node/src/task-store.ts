@@ -40,7 +40,6 @@ export interface TaskStore {
   getByFileReferenceId(fileReferenceId: string): Promise<Task[]>;
   insert(config: CreateTask): Promise<Task>;
   insertMany(configs: CreateTask[]): Promise<Task[]>;
-  getAndSetToInProgress(): Promise<Task | undefined>;
   setToInProgress(taskId: string): Promise<Task | undefined>;
   setToSuceeded(taskId: string): Promise<Task | undefined>;
   setToFailed(taskId: string): Promise<Task | undefined>;
@@ -86,28 +85,23 @@ WHERE
   }
 
   async setToInProgress(taskId: string): Promise<Task> {
-    return this.pool.one(
-      sql.type(ZFromTaskRow)`
-UPDATE
-    task
-SET
-    status = 'in-progress',
-    status_updated_at = now()
-WHERE
-    task.id = ${taskId}
-RETURNING
-    ${FIELDS}
-`,
-    );
+    return this.#setToPending(taskId, "in-progress");
   }
 
   async setToQueued(taskId: string): Promise<Task> {
+    return this.#setToPending(taskId, "queued");
+  }
+
+  async #setToPending(
+    taskId: string,
+    status: "in-progress" | "queued",
+  ): Promise<Task> {
     return this.pool.one(
       sql.type(ZFromTaskRow)`
 UPDATE
     task
 SET
-    status = 'queued',
+    status = ${status},
     status_updated_at = now()
 WHERE
     task.id = ${taskId}
@@ -117,19 +111,22 @@ RETURNING
     );
   }
 
-  async getAndSetToInProgress(): Promise<Task | undefined> {
-    const [row] = await this.getAndSetManyToInProgress({ limit: 1 });
-    return row;
-  }
-
   async setToFailed(taskId: string): Promise<Task | undefined> {
-    const [row] = await this.setManyToCompleted([{ taskId, status: "failed" }]);
+    const [row] = await this.setManyToCompleted([
+      {
+        taskId,
+        status: "failed",
+      },
+    ]);
     return row;
   }
 
   async setToSuceeded(taskId: string): Promise<Task | undefined> {
     const [row] = await this.setManyToCompleted([
-      { taskId, status: "succeeded" },
+      {
+        taskId,
+        status: "succeeded",
+      },
     ]);
     return row;
   }
@@ -139,79 +136,32 @@ RETURNING
       return [];
     }
 
-    const rows = config.map((c) => {
-      const j = sql.jsonb(JSON.stringify({}));
-      const nullValue = sql.jsonb(null);
-      return sql.fragment`
+    const rows = config.map(
+      (c) =>
+        sql.fragment`
 (${c.taskId}::uuid,
-    ${c.status},
-    ${c.status === "succeeded" ? j : nullValue},
-    ${c.status === "failed" ? j : nullValue})
-`;
-    });
+    ${c.status})
+`,
+    );
 
-    const tasks = this.pool.connect(async (cnx) => {
-      const resp = await cnx.query(
-        sql.type(ZFromTaskRow)`
+    const tasks = await this.pool.any(
+      sql.type(ZFromTaskRow)`
 UPDATE
     task
 SET
     status = c.status,
-    success_output = c.success_output,
-    error_output = c.error_output,
     status_updated_at = now(),
     finished_at = now()
 FROM (
-    VALUES ${sql.join(
-      rows,
-      sql.fragment`, `,
-    )}) c (id, status, success_output, error_output)
+    VALUES ${sql.join(rows, sql.fragment`, `)}) c (id, status)
 WHERE
     task.id = c.id
 RETURNING
     ${FIELDS}
 `,
-      );
+    );
 
-      return Array.from(resp.rows);
-    });
-
-    return tasks;
-  }
-
-  async getAndSetManyToInProgress({
-    limit,
-  }: SetManyToInProgressArgs): Promise<Task[]> {
-    if (limit <= 0) {
-      throw new Error("limit must be greater than 0");
-    }
-    const tasks = this.pool.connect(async (cnx) => {
-      const resp = await cnx.query(
-        sql.type(ZFromTaskRow)`
-UPDATE
-    task
-SET
-    status = 'in-progress',
-    status_updated_at = now()
-FROM (
-    SELECT
-        t2.id
-    FROM
-        task t2
-    WHERE
-        t2.status = 'queued'
-    LIMIT ${limit}) AS subquery
-WHERE
-    task.id = subquery.id
-RETURNING
-    ${FIELDS}
-`,
-      );
-
-      return Array.from(resp.rows);
-    });
-
-    return tasks;
+    return Array.from(tasks);
   }
 
   async insertMany(args: CreateTask[]): Promise<Task[]> {
@@ -226,8 +176,8 @@ RETURNING
         }, 'queued', ${JSON.stringify(config)}, ${fileReferenceId ?? null})`,
     );
 
-    const tasks = await this.pool.connect(async (cnx) => {
-      const resp = await cnx.query(
+    const tasks = Array.from(
+      await this.pool.any(
         sql.type(ZFromTaskRow)`
 INSERT INTO task (organization_id, project_id, task_type, status, config, file_reference_id)
     VALUES
@@ -235,10 +185,8 @@ INSERT INTO task (organization_id, project_id, task_type, status, config, file_r
     RETURNING
         ${FIELDS}
 `,
-      );
-
-      return Array.from(resp.rows);
-    });
+      ),
+    );
 
     await Promise.all(
       tasks.map((task) =>
@@ -270,6 +218,6 @@ const ZFromTaskRow = z
       projectId: row.project_id,
       fileReferenceId: row.file_reference_id ?? undefined,
       status: row.status,
-      config: ZTaskConfig.parse(row.config),
+      config: row.config,
     }),
   );
