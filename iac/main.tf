@@ -924,8 +924,11 @@ resource "google_project_iam_member" "cloudrun_service_trace_agent" {
   member  = "serviceAccount:${google_service_account.cloud_run_service_account.email}"
 }
 
-
-
+resource "google_project_iam_member" "cloudrun_service_metrics" {
+  project = var.project
+  role    = "roles/monitoring.metricWriter"
+  member  = "serviceAccount:${google_service_account.cloud_run_service_account.email}"
+}
 
 resource "google_project_iam_member" "cloudrun_service_account_storage_role" {
   project = var.project
