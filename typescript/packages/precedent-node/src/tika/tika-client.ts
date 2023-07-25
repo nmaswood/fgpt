@@ -1,9 +1,7 @@
 import axios, { AxiosInstance } from "axios";
-import * as FS from "fs/promises";
 
 export interface TikaClient {
   detectFromFilename(fileName: string): Promise<string>;
-  extractFromFile(fileName: string): Promise<string>;
   extract(fileName: string, data: Buffer): Promise<string>;
 }
 
@@ -19,8 +17,6 @@ export class TikaHttpClient implements TikaClient {
   }
 
   async detectFromFilename(filename: string): Promise<string> {
-    console.log("About to fail fuck");
-
     const response = await this.#client({
       method: "PUT",
       url: "/detect/stream",
@@ -36,14 +32,8 @@ export class TikaHttpClient implements TikaClient {
     return mimeType;
   }
 
-  async extractFromFile(fileName: string): Promise<string> {
-    const data = await FS.readFile(fileName);
-    return this.extract(fileName, data);
-  }
-
-  async extract(filename: string, data: Buffer): Promise<string> {
-    const mimeType =
-      "application/pdf" ?? (await this.detectFromFilename(filename));
+  async extract(_: string, data: Buffer): Promise<string> {
+    const mimeType = "application/pdf";
 
     const response = await this.#client({
       method: "PUT",
