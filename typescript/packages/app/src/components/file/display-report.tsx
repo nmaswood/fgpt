@@ -4,6 +4,7 @@ import {
   ExcelOutputToRender,
   FileStatus,
   FileToRender,
+  isNotNull,
   Outputs,
 } from "@fgpt/precedent-iso";
 import { Term } from "@fgpt/precedent-iso/src/models/llm-outputs";
@@ -346,10 +347,31 @@ const StatusBubble: React.FC<{ status: FileStatus }> = ({ status }) => {
 };
 
 const ClaudeReport: React.FC<{
-  longForm: string[];
+  longForm: Outputs.LongForm[];
 }> = ({ longForm }) => {
-  const allText = longForm.join("\n").trim();
-  return <Typography whiteSpace="pre-wrap"> {allText}</Typography>;
+  const hasHtml = longForm.some((lf) => lf.html);
+  if (!hasHtml) {
+    const allText = longForm.map((lf) => lf.raw).join("\n");
+    return <Typography whiteSpace="pre-wrap"> {allText}</Typography>;
+  }
+
+  const allHtml = longForm.map((lf) => lf.html).filter(isNotNull);
+  return (
+    <Box>
+      {allHtml.map((html, idx) => (
+        <Box
+          key={idx}
+          dangerouslySetInnerHTML={{ __html: html }}
+          sx={(theme) => ({
+            "& *": {
+              fontSize: "16px",
+              fontFamily: theme.vars.fontFamily.body,
+            },
+          })}
+        />
+      ))}
+    </Box>
+  );
 };
 
 const ChatGPTReport: React.FC<{

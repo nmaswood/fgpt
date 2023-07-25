@@ -124,6 +124,11 @@ const ZMiscValue = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("long_form"),
     value: z.string(),
+    sanitizedHtml: z
+      .string()
+      .nullable()
+      .optional()
+      .transform((row) => row ?? undefined),
   }),
 ]);
 

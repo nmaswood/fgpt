@@ -24,7 +24,8 @@ class LongFormReportRequest(BaseModel):
 
 
 class LongFormReportResponse(BaseModel):
-    content: str
+    raw: str
+    sanitized_html: str | None
 
 
 class LLMOutputResponse(BaseModel):
@@ -58,7 +59,9 @@ class ReportRouter:
 
         @router.post("/long-form")
         async def long_form_route(req: LongFormReportRequest):
-            content = self.long_form_report_service.generate(req.text)
-            return LongFormReportResponse(content=content)
+            resp = self.long_form_report_service.generate(req.text)
+            return LongFormReportResponse(
+                raw=resp.raw, sanitized_html=resp.sanitized_html,
+            )
 
         return router

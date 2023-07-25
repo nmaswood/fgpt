@@ -41,6 +41,8 @@ async function setup() {
     bucketName: "test-bucket",
     contentType: "application/pdf",
     path: "my-path/foo",
+    fileSize: 1,
+    sha256: "hi",
   });
 
   await processedFileStore.upsert({
@@ -95,7 +97,6 @@ test("getProgress#no_tasks", async () => {
       longFormReportChunk: "task_does_not_exist",
       upsertEmbeddings: "task_does_not_exist",
       extractTable: "task_does_not_exist",
-      analyzeTable: "task_does_not_exist",
       scan: "task_does_not_exist",
       thumbnail: "task_does_not_exist",
     },
@@ -153,7 +154,6 @@ test("getProgress#pending", async () => {
       longFormReportChunk: "task_does_not_exist",
       upsertEmbeddings: "task_does_not_exist",
       extractTable: "task_does_not_exist",
-      analyzeTable: "task_does_not_exist",
       thumbnail: "task_does_not_exist",
 
       scan: "task_does_not_exist",
@@ -216,7 +216,6 @@ test("getProgress#has_failure", async () => {
       longFormReportChunk: "task_does_not_exist",
       upsertEmbeddings: "task_does_not_exist",
       extractTable: "task_does_not_exist",
-      analyzeTable: "task_does_not_exist",
       thumbnail: "task_does_not_exist",
       scan: "task_does_not_exist",
     },

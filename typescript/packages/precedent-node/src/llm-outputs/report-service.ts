@@ -68,7 +68,10 @@ export class ReportServiceImpl implements ReportService {
           acc.summaries.push(...value.value);
           break;
         case "long_form":
-          acc.longForm.push(value.value);
+          acc.longForm.push({
+            raw: value.value,
+            html: value.sanitizedHtml,
+          });
           break;
         default:
           assertNever(value);

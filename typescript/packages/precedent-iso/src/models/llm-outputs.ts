@@ -35,6 +35,7 @@ export type MiscValue =
   | {
       type: "long_form";
       value: string;
+      sanitizedHtml?: string | undefined;
     };
 
 export interface MiscValueRow {
@@ -71,7 +72,12 @@ export interface Report {
   summaries: string[];
   financialSummary: FinancialSummary;
   terms: Term[];
-  longForm: string[];
+  longForm: LongForm[];
+}
+
+export interface LongForm {
+  raw: string;
+  html: string | undefined;
 }
 
 export const EMPTY_REPORT = {

@@ -20,9 +20,14 @@ export interface LLMOutputResponse {
   terms: Term[];
 }
 
+export interface LongFormResponse {
+  raw: string;
+  sanitizedHtml: string | undefined;
+}
+
 export interface MLReportService {
   llmOutput(args: LLMOutputArgs): Promise<LLMOutputResponse>;
-  longForm(args: LongFormArgs): Promise<string>;
+  longForm(args: LongFormArgs): Promise<LongFormResponse>;
 }
 export class MLReportServiceImpl implements MLReportService {
   constructor(private readonly client: AxiosInstance) {}
@@ -33,7 +38,7 @@ export class MLReportServiceImpl implements MLReportService {
     return ZLLMOutputResponse.parse(response.data);
   }
 
-  async longForm({ text }: LongFormArgs): Promise<string> {
+  async longForm({ text }: LongFormArgs): Promise<LongFormResponse> {
     const response = await this.client.post<unknown>("/report/long-form", {
       text,
     });
@@ -43,9 +48,13 @@ export class MLReportServiceImpl implements MLReportService {
 
 const ZLongFormReportResponse = z
   .object({
-    content: z.string(),
+    raw: z.string(),
+    sanitized_html: z.string().nullable(),
   })
-  .transform((v) => v.content);
+  .transform((v) => ({
+    raw: v.raw,
+    sanitizedHtml: v.sanitized_html ?? undefined,
+  }));
 
 const ZTerm = z
   .object({

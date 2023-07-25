@@ -4,7 +4,7 @@ import {
 } from "../llm-outputs/misc-output-store";
 import { QuestionStore } from "../llm-outputs/question-store";
 import { LOGGER } from "../logger";
-import { MLReportService } from "../ml/ml-report-service";
+import { LongFormResponse, MLReportService } from "../ml/ml-report-service";
 import { ShaHash } from "../sha-hash";
 import { TextChunkStore } from "../text-chunk-store";
 
@@ -36,7 +36,7 @@ export class ReportHandlerImpl implements ReportHandler {
   async generateLongFormReport(config: ReportHandler.Arguments): Promise<void> {
     const { textChunkGroupId, textChunkIds } = config;
     const acc: {
-      value: string;
+      value: LongFormResponse;
       textChunkId: string;
     }[] = [];
 
@@ -63,7 +63,8 @@ export class ReportHandlerImpl implements ReportHandler {
         textChunkGroupId,
         value: {
           type: "long_form",
-          value: row.value,
+          value: row.value.raw,
+          sanitizedHtml: row.value.sanitizedHtml ?? undefined,
         },
       })),
     );
