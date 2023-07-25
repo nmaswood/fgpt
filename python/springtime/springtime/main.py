@@ -14,7 +14,6 @@ from springtime.routers.report_router import ReportRouter
 from springtime.routers.table_router import TableRouter
 from springtime.routers.text_router import TextRouter
 from springtime.routers.vector_router import VectorRouter
-from springtime.services.analysis_service import GPTAnalysisService
 from springtime.services.anthropic_client import AnthropicClient
 from springtime.services.chat_service import OpenAIChatService
 from springtime.services.embeddings_service import OpenAIEmbeddingsService
@@ -69,13 +68,11 @@ VECTOR_SERVICE = PineconeVectorService(
     index_name=SETTINGS.pinecone_index,
     namespace=SETTINGS.pinecone_namespace,
 )
-REPORT_SERVICE = OpenAIReportService(SETTINGS.reports_openai_model)
-CHAT_SERVICE = OpenAIChatService()
-
-GPT_ANALYSIS_SERVICE = GPTAnalysisService(
-    GPT_SHEET_PROCESSOR,
+REPORT_SERVICE = OpenAIReportService(
     SETTINGS.reports_openai_model,
+    SETTINGS.skip_fin_summary_and_summary,
 )
+CHAT_SERVICE = OpenAIChatService()
 
 
 app.include_router(ChatRouter(CHAT_SERVICE).get_router())
@@ -90,7 +87,6 @@ app.include_router(
         GPT_TABLE_ANALYZER,
         CLAUDE_TABLE_ANALYZER,
         OBJECT_STORE,
-        GPT_ANALYSIS_SERVICE,
     ).get_router(),
 )
 app.include_router(TextRouter().get_router())

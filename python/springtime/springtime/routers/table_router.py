@@ -6,7 +6,6 @@ from loguru import logger
 from pydantic import BaseModel
 
 from springtime.object_store.object_store import ObjectStore
-from springtime.services.analysis_service import AnalysisService, AnalyzeServiceResponse
 from springtime.services.table_analyzer import (
     AnalyzeResponseChunk,
     TableAnalyzer,
@@ -28,12 +27,10 @@ class TableRouter:
         gpt_table_analyzer: TableAnalyzer,
         claude_table_analyzer: TableAnalyzer,
         object_store: ObjectStore,
-        analysis_service: AnalysisService,
     ) -> None:
         self.gpt_table_analyzer = gpt_table_analyzer
         self.claude_table_analyzer = claude_table_analyzer
         self.object_store = object_store
-        self.analysis_service = analysis_service
 
     def get_router(self):
         router = APIRouter(prefix="/excel")
@@ -47,23 +44,6 @@ class TableRouter:
             req: AnalyzeTableRequest,
         ) -> AnalyzeTableResponse:
             return self.analyze_table(self.claude_table_analyzer, req)
-
-        @router.post("/analyze-code")
-        async def analyze_code(
-            req: AnalyzeTableRequest,
-        ) -> AnalyzeServiceResponse:
-            logger.info(f"Analyzing {req.bucket}/{req.object_path}")
-            with tempfile.TemporaryDirectory() as tmpdirname:
-                file_name = f"{tmpdirname}/file.xlsx"
-                self.object_store.download_to_filename(
-                    req.bucket,
-                    req.object_path,
-                    file_name,
-                )
-
-                excel_file = pd.ExcelFile(file_name)
-
-                return self.analysis_service.analyze(excel_file=excel_file)
 
         return router
 

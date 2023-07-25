@@ -63,14 +63,19 @@ class ReportService(abc.ABC):
 
 
 class OpenAIReportService(ReportService):
-    def __init__(self, model: OpenAIModel) -> None:
+    def __init__(self, model: OpenAIModel, skip_fin_summary_and_summary: bool) -> None:
         self.model = model
+        self.skip_fin_summary_and_summary = skip_fin_summary_and_summary
 
     def generate_output(self, text: str) -> Output:
         questions = self.get_questions(text)
-        summaries = self.get_summaries(text)
         terms = self.get_terms(text)
-        fin_summary = self.get_fin_summary(text)
+        if self.skip_fin_summary_and_summary:
+            summaries = []
+            fin_summary = FinancialSummary()
+        else:
+            summaries = self.get_summaries(text)
+            fin_summary = self.get_fin_summary(text)
 
         return Output(
             summaries=summaries,

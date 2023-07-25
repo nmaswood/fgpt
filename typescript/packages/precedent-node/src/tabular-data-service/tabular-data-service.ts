@@ -37,7 +37,6 @@ export interface TabularDataService {
     model: AnalyzeTableModel,
     args: AnalyzeArguments,
   ): Promise<AnalyzeResponse>;
-  analyzeCode(args: AnalyzeArguments): Promise<AnalyzeServiceResponse>;
   analyzeGPT(args: AnalyzeArguments): Promise<AnalyzeResponse>;
   analyzeClaude(args: AnalyzeArguments): Promise<AnalyzeResponse>;
 }
@@ -77,18 +76,6 @@ export class HttpTabularDataService implements TabularDataService {
     }
   }
 
-  async analyzeCode({
-    bucket,
-    objectPath,
-  }: AnalyzeArguments): Promise<AnalyzeServiceResponse> {
-    const response = await this.client.post<unknown>("/excel/analyze-code", {
-      bucket,
-      object_path: objectPath,
-    });
-
-    return { responses: ZAnalyzeServiceResponse.parse(response.data).chunks };
-  }
-
   async analyzeGPT({
     bucket,
     objectPath,
@@ -123,29 +110,6 @@ const ZAnalyzeResponseChunk = z
     sheetNames: row.sheet_names,
     content: row.content,
   }));
-
-const ZCodeOutput = z.object({
-  description: z.string(),
-  code: z.string(),
-});
-
-const ZResponseChunk = z
-  .object({
-    parsable: z.boolean(),
-    code: ZCodeOutput,
-    prompt: z.string(),
-    sheet_names: z.string().array(),
-  })
-  .transform((row) => ({
-    parsable: row.parsable,
-    code: row.code.code,
-    prompt: row.prompt,
-    sheetNames: row.sheet_names,
-  }));
-
-const ZAnalyzeServiceResponse = z.object({
-  chunks: ZResponseChunk.array(),
-});
 
 const ZAnalyzeResponse = z.object({
   chunks: ZAnalyzeResponseChunk.array(),
