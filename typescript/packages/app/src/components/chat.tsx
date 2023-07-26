@@ -325,30 +325,32 @@ const RenderChatEntryFromServer: React.FC<{
             <Typography level="body2" sx={{ whiteSpace: "pre-line" }}>
               {chatEntry.answer}
             </Typography>
-            <IconButton
-              onClick={() => setOpen((prev) => !prev)}
-              sx={{
-                position: "absolute",
-                right: "35px",
-              }}
-            >
-              <ChevronLeftIcon
+            {user && user.role === "admin" && (
+              <IconButton
+                onClick={() => setOpen((prev) => !prev)}
                 sx={{
-                  transform: rotate,
-                  transition: "all 0.2s linear",
+                  position: "absolute",
+                  right: "35px",
                 }}
-              />
-            </IconButton>
+              >
+                <ChevronLeftIcon
+                  sx={{
+                    transform: rotate,
+                    transition: "all 0.2s linear",
+                  }}
+                />
+              </IconButton>
+            )}
           </Box>
 
-          {open && <DisplayContextForId id={chatEntry.id} />}
+          {open && <DisplayPrompt id={chatEntry.id} />}
         </Box>
       </ListItem>
     </>
   );
 };
 
-const DisplayContextForId: React.FC<{ id: string }> = ({ id }) => {
+const DisplayPrompt: React.FC<{ id: string }> = ({ id }) => {
   const { data } = useFetchPrompt(id);
   return <Typography whiteSpace="pre-wrap">{data}</Typography>;
 };

@@ -2,7 +2,7 @@ import bleach
 import markdown
 from loguru import logger
 
-TAGS = set(bleach.ALLOWED_ATTRIBUTES) | {
+TAGS = set(bleach.ALLOWED_TAGS) | {
     "h1",
     "h2",
     "h3",
@@ -12,6 +12,14 @@ TAGS = set(bleach.ALLOWED_ATTRIBUTES) | {
     "p",
     "ul",
     "li",
+    "table",
+    "tr",
+    "td",
+    "th",
+    "thead",
+    "tbody",
+    "tfoot",
+    "caption",
 }
 
 
