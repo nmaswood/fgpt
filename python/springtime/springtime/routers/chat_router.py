@@ -25,6 +25,10 @@ class AskQuestionRequest(BaseModel):
     for_files: list[ChatFileContext]
 
 
+class GetPromptResponse(BaseModel):
+    prompt: str
+
+
 class ChatRouter:
     def __init__(self, chat_service: ChatService) -> None:
         self.chat_service = chat_service
@@ -40,6 +44,16 @@ class ChatRouter:
                 req.history,
             )
             return StreamingResponse(content=stream, media_type="text/event-stream")
+
+        @router.post("/prompt")
+        async def prompt_route(req: AskQuestionRequest):
+            prompt = self.chat_service.get_prompt(
+                req.for_files,
+                req.question,
+                req.history,
+            )
+
+            return GetPromptResponse(prompt=prompt)
 
         @router.post("/get-title")
         async def get_title_route(req: GetTitleRequest) -> GetTitleResponse:

@@ -20,6 +20,15 @@ class ChatService(abc.ABC):
         pass
 
     @abc.abstractmethod
+    def get_prompt(
+        self,
+        context: list[ChatFileContext],
+        question: str,
+        history: list[ChatHistory],
+    ) -> str:
+        pass
+
+    @abc.abstractmethod
     def get_title(self, question: str, answer: str) -> str:
         pass
 
@@ -28,6 +37,14 @@ MODEL = "gpt-3.5-turbo"
 
 
 class OpenAIChatService(ChatService):
+    def get_prompt(
+        self,
+        context: list[ChatFileContext],
+        question: str,
+        history: list[ChatHistory],
+    ) -> str:
+        return create_prompt(context, question, history)
+
     def ask_streaming(
         self,
         context: list[ChatFileContext],

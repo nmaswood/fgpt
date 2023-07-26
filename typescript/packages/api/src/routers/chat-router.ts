@@ -131,6 +131,8 @@ export class ChatRouter {
           },
           onEnd: async () => {
             const answer = answerBuffer.join("");
+
+            const prompt = await this.mlClient.prompt(context);
             await this.chatStore.insertChatEntry({
               organizationId: req.user.organizationId,
               projectId: args.projectId,
@@ -138,7 +140,7 @@ export class ChatRouter {
               chatId: args.chatId,
               question: args.question,
               answer,
-              context: [],
+              prompt,
             });
             if (context.shouldGenerateName) {
               res.write("__REFRESH__");
@@ -160,11 +162,11 @@ export class ChatRouter {
     );
 
     router.get(
-      "/context/:chatEntryId",
+      "/prompt/:chatEntryId",
       async (req: express.Request, res: express.Response) => {
         const args = ZContextRequest.parse(req.params);
-        const context = await this.chatStore.getContext(args.chatEntryId);
-        res.json({ context });
+        const prompt = await this.chatStore.getPrompt(args.chatEntryId);
+        res.json({ prompt });
       },
     );
 

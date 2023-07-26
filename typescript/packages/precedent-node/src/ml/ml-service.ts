@@ -38,6 +38,7 @@ export interface MLServiceClient {
   getEmbedding: (query: string) => Promise<number[]>;
   getEmbeddings: (args: GetEmbeddingsArgs) => Promise<GetEmbeddingsResponse>;
   askQuestionStreaming(args: AskQuestionStreamingArgs): Promise<void>;
+  prompt(context: ChatContextResponse): Promise<string>;
   getTitle(args: GenerateTitleArgs): Promise<string>;
   tokenLength(text: string): Promise<TokenLength>;
 }
@@ -105,6 +106,22 @@ export class MLServiceClientImpl implements MLServiceClient {
     });
   }
 
+  async prompt({
+    question,
+    history,
+    forFiles,
+  }: ChatContextResponse): Promise<string> {
+    const response = await this.client.post<unknown>("/chat/prompt", {
+      question,
+      history,
+      for_files: forFiles.map((file) => ({
+        file_name: file.fileName,
+        chunks: file.chunks,
+      })),
+    });
+    return ZGetPromptResponse.parse(response.data).prompt;
+  }
+
   async getTitle({ question, answer }: GenerateTitleArgs): Promise<string> {
     const response = await this.client.post<unknown>("/chat/get-title", {
       question,
@@ -135,4 +152,8 @@ export type TokenLength = z.infer<typeof ZTokenLengthResponse>;
 
 const ZGetTitleResponse = z.object({
   title: z.string(),
+});
+
+const ZGetPromptResponse = z.object({
+  prompt: z.string(),
 });

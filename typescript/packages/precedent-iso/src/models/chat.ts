@@ -18,10 +18,3 @@ export interface ChatResponse {
 export interface ChatHistory {
   question: string;
 }
-
-export interface ChatContext {
-  fileId: string;
-  filename: string;
-  score: number;
-  text: string;
-}

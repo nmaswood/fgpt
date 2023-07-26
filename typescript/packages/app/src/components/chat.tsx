@@ -10,22 +10,19 @@ import {
   Divider,
   IconButton,
   Input,
-  Link,
   List,
   ListItem,
   ListItemButton,
   ListItemContent,
   ListItemDecorator,
-  Table,
   Typography,
 } from "@mui/joy";
 import Image from "next/image";
-import NextLink from "next/link";
 import React from "react";
 
 import { useAskQuestion } from "../hooks/use-ask-question";
-import { useFetchContext } from "../hooks/use-context-chat";
 import { useFetchChatEntries } from "../hooks/use-fetch-chat-entry";
+import { useFetchPrompt } from "../hooks/use-fetch-prompt";
 import { DisplayChatList } from "./display-chats";
 
 interface EntryToRender {
@@ -352,35 +349,8 @@ const RenderChatEntryFromServer: React.FC<{
 };
 
 const DisplayContextForId: React.FC<{ id: string }> = ({ id }) => {
-  const { data } = useFetchContext(id);
-  return (
-    <>
-      {data.length > 0 && (
-        <Table variant="outlined">
-          <thead>
-            <tr>
-              <th align="left">Filename</th>
-              <th align="right">Score</th>
-              <th align="left">Content</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((row, idx) => (
-              <tr key={idx}>
-                <td align="left">
-                  <Link component={NextLink} href={`files/${row.fileId}`}>
-                    <Typography>{row.filename}</Typography>
-                  </Link>
-                </td>
-                <td align="right">{row.score}</td>
-                <td align="left">{row.text}</td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      )}
-    </>
-  );
+  const { data } = useFetchPrompt(id);
+  return <Typography whiteSpace="pre-wrap">{data}</Typography>;
 };
 
 const RenderChatEntryFromClient: React.FC<{

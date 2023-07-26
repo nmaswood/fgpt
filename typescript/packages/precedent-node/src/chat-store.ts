@@ -1,6 +1,5 @@
 import {
   Chat,
-  ChatContext,
   ChatEntry,
   ChatHistory,
   MAX_CHAT_LIMIT,
@@ -29,7 +28,7 @@ export interface InsertChatEntry {
   creatorId: string;
   chatId: string;
   question: string;
-  context: ChatContext[];
+  prompt: string;
   answer: string;
 }
 
@@ -55,7 +54,7 @@ export interface ChatStore {
 
   deleteChat(chatId: string): Promise<boolean>;
   listChatHistory(chatId: string): Promise<ChatHistory[]>;
-  getContext(chatEntryId: string): Promise<ChatContext[]>;
+  getPrompt(chatEntryId: string): Promise<string>;
 }
 
 export class PsqlChatStore implements ChatStore {
@@ -128,7 +127,7 @@ RETURNING
       chatId,
       creatorId,
       question,
-      context,
+      prompt,
       answer,
     }: InsertChatEntry,
   ): Promise<ChatEntry> {
@@ -142,12 +141,12 @@ WHERE
 `);
 
     return trx.one(sql.type(ZChatEntryRow)`
-INSERT INTO chat_entry (organization_id, project_id, creator_id, chat_id, question_v2, context_v2, answer, entry_order)
-    VALUES (${organizationId}, ${projectId}, ${creatorId}, ${chatId}, ${question}, ${JSON.stringify(
-      context,
-    )}, ${JSON.stringify({
-      answer,
-    })}, COALESCE((
+INSERT INTO chat_entry (organization_id, project_id, creator_id, chat_id, question_v2, prompt, answer, entry_order)
+    VALUES (${organizationId}, ${projectId}, ${creatorId}, ${chatId}, ${question}, ${prompt}, ${JSON.stringify(
+      {
+        answer,
+      },
+    )}, COALESCE((
             SELECT
                 MAX(entry_order)
                 FROM chat_entry
@@ -256,10 +255,10 @@ ORDER BY
     return Array.from(resp.rows);
   }
 
-  async getContext(chatEntryId: string): Promise<ChatContext[]> {
-    return this.pool.oneFirst(sql.type(ZGetChatContext)`
+  async getPrompt(chatEntryId: string): Promise<string> {
+    return this.pool.oneFirst(sql.type(ZGetPrompt)`
 SELECT
-    COALESCE(context_v2, '[]'::jsonb) as context
+    prompt
 FROM
     chat_entry
 WHERE
@@ -268,15 +267,8 @@ WHERE
   }
 }
 
-const ZChatContext = z.object({
-  fileId: z.string(),
-  filename: z.string(),
-  score: z.number().min(0).max(1),
-  text: z.string(),
-});
-
-const ZGetChatContext = z.object({
-  context: z.array(ZChatContext),
+const ZGetPrompt = z.object({
+  prompt: z.string(),
 });
 
 const ZChatRow = z
