@@ -79,17 +79,16 @@ export class MLServiceClientImpl implements MLServiceClient {
     onData,
     onEnd,
   }: AskQuestionStreamingArgs): Promise<void> {
-    const justText = Object.values(forFiles)
-      .flatMap((file) => file.chunks.map((chunk) => chunk.content))
-      .join("\n");
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await this.client.post<any>(
       "/chat/ask-question-streaming",
       {
-        context: justText,
         question,
         history,
+        for_files: forFiles.map((file) => ({
+          file_name: file.fileName,
+          chunks: file.chunks,
+        })),
       },
       {
         responseType: "stream",

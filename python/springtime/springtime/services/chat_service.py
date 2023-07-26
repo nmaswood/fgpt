@@ -5,7 +5,7 @@ from typing import Any
 import openai
 from loguru import logger
 
-from springtime.models.chat import ChatHistory
+from springtime.models.chat import ChatFileContext, ChatHistory
 from springtime.services.prompt import create_prompt
 
 
@@ -13,7 +13,7 @@ class ChatService(abc.ABC):
     @abc.abstractmethod
     def ask_streaming(
         self,
-        context: str,
+        context: list[ChatFileContext],
         question: str,
         history: list[ChatHistory],
     ) -> Generator[Any, Any, None]:
@@ -30,7 +30,7 @@ MODEL = "gpt-3.5-turbo"
 class OpenAIChatService(ChatService):
     def ask_streaming(
         self,
-        context: str,
+        context: list[ChatFileContext],
         question: str,
         history: list[ChatHistory],
     ) -> Generator[Any, Any, None]:

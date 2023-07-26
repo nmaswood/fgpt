@@ -1,12 +1,22 @@
-from springtime.models.chat import ChatHistory
+import re
 
-TOKEN_LIMIT = 4_000
+from springtime.models.chat import ChatChunkContext, ChatFileContext, ChatHistory
+
+TOKEN_LIMIT = 8_000
 RESPOND_PROMPT = "Respond to the following prompt:"
-CONTEXT_PROMPT = "Use the following context to supplement your information:"
+CONTEXT_PROMPT = (
+    "Potentially relevant information has pulled in chunks from files below."
+    "Use the information to supplement your knowledge."
+    "If you do not know the answer. Reply:  I do not know."
+)
 DEFAULT_PROMPT_LEN = len(RESPOND_PROMPT)
 
 
-def create_prompt(context: str, question: str, history: list[ChatHistory]):
+def create_prompt(
+    context: list[ChatFileContext],
+    question: str,
+    history: list[ChatHistory],
+):
     question_len = len(question)
     history_prompt = create_prompt_for_history(history)
     history_len = len(history_prompt)
@@ -35,7 +45,7 @@ def create_prompt(context: str, question: str, history: list[ChatHistory]):
         for prompt in [
             history_prompt,
             context_prompt,
-            RESPOND_PROMPT,
+            f"\n\n{RESPOND_PROMPT}",
             question,
         ]
         if len(prompt.strip()) > 0
@@ -44,11 +54,34 @@ def create_prompt(context: str, question: str, history: list[ChatHistory]):
     return "\n".join(non_empty_prompts)
 
 
-def create_prompt_for_context(context: str):
+def create_prompt_for_context(context: list[ChatFileContext]):
     if not context:
         return ""
 
-    return f"{CONTEXT_PROMPT}{context}"
+    prompts = "\n".join(
+        [create_prompt_for_file_context(file) for file in context],
+    )
+
+    return f"{CONTEXT_PROMPT}\n{prompts}"
+
+
+def create_prompt_for_file_context(context: ChatFileContext):
+    for_chunks = "\n".join(
+        [create_prompt_for_file_chunk(chunk) for chunk in context.chunks],
+    )
+    return f"""
+file name: {context.file_name}
+
+{for_chunks}
+""".strip()
+
+
+def create_prompt_for_file_chunk(chunk: ChatChunkContext):
+    stripped = re.sub(r"\n+", "\n", chunk.content).strip()
+    return f"""
+order: {chunk.order}
+content: {stripped}
+"""
 
 
 def create_prompt_for_history(history: list[ChatHistory]):
