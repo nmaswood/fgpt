@@ -1,34 +1,21 @@
-import { ChatHistory } from "@fgpt/precedent-iso";
 import { groupBy, orderBy, uniqBy } from "lodash";
 import { z } from "zod";
 
-import { ChatStore } from "./chat-store";
-import { FileReferenceStore } from "./file-reference-store";
-import { MLServiceClient } from "./ml/ml-service";
-import { VectorService } from "./ml/vector-service";
-import { TextChunkStore } from "./text-chunk-store";
-
-export interface ChatFileContext {
-  fileName: string;
-  chunks: {
-    order: number;
-    content: string;
-  }[];
-}
+import { ChatStore } from "../chat-store";
+import { FileReferenceStore } from "../file-reference-store";
+import { MLServiceClient } from "../ml/ml-service";
+import { VectorService } from "../ml/vector-service";
+import { TextChunkStore } from "../text-chunk-store";
+import { ChatContextResponse, ChatFileContext } from "./chat-models";
 
 export interface GetContextArgs {
   projectId: string;
   chatId: string;
   question: string;
 }
-export interface GetContextResponse {
-  shouldGenerateName: boolean;
-  forFiles: ChatFileContext[];
-  history: ChatHistory[];
-}
 
 export interface ChatContextService {
-  getContext(args: GetContextArgs): Promise<GetContextResponse>;
+  getContext(args: GetContextArgs): Promise<ChatContextResponse>;
 }
 
 export class ChatContextServiceImpl implements ChatContextService {
@@ -44,7 +31,7 @@ export class ChatContextServiceImpl implements ChatContextService {
     projectId,
     chatId,
     question,
-  }: GetContextArgs): Promise<GetContextResponse> {
+  }: GetContextArgs): Promise<ChatContextResponse> {
     const [chat, vector, history] = await Promise.all([
       this.chatStore.getChat(chatId),
       this.mlClient.getEmbedding(question),
