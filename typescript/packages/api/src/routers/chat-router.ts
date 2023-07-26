@@ -1,28 +1,23 @@
 import { assertNever } from "@fgpt/precedent-iso";
 import {
+  ChatContextService,
   ChatStore,
   FileReferenceStore,
   MLServiceClient,
   ProjectStore,
-  TextChunkStore,
-  VectorService,
 } from "@fgpt/precedent-node";
 import express from "express";
-import { keyBy, uniqBy } from "lodash";
 import { z } from "zod";
-
-import { LOGGER } from "../logger";
 
 const encoder = new TextEncoder();
 
 export class ChatRouter {
   constructor(
     private readonly mlClient: MLServiceClient,
-    private readonly textChunkStore: TextChunkStore,
     private readonly chatStore: ChatStore,
     private readonly projectStore: ProjectStore,
     private readonly fileReferenceStore: FileReferenceStore,
-    private readonly vectorService: VectorService,
+    private readonly chatContextService: ChatContextService,
   ) {}
   init() {
     const router = express.Router();
@@ -121,61 +116,19 @@ export class ChatRouter {
       async (req: express.Request, res: express.Response) => {
         const args = ZChatArguments.parse(req.body);
 
-        const [chat, vector] = await Promise.all([
-          this.chatStore.getChat(args.chatId),
-          this.mlClient.getEmbedding(args.question),
-        ]);
+        const { shouldGenerateName, history, forFiles } =
+          await this.chatContextService.getContext(args);
 
-        const metadata = chat.fileReferenceId
-          ? // note foot gun re fileId
-            { fileId: chat.fileReferenceId }
-          : { projectId: args.projectId };
-
-        const similarDocuments = await (async () => {
-          const docs = await this.vectorService.getKSimilar({
-            vector,
-            metadata,
-          });
-
-          const uniqDocs = uniqBy(docs, (doc) => doc.id);
-          return uniqDocs.map(({ id, score, metadata }) => ({
-            id,
-            score,
-            metadata: ZVectorMetadata.parse(metadata),
-          }));
-        })();
-
-        const [chunks, history, files] = await Promise.all([
-          this.textChunkStore.getTextChunks(
-            similarDocuments.map((doc) => doc.id),
-          ),
-          this.chatStore.listChatHistory(args.chatId),
-          this.fileReferenceStore.getMany(
-            similarDocuments.map((doc) => doc.metadata.fileId),
-          ),
-        ]);
-
-        const shouldGenerateName =
-          chat.name === undefined && history.length === 0;
-
-        const byId = keyBy(chunks, (chunk) => chunk.id);
-        const filesById = keyBy(files, (file) => file.id);
-
-        const missingIds = similarDocuments
-          .map((doc) => doc.id)
-          .filter((id) => !byId[id]);
-        if (missingIds.length) {
-          LOGGER.warn({ missingIds }, "No document found for id");
-        }
-
-        const justText = chunks.map((chunk) => chunk.chunkText);
+        const justText = Object.values(forFiles)
+          .flatMap((file) => file.chunks.map((chunk) => chunk.content))
+          .join("\n");
 
         setStreamingCookies(res);
 
         const answerBuffer: string[] = [];
 
         await this.mlClient.askQuestionStreaming({
-          context: justText.join("\n"),
+          context: justText,
           history,
           question: args.question,
           onData: (resp) => {
@@ -192,12 +145,7 @@ export class ChatRouter {
               chatId: args.chatId,
               question: args.question,
               answer,
-              context: similarDocuments.map((doc) => ({
-                fileId: doc.metadata.fileId,
-                filename: filesById[doc.metadata.fileId]?.fileName ?? "",
-                score: doc.score,
-                text: byId[doc.id]?.chunkText ?? "",
-              })),
+              context: [],
             });
             if (shouldGenerateName) {
               res.write("__REFRESH__");
@@ -230,12 +178,6 @@ export class ChatRouter {
     return router;
   }
 }
-
-const ZVectorMetadata = z.object({
-  fileId: z.string(),
-  next: z.string().optional(),
-  prev: z.string().optional(),
-});
 
 const ZEditChatRequest = z.object({
   id: z.string(),

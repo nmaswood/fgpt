@@ -20,6 +20,7 @@ if (SETTINGS.tracingEnabled) {
 
 import {
   axiosClientForMlService,
+  ChatContextServiceImpl,
   ExcelProgressServiceImpl,
   FileStatusServiceImpl,
   FileToRenderServiceImpl,
@@ -170,6 +171,14 @@ async function start() {
     SETTINGS.claudeReportGeneration,
   );
 
+  const chatContextService = new ChatContextServiceImpl(
+    mlService,
+    textChunkStore,
+    chatStore,
+    fileReferenceStore,
+    vectorService,
+  );
+
   app.use(cors({ origin: SETTINGS.corsOrigin }));
 
   app.use("/api/v1/user-org", jwtCheck, addUser, new UserOrgRouter().init());
@@ -204,11 +213,10 @@ async function start() {
     addUser,
     new ChatRouter(
       mlService,
-      textChunkStore,
       chatStore,
       projectStore,
       fileReferenceStore,
-      vectorService,
+      chatContextService,
     ).init(),
   );
 
