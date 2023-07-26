@@ -1,4 +1,4 @@
-import { DatabasePool, DatabasePoolConnection, sql } from "slonik";
+import { DatabasePool, sql } from "slonik";
 import { z } from "zod";
 
 export interface ProcessedFile {
@@ -29,12 +29,8 @@ const FIELDS = sql.fragment` id, organization_id, project_id, file_reference_id`
 export class PsqlProcessedFileStore implements ProcessedFileStore {
   constructor(private readonly pool: DatabasePool) {}
 
-  getText(id: string): Promise<string> {
-    return this.pool.connect(async (cnx) => this.#getText(cnx, id));
-  }
-
-  async #getText(cnx: DatabasePoolConnection, id: string): Promise<string> {
-    return cnx.oneFirst(
+  async getText(id: string): Promise<string> {
+    return this.pool.oneFirst(
       sql.type(ZGetTextRow)`
 SELECT
     extracted_text
@@ -59,13 +55,10 @@ WHERE
       return [];
     }
 
-    return this.pool.connect(async (cnx) => this.#upsertMany(cnx, args));
+    return this.#upsertMany(args);
   }
 
-  async #upsertMany(
-    cnx: DatabasePoolConnection,
-    args: UpsertProcessedFile[],
-  ): Promise<ProcessedFile[]> {
+  async #upsertMany(args: UpsertProcessedFile[]): Promise<ProcessedFile[]> {
     const values = args.map(
       ({
         organizationId,
@@ -87,7 +80,7 @@ WHERE
     ${claude100kLength ?? null})
 `,
     );
-    const { rows } = await cnx.query(
+    const { rows } = await this.pool.query(
       sql.type(ZProcessedFileRow)`
 INSERT INTO processed_file (organization_id, project_id, file_reference_id, extracted_text, extracted_text_sha256, token_length, gpt4_token_length, claude_100k_length)
     VALUES

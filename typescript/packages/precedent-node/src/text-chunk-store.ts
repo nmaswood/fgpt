@@ -64,10 +64,6 @@ export interface TextChunkStore {
     textChunkGroupId: string,
   ): AsyncIterable<TextChunk[]>;
   getTextChunkGroup(id: string): Promise<TextChunkGroup>;
-  getTextChunkGroupByFileId(
-    strategy: ChunkStrategy,
-    id: string,
-  ): Promise<TextChunkGroup>;
 
   getTextChunkById(id: string): Promise<TextChunk>;
   getTextChunkByOrder(groupId: string, orders: number[]): Promise<TextChunk[]>;
@@ -93,11 +89,6 @@ export interface TextChunkStore {
 
   getEmbedding(ids: string): Promise<EmbeddingResult>;
   getEmbeddings(ids: string[]): Promise<EmbeddingResult[]>;
-
-  getTextChunkGroupByStrategy(
-    fileReferenceId: string,
-    strategy: ChunkStrategy,
-  ): Promise<TextChunkGroup | undefined>;
 }
 
 const TEXT_CHUNK_FIELDS = sql.fragment`text_chunk.id, text_chunk.organization_id, text_chunk.project_id, text_chunk.file_reference_id, text_chunk.processed_file_id, text_chunk.chunk_order, text_chunk.chunk_text, text_chunk.embedding IS NOT NULL AS has_embedding, text_chunk_group_id`;
@@ -142,23 +133,6 @@ LIMIT ${limit}
     }
   }
 
-  async getTextChunkGroupByStrategy(
-    fileId: string,
-    strategy: ChunkStrategy,
-  ): Promise<TextChunkGroup | undefined> {
-    const res = await this.pool.maybeOne(sql.type(ZTextChunkGroupRow)`
-SELECT
-    ${TEXT_CHUNK_GROUP_FIELDS}
-FROM
-    text_chunk_group
-WHERE
-    file_reference_id = ${fileId}
-    and chunk_strategy = ${strategy}
-LIMIT 1
-`);
-    return res ?? undefined;
-  }
-
   async getTextChunkGroup(id: string): Promise<TextChunkGroup> {
     return this.pool.connect(async (cnx) => {
       return cnx.one(sql.type(ZTextChunkGroupRow)`
@@ -191,33 +165,17 @@ WHERE
   ): Promise<TextChunk[]> {
     const res = await this.pool.any(
       sql.type(ZTextChunkRow)`
+
 SELECT
     ${TEXT_CHUNK_FIELDS}
 FROM
     text_chunk
 WHERE
     text_chunk_group_id = ${groupId}
-    chunk_order IN (${sql.join(orders, sql.fragment`, `)})
+    AND chunk_order IN (${sql.join(orders, sql.fragment`, `)})
 `,
     );
     return Array.from(res);
-  }
-
-  async getTextChunkGroupByFileId(
-    strategy: ChunkStrategy,
-    fileId: string,
-  ): Promise<TextChunkGroup> {
-    return this.pool.connect(async (cnx) => {
-      return cnx.one(sql.type(ZTextChunkGroupRow)`
-SELECT
-    ${TEXT_CHUNK_GROUP_FIELDS}
-FROM
-    text_chunk_group
-WHERE
-    file_reference_id = ${fileId}
-    and chunk_strategy = ${strategy}
-`);
-    });
   }
 
   async upsertTextChunkGroup(

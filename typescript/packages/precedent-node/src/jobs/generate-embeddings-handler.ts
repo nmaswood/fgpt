@@ -15,6 +15,11 @@ export interface EmbeddingsHandler {
   ) => Promise<void>;
 }
 
+export interface ChunkNeighbors {
+  prev: string | undefined;
+  next: string | undefined;
+}
+
 export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
   constructor(
     private readonly mlService: MLServiceClient,
@@ -32,6 +37,7 @@ export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
 
     for await (const group of chunkGenerator) {
       const byChunkId = await this.#getAndSetEmbeddingsIfNeeded(group);
+      const orderMap = await this.#orderMap(textChunkGroupId, group);
       const payloads = group
         .map((textChunk) => {
           const vector = byChunkId[textChunk.id]?.embedding;
@@ -52,6 +58,7 @@ export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
             // this is so we can eventually migrate to the new name
             fileId: textChunk.fileReferenceId,
             fileReferenceId: textChunk.fileReferenceId,
+            ...orderMap[textChunk.chunkOrder],
           },
         }));
 
@@ -82,6 +89,30 @@ export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
     );
 
     return keyBy(newEmbeddings, (e) => e.chunkId);
+  }
+
+  async #orderMap(
+    textChunkGroupId: string,
+    chunks: TextChunk[],
+  ): Promise<Record<number, ChunkNeighbors>> {
+    const orders = this.#getOrders(chunks);
+
+    const forOrders = await this.textChunkStore.getTextChunkByOrder(
+      textChunkGroupId,
+      orders,
+    );
+
+    const byIndex = keyBy(forOrders, (c) => c.chunkOrder);
+
+    return Object.fromEntries(
+      orders.map((order) => [
+        order,
+        {
+          prev: byIndex[order - 1]?.id,
+          next: byIndex[order + 1]?.id,
+        },
+      ]),
+    );
   }
 
   #getOrders(chunks: TextChunk[]): number[] {

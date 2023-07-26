@@ -19,7 +19,6 @@ export interface QuestionStore {
   sampleForProject(projectId: string, limit: number): Promise<string[]>;
   sampleForFile(fileReferenceId: string, limit: number): Promise<string[]>;
   getForFile(fileReferenceId: string): Promise<string[]>;
-  getForChunk(chunkId: string): Promise<string[]>;
   insertMany(questions: InsertQuestion[]): Promise<Outputs.Question[]>;
 }
 
@@ -76,18 +75,6 @@ WHERE
       (a, b) => a.chunk_order - b.chunk_order,
     );
     return sorted.map((row) => row.question);
-  }
-
-  async getForChunk(chunkId: string): Promise<string[]> {
-    const result = await this.pool.query(sql.type(ZGetForFile)`
-SELECT
-    question
-FROM
-    text_chunk_question
-WHERE
-    text_chunk_id = ${chunkId}
-`);
-    return result.rows.map((row) => row.question);
   }
 
   async insertMany(questions: InsertQuestion[]): Promise<Outputs.Question[]> {

@@ -149,15 +149,6 @@ export class FileRouter {
     );
 
     router.get(
-      "/single/:fileReferenceId",
-      async (req: express.Request, res: express.Response) => {
-        const params = ZSingleRequest.parse(req.params);
-        const file = await this.fileReferenceStore.get(params.fileReferenceId);
-        res.json({ file });
-      },
-    );
-
-    router.get(
       "/show-case-file/:fileReferenceId",
       async (req: express.Request, res: express.Response) => {
         const params = ZSetShowCaseRequest.parse(req.params);
@@ -194,10 +185,6 @@ export class FileRouter {
 }
 
 const ZSetShowCaseRequest = z.object({
-  fileReferenceId: z.string(),
-});
-
-const ZSingleRequest = z.object({
   fileReferenceId: z.string(),
 });
 

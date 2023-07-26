@@ -9,19 +9,6 @@ export class LLMOutputRouter {
   ) {}
   init() {
     const router = express.Router();
-
-    router.get(
-      "/chunk-output/:textChunkId",
-      async (req: express.Request, res: express.Response) => {
-        const body = ZChunkRequest.parse(req.params);
-
-        const questions = await this.questionStore.getForChunk(
-          body.textChunkId,
-        );
-        res.json({ questions });
-      },
-    );
-
     router.get(
       "/sample-file/:fileReferenceId",
       async (req: express.Request, res: express.Response) => {
@@ -75,8 +62,4 @@ const ZFileToRenderRequest = z.object({
 
 const ZSampleFileRequest = z.object({
   fileReferenceId: z.string(),
-});
-
-const ZChunkRequest = z.object({
-  textChunkId: z.string(),
 });

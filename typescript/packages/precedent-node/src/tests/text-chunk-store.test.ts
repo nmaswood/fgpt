@@ -258,37 +258,6 @@ test("getEmbedding", async () => {
   expect(embedding.embedding).toEqual([1, 2, 3]);
 });
 
-test("getTextChunkGroupByStrategy", async () => {
-  const { processedFile, chunkStore } = await setup();
-
-  const v0 = await chunkStore.upsertTextChunkGroup({
-    organizationId: processedFile.organizationId,
-    projectId: processedFile.projectId,
-    fileReferenceId: processedFile.fileReferenceId,
-    processedFileId: processedFile.id,
-    numChunks: 2,
-    strategy: "greedy_v0",
-    embeddingsWillBeGenerated: false,
-  });
-
-  await chunkStore.upsertTextChunkGroup({
-    organizationId: processedFile.organizationId,
-    projectId: processedFile.projectId,
-    fileReferenceId: processedFile.fileReferenceId,
-    processedFileId: processedFile.id,
-    numChunks: 2,
-    strategy: "greedy_15k",
-    embeddingsWillBeGenerated: false,
-  });
-
-  const v0_2 = await chunkStore.getTextChunkGroupByStrategy(
-    processedFile.fileReferenceId,
-    "greedy_v0",
-  );
-
-  expect(v0).toEqual(v0_2);
-});
-
 test("iterateTextChunks", async () => {
   const { processedFile, chunkStore } = await setup();
 

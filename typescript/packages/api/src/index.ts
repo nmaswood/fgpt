@@ -220,10 +220,7 @@ async function start() {
   );
 
   if (SETTINGS.debug.includeRouter) {
-    app.use(
-      "/api/v1/debug",
-      new DebugRouter(taskStore, fileReferenceStore, messageBusService).init(),
-    );
+    app.use("/api/v1/debug", new DebugRouter(messageBusService).init());
   }
   app.use(
     "/api/v1/admin",

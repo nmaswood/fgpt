@@ -1,3 +1,4 @@
+export * from "./chat-service";
 export * from "./chat-store";
 export { dataBasePool } from "./data-base-pool";
 export * from "./excel-asset-store";

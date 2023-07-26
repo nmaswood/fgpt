@@ -233,6 +233,8 @@ export class ChatRouter {
 
 const ZVectorMetadata = z.object({
   fileId: z.string(),
+  next: z.string().optional(),
+  prev: z.string().optional(),
 });
 
 const ZEditChatRequest = z.object({
