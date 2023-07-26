@@ -61,7 +61,6 @@ import { DebugRouter } from "./routers/debug-router";
 import { FileRouter } from "./routers/file-router";
 import { LLMOutputRouter } from "./routers/llm-output.router";
 import { ProjectRouter } from "./routers/project-router";
-import { TextGroupRouter } from "./routers/text-group-router";
 import { UserOrgRouter } from "./routers/user-org-router";
 import { dataBasePool } from "./sql";
 
@@ -211,13 +210,6 @@ async function start() {
       fileReferenceStore,
       vectorService,
     ).init(),
-  );
-
-  app.use(
-    "/api/v1/text",
-    jwtCheck,
-    addUser,
-    new TextGroupRouter(textChunkStore).init(),
   );
 
   app.use(

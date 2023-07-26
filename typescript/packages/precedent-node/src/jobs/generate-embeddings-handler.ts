@@ -47,13 +47,11 @@ export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
           id: textChunk.id,
           vector,
           metadata: {
-            textChunkId: textChunk.id,
             organizationId: textChunk.organizationId,
             projectId: textChunk.projectId,
             // this is so we can eventually migrate to the new name
             fileId: textChunk.fileReferenceId,
             fileReferenceId: textChunk.fileReferenceId,
-            processedFileId: textChunk.processedFileId,
           },
         }));
 
@@ -84,5 +82,17 @@ export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
     );
 
     return keyBy(newEmbeddings, (e) => e.chunkId);
+  }
+
+  #getOrders(chunks: TextChunk[]): number[] {
+    const toFetch: Set<number> = new Set();
+
+    for (const chunk of chunks) {
+      toFetch.add(chunk.chunkOrder);
+      toFetch.add(chunk.chunkOrder - 1);
+      toFetch.add(chunk.chunkOrder + 1);
+    }
+
+    return Array.from(toFetch).sort();
   }
 }

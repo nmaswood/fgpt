@@ -70,7 +70,7 @@ export interface TextChunkStore {
   ): Promise<TextChunkGroup>;
 
   getTextChunkById(id: string): Promise<TextChunk>;
-  getTextChunkByOrder(groupId: string, order: number): Promise<TextChunk>;
+  getTextChunkByOrder(groupId: string, orders: number[]): Promise<TextChunk[]>;
 
   upsertTextChunkGroup(args: UpsertTextChunkGroup): Promise<TextChunkGroup>;
   upsertManyTextChunkGroups(
@@ -187,9 +187,9 @@ WHERE
 
   async getTextChunkByOrder(
     groupId: string,
-    order: number,
-  ): Promise<TextChunk> {
-    return this.pool.one(
+    orders: number[],
+  ): Promise<TextChunk[]> {
+    const res = await this.pool.any(
       sql.type(ZTextChunkRow)`
 SELECT
     ${TEXT_CHUNK_FIELDS}
@@ -197,9 +197,10 @@ FROM
     text_chunk
 WHERE
     text_chunk_group_id = ${groupId}
-    AND chunk_order = ${order}
+    chunk_order IN (${sql.join(orders, sql.fragment`, `)})
 `,
     );
+    return Array.from(res);
   }
 
   async getTextChunkGroupByFileId(
