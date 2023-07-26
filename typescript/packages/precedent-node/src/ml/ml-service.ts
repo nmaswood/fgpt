@@ -1,6 +1,7 @@
-import { ChatHistory } from "@fgpt/precedent-iso";
 import { AxiosInstance } from "axios";
 import z from "zod";
+
+import { ChatContextResponse } from "../chat/chat-models";
 
 interface GetEmbeddingsArgs {
   documents: string[];
@@ -13,9 +14,7 @@ const ZEmbeddingsResponse = z.object({
 type GetEmbeddingsResponse = z.infer<typeof ZEmbeddingsResponse>;
 
 export interface AskQuestionStreamingArgs {
-  context: string;
-  question: string;
-  history: ChatHistory[];
+  context: ChatContextResponse;
   onData: (resp: string) => void;
   onEnd: () => void;
 }
@@ -23,11 +22,6 @@ export interface AskQuestionStreamingArgs {
 export interface GenerateTitleArgs {
   question: string;
   answer: string;
-}
-
-export interface AskQuestion {
-  context: string;
-  question: string;
 }
 
 export interface ScanArgs {
@@ -43,7 +37,6 @@ export interface MLServiceClient {
   scan: (args: ScanArgs) => Promise<ScanResponse>;
   getEmbedding: (query: string) => Promise<number[]>;
   getEmbeddings: (args: GetEmbeddingsArgs) => Promise<GetEmbeddingsResponse>;
-  askQuestion(args: AskQuestion): Promise<string>;
   askQuestionStreaming(args: AskQuestionStreamingArgs): Promise<void>;
   getTitle(args: GenerateTitleArgs): Promise<string>;
   tokenLength(text: string): Promise<TokenLength>;
@@ -81,27 +74,20 @@ export class MLServiceClientImpl implements MLServiceClient {
     return response[0]!;
   }
 
-  async askQuestion({ context, question }: AskQuestion): Promise<string> {
-    const response = await this.client.post<unknown>("/chat/ask-question", {
-      context,
-      question,
-    });
-
-    return ZAskQuestionResponse.parse(response.data).data;
-  }
-
   async askQuestionStreaming({
-    context,
-    question,
+    context: { question, history, forFiles },
     onData,
     onEnd,
-    history,
   }: AskQuestionStreamingArgs): Promise<void> {
+    const justText = Object.values(forFiles)
+      .flatMap((file) => file.chunks.map((chunk) => chunk.content))
+      .join("\n");
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await this.client.post<any>(
       "/chat/ask-question-streaming",
       {
-        context,
+        context: justText,
         question,
         history,
       },
@@ -147,10 +133,6 @@ const ZScanResponse = z.object({
 });
 
 export type TokenLength = z.infer<typeof ZTokenLengthResponse>;
-
-const ZAskQuestionResponse = z.object({
-  data: z.string(),
-});
 
 const ZGetTitleResponse = z.object({
   title: z.string(),

@@ -116,21 +116,14 @@ export class ChatRouter {
       async (req: express.Request, res: express.Response) => {
         const args = ZChatArguments.parse(req.body);
 
-        const { shouldGenerateName, history, forFiles } =
-          await this.chatContextService.getContext(args);
-
-        const justText = Object.values(forFiles)
-          .flatMap((file) => file.chunks.map((chunk) => chunk.content))
-          .join("\n");
+        const context = await this.chatContextService.getContext(args);
 
         setStreamingCookies(res);
 
         const answerBuffer: string[] = [];
 
         await this.mlClient.askQuestionStreaming({
-          context: justText,
-          history,
-          question: args.question,
+          context,
           onData: (resp) => {
             const encoded = encoder.encode(resp);
             res.write(encoded);
@@ -147,7 +140,7 @@ export class ChatRouter {
               answer,
               context: [],
             });
-            if (shouldGenerateName) {
+            if (context.shouldGenerateName) {
               res.write("__REFRESH__");
               const name = await this.mlClient.getTitle({
                 question: args.question,

@@ -1,5 +1,6 @@
 import { ChatHistory } from "@fgpt/precedent-iso";
 export interface ChatContextResponse {
+  question: string;
   shouldGenerateName: boolean;
   forFiles: ChatFileContext[];
   history: ChatHistory[];

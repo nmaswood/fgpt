@@ -70,6 +70,7 @@ export class ChatContextServiceImpl implements ChatContextService {
     );
 
     return {
+      question,
       forFiles,
       history,
       shouldGenerateName: chat.name === undefined && history.length === 0,
