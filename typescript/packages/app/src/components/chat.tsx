@@ -22,6 +22,7 @@ import React from "react";
 
 import { useAskQuestion } from "../hooks/use-ask-question";
 import { useFetchChatEntries } from "../hooks/use-fetch-chat-entry";
+import { useFetchMe } from "../hooks/use-fetch-me";
 import { useFetchPrompt } from "../hooks/use-fetch-prompt";
 import { DisplayChatList } from "./display-chats";
 
@@ -297,6 +298,7 @@ const RenderChatEntryFromServer: React.FC<{
   chatEntry: ChatEntry;
 }> = ({ chatEntry }) => {
   const { user } = useUser();
+  const { data: me } = useFetchMe();
   const picture = user?.picture;
 
   const [open, setOpen] = React.useState(false);
@@ -325,7 +327,7 @@ const RenderChatEntryFromServer: React.FC<{
             <Typography level="body2" sx={{ whiteSpace: "pre-line" }}>
               {chatEntry.answer}
             </Typography>
-            {user && user.role === "admin" && (
+            {me && me.role === "superadmin" && (
               <IconButton
                 onClick={() => setOpen((prev) => !prev)}
                 sx={{
