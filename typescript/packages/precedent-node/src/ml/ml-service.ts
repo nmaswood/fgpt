@@ -41,6 +41,7 @@ export interface MLServiceClient {
   prompt(context: ChatContextResponse): Promise<string>;
   getTitle(args: GenerateTitleArgs): Promise<string>;
   tokenLength(text: string): Promise<TokenLength>;
+  htmlFromText(text: string): Promise<string | undefined>;
 }
 
 export class MLServiceClientImpl implements MLServiceClient {
@@ -137,6 +138,14 @@ export class MLServiceClientImpl implements MLServiceClient {
     });
     return ZTokenLengthResponse.parse(response.data);
   }
+
+  async htmlFromText(text: string): Promise<string | undefined> {
+    const response = await this.client.post<unknown>("/chat/sanitize", {
+      text,
+    });
+    const html = ZHtmlFromText.parse(response.data).html;
+    return html ?? undefined;
+  }
 }
 
 const ZTokenLengthResponse = z.object({
@@ -146,6 +155,10 @@ const ZTokenLengthResponse = z.object({
 
 const ZScanResponse = z.object({
   description: z.string(),
+});
+
+const ZHtmlFromText = z.object({
+  html: z.string().nullable(),
 });
 
 export type TokenLength = z.infer<typeof ZTokenLengthResponse>;

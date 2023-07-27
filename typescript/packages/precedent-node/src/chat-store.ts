@@ -30,6 +30,7 @@ export interface InsertChatEntry {
   question: string;
   prompt: string;
   answer: string;
+  html: string | undefined;
 }
 
 export interface UpdateChatEntry {
@@ -38,7 +39,7 @@ export interface UpdateChatEntry {
 }
 
 const CHAT_FIELDS = sql.fragment`chat.id as chat_id, chat.name as chat_name, chat.file_reference_id as file_reference_id, COALESCE(chat_entry_count, 0) as chat_entry_count`;
-const CHAT_ENTRY_FIELDS = sql.fragment`chat_entry.id as chat_entry_id, question_v2 as question, answer`;
+const CHAT_ENTRY_FIELDS = sql.fragment`chat_entry.id as chat_entry_id, question_v2 as question, answer, html`;
 
 export interface ChatStore {
   getChat(id: string): Promise<Chat>;
@@ -129,9 +130,10 @@ RETURNING
       question,
       prompt,
       answer,
+      html,
     }: InsertChatEntry,
   ): Promise<ChatEntry> {
-    await trx.query(sql.type(ZCountRow)`
+    await trx.query(sql.unsafe`
 UPDATE
     chat
 SET
@@ -141,12 +143,12 @@ WHERE
 `);
 
     return trx.one(sql.type(ZChatEntryRow)`
-INSERT INTO chat_entry (organization_id, project_id, creator_id, chat_id, question_v2, prompt, answer, entry_order)
-    VALUES (${organizationId}, ${projectId}, ${creatorId}, ${chatId}, ${question}, ${prompt}, ${JSON.stringify(
-      {
-        answer,
-      },
-    )}, COALESCE((
+INSERT INTO chat_entry (organization_id, project_id, creator_id, chat_id, question_v2, prompt, html, answer, entry_order)
+    VALUES (${organizationId}, ${projectId}, ${creatorId}, ${chatId}, ${question}, ${prompt}, ${
+      html ?? null
+    }, ${JSON.stringify({
+      answer,
+    })}, COALESCE((
             SELECT
                 MAX(entry_order)
                 FROM chat_entry
@@ -296,12 +298,14 @@ const ZChatEntryRow = z
     chat_entry_id: z.string(),
     question: z.string(),
     answer: ZChatEntryAnswer.nullable(),
+    html: z.string().nullable(),
   })
   .transform(
     (row): ChatEntry => ({
       id: row.chat_entry_id,
       question: row.question,
       answer: row.answer?.answer ?? undefined,
+      html: row.html ?? undefined,
     }),
   );
 

@@ -2,10 +2,10 @@ import re
 
 from springtime.models.chat import ChatChunkContext, ChatFileContext, ChatHistory
 
-TOKEN_LIMIT = 8_000
+TOKEN_LIMIT = 12_000
 RESPOND_PROMPT = "Respond to the following prompt:"
 CONTEXT_PROMPT = (
-    "Potentially relevant information has pulled in chunks from files below."
+    "Potentially relevant information is provided in chunks from files below."
     "Use the information to supplement your knowledge."
     "If you do not know the answer. Reply:  I do not know."
 )

@@ -132,6 +132,8 @@ export class ChatRouter {
           onEnd: async () => {
             const answer = answerBuffer.join("");
 
+            const html = await this.mlClient.htmlFromText(answer);
+
             const prompt = await this.mlClient.prompt(context);
             await this.chatStore.insertChatEntry({
               organizationId: req.user.organizationId,
@@ -141,6 +143,7 @@ export class ChatRouter {
               question: args.question,
               answer,
               prompt,
+              html,
             });
             if (context.shouldGenerateName) {
               res.write("__REFRESH__");

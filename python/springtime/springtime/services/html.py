@@ -20,6 +20,7 @@ TAGS = set(bleach.ALLOWED_TAGS) | {
     "tbody",
     "tfoot",
     "caption",
+    "code",
 }
 
 

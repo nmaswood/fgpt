@@ -12,22 +12,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@auth0/nextjs-auth0@npm:^2.7.0":
-  version: 2.7.0
-  resolution: "@auth0/nextjs-auth0@npm:2.7.0"
+"@auth0/nextjs-auth0@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "@auth0/nextjs-auth0@npm:3.0.0"
   dependencies:
     "@panva/hkdf": ^1.0.2
     cookie: ^0.5.0
     debug: ^4.3.4
-    http-errors: ^1.8.1
     joi: ^17.6.0
     jose: ^4.9.2
+    oauth4webapi: ^2.3.0
     openid-client: ^5.2.1
     tslib: ^2.4.0
     url-join: ^4.0.1
   peerDependencies:
     next: ">=10"
-  checksum: 5d8ddfe5af6079881c0cdf313be72078bb332a52b3c263b3e311d5cac57296d1bf32b7cd23670e40c0b1796220f2700642684518ec5fae975ae9e41f12784fe3
+  checksum: 3bf5c0e60b874e9a12f9bdbcb1eba8a941153743257c4f6b452138bfc02569399d6e4639e38d7a00c954e0838330dcaa4a10409fc4601a838225c1dc07e750fa
   languageName: node
   linkType: hard
 
@@ -499,9 +499,9 @@ __metadata:
     "@types/cors": ^2.8.13
     "@types/eslint": ^8.44.1
     "@types/express": ^4.17.17
-    "@types/lodash": ^4.14.195
+    "@types/lodash": ^4.14.196
     "@types/multer": ^1.4.7
-    "@types/node": ^20.4.4
+    "@types/node": ^20.4.5
     "@types/prettier": ^2.7.3
     "@typescript-eslint/eslint-plugin": ^6.2.0
     "@typescript-eslint/parser": ^6.2.0
@@ -532,7 +532,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@fgpt/app@workspace:packages/app"
   dependencies:
-    "@auth0/nextjs-auth0": ^2.7.0
+    "@auth0/nextjs-auth0": ^3.0.0
     "@emotion/react": ^11.11.1
     "@emotion/styled": ^11.11.0
     "@fgpt/precedent-iso": "workspace:^"
@@ -542,9 +542,9 @@ __metadata:
     "@mui/x-data-grid": ^6.10.1
     "@next/eslint-plugin-next": ^13.4.12
     "@types/eslint": ^8.44.1
-    "@types/node": ^20.4.4
+    "@types/node": ^20.4.5
     "@types/prettier": ^2.7.3
-    "@types/react": ^18.2.16
+    "@types/react": ^18.2.17
     "@types/react-dom": ^18.2.7
     "@typescript-eslint/eslint-plugin": ^6.2.0
     "@typescript-eslint/parser": ^6.2.0
@@ -584,7 +584,7 @@ __metadata:
     "@types/cors": ^2.8.13
     "@types/eslint": ^8.44.1
     "@types/express": ^4.17.17
-    "@types/node": ^20.4.4
+    "@types/node": ^20.4.5
     "@types/prettier": ^2.7.3
     "@typescript-eslint/eslint-plugin": ^6.2.0
     "@typescript-eslint/parser": ^6.2.0
@@ -628,10 +628,10 @@ __metadata:
   resolution: "@fgpt/precedent-node@workspace:packages/precedent-node"
   dependencies:
     "@fgpt/precedent-iso": "workspace:^"
-    "@google-cloud/pubsub": ^3.7.2
+    "@google-cloud/pubsub": ^3.7.3
     "@google-cloud/storage": ^6.12.0
     "@types/eslint": ^8.44.1
-    "@types/lodash": ^4.14.195
+    "@types/lodash": ^4.14.196
     "@types/prettier": ^2.7.3
     "@typescript-eslint/eslint-plugin": ^6.2.0
     "@typescript-eslint/parser": ^6.2.0
@@ -767,9 +767,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@google-cloud/pubsub@npm:^3.7.2":
-  version: 3.7.2
-  resolution: "@google-cloud/pubsub@npm:3.7.2"
+"@google-cloud/pubsub@npm:^3.7.3":
+  version: 3.7.3
+  resolution: "@google-cloud/pubsub@npm:3.7.3"
   dependencies:
     "@google-cloud/paginator": ^4.0.0
     "@google-cloud/precise-date": ^3.0.0
@@ -787,7 +787,7 @@ __metadata:
     is-stream-ended: ^0.1.4
     lodash.snakecase: ^4.1.1
     p-defer: ^3.0.0
-  checksum: 70d00c8091037938b09a3836bb412eb956ac0aaea857c28f58ab518b1cccbd5822ef3637bf1afc43b52a6d36e68ae143b26a6a3e6fd4fd86d0d625534c135141
+  checksum: 925b1080f38c05699b2807b62e9837644d957e609119b8d11d11670de59d483f7ff878e4e784ef3b71812f0b8db5176cc5eddd59534060ff1e49567b3d31172e
   languageName: node
   linkType: hard
 
@@ -1639,10 +1639,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:^4.14.195":
-  version: 4.14.195
-  resolution: "@types/lodash@npm:4.14.195"
-  checksum: 39b75ca635b3fa943d17d3d3aabc750babe4c8212485a4df166fe0516e39288e14b0c60afc6e21913cc0e5a84734633c71e617e2bd14eaa1cf51b8d7799c432e
+"@types/lodash@npm:^4.14.196":
+  version: 4.14.196
+  resolution: "@types/lodash@npm:4.14.196"
+  checksum: 201d17c3e62ae02a93c99ec78e024b2be9bd75564dd8fd8c26f6ac51a985ab280d28ce2688c3bcdfe785b0991cd9814edff19ee000234c7b45d9a697f09feb6a
   languageName: node
   linkType: hard
 
@@ -1714,10 +1714,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^20.4.4":
-  version: 20.4.4
-  resolution: "@types/node@npm:20.4.4"
-  checksum: 43f3c4a8acc38ae753e15a0e79bae0447d255b3742fa87f8e065d7b9d20ecb0e03d6c5b46c00d5d26f4552160381a00255f49205595a8ee48c2423e00263c930
+"@types/node@npm:^20.4.5":
+  version: 20.4.5
+  resolution: "@types/node@npm:20.4.5"
+  checksum: 36a0304a8dc346a1b2d2edac4c4633eecf70875793d61a5274d0df052d7a7af7a8e34f29884eac4fbd094c4f0201477dcb39c0ecd3307ca141688806538d1138
   languageName: node
   linkType: hard
 
@@ -1805,14 +1805,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^18.2.16":
-  version: 18.2.16
-  resolution: "@types/react@npm:18.2.16"
+"@types/react@npm:^18.2.17":
+  version: 18.2.17
+  resolution: "@types/react@npm:18.2.17"
   dependencies:
     "@types/prop-types": "*"
     "@types/scheduler": "*"
     csstype: ^3.0.2
-  checksum: 3d4fdc12509e0098e0dbb4bacdea53e8ccc6632e9df63d9f2711c77aa81ce3b2bb9c76d087f284034b25fd7245680167f4832bf6e4df960c5af2634b52adfd0c
+  checksum: 150516b31bd98b635e4a56bcf2af007330b35cccb6e35e902f46a47f0e81e30c46cdacc095e91051bdf2f33e4846e7e62fd51b67e064dc7d15c00e15dfa449d5
   languageName: node
   linkType: hard
 
@@ -3292,13 +3292,6 @@ __metadata:
   version: 2.0.0
   resolution: "depd@npm:2.0.0"
   checksum: abbe19c768c97ee2eed6282d8ce3031126662252c58d711f646921c9623f9052e3e1906443066beec1095832f534e57c523b7333f8e7e0d93051ab6baef5ab3a
-  languageName: node
-  linkType: hard
-
-"depd@npm:~1.1.2":
-  version: 1.1.2
-  resolution: "depd@npm:1.1.2"
-  checksum: 6b406620d269619852885ce15965272b829df6f409724415e0002c8632ab6a8c0a08ec1f0bd2add05dc7bd7507606f7e2cc034fa24224ab829580040b835ecd9
   languageName: node
   linkType: hard
 
@@ -4808,19 +4801,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"http-errors@npm:^1.8.1":
-  version: 1.8.1
-  resolution: "http-errors@npm:1.8.1"
-  dependencies:
-    depd: ~1.1.2
-    inherits: 2.0.4
-    setprototypeof: 1.2.0
-    statuses: ">= 1.5.0 < 2"
-    toidentifier: 1.0.1
-  checksum: d3c7e7e776fd51c0a812baff570bdf06fe49a5dc448b700ab6171b1250e4cf7db8b8f4c0b133e4bfe2451022a5790c1ca6c2cae4094dedd6ac8304a1267f91d2
-  languageName: node
-  linkType: hard
-
 "http-proxy-agent@npm:^5.0.0":
   version: 5.0.0
   resolution: "http-proxy-agent@npm:5.0.0"
@@ -6141,6 +6121,13 @@ __metadata:
   dependencies:
     boolbase: ^1.0.0
   checksum: 5afc3dafcd1573b08877ca8e6148c52abd565f1d06b1eb08caf982e3fa289a82f2cae697ffb55b5021e146d60443f1590a5d6b944844e944714a5b549675bcd3
+  languageName: node
+  linkType: hard
+
+"oauth4webapi@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "oauth4webapi@npm:2.3.0"
+  checksum: abe1aa9997f8cd779b661ca60b378d50de039b624f89c0a72574c65141432bca6a319116362cae49197f687b6e08d01d76476f74545f074071cbb63303d86fab
   languageName: node
   linkType: hard
 
@@ -7801,13 +7788,6 @@ __metadata:
   version: 2.0.1
   resolution: "statuses@npm:2.0.1"
   checksum: 18c7623fdb8f646fb213ca4051be4df7efb3484d4ab662937ca6fbef7ced9b9e12842709872eb3020cc3504b93bde88935c9f6417489627a7786f24f8031cbcb
-  languageName: node
-  linkType: hard
-
-"statuses@npm:>= 1.5.0 < 2":
-  version: 1.5.0
-  resolution: "statuses@npm:1.5.0"
-  checksum: c469b9519de16a4bb19600205cffb39ee471a5f17b82589757ca7bd40a8d92ebb6ed9f98b5a540c5d302ccbc78f15dc03cc0280dd6e00df1335568a5d5758a5c
   languageName: node
   linkType: hard
 

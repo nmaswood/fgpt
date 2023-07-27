@@ -74,7 +74,8 @@ export const DisplayChat: React.FC<{
 
   const selectedChatIdx = chats.findIndex((c) => c.id === selectedChatId);
 
-  const { data: chatEntries } = useFetchChatEntries(selectedChatId);
+  const { data: chatEntries, mutate: refreshChatEntry } =
+    useFetchChatEntries(selectedChatId);
 
   const [input, setInput] = React.useState("");
   const [entriesToRender, setEntriesToRender] = React.useState<EntryToRender[]>(
@@ -115,6 +116,7 @@ export const DisplayChat: React.FC<{
       if (shouldRefresh) {
         refetchChats();
       }
+      refreshChatEntry();
 
       const last = qs[qs.length - 1];
       if (!last || last.state.type !== "rendering") {
@@ -324,9 +326,23 @@ const RenderChatEntryFromServer: React.FC<{
             <Box display="flex" width="56" height="40" marginRight={2}>
               <ResponseAvatar state={"data"} />
             </Box>
-            <Typography level="body2" sx={{ whiteSpace: "pre-line" }}>
-              {chatEntry.answer}
-            </Typography>
+
+            {chatEntry.html ? (
+              <Box
+                dangerouslySetInnerHTML={{ __html: chatEntry.html }}
+                sx={(theme) => ({
+                  "& *": {
+                    fontSize: "14px",
+                    fontFamily: theme.vars.fontFamily.body,
+                  },
+                })}
+              />
+            ) : (
+              <Typography level="body2" sx={{ whiteSpace: "pre-line" }}>
+                {chatEntry.answer}
+              </Typography>
+            )}
+
             {me && me.role === "superadmin" && (
               <IconButton
                 onClick={() => setOpen((prev) => !prev)}

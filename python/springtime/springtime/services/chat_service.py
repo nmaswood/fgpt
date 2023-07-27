@@ -43,7 +43,11 @@ class OpenAIChatService(ChatService):
         question: str,
         history: list[ChatHistory],
     ) -> str:
-        return create_prompt(context, question, history)
+        return f"""
+System: You are an expert financial analyst.
+System: Format your output in markdown.
+User: {create_prompt(context, question, history)}
+        """
 
     def ask_streaming(
         self,

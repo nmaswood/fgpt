@@ -9,6 +9,7 @@ export interface ChatEntry {
   id: string;
   question: string;
   answer: string | undefined;
+  html: string | undefined;
 }
 
 export interface ChatResponse {

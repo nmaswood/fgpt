@@ -4,6 +4,7 @@ from starlette.responses import StreamingResponse
 
 from springtime.models.chat import ChatFileContext, ChatHistory
 from springtime.services.chat_service import ChatService
+from springtime.services.html import html_from_text
 
 
 class AskQuestionResponse(BaseModel):
@@ -27,6 +28,14 @@ class AskQuestionRequest(BaseModel):
 
 class GetPromptResponse(BaseModel):
     prompt: str
+
+
+class HtmlFromTextRequest(BaseModel):
+    text: str
+
+
+class HtmlFromTextResponse(BaseModel):
+    html: str | None
 
 
 class ChatRouter:
@@ -59,5 +68,10 @@ class ChatRouter:
         async def get_title_route(req: GetTitleRequest) -> GetTitleResponse:
             title = self.chat_service.get_title(req.question, req.answer)
             return GetTitleResponse(title=title)
+
+        @router.post("/sanitize")
+        async def get_sanitize(req: HtmlFromTextRequest) -> HtmlFromTextResponse:
+            html = html_from_text(req.text)
+            return HtmlFromTextResponse(html=html)
 
         return router

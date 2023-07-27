@@ -20,7 +20,7 @@
     "clean::dist": "rm -rf tsconfig.tsbuildinfo dist"
   },
   "dependencies": {
-    "@auth0/nextjs-auth0": "^2.7.0",
+    "@auth0/nextjs-auth0": "^3.0.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@fgpt/precedent-iso": "workspace:^",
@@ -47,9 +47,9 @@
   "devDependencies": {
     "@next/eslint-plugin-next": "^13.4.12",
     "@types/eslint": "^8.44.1",
-    "@types/node": "^20.4.4",
+    "@types/node": "^20.4.5",
     "@types/prettier": "^2.7.3",
-    "@types/react": "^18.2.16",
+    "@types/react": "^18.2.17",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.2.0",
     "@typescript-eslint/parser": "^6.2.0",
