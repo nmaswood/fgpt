@@ -1,6 +1,6 @@
 -- migrate:up
 ALTER TABLE chat_entry
-DROP COLUMN IF NOT EXISTS context_v2;
+DROP COLUMN IF EXISTS context_v2;
 
 ALTER TABLE chat_entry
 ADD COLUMN IF NOT EXISTS answer_v2 text;
