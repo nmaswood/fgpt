@@ -39,7 +39,7 @@ export interface UpdateChatEntry {
 }
 
 const CHAT_FIELDS = sql.fragment`chat.id as chat_id, chat.name as chat_name, chat.file_reference_id as file_reference_id, COALESCE(chat_entry_count, 0) as chat_entry_count`;
-const CHAT_ENTRY_FIELDS = sql.fragment`chat_entry.id as chat_entry_id, question_v2 as question, answer, html`;
+const CHAT_ENTRY_FIELDS = sql.fragment`chat_entry.id as chat_entry_id, question_v2 as question, answer, html, entry_order as index`;
 
 export interface ChatStore {
   getChat(id: string): Promise<Chat>;
@@ -299,6 +299,7 @@ const ZChatEntryRow = z
     question: z.string(),
     answer: ZChatEntryAnswer.nullable(),
     html: z.string().nullable(),
+    index: z.number(),
   })
   .transform(
     (row): ChatEntry => ({
@@ -306,6 +307,7 @@ const ZChatEntryRow = z
       question: row.question,
       answer: row.answer?.answer ?? undefined,
       html: row.html ?? undefined,
+      index: row.index,
     }),
   );
 

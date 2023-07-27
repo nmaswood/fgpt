@@ -7,6 +7,7 @@ export interface Chat {
 
 export interface ChatEntry {
   id: string;
+  index: number;
   question: string;
   answer: string | undefined;
   html: string | undefined;

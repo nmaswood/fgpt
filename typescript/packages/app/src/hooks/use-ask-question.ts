@@ -12,7 +12,11 @@ const decoder = new TextDecoder();
 
 export const useAskQuestion = (
   token: string,
-  onDone: (value: { answer: string; shouldRefresh: boolean }) => void,
+  onDone: (value: {
+    answer: string;
+    shouldRefresh: boolean;
+    chatId: string;
+  }) => void,
 ) => {
   const [answerBuffer, setAnswerBuffer] = React.useState<string[]>([]);
   const answerRefBuffer = React.useRef<string[]>([]);
@@ -65,6 +69,7 @@ export const useAskQuestion = (
         onDone({
           answer: answerRefBuffer.current.join(""),
           shouldRefresh,
+          chatId,
         });
         setLoading(false);
         setAnswerBuffer([]);

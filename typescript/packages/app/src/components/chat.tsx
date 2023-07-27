@@ -27,9 +27,8 @@ import { useFetchPrompt } from "../hooks/use-fetch-prompt";
 import { DisplayChatList } from "./display-chats";
 
 interface EntryToRender {
-  id: string;
+  index: number;
   question: string;
-  chatId: string;
   state:
     | {
         type: "error";
@@ -43,6 +42,8 @@ interface EntryToRender {
         value: string;
       };
 }
+
+type EntriesByChatId = Record<string, EntryToRender>;
 
 export const DisplayChat: React.FC<{
   projectId: string;
@@ -78,85 +79,88 @@ export const DisplayChat: React.FC<{
     useFetchChatEntries(selectedChatId);
 
   const [input, setInput] = React.useState("");
-  const [entriesToRender, setEntriesToRender] = React.useState<EntryToRender[]>(
-    [],
+  const [entriesByChatId, setEntriesByChatId] = React.useState<EntriesByChatId>(
+    {},
   );
 
   React.useEffect(() => {
     if (!chatEntries.length || !selectedChatId) {
       return;
     }
-    setEntriesToRender((prev) =>
-      prev.filter((e) => e.chatId !== selectedChatId),
-    );
+    setEntriesByChatId((prev) => {
+      const clone = structuredClone(prev);
+      delete clone[selectedChatId];
+      return clone;
+    });
   }, [chatEntries, selectedChatId]);
 
   React.useEffect(() => {
     setSelectedChatId(undefined);
   }, [projectId, fileReferenceId]);
 
-  const filtered = (() => {
-    if (!selectedChatId) {
-      return [];
+  const entryToRender = (() => {
+    const forChatId = selectedChatId
+      ? entriesByChatId[selectedChatId]
+      : undefined;
+    if (!forChatId) {
+      return undefined;
     }
-    const filteredEntries = entriesToRender.filter(
-      (e) => e.chatId === selectedChatId,
-    );
 
-    const final = filteredEntries.filter(
-      (e, idx) => chatEntries[idx]?.question !== e.question,
+    const hasFromServer = chatEntries.some(
+      (ce) => ce.index === forChatId.index,
     );
-    return final;
+    return hasFromServer ? undefined : forChatId;
   })();
 
-  const onDelete = async (id: string) => {
-    await deleteChat({ id });
-    if (id === selectedChatId) {
-      setSelectedChatId(undefined);
-    }
-  };
+  const onDelete = React.useCallback(
+    async (id: string) => {
+      await deleteChat({ id });
+      if (id === selectedChatId) {
+        setSelectedChatId(undefined);
+      }
+    },
+    [deleteChat, selectedChatId],
+  );
 
   const {
     trigger: askQuestion,
     text,
     loading,
-  } = useAskQuestion(token, ({ answer, shouldRefresh }) => {
+  } = useAskQuestion(token, ({ answer, shouldRefresh, chatId }) => {
     refreshChatEntry();
-    setEntriesToRender((qs) => {
+    setEntriesByChatId((prev) => {
       if (shouldRefresh) {
         refetchChats();
       }
       refreshChatEntry();
 
-      const last = qs[qs.length - 1];
-      if (!last || last.state.type !== "rendering") {
-        return qs;
+      const lastEntry = prev[chatId];
+      if (!lastEntry) {
+        return prev;
       }
 
-      return qs.slice(0, -1).concat([
-        {
-          ...last,
-          state: {
-            type: "rendered",
-            value: answer,
-          },
+      const copy = structuredClone(prev);
+      copy[chatId] = {
+        ...lastEntry,
+        state: {
+          type: "rendered",
+          value: answer,
         },
-      ]);
+      };
+      return copy;
     });
   });
 
   const trimmed = input.trim();
 
-  const submit = async (question?: string) => {
+  const submit = async (question: string) => {
     if (loading || isMutating) {
       return;
     }
-    const trimmed = question ?? input.trim();
+    const trimmed = question.trim();
     if (!trimmed.length) {
       return;
     }
-
-    const id = crypto.randomUUID();
 
     const getChatId = async () => {
       if (selectedChatId) {
@@ -175,16 +179,22 @@ export const DisplayChat: React.FC<{
     const chatId = await getChatId();
 
     setSelectedChatId(chatId);
+    // server indexes at 1 ... FOOT GUN!
 
-    setEntriesToRender((prev) => [
-      ...prev,
-      {
-        id,
-        chatId,
+    const index =
+      chatEntries.length === 0
+        ? 1
+        : Math.max(...chatEntries.map((e) => e.index)) + 1;
+
+    setEntriesByChatId((prev) => {
+      const copy = structuredClone(prev);
+      copy[chatId] = {
+        index,
         question: trimmed,
         state: { type: "rendering" },
-      },
-    ]);
+      };
+      return copy;
+    });
 
     setInput("");
 
@@ -236,7 +246,7 @@ export const DisplayChat: React.FC<{
           <DisplayQuestions
             questions={questions}
             disabled={isMutating || loading}
-            askQuestion={(question: string) => submit(question)}
+            askQuestion={submit}
           />
         )}
         <Box
@@ -248,7 +258,7 @@ export const DisplayChat: React.FC<{
           bgcolor="neutral.0"
           borderRadius={8}
         >
-          {(filtered.length > 0 || chatEntries.length > 0) && (
+          {(entryToRender || chatEntries.length > 0) && (
             <List sx={{ width: "100%" }}>
               {chatEntries.map((chatEntry) => (
                 <React.Fragment key={chatEntry.id}>
@@ -260,12 +270,9 @@ export const DisplayChat: React.FC<{
                   <Divider />
                 </React.Fragment>
               ))}
-              {filtered.map((q) => (
-                <React.Fragment key={q.id}>
-                  <RenderChatEntryFromClient q={q} text={text} />
-                  <Divider />
-                </React.Fragment>
-              ))}
+              {entryToRender && (
+                <RenderChatEntryFromClient q={entryToRender} text={text} />
+              )}
             </List>
           )}
         </Box>
@@ -280,7 +287,7 @@ export const DisplayChat: React.FC<{
             }}
             onKeyPress={(ev) => {
               if (ev.key === "Enter") {
-                submit();
+                submit(input);
                 ev.preventDefault();
               }
             }}
@@ -294,7 +301,7 @@ export const DisplayChat: React.FC<{
                   },
                 }}
                 disabled={trimmed.length === 0 || loading || isMutating}
-                onClick={() => submit()}
+                onClick={() => submit(input)}
               >
                 <SendIcon fontSize="small" />
               </IconButton>
@@ -314,7 +321,6 @@ const RenderChatEntryFromServer: React.FC<{
   const picture = user?.picture;
 
   const [open, setOpen] = React.useState(false);
-  const rotate = open ? "rotate(-90deg)" : "rotate(0)";
 
   return (
     <>
@@ -363,7 +369,7 @@ const RenderChatEntryFromServer: React.FC<{
               >
                 <ChevronLeftIcon
                   sx={{
-                    transform: rotate,
+                    transform: open ? "rotate(-90deg)" : "rotate(0)",
                     transition: "all 0.2s linear",
                   }}
                 />
@@ -496,10 +502,9 @@ const DisplayQuestions: React.FC<{
       maxHeight="120px"
       overflow="auto"
       borderRadius={8}
+      bgcolor="neutral.0"
       sx={(theme) => ({
         border: `1px solid ${theme.vars.palette.neutral[100]}`,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        bgcolor: (theme.vars.palette.neutral as any)[0],
       })}
     >
       <List size="sm">

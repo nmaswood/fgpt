@@ -106,9 +106,10 @@ export const DisplayChatList: React.FC<{
         }}
       >
         {chats.map((chat) => (
-          <ListItemEntry
+          <ListItemEntryMemo
             key={chat.id}
-            chat={chat}
+            chatId={chat.id}
+            chatName={chat.name}
             selectedChatId={selectedChatId}
             setSelectedChatId={setSelectedChatId}
             isLoading={isMutating}
@@ -124,7 +125,8 @@ export const DisplayChatList: React.FC<{
 };
 
 const ListItemEntry: React.FC<{
-  chat: Chat;
+  chatName: string | undefined;
+  chatId: string;
   selectedChatId: string | undefined;
   setSelectedChatId: (s: string) => void;
   isLoading: boolean;
@@ -133,7 +135,8 @@ const ListItemEntry: React.FC<{
   isMutating: boolean;
   loading: boolean;
 }> = ({
-  chat,
+  chatId,
+  chatName,
   selectedChatId,
   setSelectedChatId,
   isLoading: propsIsLoading,
@@ -144,18 +147,18 @@ const ListItemEntry: React.FC<{
 }) => {
   const [isEditing, setIsEditing] = React.useState(false);
 
-  const [name, setName] = React.useState(chat.name ?? "");
+  const [name, setName] = React.useState(chatName ?? "");
 
-  const isSelected = chat.id === selectedChatId;
+  const isSelected = chatId === selectedChatId;
 
   const onSubmit = async () => {
     const trimmed = name.trim();
-    if (trimmed.length === 0 || trimmed === chat.name) {
+    if (trimmed.length === 0 || trimmed === chatName) {
       setIsEditing(false);
       return;
     }
 
-    await editChat({ id: chat.id, name: trimmed });
+    await editChat({ id: chatId, name: trimmed });
     setIsEditing(false);
   };
 
@@ -167,7 +170,7 @@ const ListItemEntry: React.FC<{
 
   const isLoading = propsIsLoading || isMutating;
 
-  const waitingForTitle = loading && !chat.name && isSelected;
+  const waitingForTitle = loading && !chatName && isSelected;
 
   return (
     <ListItem
@@ -185,9 +188,8 @@ const ListItemEntry: React.FC<{
       )}
       {!waitingForTitle && (
         <ListItemButton
-          key={chat.id}
           selected={isSelected}
-          onClick={() => setSelectedChatId(chat.id)}
+          onClick={() => setSelectedChatId(chatId)}
           sx={{
             gap: 1 / 2,
           }}
@@ -207,7 +209,7 @@ const ListItemEntry: React.FC<{
             />
           )}
           {!isEditing && (
-            <ListItemContent>{chat.name || "Nameless chat"}</ListItemContent>
+            <ListItemContent>{chatName ?? "Nameless chat"}</ListItemContent>
           )}
           {isSelected && !isEditing && (
             <IconButton
@@ -232,7 +234,7 @@ const ListItemEntry: React.FC<{
               disabled={isLoading}
               onClick={(e) => {
                 e.stopPropagation();
-                onDelete(chat.id);
+                onDelete(chatId);
               }}
             >
               <DeleteIcon fontSize="small" />
@@ -254,11 +256,11 @@ const ListItemEntry: React.FC<{
           {isEditing && (
             <IconButton
               size="sm"
-              disabled={isLoading}
+              disabled={isLoading || chatName === ""}
               onClick={(e) => {
                 e.stopPropagation();
                 setIsEditing(false);
-                setName(chat.name ?? "");
+                setName(chatName ?? "");
               }}
             >
               <CloseIcon fontSize="small" />
@@ -269,3 +271,5 @@ const ListItemEntry: React.FC<{
     </ListItem>
   );
 };
+
+const ListItemEntryMemo = React.memo(ListItemEntry);
