@@ -40,6 +40,8 @@ class PineconeVectorService(VectorService):
         environment: str,
         index_name: str,
         namespace: str,
+        # to do make sure to only index necessary fields
+        indexed_fields: list[str],
     ) -> None:
         pinecone.init(api_key=api_key, environment=environment)
         self.index = pinecone.Index(index_name=index_name)

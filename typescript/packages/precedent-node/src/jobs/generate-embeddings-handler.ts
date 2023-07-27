@@ -55,8 +55,6 @@ export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
           metadata: {
             organizationId: textChunk.organizationId,
             projectId: textChunk.projectId,
-            // this is so we can eventually migrate to the new name
-            fileId: textChunk.fileReferenceId,
             fileReferenceId: textChunk.fileReferenceId,
             ...orderMap[textChunk.chunkOrder],
           },

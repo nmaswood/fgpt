@@ -19,7 +19,8 @@ class Settings(BaseSettings):
     anthropic_api_key: str = Field(env="ANTHROPIC_API_KEY")
     reports_openai_model: OpenAIModel = Field(env="REPORTS_OPENAI_MODEL")
     skip_fin_summary_and_summary: bool = Field(
-        env="SKIP_FIN_SUMMARY_AND_SUMMARY", default=False,
+        env="SKIP_FIN_SUMMARY_AND_SUMMARY",
+        default=False,
     )
 
     class Config:

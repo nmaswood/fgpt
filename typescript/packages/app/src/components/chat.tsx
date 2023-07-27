@@ -350,6 +350,7 @@ const RenderChatEntryFromServer: React.FC<{
                   "& *": {
                     fontSize: "14px",
                     fontFamily: theme.vars.fontFamily.body,
+                    whiteSpace: "pre-wrap",
                   },
                 })}
               />

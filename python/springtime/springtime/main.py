@@ -67,6 +67,7 @@ VECTOR_SERVICE = PineconeVectorService(
     environment=SETTINGS.pinecone_env,
     index_name=SETTINGS.pinecone_index,
     namespace=SETTINGS.pinecone_namespace,
+    indexed_fields=["organizationId", "projectId", "fileReferenceId"],
 )
 REPORT_SERVICE = OpenAIReportService(
     SETTINGS.reports_openai_model,

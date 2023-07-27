@@ -39,7 +39,7 @@ export class ChatContextServiceImpl implements ChatContextService {
     ]);
 
     const metadata = chat.fileReferenceId
-      ? { fileId: chat.fileReferenceId }
+      ? { fileReferenceId: chat.fileReferenceId }
       : { projectId };
 
     const similarDocuments = await this.#similarDocuments(vector, metadata);

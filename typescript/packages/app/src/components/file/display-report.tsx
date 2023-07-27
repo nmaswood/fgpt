@@ -132,7 +132,7 @@ const ForExcel: React.FC<{ chunks: AnalyzeResponseChunk[] }> = ({ chunks }) => {
               dangerouslySetInnerHTML={{ __html: html }}
               sx={(theme) => ({
                 "& *": {
-                  fontSize: "16px",
+                  fontSize: "14px",
                   fontFamily: theme.vars.fontFamily.body,
                 },
               })}
@@ -404,7 +404,7 @@ const ClaudeReport: React.FC<{
           dangerouslySetInnerHTML={{ __html: html }}
           sx={(theme) => ({
             "& *": {
-              fontSize: "16px",
+              fontSize: "14px",
               fontFamily: theme.vars.fontFamily.body,
             },
           })}
