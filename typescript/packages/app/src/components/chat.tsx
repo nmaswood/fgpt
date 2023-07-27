@@ -83,6 +83,15 @@ export const DisplayChat: React.FC<{
   );
 
   React.useEffect(() => {
+    if (!chatEntries.length || !selectedChatId) {
+      return;
+    }
+    setEntriesToRender((prev) =>
+      prev.filter((e) => e.chatId !== selectedChatId),
+    );
+  }, [chatEntries, selectedChatId]);
+
+  React.useEffect(() => {
     setSelectedChatId(undefined);
   }, [projectId, fileReferenceId]);
 
@@ -112,6 +121,7 @@ export const DisplayChat: React.FC<{
     text,
     loading,
   } = useAskQuestion(token, ({ answer, shouldRefresh }) => {
+    refreshChatEntry();
     setEntriesToRender((qs) => {
       if (shouldRefresh) {
         refetchChats();
