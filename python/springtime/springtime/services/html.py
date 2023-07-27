@@ -26,7 +26,7 @@ TAGS = set(bleach.ALLOWED_TAGS) | {
 
 def html_from_text(text: str) -> str | None:
     try:
-        m = markdown.markdown(text)
+        m = markdown.markdown(text, extensions=["tables"])
         return bleach.clean(m, tags=TAGS)
     except Exception as e:
         logger.error(f"Error generating markdown: {e}")
