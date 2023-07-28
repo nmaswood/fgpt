@@ -8,6 +8,7 @@ export interface User {
   email: string;
   organizationId: string;
   role: UserRole;
+  status: "activate" | "invited" | "inactive";
 }
 
 export interface IdentitySub {
