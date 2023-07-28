@@ -438,12 +438,12 @@ const RenderChatEntryFromClient: React.FC<{
             <ResponseAvatar state={"data"} />
           </Box>
           {q.state.type === "rendered" && (
-            <Typography level="body1" sx={{ whiteSpace: "pre-line" }}>
+            <Typography level="body2" sx={{ whiteSpace: "pre-line" }}>
               {q.state.value}
             </Typography>
           )}
           {q.state.type === "rendering" && (
-            <Typography level="body1" sx={{ whiteSpace: "pre-line" }}>
+            <Typography level="body2" sx={{ whiteSpace: "pre-line" }}>
               {text}
             </Typography>
           )}
