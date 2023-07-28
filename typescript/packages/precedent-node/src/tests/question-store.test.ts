@@ -164,7 +164,7 @@ test("getForFile", async () => {
   expect(question).toEqual("hi");
 });
 
-test("getForChunk", async () => {
+test("getForFile", async () => {
   const {
     organizationId,
     projectId,
@@ -188,7 +188,7 @@ test("getForChunk", async () => {
     },
   ]);
 
-  const [question] = await questionStore.getForChunk(textChunkId);
+  const [question] = await questionStore.getForFile(fileReferenceId);
 
   expect(question).toEqual("hi");
 });
@@ -217,7 +217,7 @@ test("sampleForFile", async () => {
     },
   ]);
 
-  const [question] = await questionStore.getForChunk(textChunkId);
+  const [question] = await questionStore.getForFile(fileReferenceId);
 
   expect(question).toEqual("hi");
 });

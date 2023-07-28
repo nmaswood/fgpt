@@ -37,6 +37,8 @@ async function setup() {
     bucketName: "test",
     path: "test",
     contentType: "application/pdf",
+    sha256: "test",
+    fileSize: 1,
   });
   return {
     creatorId: user.id,
@@ -141,8 +143,9 @@ test("insertChatEntry", async () => {
     creatorId,
     chatId: chat.id,
     question: "What is your favorite color?",
-    context: [],
     answer: "answer",
+    prompt: "prompt",
+    html: "<p> Hi </p>",
   });
 
   expect(chatEntry.question).toEqual("What is your favorite color?");
@@ -164,8 +167,9 @@ test("updateChatEntry", async () => {
     creatorId,
     chatId: chat.id,
     question: "What is your favorite color?",
+    prompt: "prompt",
+    html: "<p> Hi </p>",
 
-    context: [],
     answer: "answer",
   });
 
@@ -194,8 +198,9 @@ test("listChatEntry", async () => {
     creatorId,
     chatId: chat.id,
     question: "What is your favorite color?",
-    context: [],
     answer: "answer",
+    prompt: "prompt",
+    html: "<p> Hi </p>",
   });
 
   const foo = await chatStore.getChatEntry(chatEntry.id);
@@ -219,8 +224,9 @@ test("listChatEntries", async () => {
     creatorId,
     chatId: chat.id,
     question: "What is your favorite color?",
-    context: [],
     answer: "answer",
+    prompt: "prompt",
+    html: "<p> Hi </p>",
   });
 
   const [firstChatEntry] = await chatStore.listChatEntries(chat.id);
@@ -244,8 +250,9 @@ test("deleteChat", async () => {
     creatorId,
     chatId: chat.id,
     question: "What is your favorite color?",
-    context: [],
     answer: "answer",
+    prompt: "prompt",
+    html: "<p> Hi </p>",
   });
 
   const entries = await chatStore.listChatEntries(chat.id);
@@ -275,15 +282,16 @@ test("listChatHistory", async () => {
     creatorId,
     chatId: chat.id,
     question: "What is your favorite color?",
-    context: [],
     answer: "answer",
+    prompt: "prompt",
+    html: "<p> Hi </p>",
   });
 
   const [history] = await chatStore.listChatHistory(chat.id);
   expect(history.question).toEqual("What is your favorite color?");
 });
 
-test("getContext", async () => {
+test("getPrompt", async () => {
   const { creatorId, projectId, organizationId, chatStore } = await setup();
 
   const chat = await chatStore.insertChat({
@@ -299,19 +307,13 @@ test("getContext", async () => {
     creatorId,
     chatId: chat.id,
     question: "What is your favorite color?",
-    context: [
-      {
-        filename: "hi.pdf",
-        score: 0.5,
-        text: "hi",
-        fileId: "hi",
-      },
-    ],
     answer: "answer",
+    prompt: "prompt",
+    html: "<p>hi</p>",
   });
 
-  const [context] = await chatStore.getContext(entry.id);
-  expect(context.filename).toEqual("hi.pdf");
+  const prompt = await chatStore.getPrompt(entry.id);
+  expect(prompt).toEqual("prompt");
 });
 
 test("getChat", async () => {

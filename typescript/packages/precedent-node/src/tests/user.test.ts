@@ -86,3 +86,12 @@ test("addToProjectCountForOrg", async () => {
 
   expect(countPost).toEqual(9);
 });
+
+test("invite", async () => {
+  const { userOrgService } = await setup();
+
+  await userOrgService.invite({
+    email: "nasr@test.com",
+    organizationId: undefined,
+  });
+});

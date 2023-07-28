@@ -1,4 +1,4 @@
-import { IdentitySub, User, ZUserRole } from "@fgpt/precedent-iso";
+import { IdentitySub, User, ZUserRole, ZUserStatus } from "@fgpt/precedent-iso";
 import { DatabasePool, DatabaseTransactionConnection, sql } from "slonik";
 import { z } from "zod";
 
@@ -6,6 +6,13 @@ export interface UpsertUserArguments {
   sub: IdentitySub;
   email: string;
 }
+
+export interface InviteUserArgs {
+  email: string;
+  organizationId: string | undefined;
+}
+
+export type InviteUserResponse = "user_already_active" | "user_invited";
 
 export interface UserOrgService {
   get: (id: string) => Promise<User>;
@@ -15,9 +22,12 @@ export interface UserOrgService {
     organizationId: string,
     delta: number,
   ) => Promise<number>;
+  invite(args: InviteUserArgs): Promise<InviteUserResponse>;
 }
 
-const USER_FIELDS = sql.fragment`id, organization_id, email, role`;
+const USER_FIELDS = sql.fragment`id, organization_id, email, role, status`;
+
+//const USER_INVITE_FIELDS = sql.fragment`id, email, organization_id`;
 
 export class PsqlUserOrgService implements UserOrgService {
   constructor(private readonly pool: DatabasePool) {}
@@ -105,6 +115,35 @@ RETURNING
 `,
     );
   }
+
+  async invite({
+    email,
+    organizationId,
+  }: InviteUserArgs): Promise<InviteUserResponse> {
+    return this.pool.transaction(async (trx) => {
+      const user = await trx.maybeOne(sql.type(ZUserRow)`
+SELECT
+    ${USER_FIELDS}
+FROM
+    app_user
+WHERE
+    google_sub = ${email}
+LIMIT 1
+`);
+      if (user?.status === "activate") {
+        return "user_already_active";
+      }
+
+      await trx.query(sql.unsafe`
+INSERT INTO app_user_invite (email, organization_id)
+    VALUES (${email}, ${organizationId ?? null})
+ON CONFLICT (email)
+    DO UPDATE SET
+        organization_id = ${organizationId ?? null}
+`);
+      return "user_invited";
+    });
+  }
 }
 
 const ZProjectCountRow = z.object({ project_count: z.number() });
@@ -119,10 +158,12 @@ const ZUserRow = z
     organization_id: z.string(),
     email: z.string(),
     role: ZUserRole,
+    status: ZUserStatus,
   })
   .transform((row) => ({
     id: row.id,
     email: row.email,
     organizationId: row.organization_id,
     role: row.role,
+    status: row.status,
   }));
