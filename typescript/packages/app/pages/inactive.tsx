@@ -1,5 +1,5 @@
 import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
-import { Alert, Box, CircularProgress, Typography } from "@mui/joy";
+import { Box, CircularProgress, Typography } from "@mui/joy";
 import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
