@@ -1,4 +1,10 @@
-import { IdentitySub, User, ZUserRole, ZUserStatus } from "@fgpt/precedent-iso";
+import {
+  IdentitySub,
+  User,
+  ZUserRole,
+  ZUserStatus,
+  InvitedUser,
+} from "@fgpt/precedent-iso";
 import { DatabasePool, DatabaseTransactionConnection, sql } from "slonik";
 import { z } from "zod";
 
@@ -23,11 +29,12 @@ export interface UserOrgService {
     delta: number,
   ) => Promise<number>;
   invite(args: InviteUserArgs): Promise<InviteUserResponse>;
+  listInvites(): Promise<InvitedUser[]>;
 }
 
 const USER_FIELDS = sql.fragment`id, organization_id, email, role, status`;
 
-//const USER_INVITE_FIELDS = sql.fragment`id, email, organization_id`;
+const USER_INVITE_FIELDS = sql.fragment`id, email, organization_id`;
 
 export class PsqlUserOrgService implements UserOrgService {
   constructor(private readonly pool: DatabasePool) {}
@@ -144,6 +151,19 @@ ON CONFLICT (email)
       return "user_invited";
     });
   }
+
+  async listInvites(): Promise<InvitedUser[]> {
+    const rows = await this.pool.any(sql.type(ZInvitedUserRow)`
+                         SELECT ${USER_INVITE_FIELDS}
+                         FROM app_user_invite
+                         LIMIT 101
+                         `);
+    if (rows.length === 101) {
+      throw new Error("max row limit");
+    }
+
+    return Array.from(rows);
+  }
 }
 
 const ZProjectCountRow = z.object({ project_count: z.number() });
@@ -166,4 +186,16 @@ const ZUserRow = z
     organizationId: row.organization_id,
     role: row.role,
     status: row.status,
+  }));
+
+const ZInvitedUserRow = z
+  .object({
+    id: z.string(),
+    email: z.string(),
+    organization_id: z.string().nullable(),
+  })
+  .transform((row) => ({
+    id: row.id,
+    email: row.email,
+    organizationId: row.organization_id ?? undefined,
   }));

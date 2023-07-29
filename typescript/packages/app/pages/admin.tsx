@@ -10,6 +10,7 @@ import {
 } from "@mui/joy";
 import { useRouter } from "next/navigation";
 import * as React from "react";
+import { DisplayUserInvitiations } from "../src/components/admin/invite-user";
 
 import { Navbar } from "../src/components/navbar";
 import { useFetchMe } from "../src/hooks/use-fetch-me";
@@ -54,6 +55,7 @@ const Admin: React.FC = () => {
         <Typography level="h3">Admin</Typography>
 
         {user && <AdminInner />}
+        <DisplayUserInvitiations />
       </Box>
     </Box>
   );

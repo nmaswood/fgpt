@@ -18,3 +18,9 @@ export interface IdentitySub {
   provider: "google";
   value: string;
 }
+
+export interface InvitedUser {
+  id: string;
+  email: string;
+  organizationId: string | undefined;
+}

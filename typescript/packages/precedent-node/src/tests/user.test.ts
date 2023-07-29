@@ -20,7 +20,7 @@ beforeEach(async () => {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
 
   await pool.query(
-    sql.unsafe`TRUNCATE TABLE app_user, organization, project CASCADE`,
+    sql.unsafe`TRUNCATE TABLE app_user, organization, project, app_user_invite  CASCADE`,
   );
 });
 
@@ -28,7 +28,7 @@ afterEach(async () => {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
 
   await pool.query(
-    sql.unsafe`TRUNCATE TABLE app_user, organization, project CASCADE`,
+    sql.unsafe`TRUNCATE TABLE app_user, organization, project, app_user_invite CASCADE`,
   );
 });
 
@@ -87,11 +87,15 @@ test("addToProjectCountForOrg", async () => {
   expect(countPost).toEqual(9);
 });
 
-test("invite", async () => {
+test("invite+list", async () => {
   const { userOrgService } = await setup();
 
   await userOrgService.invite({
     email: "nasr@test.com",
     organizationId: undefined,
   });
+
+  const [user] = await userOrgService.listInvites();
+
+  expect(user.email).toEqual("nasr@test.com");
 });
