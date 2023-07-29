@@ -18,11 +18,13 @@ import { Navbar } from "../src/components/navbar";
 import { useCreateProject } from "../src/hooks/use-create-project";
 import { useDeleteProject } from "../src/hooks/use-delete-project";
 import { useEditProject } from "../src/hooks/use-edit-project";
+import { useFetchMe } from "../src/hooks/use-fetch-me";
 import { useFetchProjects } from "../src/hooks/use-fetch-projects";
 
 const Index: React.FC = () => {
   const { data: projects, isLoading: projectsLoading } = useFetchProjects();
 
+  const { isLoading: userIsLoading } = useFetchMe();
   const [modal, setModal] = React.useState<
     | { type: "create" | "closed" }
     | {
@@ -55,7 +57,7 @@ const Index: React.FC = () => {
 
       <DisplayProjects
         openCreateProjects={() => setModal({ type: "create" })}
-        projectsLoading={projectsLoading}
+        projectsLoading={projectsLoading || userIsLoading}
         setEditingProject={(projectId: string, projectName: string) =>
           setModal({
             type: "edit",

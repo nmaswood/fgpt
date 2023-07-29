@@ -1,0 +1,34 @@
+@keyframes float {
+  0% {
+    transform: translatey(0px);
+  }
+  50% {
+    transform: translatey(-5px);
+  }
+  100% {
+    transform: translatey(0px);
+  }
+}
+
+.icon {
+  transform: translatey(0px);
+  animation: float 6s ease-in-out infinite;
+}
+
+@media (max-width: 767px) {
+  .message-display {
+    flex-direction: column;
+  }
+  .message-text {
+    text-align: center;
+  }
+}
+
+@media (min-width: 768px) {
+  .message-display {
+    flex-direction: row;
+  }
+  .message-text {
+    text-align: left;
+  }
+}
