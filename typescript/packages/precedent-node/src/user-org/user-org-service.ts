@@ -1,9 +1,9 @@
 import {
   IdentitySub,
+  InvitedUser,
   User,
   ZUserRole,
   ZUserStatus,
-  InvitedUser,
 } from "@fgpt/precedent-iso";
 import { DatabasePool, DatabaseTransactionConnection, sql } from "slonik";
 import { z } from "zod";
@@ -87,18 +87,18 @@ WHERE
     google_sub = ${googleSub}
 LIMIT 1
 `);
+
     if (user) {
       return user;
     }
 
-    const organizationId = (
-      await trx.one(sql.type(ZCreateOrgRow)`
+    const orgSlug = `Organization for ${email}`;
+    const organizationId = await trx.oneFirst(sql.type(ZCreateOrgRow)`
 INSERT INTO organization (name)
-    VALUES (${null})
+    VALUES (${orgSlug})
 RETURNING
     id
-`)
-    ).id;
+`);
 
     return await trx.one(sql.type(ZUserRow)`
 INSERT INTO app_user (organization_id, email, google_sub)
@@ -137,7 +137,7 @@ WHERE
     google_sub = ${email}
 LIMIT 1
 `);
-      if (user?.status === "activate") {
+      if (user?.status === "active") {
         return "user_already_active";
       }
 
@@ -154,10 +154,13 @@ ON CONFLICT (email)
 
   async listInvites(): Promise<InvitedUser[]> {
     const rows = await this.pool.any(sql.type(ZInvitedUserRow)`
-                         SELECT ${USER_INVITE_FIELDS}
-                         FROM app_user_invite
-                         LIMIT 101
-                         `);
+
+SELECT
+    ${USER_INVITE_FIELDS}
+FROM
+    app_user_invite
+LIMIT 101
+`);
     if (rows.length === 101) {
       throw new Error("max row limit");
     }

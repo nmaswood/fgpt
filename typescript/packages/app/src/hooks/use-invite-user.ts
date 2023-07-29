@@ -17,7 +17,7 @@ export const useInviteUser = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(args),
+      body: JSON.stringify(args.arg),
     });
     await res.json();
     return "ok";

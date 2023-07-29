@@ -1,6 +1,6 @@
 import { UserOrgService } from "@fgpt/precedent-node";
-import { z } from "zod";
 import express from "express";
+import { z } from "zod";
 
 export class AdminRouter {
   constructor(private readonly userOrgService: UserOrgService) {}
@@ -21,14 +21,20 @@ export class AdminRouter {
       "/invite",
       async (req: express.Request, res: express.Response) => {
         const body = ZInviteUser.parse(req.body);
-        res.json({ body });
+        await this.userOrgService.invite(body);
+        res.json({ status: "ok" });
       },
     );
     return router;
   }
 }
 
-const ZInviteUser = z.object({
-  email: z.string().email(),
-  organizationId: z.string().optional(),
-});
+const ZInviteUser = z
+  .object({
+    email: z.string().email(),
+    organizationId: z.string().optional(),
+  })
+  .transform((row) => ({
+    email: row.email.toLowerCase(),
+    organizationId: row.organizationId || undefined,
+  }));
