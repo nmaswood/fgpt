@@ -5,6 +5,7 @@ import {
   Box,
   Button,
   ButtonGroup,
+  CircularProgress,
   Input,
   Modal,
   ModalDialog,
@@ -61,8 +62,19 @@ const Index: React.FC = () => {
       bgcolor="background.body"
     >
       <Navbar loading={false} />
+      {userIsLoading && (
+        <Box
+          display="flex"
+          width="100%"
+          height="100%"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <CircularProgress />
+        </Box>
+      )}
 
-      {!userIsLoading && (
+      {user && user.status === "active" && (
         <DisplayProjects
           openCreateProjects={() => setModal({ type: "create" })}
           projectsLoading={projectsLoading}
