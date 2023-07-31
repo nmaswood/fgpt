@@ -2,6 +2,7 @@ import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 import { Box, CircularProgress, Typography } from "@mui/joy";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import * as React from "react";
 
 import { Navbar } from "../src/components/navbar";
@@ -9,7 +10,15 @@ import { useFetchMe } from "../src/hooks/use-fetch-me";
 import styles from "./inactive.module.css";
 
 const Inactive: React.FC = () => {
-  const { isLoading } = useFetchMe();
+  const router = useRouter();
+  const { data: user, isLoading } = useFetchMe();
+
+  const status = user?.status;
+  React.useEffect(() => {
+    if (status === "active") {
+      router.push("/");
+    }
+  }, [router, status]);
   return (
     <Box
       display="flex"

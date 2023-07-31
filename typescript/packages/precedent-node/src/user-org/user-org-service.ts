@@ -31,7 +31,8 @@ export interface UserOrgService {
   upsertOrganization: (args: UpsertOrganization) => Promise<Organization>;
   get: (id: string) => Promise<User>;
   upsert: (args: UpsertUserArguments) => Promise<User>;
-  list: () => Promise<User[]>;
+  listUsers: () => Promise<User[]>;
+  listOrganizations: () => Promise<Organization[]>;
   addToProjectCountForOrg: (
     organizationId: string,
     delta: number,
@@ -72,12 +73,26 @@ WHERE
 `);
   }
 
-  async list(): Promise<User[]> {
+  async listUsers(): Promise<User[]> {
     const rows = await this.pool.any(sql.type(ZUserRow)`
 SELECT
     ${USER_FIELDS}
 FROM
     app_user
+LIMIT 101
+`);
+    if (rows.length === 101) {
+      throw new Error("max row limit");
+    }
+    return Array.from(rows);
+  }
+
+  async listOrganizations(): Promise<Organization[]> {
+    const rows = await this.pool.any(sql.type(ZOrganizationRow)`
+SELECT
+    ${ORGANIZATION_FIELDS}
+FROM
+    organization
 LIMIT 101
 `);
     if (rows.length === 101) {
@@ -291,7 +306,7 @@ const ZUserRow = z
 const ZOrganizationRow = z
   .object({
     id: z.string(),
-    name: z.string().optional(),
+    name: z.string().nullable(),
   })
   .transform((row) => ({
     id: row.id,

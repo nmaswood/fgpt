@@ -118,7 +118,7 @@ test("list", async () => {
     email: "nasr@test.com",
   });
 
-  const [user] = await userOrgService.list();
+  const [user] = await userOrgService.listUsers();
 
   expect(user.email).toEqual("nasr@test.com");
 });

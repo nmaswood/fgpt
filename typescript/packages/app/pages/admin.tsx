@@ -8,11 +8,14 @@ import * as React from "react";
 import { DisplayUserInvitiations } from "../src/components/admin/invite-user";
 import { Navbar } from "../src/components/navbar";
 import { useFetchMe } from "../src/hooks/use-fetch-me";
+import { useFetchOrganizations } from "../src/hooks/use-fetch-organizations";
 import { useFetchUsers } from "../src/hooks/use-fetch-users";
 import { ImpersonateService } from "../src/services/impersonate-service";
 
 const Admin: React.FC = () => {
   const { data: user } = useFetchMe();
+  const { data: organizations } = useFetchOrganizations();
+
   const router = useRouter();
 
   React.useEffect(() => {
@@ -49,7 +52,7 @@ const Admin: React.FC = () => {
         <Typography level="h3">Admin</Typography>
 
         {user && <DisplayUsers userId={user.id} />}
-        <DisplayUserInvitiations />
+        <DisplayUserInvitiations organizations={organizations} />
       </Box>
     </Box>
   );

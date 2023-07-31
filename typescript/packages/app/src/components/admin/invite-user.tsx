@@ -1,20 +1,25 @@
-import { InvitedUser } from "@fgpt/precedent-iso";
+import { InvitedUser, Organization } from "@fgpt/precedent-iso";
 import { Button } from "@mui/joy";
-import { Box, Input, Typography } from "@mui/joy";
+import { Box, Input, Option, Select, Typography } from "@mui/joy";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import React from "react";
 
 import { useFetchInvitations } from "../../hooks/use-fetch-invitations";
 import { useInviteUser } from "../../hooks/use-invite-user";
 
-export const DisplayUserInvitiations = () => {
+export const DisplayUserInvitiations: React.FC<{
+  organizations: Organization[];
+}> = ({ organizations }) => {
   const [email, setEmail] = React.useState("");
   const { data: invitations, mutate: mutateInvitations } =
     useFetchInvitations();
   const { trigger, isMutating } = useInviteUser();
+  const [organizationId, setOrganizationId] = React.useState<
+    string | undefined
+  >(undefined);
 
   const onSubmit = async () => {
-    await trigger({ email });
+    await trigger({ email, organizationId });
     setEmail("");
     mutateInvitations();
   };
@@ -37,6 +42,28 @@ export const DisplayUserInvitiations = () => {
           }
         }}
       />
+      <Select value={organizationId ?? null}>
+        <Option
+          value={null}
+          onClick={() => {
+            setOrganizationId(undefined);
+          }}
+        >
+          No organization
+        </Option>
+
+        {organizations.map((organization) => (
+          <Option
+            key={organization.id}
+            value={organization.id}
+            onClick={() => {
+              setOrganizationId(organization.id);
+            }}
+          >
+            {organization.name ?? organization.id}
+          </Option>
+        ))}
+      </Select>
       <Button
         disabled={!email}
         sx={{ width: "300px" }}

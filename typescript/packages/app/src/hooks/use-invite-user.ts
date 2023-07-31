@@ -2,7 +2,7 @@ import useSWRMutation from "swr/mutation";
 
 interface Args {
   email: string;
-  organizationId?: string;
+  organizationId: string | undefined;
 }
 
 export const useInviteUser = () => {

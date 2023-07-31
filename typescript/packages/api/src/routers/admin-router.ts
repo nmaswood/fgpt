@@ -7,8 +7,17 @@ export class AdminRouter {
   init() {
     const router = express.Router();
     router.get("/users", async (_: express.Request, res: express.Response) => {
-      res.json({ users: await this.userOrgService.list() });
+      res.json({ users: await this.userOrgService.listUsers() });
     });
+
+    router.get(
+      "/organizations",
+      async (_: express.Request, res: express.Response) => {
+        res.json({
+          organizations: await this.userOrgService.listOrganizations(),
+        });
+      },
+    );
 
     router.get(
       "/invitations",
