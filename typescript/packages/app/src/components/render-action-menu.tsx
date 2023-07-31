@@ -19,7 +19,10 @@ export const RenderActionMenu: React.FC<{
       <IconButton
         ref={buttonRef}
         variant="plain"
-        onClick={() => setOpen(true)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(true);
+        }}
         style={{ visibility: hidden ? "hidden" : "visible" }}
       >
         <MoreVertOutlinedIcon />
@@ -31,7 +34,9 @@ export const RenderActionMenu: React.FC<{
         placement="left-end"
       >
         <MenuItem
-          onClick={async () => {
+          onClick={async (e) => {
+            e.stopPropagation();
+            e.preventDefault();
             await trigger({ fileReferenceId });
             mutate();
             setOpen(false);

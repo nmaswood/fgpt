@@ -60,6 +60,8 @@ export const Navbar: React.FC<{
               component={Link}
               href="/"
               level="body1"
+              fontWeight="700"
+              fontSize="14px"
               sx={{
                 display: "flex",
                 alignItems: "center",
@@ -100,6 +102,8 @@ export const Navbar: React.FC<{
                 level="body1"
                 component={Link}
                 href={`/projects/${project.id}`}
+                fontWeight="700"
+                fontSize="14px"
                 sx={{
                   color: "neutral.0",
                   ...(fileName ? { opacity: 0.75 } : {}),
@@ -111,6 +115,8 @@ export const Navbar: React.FC<{
             {fileName && (
               <Typography
                 level="body1"
+                fontWeight="700"
+                fontSize="14px"
                 sx={{
                   color: "neutral.0",
                 }}

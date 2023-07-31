@@ -1,9 +1,9 @@
 import { assertNever, FileStatus, LoadedFile } from "@fgpt/precedent-iso";
-import { Box, Link, Typography } from "@mui/joy";
+import { Box, Typography } from "@mui/joy";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Uppy from "@uppy/core";
 import { format } from "fecha";
-import NextLink from "next/link";
+import { useRouter } from "next/router";
 import React from "react";
 
 import { useFetchShowCaseFile } from "../../hooks/use-fetch-show-case-file";
@@ -17,6 +17,7 @@ export const DisplayFiles: React.FC<{
   openModal: () => void;
   uppy: Uppy;
 }> = ({ files, projectId, openModal, uppy }) => {
+  const router = useRouter();
   const { data: showCaseFile, mutate } = useFetchShowCaseFile(projectId);
 
   const columns: GridColDef<LoadedFile>[] = [
@@ -36,15 +37,16 @@ export const DisplayFiles: React.FC<{
       minWidth: 300,
       renderCell: ({ row }) => {
         return (
-          <Link
-            component={NextLink}
-            href={`/files/${row.id}`}
+          <Typography
             sx={{
+              color: "black",
               textWrap: "wrap",
+              fontWeight: 700,
+              fontSize: "14px",
             }}
           >
             {row.fileName}
-          </Link>
+          </Typography>
         );
       },
     },
@@ -100,11 +102,11 @@ export const DisplayFiles: React.FC<{
       flexDirection="column"
       height="100%"
       width="100%"
-      padding={2}
-      paddingBottom={4}
+      paddingX={2}
+      paddingBottom={1}
       maxHeight="100%"
       overflow="auto"
-      gap={3}
+      gap={2}
       bgcolor="neutral.0"
       borderRadius={8}
     >
@@ -128,11 +130,30 @@ export const DisplayFiles: React.FC<{
         rows={files}
         columns={columns}
         disableRowSelectionOnClick
+        onRowClick={(row) => {
+          router.push(`/files/${row.id}`);
+        }}
         disableColumnFilter
         disableColumnMenu
         hideFooter={true}
         hideFooterPagination
         getRowHeight={() => "auto"}
+        sx={{
+          borderColor: "#E5E5E5",
+          "& .MuiDataGrid-row--dynamicHeight:hover": {
+            cursor: "pointer",
+            boxShadow: "0px 0px 8px 0px rgba(0, 0, 0, 0.15)",
+            transform: "translate3d(0px, -1px, 0px)",
+            backgroundColor: "white",
+          },
+          "& .MuiDataGrid-columnHeaderTitle": {
+            color: "#666",
+            fontWeight: 700,
+          },
+          ".MuiDataGrid-cell:focus": {
+            outline: "none",
+          },
+        }}
       />
     </Box>
   );
@@ -144,6 +165,7 @@ const RenderDescription: React.FC<{ description: string }> = ({
     <Typography
       sx={{
         textWrap: "wrap",
+        fontSize: "14px",
       }}
     >
       {description}

@@ -1,21 +1,12 @@
 import { assertNever, RenderShowCaseFile } from "@fgpt/precedent-iso";
-import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
-import {
-  Alert,
-  Badge,
-  Box,
-  Button,
-  CircularProgress,
-  Typography,
-} from "@mui/joy";
+import { Alert, Box, Button, CircularProgress, Typography } from "@mui/joy";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
 import { BLUR_DATA_URL } from "./make-blur-data-url";
 import { TermsTable } from "./terms-table";
-import { useHover } from "./use-hover";
 
 export const DataRoomSummary: React.FC<{
   loading: boolean;
@@ -52,7 +43,7 @@ export const DataRoomSummary: React.FC<{
                 textWrap: "nowrap",
               }}
             >
-              View summary
+              View Summary
             </Button>
           </Box>
         )}
@@ -88,7 +79,6 @@ export const DataRoomSummary: React.FC<{
 const Dispatch: React.FC<{ showCaseFile: RenderShowCaseFile.File }> = ({
   showCaseFile,
 }) => {
-  const [ref, hovering] = useHover();
   switch (showCaseFile.type) {
     case "not_set":
       return (
@@ -116,51 +106,51 @@ const Dispatch: React.FC<{ showCaseFile: RenderShowCaseFile.File }> = ({
           gap={3}
           paddingTop={2}
         >
-          <Badge
-            ref={ref as any} // eslint-disable-line @typescript-eslint/no-explicit-any
-            invisible={!hovering}
-            component={Link}
-            badgeContent={<OpenInNewOutlinedIcon />}
-            href={`/files/${showCaseFile.fileReferenceId}`}
-          >
+          <Link href={`/files/${showCaseFile.fileReferenceId}`}>
             {!showCaseFile.url && (
               <Box
-                display="flex"
-                overflow="auto"
-                gap={3}
                 width="320px"
                 height="100%"
-                component={Box}
+                display="flex"
+                borderRadius={8}
+                border="1px solid #E5E5E5"
+                boxShadow="rgba(0, 0, 0, 0.06) 0px 2px 4px"
+                justifyContent="center"
+                alignItems="center"
+                sx={{
+                  transition: "all .1s ease-in-out",
+                  "&:hover": {
+                    border: "1.5px solid lightgray",
+                    boxShadow: "rgba(0, 0, 0, 0.06) 0px 9px 9px",
+                  },
+                }}
               >
-                <Box
-                  width="100%"
-                  height="100%"
-                  display="flex"
-                  borderRadius={8}
-                  border="1px solid #E5E5E5"
-                  boxShadow="rgba(0, 0, 0, 0.06) 0px 2px 4px"
-                  justifyContent="center"
-                  alignItems="center"
-                >
-                  <PictureAsPdfOutlinedIcon
-                    color="error"
-                    sx={{
-                      fontSize: 36,
-                      color: "danger.solidColor",
-                    }}
-                  />
-                </Box>
+                <PictureAsPdfOutlinedIcon
+                  color="error"
+                  sx={{
+                    fontSize: 36,
+                    color: "danger.solidColor",
+                  }}
+                />
               </Box>
             )}
             {showCaseFile.url && (
               <Box
                 display="flex"
                 borderRadius={8}
-                width="345px"
+                width="320px"
                 border="1px solid #E5E5E5"
                 boxShadow="rgba(0, 0, 0, 0.06) 0px 2px 4px"
                 position="relative"
+                height="100%"
                 minHeight="200px"
+                sx={{
+                  transition: "all .1s ease-in-out",
+                  "&:hover": {
+                    border: "1.5px solid lightgray",
+                    boxShadow: "rgba(0, 0, 0, 0.06) 0px 9px 9px",
+                  },
+                }}
               >
                 <Image
                   placeholder="blur"
@@ -175,7 +165,7 @@ const Dispatch: React.FC<{ showCaseFile: RenderShowCaseFile.File }> = ({
                 />
               </Box>
             )}
-          </Badge>
+          </Link>
           <Box
             display="flex"
             width="100%"

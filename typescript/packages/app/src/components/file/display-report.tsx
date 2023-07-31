@@ -23,9 +23,11 @@ import {
   Select,
   Typography,
 } from "@mui/joy";
+import Image from "next/image";
 import React from "react";
 
 import { TermsTable } from "../terms-table";
+import styles from "./display-report.module.css";
 import { ReportType } from "./report-type";
 
 export const DisplayFileReport: React.FC<{
@@ -46,6 +48,32 @@ export const DisplayFileReport: React.FC<{
       gap={2}
       bgcolor="#F5F5F5"
     >
+      {file.status === "pending" && (
+        <Box
+          display="flex"
+          bgcolor="#2B1657"
+          flexDirection="column"
+          padding={2}
+          borderRadius={8}
+          gap={1}
+        >
+          <Typography
+            level="h4"
+            className={styles.analyzing}
+            sx={{ fontWeight: 700, color: "white", fontSize: "16px" }}
+          >
+            Analyzing
+          </Typography>
+
+          <Typography
+            sx={{ fontWeight: 400, color: "white", fontSize: "14px" }}
+          >
+            Paredo is hard at work analyzing this document for you!
+            <br /> This can take a few minutes. You do not have to stay on this
+            screen.
+          </Typography>
+        </Box>
+      )}
       {file.type === "pdf" && (
         <ForOverview
           status={file.status}
@@ -195,6 +223,44 @@ const ForOverview: React.FC<{
   description: string | undefined;
   terms: Term[];
 }> = ({ status, description, terms }) => {
+  if (status === "pending") {
+    return (
+      <Box
+        display="flex"
+        width="100%"
+        height="auto"
+        maxHeight="100%"
+        overflow="auto"
+        sx={(theme) => ({
+          border: `1px solid ${theme.vars.palette.neutral[100]}`,
+        })}
+        borderRadius={8}
+        bgcolor="neutral.0"
+        alignItems="center"
+        justifyContent="space-between"
+        padding={2}
+      >
+        <Typography
+          level="h4"
+          sx={{
+            fontWeight: 700,
+            color: "black",
+          }}
+        >
+          Overview
+        </Typography>
+
+        <Image
+          priority
+          src="/paredo-second.svg"
+          height={64}
+          width={64}
+          className={styles.rotating}
+          alt="Paredo icon"
+        />
+      </Box>
+    );
+  }
   return (
     <Box
       display="flex"
@@ -215,6 +281,7 @@ const ForOverview: React.FC<{
           level="h4"
           sx={{
             fontWeight: 700,
+            color: "#666",
           }}
         >
           Overview
@@ -264,6 +331,44 @@ const ForReport: React.FC<{
   showAdminOnly: boolean;
 }> = ({ file, showAdminOnly }) => {
   const [reportType, setReportType] = React.useState<ReportType>("claude");
+  if (file.status === "pending") {
+    return (
+      <Box
+        display="flex"
+        width="100%"
+        height="auto"
+        maxHeight="100%"
+        overflow="auto"
+        sx={(theme) => ({
+          border: `1px solid ${theme.vars.palette.neutral[100]}`,
+        })}
+        borderRadius={8}
+        bgcolor="neutral.0"
+        alignItems="center"
+        justifyContent="space-between"
+        padding={2}
+      >
+        <Typography
+          level="h4"
+          sx={{
+            fontWeight: 700,
+            color: "#666",
+          }}
+        >
+          Report
+        </Typography>
+
+        <Image
+          priority
+          src="/paredo-second.svg"
+          height={64}
+          width={64}
+          className={styles.rotating}
+          alt="Paredo icon"
+        />
+      </Box>
+    );
+  }
   return (
     <Box
       display="flex"
@@ -285,6 +390,7 @@ const ForReport: React.FC<{
             level="h4"
             sx={{
               fontWeight: 700,
+              color: "black",
             }}
           >
             Report
@@ -337,6 +443,7 @@ const StatusBubble: React.FC<{ status: FileStatus }> = ({ status }) => {
             size="sm"
             sx={{
               background: "#fff",
+              fontSize: "14px",
               color: "neutral.600",
               border: "1px solid #E5E5E5",
               fontWeight: 700,
@@ -351,6 +458,7 @@ const StatusBubble: React.FC<{ status: FileStatus }> = ({ status }) => {
             size="sm"
             sx={{
               background: "#fff",
+              fontSize: "14px",
               color: "success.solidColor",
               border: "1px solid #E5E5E5",
               fontWeight: 700,
@@ -365,6 +473,7 @@ const StatusBubble: React.FC<{ status: FileStatus }> = ({ status }) => {
             size="sm"
             sx={{
               background: "#fff",
+              fontSize: "14px",
               color: "danger.solidColor",
               border: "1px solid #E5E5E5",
               fontWeight: 700,

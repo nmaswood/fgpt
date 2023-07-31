@@ -1,0 +1,17 @@
+.rotating {
+  animation: rotating 3s linear infinite;
+  animation-play-state: paused;
+}
+
+.rotating:hover {
+  animation-play-state: running;
+}
+
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
