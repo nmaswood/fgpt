@@ -1,13 +1,7 @@
 import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 import { User } from "@fgpt/precedent-iso";
-import {
-  Box,
-  List,
-  ListItem,
-  ListItemButton,
-  Sheet,
-  Typography,
-} from "@mui/joy";
+import { Box, Button, Typography } from "@mui/joy";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
@@ -54,39 +48,68 @@ const Admin: React.FC = () => {
       >
         <Typography level="h3">Admin</Typography>
 
-        {user && <AdminInner />}
+        {user && <DisplayUsers userId={user.id} />}
         <DisplayUserInvitiations />
       </Box>
     </Box>
   );
 };
 
-const AdminInner = () => {
+const DisplayUsers: React.FC<{ userId: string }> = ({ userId }) => {
   const { data: users } = useFetchUsers();
-
+  const columns: GridColDef<User>[] = [
+    {
+      field: "email",
+      headerName: "Email",
+      minWidth: 300,
+    },
+    {
+      field: "role",
+      headerName: "Role",
+      minWidth: 300,
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      minWidth: 300,
+    },
+    {
+      minWidth: 300,
+      field: "organizationId",
+      headerName: "Organization id",
+    },
+    {
+      minWidth: 300,
+      field: "impersonate",
+      headerName: "Impersonate",
+      renderCell: (params) => {
+        if (userId === params.row.id) {
+          return null;
+        }
+        return (
+          <Button
+            onClick={() => {
+              ImpersonateService.set(params.row.id);
+              window.location.href = "/";
+            }}
+          >
+            Impersonate {params.row.email}
+          </Button>
+        );
+      },
+    },
+  ];
   return (
-    <Sheet>
-      <List>
-        {users.map((user) => (
-          <DisplayUser key={user.id} user={user} />
-        ))}
-      </List>
-    </Sheet>
-  );
-};
-
-const DisplayUser: React.FC<{ user: User }> = ({ user }) => {
-  return (
-    <ListItem>
-      <ListItemButton
-        onClick={() => {
-          ImpersonateService.set(user.id);
-          window.location.href = "/";
-        }}
-      >
-        <Typography level="body1">Impersonate {user.email}</Typography>
-      </ListItemButton>
-    </ListItem>
+    <DataGrid
+      rows={users}
+      columns={columns}
+      disableRowSelectionOnClick
+      disableColumnFilter
+      disableColumnMenu
+      hideFooter={true}
+      hideFooterPagination
+      getRowHeight={() => "auto"}
+    />
   );
 };
 

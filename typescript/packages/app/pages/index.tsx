@@ -22,9 +22,17 @@ import { useFetchMe } from "../src/hooks/use-fetch-me";
 import { useFetchProjects } from "../src/hooks/use-fetch-projects";
 
 const Index: React.FC = () => {
+  const router = useRouter();
   const { data: projects, isLoading: projectsLoading } = useFetchProjects();
+  const { data: user, isLoading: userIsLoading } = useFetchMe();
+  const status = user?.status;
 
-  const { isLoading: userIsLoading } = useFetchMe();
+  React.useEffect(() => {
+    if (status === "inactive") {
+      router.push("/inactive");
+    }
+  }, [router, status]);
+
   const [modal, setModal] = React.useState<
     | { type: "create" | "closed" }
     | {
@@ -36,7 +44,6 @@ const Index: React.FC = () => {
   const closeModal = () => setModal({ type: "closed" });
   const { trigger, isMutating } = useCreateProject();
 
-  const router = useRouter();
   const projectNames = React.useMemo(
     () => new Set(projects.map((p) => p.name)),
     [projects],
@@ -55,25 +62,27 @@ const Index: React.FC = () => {
     >
       <Navbar loading={false} />
 
-      <DisplayProjects
-        openCreateProjects={() => setModal({ type: "create" })}
-        projectsLoading={projectsLoading || userIsLoading}
-        setEditingProject={(projectId: string, projectName: string) =>
-          setModal({
-            type: "edit",
-            projectId,
-            projectName,
-          })
-        }
-        setDeletingProject={(projectId: string, projectName: string) =>
-          setModal({
-            type: "delete",
-            projectId,
-            projectName,
-          })
-        }
-        projects={projects}
-      />
+      {!userIsLoading && (
+        <DisplayProjects
+          openCreateProjects={() => setModal({ type: "create" })}
+          projectsLoading={projectsLoading}
+          setEditingProject={(projectId: string, projectName: string) =>
+            setModal({
+              type: "edit",
+              projectId,
+              projectName,
+            })
+          }
+          setDeletingProject={(projectId: string, projectName: string) =>
+            setModal({
+              type: "delete",
+              projectId,
+              projectName,
+            })
+          }
+          projects={projects}
+        />
+      )}
       {modal.type === "create" && (
         <CreateProjectModal
           onClose={closeModal}

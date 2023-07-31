@@ -1,3 +1,4 @@
+import { User } from "@fgpt/precedent-iso";
 import { ChatOutlined } from "@mui/icons-material";
 import AssessmentIcon from "@mui/icons-material/AssessmentOutlined";
 import AutoModeOutlinedIcon from "@mui/icons-material/AutoModeOutlined";
@@ -27,19 +28,32 @@ import styles from "./file.module.css";
 export default function DisplayFile() {
   const router = useRouter();
 
+  const { data: user } = useFetchMe();
+
   const fileId = (() => {
     const fileId = router.query.file;
     return typeof fileId === "string" ? fileId : undefined;
   })();
 
-  return <>{fileId && <ForFileId fileId={fileId} />}</>;
+  return <>{fileId && <ForFileId fileId={fileId} user={user} />}</>;
 }
 
-const ForFileId: React.FC<{ fileId: string }> = ({ fileId }) => {
+const ForFileId: React.FC<{ fileId: string; user: User | undefined }> = ({
+  fileId,
+  user,
+}) => {
+  const router = useRouter();
+  const status = user?.status;
+
+  React.useEffect(() => {
+    if (status === "inactive") {
+      router.push("/inactive");
+    }
+  }, [router, status]);
+
   const { data: file } = useFetchFileToRender(fileId);
   const { data: token } = useFetchToken();
   const { data: displayFile } = useFetchDisplayFile(fileId);
-  const { data: user } = useFetchMe();
 
   const [tab, setTab] = useTabState();
 

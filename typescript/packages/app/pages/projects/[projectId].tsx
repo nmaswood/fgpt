@@ -8,15 +8,25 @@ import * as React from "react";
 
 import { Navbar } from "../../src/components/navbar";
 import { SelectedProject } from "../../src/components/selected-project";
+import { useFetchMe } from "../../src/hooks/use-fetch-me";
 import { useFetchProject } from "../../src/hooks/use-fetch-project";
 import { useFetchToken } from "../../src/hooks/use-fetch-token";
 
 const DisplayProject: React.FC = () => {
   const router = useRouter();
+  const { data: user, isLoading: userIsLoading } = useFetchMe();
   const projectId = (() => {
     const projectId = router.query.projectId;
     return typeof projectId === "string" ? projectId : undefined;
   })();
+
+  const status = user?.status;
+
+  React.useEffect(() => {
+    if (status === "inactive") {
+      router.push("/inactive");
+    }
+  }, [router, status]);
 
   const { data: token, isLoading: isTokenLoading } = useFetchToken();
 
@@ -38,7 +48,7 @@ const DisplayProject: React.FC = () => {
 
       <SelectedProject
         token={token}
-        loading={isTokenLoading || isProjectLoading}
+        loading={isTokenLoading || isProjectLoading || userIsLoading}
         project={project}
       />
     </Box>
