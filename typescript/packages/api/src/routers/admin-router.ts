@@ -21,7 +21,7 @@ export class AdminRouter {
       "/invite",
       async (req: express.Request, res: express.Response) => {
         const body = ZInviteUser.parse(req.body);
-        await this.userOrgService.invite(body);
+        await this.userOrgService.createInvite(body);
         res.json({ status: "ok" });
       },
     );

@@ -1,12 +1,19 @@
 import {
   IdentitySub,
   InvitedUser,
+  Organization,
   User,
   ZUserRole,
   ZUserStatus,
 } from "@fgpt/precedent-iso";
 import { DatabasePool, DatabaseTransactionConnection, sql } from "slonik";
 import { z } from "zod";
+
+const PLACEHOLDER_ORG_ID = "00000000-0000-0000-0000-000000000000";
+
+export interface UpsertOrganization {
+  name: string;
+}
 
 export interface UpsertUserArguments {
   sub: IdentitySub;
@@ -21,6 +28,7 @@ export interface InviteUserArgs {
 export type InviteUserResponse = "user_already_active" | "user_invited";
 
 export interface UserOrgService {
+  upsertOrganization: (args: UpsertOrganization) => Promise<Organization>;
   get: (id: string) => Promise<User>;
   upsert: (args: UpsertUserArguments) => Promise<User>;
   list: () => Promise<User[]>;
@@ -28,16 +36,30 @@ export interface UserOrgService {
     organizationId: string,
     delta: number,
   ) => Promise<number>;
-  invite(args: InviteUserArgs): Promise<InviteUserResponse>;
+  createInvite(args: InviteUserArgs): Promise<InviteUserResponse>;
   listInvites(): Promise<InvitedUser[]>;
 }
 
-const USER_FIELDS = sql.fragment`id, organization_id, email, role, status`;
-
+const ORGANIZATION_FIELDS = sql.fragment`id, name`;
+const USER_FIELDS = sql.fragment`app_user.id, organization_id, email, role, status`;
 const USER_INVITE_FIELDS = sql.fragment`id, email, organization_id`;
 
 export class PsqlUserOrgService implements UserOrgService {
   constructor(private readonly pool: DatabasePool) {}
+
+  async upsertOrganization({
+    name,
+  }: UpsertOrganization): Promise<Organization> {
+    return this.pool.one(sql.type(ZOrganizationRow)`
+INSERT INTO organization (name)
+    VALUES (${name})
+ON CONFLICT (id)
+    DO UPDATE SET
+        name = ${name}
+    RETURNING
+        ${ORGANIZATION_FIELDS}
+`);
+  }
 
   async get(id: string): Promise<User> {
     return this.pool.one(sql.type(ZUserRow)`
@@ -73,6 +95,10 @@ LIMIT 101
       this.#upsert(trx, sub.value, email),
     );
   }
+
+  // TODO
+  // this logic is pretty complicated
+  // simplify this
   async #upsert(
     trx: DatabaseTransactionConnection,
     googleSub: string,
@@ -85,27 +111,102 @@ FROM
     app_user
 WHERE
     google_sub = ${googleSub}
-LIMIT 1
 `);
 
-    if (user) {
+    if (user && user.status === "active") {
       return user;
     }
 
-    const orgSlug = `Organization for ${email}`;
-    const organizationId = await trx.oneFirst(sql.type(ZCreateOrgRow)`
-INSERT INTO organization (name)
-    VALUES (${orgSlug})
-RETURNING
-    id
+    await trx.query(sql.unsafe`
+INSERT INTO organization (name, id)
+    VALUES ('Placeholder Org', ${PLACEHOLDER_ORG_ID})
+ON CONFLICT (id)
+    do nothing
 `);
 
-    return await trx.one(sql.type(ZUserRow)`
+    const invite = await this.#getInvite(trx, email);
+    if (!invite) {
+      return user
+        ? user
+        : trx.one(sql.type(ZUserRow)`
 INSERT INTO app_user (organization_id, email, google_sub)
-    VALUES (${organizationId}, ${email}, ${googleSub})
+    VALUES (${PLACEHOLDER_ORG_ID}, ${email}, ${googleSub})
 RETURNING
     ${USER_FIELDS}
 `);
+    }
+
+    await this.#deleteInvite(trx, invite.id);
+
+    if (invite.organizationId) {
+      return trx.one(sql.type(ZUserRow)`
+INSERT INTO app_user (organization_id, email, google_sub, status)
+    VALUES (${invite.organizationId}, ${email}, ${googleSub}, 'active')
+ON CONFLICT (email)
+    DO UPDATE SET
+        organization_id = EXCLUDED.organization_id, status = 'active'
+    RETURNING
+        ${USER_FIELDS}
+`);
+    }
+
+    if (user) {
+      return trx.one(sql.type(ZUserRow)`
+UPDATE
+    app_user
+SET
+    status = 'active'
+WHERE
+    id = ${user.id}
+RETURNING
+    ${USER_FIELDS}
+`);
+    }
+
+    const slug = `Organization for ${email}`;
+    return trx.one(sql.type(ZUserRow)`
+
+WITH new_org AS (
+INSERT INTO organization (name)
+        VALUES (${slug})
+    RETURNING
+        id)
+    INSERT INTO app_user (organization_id, email, google_sub, status)
+        VALUES ((
+                SELECT
+                    id
+                from
+                    new_org),
+                ${email},
+                ${googleSub},
+                'active')
+    ON CONFLICT (email)
+        DO UPDATE SET
+            organization_id = EXCLUDED.organization_id,
+            status = 'active'
+        RETURNING
+            ${USER_FIELDS}
+`);
+  }
+
+  async #deleteInvite(trx: DatabaseTransactionConnection, id: string) {
+    await trx.query(sql.unsafe`DELETE FROM app_user_invite where id = ${id} `);
+    return undefined;
+  }
+
+  async #getInvite(
+    trx: DatabaseTransactionConnection,
+    email: string,
+  ): Promise<InvitedUser | undefined> {
+    const invite = await trx.maybeOne(sql.type(ZInvitedUserRow)`
+SELECT
+    ${USER_INVITE_FIELDS}
+FROM
+    app_user_invite
+WHERE
+    email = ${email}
+`);
+    return invite ?? undefined;
   }
 
   async addToProjectCountForOrg(id: string, delta: number): Promise<number> {
@@ -123,7 +224,7 @@ RETURNING
     );
   }
 
-  async invite({
+  async createInvite({
     email,
     organizationId,
   }: InviteUserArgs): Promise<InviteUserResponse> {
@@ -137,6 +238,7 @@ WHERE
     google_sub = ${email}
 LIMIT 1
 `);
+
       if (user?.status === "active") {
         return "user_already_active";
       }
@@ -154,7 +256,6 @@ ON CONFLICT (email)
 
   async listInvites(): Promise<InvitedUser[]> {
     const rows = await this.pool.any(sql.type(ZInvitedUserRow)`
-
 SELECT
     ${USER_INVITE_FIELDS}
 FROM
@@ -171,10 +272,6 @@ LIMIT 101
 
 const ZProjectCountRow = z.object({ project_count: z.number() });
 
-const ZCreateOrgRow = z.object({
-  id: z.string(),
-});
-
 const ZUserRow = z
   .object({
     id: z.string(),
@@ -189,6 +286,16 @@ const ZUserRow = z
     organizationId: row.organization_id,
     role: row.role,
     status: row.status,
+  }));
+
+const ZOrganizationRow = z
+  .object({
+    id: z.string(),
+    name: z.string().optional(),
+  })
+  .transform((row) => ({
+    id: row.id,
+    name: row.name ?? undefined,
   }));
 
 const ZInvitedUserRow = z
