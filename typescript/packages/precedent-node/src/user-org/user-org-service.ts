@@ -119,6 +119,7 @@ LIMIT 101
     googleSub: string,
     email: string,
   ): Promise<User> {
+    debugger;
     const user = await trx.maybeOne(sql.type(ZUserRow)`
 SELECT
     ${USER_FIELDS}
@@ -146,8 +147,11 @@ ON CONFLICT (id)
         : trx.one(sql.type(ZUserRow)`
 INSERT INTO app_user (organization_id, email, google_sub)
     VALUES (${PLACEHOLDER_ORG_ID}, ${email}, ${googleSub})
-RETURNING
-    ${USER_FIELDS}
+ON CONFLICT (email)
+    DO UPDATE SET
+        google_sub = EXCLUDED.google_sub, organization_id = EXCLUDED.organization_id
+    RETURNING
+        ${USER_FIELDS}
 `);
     }
 
@@ -180,7 +184,6 @@ RETURNING
 
     const slug = `Organization for ${email}`;
     return trx.one(sql.type(ZUserRow)`
-
 WITH new_org AS (
 INSERT INTO organization (name)
         VALUES (${slug})
