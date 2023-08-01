@@ -17,27 +17,7 @@ def create_prompt(
     question: str,
     history: list[ChatHistory],
 ):
-    question_len = len(question)
-    history_prompt = create_prompt_for_history(history)
-    history_len = len(history_prompt)
-    total_len = (
-        DEFAULT_PROMPT_LEN
-        + question_len
-        + history_len
-        + len(context)
-        + len(CONTEXT_PROMPT)
-    )
-
-    if total_len >= TOKEN_LIMIT:
-        context = context[
-            : TOKEN_LIMIT
-            - DEFAULT_PROMPT_LEN
-            - question_len
-            - history_len
-            - len(CONTEXT_PROMPT)
-            - 1
-        ]
-
+    history_prompt = create_prompt_for_histories(history)
     context_prompt = create_prompt_for_context(context)
 
     non_empty_prompts = [
@@ -84,14 +64,33 @@ content: {stripped}
 """
 
 
-def create_prompt_for_history(history: list[ChatHistory]):
+def create_prompt_for_histories(history: list[ChatHistory]):
     if not history:
         return ""
 
-    prompt = "".join(
+    total_len = len(history)
+    prompt = "\n".join(
         [
             "Previously, the user prompted you with the following questions/statements:\n",
-            *[f"{h.question}\n" for h in history],
+            *[
+                create_prompt_for_history(h, total_len, idx)
+                for idx, h in enumerate(history)
+            ],
         ],
     )
     return " " + prompt
+
+
+WINDOW_LIMIT = 7
+
+
+def create_prompt_for_history(
+    history: ChatHistory,
+    total_len: int,
+    idx: int,
+):
+    too_long = total_len - idx > WINDOW_LIMIT
+    return f"""
+User: {history.question}
+You: {history.answer if not too_long else "OMITTED FOR BREVITY"}
+"""
