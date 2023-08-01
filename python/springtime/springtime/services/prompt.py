@@ -81,7 +81,7 @@ def create_prompt_for_histories(history: list[ChatHistory]):
     return " " + prompt
 
 
-WINDOW_LIMIT = 7
+WINDOW_LIMIT = 3
 
 
 def create_prompt_for_history(
