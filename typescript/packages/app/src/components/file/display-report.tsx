@@ -223,6 +223,9 @@ const ForOverview: React.FC<{
   description: string | undefined;
   terms: Term[];
 }> = ({ status, description, terms }) => {
+  const withDescription = description
+    ? [{ termName: "Description", termValue: description }, ...terms]
+    : terms;
   if (status === "pending") {
     return (
       <Box
@@ -244,7 +247,7 @@ const ForOverview: React.FC<{
           level="h4"
           sx={{
             fontWeight: 700,
-            color: "black",
+            color: "#666",
           }}
         >
           Overview
@@ -281,7 +284,7 @@ const ForOverview: React.FC<{
           level="h4"
           sx={{
             fontWeight: 700,
-            color: "#666",
+            color: "black",
           }}
         >
           Overview
@@ -289,7 +292,7 @@ const ForOverview: React.FC<{
         <StatusBubble status={status} />
       </Box>
       <Divider />
-      {terms.length > 0 && (
+      {withDescription.length > 0 && (
         <Box
           display="flex"
           flexDirection="column"
@@ -298,28 +301,7 @@ const ForOverview: React.FC<{
           overflow="auto"
           padding={2}
         >
-          <TermsTable terms={terms} />
-        </Box>
-      )}
-
-      {description && (
-        <Box
-          display="flex"
-          padding={2}
-          flexDirection="column"
-          gap={1}
-          flexShrink={0}
-        >
-          <Typography
-            level="h6"
-            sx={{
-              fontWeight: 700,
-              fontSize: "16px",
-            }}
-          >
-            Description
-          </Typography>
-          <Typography whiteSpace="pre-wrap">{description}</Typography>
+          <TermsTable terms={withDescription} />
         </Box>
       )}
     </Box>
