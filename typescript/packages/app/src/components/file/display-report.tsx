@@ -163,6 +163,11 @@ const ForExcel: React.FC<{ chunks: AnalyzeResponseChunk[] }> = ({ chunks }) => {
                   fontSize: "14px",
                   fontFamily: theme.vars.fontFamily.body,
                 },
+                "& table, th, td": {
+                  padding: "8px",
+                  border: "1px solid #E5E5E5",
+                  borderCollapse: "collapse",
+                },
               })}
             />
           </Box>

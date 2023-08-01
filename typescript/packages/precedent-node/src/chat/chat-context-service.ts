@@ -135,12 +135,19 @@ export interface CollectedIds {
 
 export const ZVectorMetadata = z
   .object({
-    fileId: z.string(),
+    fileId: z.string().optional(),
+    fileReferenceId: z.string().optional(),
     next: z.string().optional(),
     prev: z.string().optional(),
   })
-  .transform((row) => ({
-    fileId: row.fileId,
-    next: row.next ?? undefined,
-    prev: row.prev ?? undefined,
-  }));
+  .transform((row) => {
+    const fileId = row.fileId ?? row.fileReferenceId;
+    if (fileId === undefined) {
+      throw new Error("illegal state");
+    }
+    return {
+      fileId,
+      next: row.next ?? undefined,
+      prev: row.prev ?? undefined,
+    };
+  });
