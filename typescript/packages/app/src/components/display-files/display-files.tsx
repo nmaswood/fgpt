@@ -150,9 +150,6 @@ export const DisplayFiles: React.FC<{
             color: "#666",
             fontWeight: 700,
           },
-          ".MuiDataGrid-cell:focus": {
-            outline: "none",
-          },
         }}
       />
     </Box>
