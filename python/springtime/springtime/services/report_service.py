@@ -118,12 +118,18 @@ class OpenAIReportService(ReportService):
         )
         response = self.call_function(req)
         terms = [t for t in response["terms"] if "term_value" in t]
-        terms_from_model = Terms(terms=terms)
-        return [
-            term
-            for term in terms_from_model.terms
-            if term.term_value != "Not Available" and len(term.term_value.strip()) > 0
-        ]
+        try:
+            terms_from_model = Terms(terms=terms)
+            return [
+                term
+                for term in terms_from_model.terms
+                if term.term_value != "Not Available"
+                and len(term.term_value.strip()) > 0
+            ]
+        except Exception as e:
+            logger.error(e)
+            logger.error("Invalid terms parsed")
+            return []
 
     def get_summaries(self, text: str) -> list[str]:
         req = CallFunctionRequest(

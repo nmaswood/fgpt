@@ -105,23 +105,11 @@ async def healthz():
     return "OK"
 
 
-@app.middleware("http")
-async def secure_svc_to_svc(request: Request, call_next):
-    secret = request.headers.get("x-service-to-service-secret")
-
-    if (
-        SETTINGS.service_to_service_secret
-        and SETTINGS.service_to_service_secret != secret
-    ):
-        return JSONResponse(status_code=401, content="Not authorized")
-
-    return await call_next(request)
-
-
 def start():
     uvicorn.run(
         "springtime.main:app",
         host=SETTINGS.host,
         port=SETTINGS.port,
         reload=SETTINGS.reload,
+        timeout_keep_alive=60,
     )

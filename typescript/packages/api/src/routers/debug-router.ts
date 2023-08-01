@@ -7,7 +7,7 @@ export class DebugRouter {
   init() {
     const router = express.Router();
 
-    router.get(
+    router.post(
       "/queue/:taskId",
       async (req: express.Request, res: express.Response) => {
         const { taskId } = ZQueueArgs.parse(req.params);
