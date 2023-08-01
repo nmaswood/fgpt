@@ -27,7 +27,6 @@ export class TaskExecutorImpl implements TaskExecutor {
     private readonly ingestFileHandler: IngestFileHandler,
     private readonly thumbnailHandler: ThumbnailHandler,
     private readonly scanHandler: ScanHandler,
-    private readonly claudeReportGeneration: boolean,
   ) {}
 
   async execute({ config, organizationId, projectId }: Task) {
@@ -58,24 +57,20 @@ export class TaskExecutorImpl implements TaskExecutor {
             strategy,
           },
         }));
-        if (this.claudeReportGeneration) {
-          LOGGER.info("Enqueueing greedy_125k chunking");
-          taskConfig.push({
-            organizationId: config.organizationId,
-            projectId: config.projectId,
+        LOGGER.info("Enqueueing greedy_125k chunking");
+        taskConfig.push({
+          organizationId: config.organizationId,
+          projectId: config.projectId,
+          fileReferenceId: config.fileReferenceId,
+          config: {
+            type: "text-chunk",
+            organizationId,
+            projectId,
             fileReferenceId: config.fileReferenceId,
-            config: {
-              type: "text-chunk",
-              organizationId,
-              projectId,
-              fileReferenceId: config.fileReferenceId,
-              processedFileId,
-              strategy: "greedy_125k",
-            },
-          });
-        } else {
-          LOGGER.info("Skipping greedy_125k chunking");
-        }
+            processedFileId,
+            strategy: "greedy_125k",
+          },
+        });
 
         taskConfig.push({
           organizationId: config.organizationId,

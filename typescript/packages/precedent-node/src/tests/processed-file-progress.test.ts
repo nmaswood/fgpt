@@ -83,10 +83,7 @@ afterEach(async () => {
 test("getProgress#no_tasks", async () => {
   const { fileReferenceId, progressStore } = await setup();
 
-  const progress = await progressStore.getProgress(
-    { longFormReport: true },
-    fileReferenceId,
-  );
+  const progress = await progressStore.getProgress(fileReferenceId);
   expect(progress).toEqual({
     status: "pending",
     forTask: {
@@ -140,10 +137,7 @@ test("getProgress#pending", async () => {
       },
     },
   ]);
-  const progress = await progressStore.getProgress(
-    { longFormReport: true },
-    fileReferenceId,
-  );
+  const progress = await progressStore.getProgress(fileReferenceId);
   expect(progress).toEqual({
     status: "pending",
     forTask: {
@@ -201,10 +195,7 @@ test("getProgress#has_failure", async () => {
 
   await taskStore.setToFailed(task1.id);
   await taskStore.setToSuceeded(task2.id);
-  const progress = await progressStore.getProgress(
-    { longFormReport: true },
-    fileReferenceId,
-  );
+  const progress = await progressStore.getProgress(fileReferenceId);
 
   expect(progress).toEqual({
     status: "error",
@@ -364,10 +355,7 @@ test("getProgress#complete", async () => {
 
   await Promise.all(tasks.map((t) => taskStore.setToSuceeded(t.id)));
 
-  const progress = await progressStore.getProgress(
-    { longFormReport: true },
-    fileReferenceId,
-  );
+  const progress = await progressStore.getProgress(fileReferenceId);
 
   expect(progress.status).toEqual("ready");
 });

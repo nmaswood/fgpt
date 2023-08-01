@@ -74,7 +74,6 @@ test("getProgress#noop", async () => {
   expect(progress).toEqual({
     status: "pending",
     forTask: {
-      analyzeTableGPT: "task_does_not_exist",
       analyzeTableClaude: "task_does_not_exist",
     },
   });
@@ -99,7 +98,7 @@ test("getProgress#success", async () => {
       type: "analyze-table",
       analysis: {
         type: "code",
-        model: "gpt",
+        model: "claude",
       },
       fileReferenceId,
       source: null,
@@ -110,10 +109,9 @@ test("getProgress#success", async () => {
 
   const progress = await progressStore.getProgress(fileReferenceId);
   expect(progress).toEqual({
-    status: "pending",
+    status: "ready",
     forTask: {
-      analyzeTableGPT: "succeeded",
-      analyzeTableClaude: "task_does_not_exist",
+      analyzeTableClaude: "succeeded",
     },
   });
 });
@@ -137,7 +135,7 @@ test("getProgress#fail", async () => {
       type: "analyze-table",
       analysis: {
         type: "code",
-        model: "gpt",
+        model: "claude",
       },
       fileReferenceId,
       source: null,
@@ -150,8 +148,7 @@ test("getProgress#fail", async () => {
   expect(progress).toEqual({
     status: "error",
     forTask: {
-      analyzeTableGPT: "failed",
-      analyzeTableClaude: "task_does_not_exist",
+      analyzeTableClaude: "failed",
     },
   });
 });

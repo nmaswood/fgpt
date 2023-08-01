@@ -158,7 +158,6 @@ async function start(settings: Settings) {
     ingestFileHandler,
     thumbnailHandler,
     scanHandler,
-    SETTINGS.claudeReportGeneration,
   );
 
   const processedFileProgressStore = new ProcessedFileProgressServiceImpl(
@@ -171,7 +170,6 @@ async function start(settings: Settings) {
     fileReferenceStore,
     processedFileProgressStore,
     excelProgressStore,
-    SETTINGS.claudeReportGeneration,
   );
 
   const mainRouter = new MainRouter(taskStore, taskExecutor, fileStatusService);

@@ -23,7 +23,6 @@ export class FileStatusServiceImpl implements FileStatusService {
     private readonly fileReferenceStore: FileReferenceStore,
     private readonly processedFileProgressStore: ProcessedFileProgressService,
     private readonly excelProgressStore: ExcelProgressService,
-    private readonly longFormReport: boolean,
   ) {}
 
   async update(fileReferenceId: string) {
@@ -47,10 +46,7 @@ export class FileStatusServiceImpl implements FileStatusService {
       }
       case "pdf": {
         const processedFileProgress =
-          await this.processedFileProgressStore.getProgress(
-            { longFormReport: this.longFormReport },
-            fileReferenceId,
-          );
+          await this.processedFileProgressStore.getProgress(fileReferenceId);
 
         return processedFileProgress;
       }

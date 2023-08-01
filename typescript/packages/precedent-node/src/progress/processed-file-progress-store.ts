@@ -8,12 +8,8 @@ import {
 import { TaskStore } from "../task-store";
 import { statusForFile } from "./status-for-file";
 
-interface ProgressOptions {
-  longFormReport: boolean;
-}
 export interface ProcessedFileProgressService {
   getProgress(
-    options: ProgressOptions,
     processedFileId: string,
   ): Promise<FileProgress<ProgressForPdfTasks>>;
 }
@@ -23,7 +19,6 @@ export class ProcessedFileProgressServiceImpl
 {
   constructor(private readonly taskStore: TaskStore) {}
   async getProgress(
-    options: ProgressOptions,
     fileReferenceId: string,
   ): Promise<FileProgress<ProgressForPdfTasks>> {
     const tasks = await this.taskStore.getByFileReferenceId(fileReferenceId);
@@ -36,12 +31,9 @@ export class ProcessedFileProgressServiceImpl
       extractTable: "task_does_not_exist",
       scan: "task_does_not_exist",
       thumbnail: "task_does_not_exist",
-      ...(options.longFormReport
-        ? {
-            longFormReport: "task_does_not_exist",
-            longFormReportChunk: "task_does_not_exist",
-          }
-        : undefined),
+
+      longFormReport: "task_does_not_exist",
+      longFormReportChunk: "task_does_not_exist",
     };
 
     for (const task of tasks) {

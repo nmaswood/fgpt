@@ -168,7 +168,6 @@ async function start() {
     fileReferenceStore,
     processedFileProgressStore,
     excelProgressStore,
-    SETTINGS.claudeReportGeneration,
   );
 
   const chatContextService = new ChatContextServiceImpl(

@@ -143,12 +143,10 @@ WHERE
 `);
 
     return trx.one(sql.type(ZChatEntryRow)`
-INSERT INTO chat_entry (organization_id, project_id, creator_id, chat_id, question_v2, prompt, html, answer, answer_v2, entry_order)
+INSERT INTO chat_entry (organization_id, project_id, creator_id, chat_id, question_v2, prompt, html, answer_v2, entry_order)
     VALUES (${organizationId}, ${projectId}, ${creatorId}, ${chatId}, ${question}, ${prompt}, ${
       html ?? null
-    }, ${JSON.stringify({
-      answer,
-    })}, ${answer},  COALESCE((
+    }, ${answer},  COALESCE((
             SELECT
                 MAX(entry_order)
                 FROM chat_entry
