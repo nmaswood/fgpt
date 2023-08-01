@@ -70,7 +70,6 @@ VECTOR_SERVICE = PineconeVectorService(
 )
 REPORT_SERVICE = OpenAIReportService(
     SETTINGS.reports_openai_model,
-    SETTINGS.skip_fin_summary_and_summary,
 )
 CHAT_SERVICE = OpenAIChatService()
 

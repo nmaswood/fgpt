@@ -51,51 +51,6 @@ questions_schema = {
     "required": ["questions"],
 }
 
-summaries_schema = {
-    "type": "object",
-    "properties": {
-        "summaries": {
-            "type": "array",
-            "description": "Top 5 most notable facts or ideas summarizing the document.",
-            "items": {
-                "description": "Key fact or idea which helps summarize this document",
-                "type": "string",
-            },
-        },
-    },
-    "required": ["summaries"],
-}
-
-financial_summary_schema = {
-    "type": "object",
-    "properties": {
-        "investment_merits": {
-            "type": "array",
-            "description": "Top 3 most relevant reasons why the company described in the document would be a good investment",
-            "items": {
-                "type": "string",
-                "description": "Investment merits / reasons why this company would be a good investment",
-            },
-        },
-        "investment_risks": {
-            "type": "array",
-            "description": "Top 3 most important risks of the company described in the document might be a poor investment",
-            "items": {
-                "type": "string",
-                "description": "Risk or danger in investing in this company",
-            },
-        },
-        "financial_summaries": {
-            "type": "array",
-            "description": "Top 3 most important financial details or trends on this company",
-            "items": {
-                "type": "string",
-                "description": "Important financial detail or trends on this company ",
-            },
-        },
-    },
-    "required": ["investment_merits", "investment_risks", "financial_summaries"],
-}
 
 GPT_PROMPT = """
 You are an AI assistant that is an expert financial and data analyst.

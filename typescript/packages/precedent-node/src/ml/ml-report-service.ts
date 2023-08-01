@@ -94,6 +94,10 @@ const ZLLMOutputResponse = z
       summaries: row.summaries,
       questions: row.questions,
       terms: row.terms,
-      financialSummary: row.financial_summary,
+      financialSummary: {
+        investmentRisks: [],
+        investmentMerits: [],
+        financialSummaries: [],
+      },
     }),
   );

@@ -7,10 +7,9 @@ from loguru import logger
 from pydantic import BaseModel
 
 from springtime.models.open_ai import OpenAIModel
+from springtime.services.anthropic_client import AnthropicClient
 from springtime.services.prompts import (
-    financial_summary_schema,
     questions_schema,
-    summaries_schema,
     terms_schema,
 )
 
@@ -23,12 +22,6 @@ class Questions(BaseModel):
     questions: list[Question] = []
 
 
-class FinancialSummary(BaseModel):
-    investment_merits: list[str] = []
-    investment_risks: list[str] = []
-    financial_summaries: list[str] = []
-
-
 class Term(BaseModel):
     term_value: str
     term_name: str
@@ -39,14 +32,8 @@ class Terms(BaseModel):
 
 
 class Output(BaseModel):
-    summaries: list[str] = []
     questions: list[str] = []
     terms: list[Term] = []
-    financial_summary: FinancialSummary
-
-
-class Summaries(BaseModel):
-    summaries: list[str] = []
 
 
 class CallFunctionRequest(BaseModel):
@@ -63,25 +50,16 @@ class ReportService(abc.ABC):
 
 
 class OpenAIReportService(ReportService):
-    def __init__(self, model: OpenAIModel, skip_fin_summary_and_summary: bool) -> None:
+    def __init__(self, model: OpenAIModel) -> None:
         self.model = model
-        self.skip_fin_summary_and_summary = skip_fin_summary_and_summary
 
     def generate_output(self, text: str) -> Output:
         questions = self.get_questions(text)
         terms = self.get_terms(text)
-        if self.skip_fin_summary_and_summary:
-            summaries = []
-            fin_summary = FinancialSummary()
-        else:
-            summaries = self.get_summaries(text)
-            fin_summary = self.get_fin_summary(text)
 
         return Output(
-            summaries=summaries,
             questions=questions,
             terms=terms,
-            financial_summary=fin_summary,
         )
 
     def get_questions(self, text: str) -> list[str]:
@@ -94,20 +72,6 @@ class OpenAIReportService(ReportService):
         response = self.call_function(req)
         questions = Questions(**response)
         return [q.question for q in questions.questions]
-
-    def get_fin_summary(self, text: str) -> FinancialSummary:
-        req = CallFunctionRequest(
-            text=text,
-            prompt="You are an expert financial analyst. Parse the document for the requested information. If the information is not available, do not return anything.",
-            json_schema=financial_summary_schema,
-            function_name="parse_financial_summary",
-        )
-        response = self.call_function(req)
-        try:
-            return FinancialSummary(**response)
-        except Exception as e:
-            logger.error(e)
-            return FinancialSummary()
 
     def get_terms(self, text: str) -> list[Term]:
         req = CallFunctionRequest(
@@ -131,17 +95,6 @@ class OpenAIReportService(ReportService):
             logger.error("Invalid terms parsed")
             return []
 
-    def get_summaries(self, text: str) -> list[str]:
-        req = CallFunctionRequest(
-            text=text,
-            prompt="You are an expert financial analyst. Parse the document for the requested information",
-            json_schema=summaries_schema,
-            function_name="parse_summaries",
-        )
-        response = self.call_function(req)
-        summaries = Summaries(**response)
-        return summaries.summaries
-
     def call_function(self, req: CallFunctionRequest) -> dict[str, Any]:
         logger.info(f"Running function {req.function_name}")
         completion = openai.ChatCompletion.create(
@@ -157,3 +110,19 @@ class OpenAIReportService(ReportService):
         res = completion.choices[0].message.function_call.arguments
 
         return json.loads(res)
+
+
+class ClaudeReportService(ReportService):
+    def __init__(self, client: AnthropicClient) -> None:
+        self._client = client
+
+    def generate_output(self, text: str) -> Output:
+        questions = self._get_questions(text)
+        terms = self._get_terms(text)
+        return Output()
+
+    def _get_questions(self, text: str) -> list[str]:
+        return []
+
+    def _get_terms(self, text: str) -> list[Term]:
+        return []

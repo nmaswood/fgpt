@@ -3,7 +3,6 @@ from pydantic import BaseModel
 
 from springtime.services.long_form_report_service import LongformReportService
 from springtime.services.report_service import (
-    FinancialSummary,
     ReportService,
     Term,
 )
@@ -29,10 +28,8 @@ class LongFormReportResponse(BaseModel):
 
 
 class LLMOutputResponse(BaseModel):
-    summaries: list[str] = []
     questions: list[str] = []
     terms: list[Term] = []
-    financial_summary: FinancialSummary
 
 
 class ReportRouter:

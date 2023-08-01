@@ -4,7 +4,7 @@ import { LOGGER } from "../logger";
 import { CreateTask, Task, TaskStore } from "../task-store";
 import { EmbeddingsHandler } from "./generate-embeddings-handler";
 import { IngestFileHandler } from "./ingest-file-handler";
-import { ReportHandler } from "./llm-output-handler";
+import { ReportHandler } from "./report-handler";
 import { ScanHandler } from "./scan-handler";
 import { TableHandler } from "./table-handler";
 import { TextChunkHandler } from "./text-chunk-handler";
