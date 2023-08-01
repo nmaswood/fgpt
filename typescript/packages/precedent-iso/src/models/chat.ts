@@ -19,4 +19,5 @@ export interface ChatResponse {
 
 export interface ChatHistory {
   question: string;
+  answer: string;
 }

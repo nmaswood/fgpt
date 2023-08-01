@@ -289,6 +289,7 @@ test("listChatHistory", async () => {
 
   const [history] = await chatStore.listChatHistory(chat.id);
   expect(history.question).toEqual("What is your favorite color?");
+  expect(history.answer).toEqual("answer");
 });
 
 test("getPrompt", async () => {

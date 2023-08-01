@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 class ChatHistory(BaseModel):
     question: str
+    answer: str
 
 
 class ChatChunkContext(BaseModel):
