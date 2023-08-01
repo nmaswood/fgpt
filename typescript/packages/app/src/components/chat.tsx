@@ -352,6 +352,11 @@ const RenderChatEntryFromServer: React.FC<{
                     fontFamily: theme.vars.fontFamily.body,
                     whiteSpace: "pre-wrap",
                   },
+                  "& table, th, td": {
+                    padding: "8px",
+                    border: "1px solid #E5E5E5",
+                    borderCollapse: "collapse",
+                  },
                 })}
               />
             ) : (
