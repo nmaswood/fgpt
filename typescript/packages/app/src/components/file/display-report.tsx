@@ -297,7 +297,6 @@ const ForOverview: React.FC<{
           display="flex"
           flexDirection="column"
           gap={1}
-          maxHeight="50%"
           overflow="auto"
           padding={2}
         >
