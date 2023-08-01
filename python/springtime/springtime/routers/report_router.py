@@ -50,18 +50,19 @@ class ReportRouter:
         router = APIRouter(prefix="/report")
 
         @router.post("/llm-output")
-        async def llm_output_route(req: LLMOutputRequest):
+        def llm_output_route(req: LLMOutputRequest):
             return self.report_service.generate_output(req.text)
 
         @router.post("/scan")
-        async def scan_route(req: ScanRequest):
+        def scan_route(req: ScanRequest):
             return self.scan_service.scan(file_name=req.file_name, text=req.text)
 
         @router.post("/long-form")
-        async def long_form_route(req: LongFormReportRequest):
+        def long_form_route(req: LongFormReportRequest):
             resp = self.long_form_report_service.generate(req.text)
             return LongFormReportResponse(
-                raw=resp.raw, sanitized_html=resp.sanitized_html,
+                raw=resp.raw,
+                sanitized_html=resp.sanitized_html,
             )
 
         return router

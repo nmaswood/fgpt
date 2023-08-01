@@ -12,7 +12,7 @@ TABLE_EXTRACTOR = TabulaTableExtractor(OBJECT_STORE)
 
 
 @app.get("/")
-async def read_main():
+def read_main():
     return {"msg": "Hello World"}
 
 

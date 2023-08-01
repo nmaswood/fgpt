@@ -50,7 +50,7 @@ class PdfRouter:
         router = APIRouter(prefix="/pdf")
 
         @router.post("/extract-tables")
-        async def extract_tables(req: ExtractTablesRequest):
+        def extract_tables(req: ExtractTablesRequest):
             with tempfile.NamedTemporaryFile("wb+") as tmp:
                 self.object_store.download_to_filename(
                     req.bucket,
@@ -72,7 +72,7 @@ class PdfRouter:
                 )
 
         @router.post("/get-thumbnail")
-        async def get_thumbnail(req: GetThumbnailRequest):
+        def get_thumbnail(req: GetThumbnailRequest):
             with tempfile.TemporaryDirectory() as tmp_dir:
                 gen_uuid = str(uuid.uuid4())
                 file_path = os.path.join(tmp_dir, gen_uuid)

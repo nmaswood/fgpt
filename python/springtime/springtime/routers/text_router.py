@@ -18,7 +18,7 @@ class TextRouter:
         router = APIRouter(prefix="/text")
 
         @router.post("/token-length")
-        async def token_length_route(req: TokenLengthRequest):
+        def token_length_route(req: TokenLengthRequest):
             return TokenLengthResponse(
                 gpt4=TokenLength.gpt4(req.text),
                 claude100k=TokenLength.claude100k(req.text),

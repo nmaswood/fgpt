@@ -46,7 +46,7 @@ class ChatRouter:
         router = APIRouter(prefix="/chat")
 
         @router.post("/ask-question-streaming")
-        async def ask_question_streaming_route(req: AskQuestionRequest):
+        def ask_question_streaming_route(req: AskQuestionRequest):
             stream = self.chat_service.ask_streaming(
                 req.for_files,
                 req.question,
@@ -55,7 +55,7 @@ class ChatRouter:
             return StreamingResponse(content=stream, media_type="text/event-stream")
 
         @router.post("/prompt")
-        async def prompt_route(req: AskQuestionRequest):
+        def prompt_route(req: AskQuestionRequest):
             prompt = self.chat_service.get_prompt(
                 req.for_files,
                 req.question,
@@ -65,12 +65,12 @@ class ChatRouter:
             return GetPromptResponse(prompt=prompt)
 
         @router.post("/get-title")
-        async def get_title_route(req: GetTitleRequest) -> GetTitleResponse:
+        def get_title_route(req: GetTitleRequest) -> GetTitleResponse:
             title = self.chat_service.get_title(req.question, req.answer)
             return GetTitleResponse(title=title)
 
         @router.post("/sanitize")
-        async def get_sanitize(req: HtmlFromTextRequest) -> HtmlFromTextResponse:
+        def get_sanitize(req: HtmlFromTextRequest) -> HtmlFromTextResponse:
             html = html_from_text(req.text)
             return HtmlFromTextResponse(html=html)
 

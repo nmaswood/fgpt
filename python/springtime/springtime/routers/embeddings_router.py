@@ -20,7 +20,7 @@ class EmbeddingsRouter:
         router = APIRouter(prefix="/embeddings")
 
         @router.post("/embedding-for-documents")
-        async def embeddings_for_documents_route(req: EmbeddingForDocumentRequest):
+        def embeddings_for_documents_route(req: EmbeddingForDocumentRequest):
             response = self.embeddings_service.embed_documents(req.documents)
             return EmbeddingForDocumentResponse(response=response)
 

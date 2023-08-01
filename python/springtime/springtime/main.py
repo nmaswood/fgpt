@@ -1,6 +1,5 @@
 import uvicorn
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI
 from fastapi_utils.timing import add_timing_middleware
 from loguru import logger
 
@@ -96,12 +95,12 @@ app.include_router(EmbeddingsRouter(EMBEDDING_SERVICE).get_router())
 
 
 @app.get("/ping")
-async def ping():
+def ping():
     return {"ping": "ping"}
 
 
 @app.get("/healthz")
-async def healthz():
+def healthz():
     return "OK"
 
 

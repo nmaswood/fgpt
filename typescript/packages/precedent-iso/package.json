@@ -14,7 +14,7 @@
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "prettier": "^3.0.0",
     "typescript": "^5.1.6",
-    "vitest": "^0.33.0"
+    "vitest": "^0.34.1"
   },
   "scripts": {
     "build": "tsc",

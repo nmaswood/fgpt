@@ -23,13 +23,13 @@ class VectorRouter:
         router = APIRouter(prefix="/vector")
 
         @router.put("/upsert-vectors")
-        async def upsert_vectors_route(req: UpsertVectorRequest):
+        def upsert_vectors_route(req: UpsertVectorRequest):
             if req.vectors:
                 self.vector_service.upsert(req.vectors)
             return {"upsert_count": len(req.vectors)}
 
         @router.post("/similar-vectors")
-        async def similar_vectors_route(req: SimilarVectorRequest):
+        def similar_vectors_route(req: SimilarVectorRequest):
             results = self.vector_service.get_similar(req.vector, req.metadata)
             return {"results": results}
 

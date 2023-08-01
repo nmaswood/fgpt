@@ -36,11 +36,11 @@ class TableRouter:
         router = APIRouter(prefix="/excel")
 
         @router.post("/analyze-gpt")
-        async def analyze_tables_gpt(req: AnalyzeTableRequest) -> AnalyzeTableResponse:
+        def analyze_tables_gpt(req: AnalyzeTableRequest) -> AnalyzeTableResponse:
             return self.analyze_table(self.gpt_table_analyzer, req)
 
         @router.post("/analyze-claude")
-        async def analyze_tables_claude(
+        def analyze_tables_claude(
             req: AnalyzeTableRequest,
         ) -> AnalyzeTableResponse:
             return self.analyze_table(self.claude_table_analyzer, req)
