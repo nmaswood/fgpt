@@ -244,7 +244,8 @@ where id = ${chatId}
   async listChatHistory(chatId: string): Promise<ChatHistory[]> {
     const resp = await this.pool.query(sql.type(ZChatHistory)`
 SELECT
-    question_v2 as question, answer_v2 as answer
+    question_v2 as question,
+    answer_v2 as answer
 FROM
     chat_entry
 WHERE

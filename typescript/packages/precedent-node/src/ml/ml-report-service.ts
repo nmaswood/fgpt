@@ -1,7 +1,4 @@
-import {
-  FinancialSummary,
-  Term,
-} from "@fgpt/precedent-iso/src/models/llm-outputs";
+import { Term } from "@fgpt/precedent-iso/src/models/llm-outputs";
 import { AxiosInstance } from "axios";
 import { z } from "zod";
 
@@ -14,9 +11,7 @@ export interface LongFormArgs {
 }
 
 export interface LLMOutputResponse {
-  summaries: string[];
   questions: string[];
-  financialSummary: FinancialSummary;
   terms: Term[];
 }
 
@@ -68,36 +63,14 @@ const ZTerm = z
     }),
   );
 
-const ZFinancialSummary = z
-  .object({
-    investment_merits: z.string().array(),
-    investment_risks: z.string().array(),
-    financial_summaries: z.string().array(),
-  })
-  .transform(
-    (row): FinancialSummary => ({
-      investmentMerits: row.investment_merits,
-      investmentRisks: row.investment_risks,
-      financialSummaries: row.financial_summaries,
-    }),
-  );
-
 const ZLLMOutputResponse = z
   .object({
-    summaries: z.array(z.string()),
     questions: z.array(z.string()),
-    financial_summary: ZFinancialSummary,
     terms: z.array(ZTerm),
   })
   .transform(
     (row): LLMOutputResponse => ({
-      summaries: row.summaries,
       questions: row.questions,
       terms: row.terms,
-      financialSummary: {
-        investmentRisks: [],
-        investmentMerits: [],
-        financialSummaries: [],
-      },
     }),
   );

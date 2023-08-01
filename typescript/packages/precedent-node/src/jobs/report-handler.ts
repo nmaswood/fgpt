@@ -1,3 +1,5 @@
+import { chunk } from "lodash";
+
 import {
   InsertMiscValue,
   MiscOutputStore,
@@ -85,11 +87,15 @@ export class ReportHandlerImpl implements ReportHandler {
       `Skipping ${allChunkIdsSeen.size} chunks as they have already been processed`,
     );
 
-    for (const textChunkId of toProcess) {
-      await this.#generateReportForChunk({
-        ...config,
-        textChunkId,
-      });
+    for (const groupOfIds of chunk(toProcess, 3)) {
+      await Promise.all(
+        groupOfIds.map((textChunkId) =>
+          this.#generateReportForChunk({
+            ...config,
+            textChunkId,
+          }),
+        ),
+      );
     }
   }
 
@@ -104,34 +110,11 @@ export class ReportHandlerImpl implements ReportHandler {
     const { textChunkId } = config;
     const chunk = await this.textChunkStore.getTextChunkById(textChunkId);
 
-    const { summaries, questions, financialSummary, terms } =
-      await this.mlReportService.llmOutput({
-        text: chunk.chunkText,
-      });
+    const { questions, terms } = await this.mlReportService.llmOutput({
+      text: chunk.chunkText,
+    });
 
     const values: InsertMiscValue[] = [];
-    if (
-      financialSummary.financialSummaries.length > 0 ||
-      financialSummary.investmentMerits.length > 0 ||
-      financialSummary.investmentRisks.length > 0
-    ) {
-      values.push({
-        ...config,
-        value: {
-          type: "financial_summary",
-          value: financialSummary,
-        },
-      });
-    }
-    if (summaries.length > 0) {
-      values.push({
-        ...config,
-        value: {
-          type: "summary",
-          value: summaries,
-        },
-      });
-    }
 
     if (terms.length > 0) {
       values.push({
