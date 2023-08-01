@@ -21,7 +21,6 @@ export class ExcelProgressServiceImpl implements ExcelProgressService {
     const tasks = await this.taskStore.getByFileReferenceId(fileReferenceId);
 
     const forTask: ProgressForExcelTasks = {
-      analyzeTableGPT: "task_does_not_exist",
       analyzeTableClaude: "task_does_not_exist",
     };
 
@@ -29,14 +28,11 @@ export class ExcelProgressServiceImpl implements ExcelProgressService {
       switch (task.config.type) {
         case "analyze-table": {
           switch (task.config.analysis?.model) {
-            case "gpt": {
-              forTask.analyzeTableGPT = task.status;
-              break;
-            }
             case "claude": {
               forTask.analyzeTableClaude = task.status;
               break;
             }
+            case "gpt":
             case undefined:
             case null:
               break;

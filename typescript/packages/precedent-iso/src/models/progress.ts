@@ -26,6 +26,5 @@ export interface ProgressForPdfTasks {
 }
 
 export interface ProgressForExcelTasks {
-  analyzeTableGPT: ProgressTaskStatus;
   analyzeTableClaude: ProgressTaskStatus;
 }

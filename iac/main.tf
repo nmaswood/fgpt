@@ -372,6 +372,10 @@ resource "google_cloud_run_v2_service" "springtime" {
         name  = "REPORTS_OPENAI_MODEL"
         value = "gpt-4-0613"
       }
+      env {
+        name  = "SKIP_FIN_SUMMARY_AND_SUMMARY"
+        value = "true"
+      }
     }
   }
 

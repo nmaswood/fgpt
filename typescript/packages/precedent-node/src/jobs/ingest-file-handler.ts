@@ -6,7 +6,6 @@ export interface IngestFileHandler {
   dispatch: (config: IngestFileConfig) => Promise<void>;
 }
 
-const MODELS = ["gpt", "claude"] as const;
 export class IngestFileHandlerImpl implements IngestFileHandler {
   constructor(private readonly taskStore: TaskStore) {}
 
@@ -54,26 +53,24 @@ export class IngestFileHandlerImpl implements IngestFileHandler {
         break;
       }
       case "excel": {
-        await this.taskStore.insertMany(
-          MODELS.map((model) => ({
+        await this.taskStore.insert({
+          organizationId,
+          projectId,
+          fileReferenceId,
+          config: {
+            type: "analyze-table",
             organizationId,
             projectId,
             fileReferenceId,
-            config: {
-              type: "analyze-table",
-              organizationId,
-              projectId,
-              fileReferenceId,
-              source: {
-                type: "direct-upload",
-              },
-              analysis: {
-                type: "text",
-                model,
-              },
+            source: {
+              type: "direct-upload",
             },
-          })),
-        );
+            analysis: {
+              type: "text",
+              model: "claude",
+            },
+          },
+        });
         break;
       }
       default:

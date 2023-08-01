@@ -102,8 +102,7 @@ export const DisplayFiles: React.FC<{
       flexDirection="column"
       height="100%"
       width="100%"
-      paddingX={2}
-      paddingBottom={1}
+      padding={2}
       maxHeight="100%"
       overflow="auto"
       gap={2}
