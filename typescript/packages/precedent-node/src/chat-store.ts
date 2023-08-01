@@ -146,10 +146,10 @@ WHERE
 INSERT INTO chat_entry (organization_id, project_id, creator_id, chat_id, question_v2, prompt, html, answer_v2, entry_order)
     VALUES (${organizationId}, ${projectId}, ${creatorId}, ${chatId}, ${question}, ${prompt}, ${
       html ?? null
-    }, ${answer},  COALESCE((
+    }, ${answer}, COALESCE((
             SELECT
                 MAX(entry_order)
-                FROM chat_entry
+            FROM chat_entry
             WHERE
                 chat_id = ${chatId}), 0) + 1)
 RETURNING

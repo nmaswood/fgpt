@@ -165,7 +165,6 @@ WHERE
   ): Promise<TextChunk[]> {
     const res = await this.pool.any(
       sql.type(ZTextChunkRow)`
-
 SELECT
     ${TEXT_CHUNK_FIELDS}
 FROM
