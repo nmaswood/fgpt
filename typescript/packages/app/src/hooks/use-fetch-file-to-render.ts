@@ -1,6 +1,6 @@
 import { assertNever, FileToRender } from "@fgpt/precedent-iso";
-import useSWR from "swr";
 import React from "react";
+import useSWR from "swr";
 
 export const useFetchFileToRender = (fileReferenceId: string) => {
   const limit = React.useRef(10);
