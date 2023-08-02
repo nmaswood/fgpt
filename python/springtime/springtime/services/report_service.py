@@ -1,5 +1,6 @@
 import abc
 import json
+import time
 from typing import Any
 
 import json5
@@ -51,6 +52,18 @@ class OpenAIReportService(ReportService):
         self.model = model
 
     def generate_questions(self, text: str) -> list[str]:
+        for _attempt in range(3):
+            try:
+                return self._generate_questions(text)
+            except openai.error.RateLimitError as e:
+                logger.error(e)
+                logger.error("OpenAI response for questions failed")
+                logger.error("Sleeping for 10 seconds")
+                time.sleep(10)
+        msg = "OpenAI response for questions failed"
+        raise Exception(msg)
+
+    def _generate_questions(self, text: str) -> list[str]:
         completion = openai.ChatCompletion.create(
             model=self.model,
             messages=[
@@ -81,6 +94,18 @@ class OpenAIReportService(ReportService):
         return [q.question for q in questions.questions]
 
     def generate_terms(self, text: str) -> list[Term]:
+        for _attempt in range(3):
+            try:
+                return self._generate_terms(text)
+            except openai.error.RateLimitError as e:
+                logger.error(e)
+                logger.error("OpenAI response for questions failed")
+                logger.error("Sleeping for 10 seconds")
+                time.sleep(10)
+        msg = "OpenAI response for terms failed"
+        raise Exception(msg)
+
+    def _generate_terms(self, text: str) -> list[Term]:
         completion = openai.ChatCompletion.create(
             model=self.model,
             messages=[
