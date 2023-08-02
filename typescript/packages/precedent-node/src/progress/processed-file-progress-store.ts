@@ -48,7 +48,8 @@ export class ProcessedFileProgressServiceImpl
               forTask.reportChunk = task.status;
               break;
             }
-            case "greedy_125k": {
+            case "greedy_125k":
+            case "greedy_150k": {
               forTask.longFormReportChunk = task.status;
               break;
             }

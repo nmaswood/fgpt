@@ -60,7 +60,7 @@ class OpenAIReportService(ReportService):
                 },
                 {
                     "role": "user",
-                    "content": "You will be given a document. Read the document and generate the most relevant questions you would want to ask about the data to better understand it for evaluating a potential investment.",
+                    "content": "You will be given a document. Read the document and generate up to ten of the most relevant questions you would want to ask about the data to better understand it for evaluating a potential investment.",
                 },
                 {
                     "role": "user",

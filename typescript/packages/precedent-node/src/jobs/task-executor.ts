@@ -57,7 +57,7 @@ export class TaskExecutorImpl implements TaskExecutor {
             strategy,
           },
         }));
-        LOGGER.info("Enqueueing greedy_125k chunking");
+        LOGGER.info("Enqueueing greedy_150k chunking");
         taskConfig.push({
           organizationId: config.organizationId,
           projectId: config.projectId,
@@ -68,7 +68,7 @@ export class TaskExecutorImpl implements TaskExecutor {
             projectId,
             fileReferenceId: config.fileReferenceId,
             processedFileId,
-            strategy: "greedy_125k",
+            strategy: "greedy_150k",
           },
         });
 

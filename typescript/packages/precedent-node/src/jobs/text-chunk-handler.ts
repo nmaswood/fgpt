@@ -114,7 +114,8 @@ export class TextChunkHandlerImpl implements TextChunkHandler {
           textGroupId: textChunkGroup.id,
         };
       }
-      case "greedy_125k": {
+      case "greedy_125k":
+      case "greedy_150k": {
         return {
           type: "long-form",
           textChunkIds: textChunks.map((chunk) => chunk.id),
