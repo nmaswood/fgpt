@@ -9,11 +9,14 @@ import {
 } from "@fgpt/precedent-iso";
 import { Term } from "@fgpt/precedent-iso/src/models/llm-outputs";
 import ArrowDropDown from "@mui/icons-material/ArrowDropDownOutlined";
+import CloseFullscreenOutlinedIcon from "@mui/icons-material/CloseFullscreenOutlined";
+import OpenInFullOutlinedIcon from "@mui/icons-material/OpenInFullOutlined";
 import {
   Box,
   Button,
   Chip,
   Divider,
+  IconButton,
   List,
   ListItem,
   ListItemContent,
@@ -23,6 +26,7 @@ import {
   Select,
   Typography,
 } from "@mui/joy";
+import { Collapse } from "@mui/material";
 import Image from "next/image";
 import React from "react";
 
@@ -228,6 +232,7 @@ const ForOverview: React.FC<{
   description: string | undefined;
   terms: Term[];
 }> = ({ status, description, terms }) => {
+  const [collapsed, setCollapsed] = React.useState(true);
   const withDescription = description
     ? [{ termName: "Description", termValue: description }, ...terms]
     : terms;
@@ -273,10 +278,9 @@ const ForOverview: React.FC<{
     <Box
       display="flex"
       width="100%"
-      height="100%"
+      height="auto"
       maxHeight="100%"
-      overflow="auto"
-      minHeight="200px"
+      overflow={collapsed ? "auto" : undefined}
       sx={(theme) => ({
         border: `1px solid ${theme.vars.palette.neutral[100]}`,
       })}
@@ -284,29 +288,55 @@ const ForOverview: React.FC<{
       borderRadius={8}
       bgcolor="neutral.0"
     >
-      <Box display="flex" gap={2} padding={2} alignItems="center">
-        <Typography
-          level="h4"
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        padding={2}
+        alignItems="center"
+      >
+        <Box display="flex" gap={2} alignItems="center">
+          <Typography
+            level="h4"
+            sx={{
+              fontWeight: 700,
+              color: "black",
+            }}
+          >
+            Overview
+          </Typography>
+          <StatusBubble status={status} />
+        </Box>
+        <IconButton
+          size="sm"
+          onClick={() => setCollapsed((prev) => !prev)}
           sx={{
-            fontWeight: 700,
-            color: "black",
+            "&:hover": {
+              bgcolor: "transparent",
+            },
           }}
         >
-          Overview
-        </Typography>
-        <StatusBubble status={status} />
+          {collapsed ? (
+            <CloseFullscreenOutlinedIcon fontSize="small" />
+          ) : (
+            <OpenInFullOutlinedIcon fontSize="small" />
+          )}
+        </IconButton>
       </Box>
-      <Divider />
-      {withDescription.length > 0 && (
-        <Box
-          display="flex"
-          flexDirection="column"
-          gap={1}
-          overflow="auto"
-          padding={2}
-        >
-          <TermsTable terms={withDescription} />
-        </Box>
+      {collapsed && (
+        <>
+          <Divider />
+          {withDescription.length > 0 && (
+            <Box
+              display="flex"
+              flexDirection="column"
+              gap={1}
+              overflow="auto"
+              padding={2}
+            >
+              <TermsTable terms={withDescription} />
+            </Box>
+          )}
+        </>
       )}
     </Box>
   );
@@ -409,7 +439,7 @@ const ForReport: React.FC<{
         />
       </Box>
       <Divider />
-      <Box display="flex" padding={2}>
+      <Box display="flex" padding={2} maxHeight="100%" overflow="auto">
         <Dispatch
           file={file}
           reportType={reportType}
