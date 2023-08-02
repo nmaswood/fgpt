@@ -18,7 +18,7 @@ from springtime.services.chat_service import OpenAIChatService
 from springtime.services.embeddings_service import OpenAIEmbeddingsService
 from springtime.services.excel_analyzer import ClaudeExcelAnalyzer, OpenAIExcelAnalyzer
 from springtime.services.long_form_report_service import ClaudeLongformReportService
-from springtime.services.report_service import OpenAIReportService
+from springtime.services.report_service import ClaudeReportService, OpenAIReportService
 from springtime.services.scan_service import OpenAIScanService
 from springtime.services.sheet_processor import (
     CLAUDE_SHEET_PROCESSOR,
@@ -68,15 +68,21 @@ VECTOR_SERVICE = PineconeVectorService(
     namespace=SETTINGS.pinecone_namespace,
     indexed_fields=["organizationId", "projectId", "fileReferenceId"],
 )
-REPORT_SERVICE = OpenAIReportService(
+OPENAI_REPORT_SERVICE = OpenAIReportService(
     SETTINGS.reports_openai_model,
 )
+CLAUDE_REPORT_SERVICE = ClaudeReportService(ANTHROPIC_CLIENT)
 CHAT_SERVICE = OpenAIChatService()
 
 
 app.include_router(ChatRouter(CHAT_SERVICE).get_router())
 app.include_router(
-    ReportRouter(REPORT_SERVICE, LONG_FORM_REPORT_SERVICE, SCAN_SERVICE).get_router(),
+    ReportRouter(
+        OPENAI_REPORT_SERVICE,
+        CLAUDE_REPORT_SERVICE,
+        LONG_FORM_REPORT_SERVICE,
+        SCAN_SERVICE,
+    ).get_router(),
 )
 app.include_router(
     PdfRouter(TABLE_EXTRACTOR, OBJECT_STORE, THUMBNAIL_SERVICE).get_router(),

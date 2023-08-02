@@ -27,6 +27,7 @@ export interface ReportHandler {
   generateLongFormReport: (args: ReportHandler.Arguments) => Promise<void>;
 }
 
+const CHUNK_LIMIT = 4;
 export class ReportHandlerImpl implements ReportHandler {
   constructor(
     private readonly mlReportService: MLReportService,
@@ -87,7 +88,7 @@ export class ReportHandlerImpl implements ReportHandler {
       `Skipping ${allChunkIdsSeen.size} chunks as they have already been processed`,
     );
 
-    for (const groupOfIds of chunk(toProcess, 3)) {
+    for (const groupOfIds of chunk(toProcess, CHUNK_LIMIT)) {
       await Promise.all(
         groupOfIds.map((textChunkId) =>
           this.#generateReportForChunk({

@@ -1,9 +1,6 @@
 import abc
 
-import bleach
-import markdown
 import pydantic
-from loguru import logger
 
 from springtime.services.anthropic_client import AnthropicClient
 from springtime.services.html import html_from_text
@@ -22,7 +19,7 @@ class LongformReportService(abc.ABC):
 
 BASE_PROMPT = (
     "You are an expert financial analyst. Your job is to review materials and evaluate whether it might be a good investment for the PE fund you are supporting."
-    "I will provide you a document after you answer OK. The document start after _START_DOCUMENT_ and end after _END_DOCUMENT_.  Read the document and provide key investment merits, investment risks, financial summary and transaction details from the document."
+    "I will provide you a document after you answer OK. The document start after _START_DOCUMENT_ and end before _END_DOCUMENT_.  Read the document and provide key investment merits, investment risks, financial summary and transaction details from the document."
     "Please output unrendered markdown. Headers should be designated with #. Do not speak in the first person. Do not output anything except the report."
 )
 

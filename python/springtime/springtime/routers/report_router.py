@@ -38,26 +38,44 @@ class LongFormReportResponse(BaseModel):
 class ReportRouter:
     def __init__(
         self,
-        report_service: ReportService,
+        gpt_report_service: ReportService,
+        claude_report_service: ReportService,
         long_form_report_service: LongformReportService,
         scan_service: ScanService,
     ) -> None:
-        self.report_service = report_service
+        self.gpt_report_service = gpt_report_service
+        self.claude_report_service = claude_report_service
         self.long_form_report_service = long_form_report_service
         self.scan_service = scan_service
 
     def get_router(self):
         router = APIRouter(prefix="/report")
 
+        # GPT
         @router.post("/generate-questions")
         def questions_route(req: LLMOutputRequest) -> GenerateQuestionsResponse:
-            questions = self.report_service.generate_questions(req.text)
+            questions = self.gpt_report_service.generate_questions(req.text)
             return GenerateQuestionsResponse(questions=questions)
 
         @router.post("/generate-terms")
         def terms_route(req: LLMOutputRequest) -> GenerateTermsResponse:
-            terms = self.report_service.generate_terms(req.text)
+            terms = self.gpt_report_service.generate_terms(req.text)
             return GenerateTermsResponse(terms=terms)
+
+        ###
+
+        # CLAUDE
+        @router.post("/generate-questions-claude")
+        def questions_route_claude(req: LLMOutputRequest) -> GenerateQuestionsResponse:
+            questions = self.claude_report_service.generate_questions(req.text)
+            return GenerateQuestionsResponse(questions=questions)
+
+        @router.post("/generate-terms-claude")
+        def terms_route_claude(req: LLMOutputRequest) -> GenerateTermsResponse:
+            terms = self.claude_report_service.generate_terms(req.text)
+            return GenerateTermsResponse(terms=terms)
+
+        ###
 
         @router.post("/scan")
         def scan_route(req: ScanRequest):

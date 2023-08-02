@@ -100,3 +100,105 @@ class OpenAIReportService(ReportService):
         res = completion.choices[0].message.function_call.arguments
 
         return json.loads(res)
+
+
+class ClaudeReportService(ReportService):
+    def __init__(self, client: AnthropicClient) -> None:
+        self._client = client
+
+    def generate_questions(self, text: str) -> list[str]:
+        prompt = f"""
+
+
+Human: You are an expert financial analyst AI assistant. I will provide you a document. The document will start after the delimiter _START_DOCUMENT_ and end after the delimiter _END_DOCUMENT_. Based on the document generate the 10 most relevant questions you would want to ask about the data to better understand it for evaluating a potential investment.
+
+* Output each question as an entry in a json array of strings.
+* Speak in the third person, e.g. do not use "you"
+* Prefer proper, specific nouns to refer to entities
+
+Human: _START_DOCUMENT_{text.strip()}_END_DOCUMENT_
+
+
+Assistant:"""
+        raw = self._client.complete(
+            prompt,
+        ).strip()
+
+        start_index = raw.find("[")
+        value = raw[start_index:]
+
+        try:
+            return json.loads(value)
+        except Exception as e:
+            logger.error(e)
+            logger.error(value)
+            logger.error(raw)
+            logger.error("Claude response for questions failed")
+            return []
+
+    def generate_terms(self, text: str) -> list[Term]:
+        prompt = f"""
+
+
+Human: You are an expert financial analyst AI assistant. I will provide you a document. The document will start after the delimiter _START_DOCUMENT_ and end after the delimiter _END_DOCUMENT_. From the document try to parse the following:
+
+Company Overview
+
+Company Description
+
+Company Industry
+
+Document Overview
+
+Document Name
+
+Document Date
+
+Lead Arranger
+
+Most Recent Revenue
+
+Most Recent Full Year EBITDA
+
+Most Recent Full Year Net Income
+
+* Output each term as an entry in a json array of strings. Put the term name on the left and the term value on the right with a "|" separating the two. e.g. "Document Name | Investment Document January"
+
+* Do not output anything else
+* If you cannot find a term in the document output "Not provided" for that term. For example "Most Recent Full Year EBITDA | Not provided"
+
+
+Human: _START_DOCUMENT_{text.strip()}_END_DOCUMENT_
+
+
+Assistant:"""
+
+        raw = self._client.complete(
+            prompt,
+        ).strip()
+
+        start_index = raw.find("[")
+        value = raw[start_index:]
+
+        try:
+            parsed = json.loads(value)
+            terms = [parse_term(term) for term in parsed]
+            return [term for term in terms if term is not None]
+        except Exception as e:
+            logger.error(e)
+            logger.error(value)
+            logger.error(raw)
+            logger.error("Claude response for terms failed")
+            return []
+
+
+def parse_term(value: str) -> Term | None:
+    splat = value.split("|", 1)
+    if len(splat) != 2:
+        return None
+    left, right = splat
+    left = left.strip()
+    right = right.strip()
+    if right == "Not provided":
+        return None
+    return Term(term_name=left, term_value=right)
