@@ -360,7 +360,7 @@ const RenderChatEntryFromServer: React.FC<{
                 })}
               />
             ) : (
-              <Typography level="body2" sx={{ whiteSpace: "pre-line" }}>
+              <Typography level="body-sm" sx={{ whiteSpace: "pre-line" }}>
                 {chatEntry.answer}
               </Typography>
             )}
@@ -443,12 +443,12 @@ const RenderChatEntryFromClient: React.FC<{
             <ResponseAvatar state={"data"} />
           </Box>
           {q.state.type === "rendered" && (
-            <Typography level="body2" sx={{ whiteSpace: "pre-line" }}>
+            <Typography level="body-sm" sx={{ whiteSpace: "pre-line" }}>
               {q.state.value}
             </Typography>
           )}
           {q.state.type === "rendering" && (
-            <Typography level="body2" sx={{ whiteSpace: "pre-line" }}>
+            <Typography level="body-sm" sx={{ whiteSpace: "pre-line" }}>
               {text}
             </Typography>
           )}
@@ -552,7 +552,7 @@ const UserAvatarWithResponse: React.FC<{
         </ListItemDecorator>
       )}
       <ListItemContent>
-        <Typography level="body2">{text}</Typography>
+        <Typography level="body-sm">{text}</Typography>
       </ListItemContent>
     </ListItem>
   );

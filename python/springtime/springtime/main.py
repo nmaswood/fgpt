@@ -1,6 +1,5 @@
 import uvicorn
 from fastapi import FastAPI
-from fastapi_utils.timing import add_timing_middleware
 from loguru import logger
 
 from springtime.excel.table_extractor import TabulaTableExtractor
@@ -31,8 +30,6 @@ from springtime.services.vector_service import PineconeVectorService
 from .settings import SETTINGS
 
 app = FastAPI()
-
-add_timing_middleware(app, record=logger.info, prefix="app", exclude="untimed")
 
 
 logger.info("Starting server")

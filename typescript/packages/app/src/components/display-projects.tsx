@@ -244,7 +244,7 @@ const ProjectCard: React.FC<{
         >
           <Box display="flex" flexDirection="column" width="100%">
             <Typography
-              level="body2"
+              level="body-sm"
               sx={{
                 color: "neutral.500",
               }}
@@ -253,7 +253,7 @@ const ProjectCard: React.FC<{
               {format(new Date(project.createdAt), "[on] MMMM Do, YYYY")}
             </Typography>
             <Typography
-              level="body2"
+              level="body-sm"
               sx={{
                 textDecoration: "none",
 

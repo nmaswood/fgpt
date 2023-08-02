@@ -89,7 +89,7 @@ const Dispatch: React.FC<{ showCaseFile: RenderShowCaseFile.File }> = ({
           alignItems="center"
           justifyContent="center"
         >
-          <Alert size="lg" variant={"outlined"} color="info">
+          <Alert size="lg" variant={"outlined"} color="primary">
             A CIM is currently not selected for this project.{" "}
           </Alert>
         </Box>
@@ -178,7 +178,7 @@ const Dispatch: React.FC<{ showCaseFile: RenderShowCaseFile.File }> = ({
               <Alert
                 size="lg"
                 variant={"outlined"}
-                color="info"
+                color="primary"
                 sx={{
                   width: "100%",
                   justifyContent: "center",

@@ -59,7 +59,7 @@ export const Navbar: React.FC<{
             <Typography
               component={Link}
               href="/"
-              level="body1"
+              level="body-lg"
               fontWeight="700"
               fontSize="14px"
               sx={{
@@ -99,7 +99,7 @@ export const Navbar: React.FC<{
             </Typography>
             {project && (
               <Typography
-                level="body1"
+                level="body-lg"
                 component={Link}
                 href={`/projects/${project.id}`}
                 fontWeight="700"
@@ -114,7 +114,7 @@ export const Navbar: React.FC<{
             )}
             {fileName && (
               <Typography
-                level="body1"
+                level="body-lg"
                 fontWeight="700"
                 fontSize="14px"
                 sx={{
@@ -196,7 +196,7 @@ const DisplayUser = () => {
                 <LogoutIcon fontSize="small" />
               </ListItemDecorator>
 
-              <Typography level="body2">Logout</Typography>
+              <Typography level="body-md">Logout</Typography>
             </MenuItem>
             {isSuperAdmin && (
               <MenuItem
@@ -212,7 +212,7 @@ const DisplayUser = () => {
                 <ListItemDecorator>
                   <AdminIcon fontSize="small" />
                 </ListItemDecorator>
-                <Typography level="body2">Admin</Typography>
+                <Typography level="body-md">Admin</Typography>
               </MenuItem>
             )}
           </Menu>

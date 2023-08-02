@@ -150,7 +150,7 @@ const ForExcel: React.FC<{ chunks: AnalyzeResponseChunk[] }> = ({ chunks }) => {
         {allHTML.map(({ html, sheetNames }, idx) => (
           <Box key={idx}>
             <Typography
-              level="h5"
+              level="title-md"
               sx={{
                 fontWeight: 700,
               }}
@@ -201,7 +201,9 @@ const ForExcelValue: React.FC<{ chunk: AnalyzeResponseChunk }> = ({
       padding={2}
       overflow="auto"
     >
-      <Typography level="h6">{formatSheetNames(chunk.sheetNames)}</Typography>
+      <Typography level="title-sm">
+        {formatSheetNames(chunk.sheetNames)}
+      </Typography>
       <Typography whiteSpace="pre-wrap">{chunk.content}</Typography>
     </Box>
   );
@@ -546,7 +548,7 @@ const ChatGPTReport: React.FC<{
       {summaries.length > 0 && (
         <>
           <Typography
-            level="h5"
+            level="title-md"
             sx={{
               fontSize: "16px",
               fontWeight: 700,
@@ -574,7 +576,7 @@ const ChatGPTReport: React.FC<{
       {financialSummary.financialSummaries.length > 0 && (
         <>
           <Typography
-            level="h5"
+            level="title-md"
             sx={{
               fontSize: "16px",
               fontWeight: 700,
@@ -595,7 +597,7 @@ const ChatGPTReport: React.FC<{
       {financialSummary.investmentRisks.length > 0 && (
         <>
           <Typography
-            level="h5"
+            level="title-md"
             sx={{
               fontSize: "16px",
               fontWeight: 700,
@@ -616,7 +618,7 @@ const ChatGPTReport: React.FC<{
       {financialSummary.investmentMerits.length > 0 && (
         <>
           <Typography
-            level="h5"
+            level="title-md"
             sx={{
               fontSize: "16px",
               fontWeight: 700,
