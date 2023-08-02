@@ -78,6 +78,10 @@ variable "pinecone_environment" {
 
 // vercel
 
+variable "public_api_endpoint" {
+  default = "https://api.getparedo.com"
+}
+
 variable "vercel_domain" {
   default = "app.getparedo.com"
 }

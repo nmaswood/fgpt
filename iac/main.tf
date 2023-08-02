@@ -744,12 +744,12 @@ resource "vercel_project" "front_end" {
     {
       key    = "PUBLIC_API_ENDPOINT"
       target = ["production", "preview"]
-      value  = google_cloud_run_v2_service.api.uri
+      value  = var.public_api_endpoint
     },
     {
       key    = "NEXT_PUBLIC_API_ENDPOINT"
       target = ["production", "preview"]
-      value  = google_cloud_run_v2_service.api.uri
+      value  = var.public_api_endpoint
     },
     {
       key    = "AUTH0_ISSUER_BASE_URL"
