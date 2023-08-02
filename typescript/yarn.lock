@@ -517,7 +517,7 @@ __metadata:
     dotenv: ^16.3.1
     eslint: ^8.46.0
     eslint-plugin-simple-import-sort: ^10.0.0
-    eslint-plugin-sql: ^2.4.0
+    eslint-plugin-sql: ^2.4.2
     express: ^4.18.2
     express-async-errors: ^3.1.1
     express-jwt: ^8.4.1
@@ -599,7 +599,7 @@ __metadata:
     dotenv: ^16.3.1
     eslint: ^8.46.0
     eslint-plugin-simple-import-sort: ^10.0.0
-    eslint-plugin-sql: ^2.4.0
+    eslint-plugin-sql: ^2.4.2
     express: ^4.18.2
     express-async-errors: ^3.1.1
     pino: ^8.14.2
@@ -646,7 +646,7 @@ __metadata:
     cheerio: ^1.0.0-rc.12
     eslint: ^8.46.0
     eslint-plugin-simple-import-sort: ^10.0.0
-    eslint-plugin-sql: ^2.4.0
+    eslint-plugin-sql: ^2.4.2
     lodash: ^4.17.21
     pino: ^8.14.2
     prettier: ^3.0.0
@@ -3790,19 +3790,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-sql@npm:^2.4.0":
-  version: 2.4.0
-  resolution: "eslint-plugin-sql@npm:2.4.0"
+"eslint-plugin-sql@npm:^2.4.2":
+  version: 2.4.2
+  resolution: "eslint-plugin-sql@npm:2.4.2"
   dependencies:
     astring: ^1.8.3
     debug: ^4.3.4
     lodash: ^4.17.21
     pg-formatter: ^2.0.2
+    redent: ^3.0.0
     sql-parse: ^0.1.5
-    strip-indent: ^3.0.0
   peerDependencies:
     eslint: ">=8.1.0"
-  checksum: bca7460335a4ee887246532eba031f6c58537501cccfbef5a28dd8d3aff4c33a08354858de23cbf39b86f814b9bfcf9b9a0d9800b81ee5e06098de6923a55c9b
+  checksum: 133071ce1c2130cd90e09ce4573a8871657ae52e832301e9bda5ac66ad3cdd373c8f62c7a3f8cda7b43a74c158b0b6d81db86f9354f82239f333599ed92b3e28
   languageName: node
   linkType: hard
 
@@ -7232,6 +7232,16 @@ __metadata:
   version: 0.2.0
   resolution: "real-require@npm:0.2.0"
   checksum: fa060f19f2f447adf678d1376928c76379dce5f72bd334da301685ca6cdcb7b11356813332cc243c88470796bc2e2b1e2917fc10df9143dd93c2ea608694971d
+  languageName: node
+  linkType: hard
+
+"redent@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "redent@npm:3.0.0"
+  dependencies:
+    indent-string: ^4.0.0
+    strip-indent: ^3.0.0
+  checksum: fa1ef20404a2d399235e83cc80bd55a956642e37dd197b4b612ba7327bf87fa32745aeb4a1634b2bab25467164ab4ed9c15be2c307923dd08b0fe7c52431ae6b
   languageName: node
   linkType: hard
 

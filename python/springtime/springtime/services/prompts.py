@@ -35,7 +35,7 @@ questions_schema = {
     "properties": {
         "questions": {
             "type": "array",
-            "description": "Interesting questions one could ask to understand the document",
+            "description": "Interesting, specific questions one could ask to understand the document in the context of a financial investment",
             "items": {
                 "type": "object",
                 "properties": {

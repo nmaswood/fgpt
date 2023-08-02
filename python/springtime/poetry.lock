@@ -1074,6 +1074,20 @@ files = [
 ]
 
 [[package]]
+name = "json5"
+version = "0.9.14"
+description = "A Python implementation of the JSON5 data format."
+optional = false
+python-versions = "*"
+files = [
+    {file = "json5-0.9.14-py2.py3-none-any.whl", hash = "sha256:740c7f1b9e584a468dbb2939d8d458db3427f2c93ae2139d05f47e453eae964f"},
+    {file = "json5-0.9.14.tar.gz", hash = "sha256:9ed66c3a6ca3510a976a9ef9b8c0787de24802724ab1860bc0153c7fdd589b02"},
+]
+
+[package.extras]
+dev = ["hypothesis"]
+
+[[package]]
 name = "loguru"
 version = "0.7.0"
 description = "Python logging made (stupidly) simple"
@@ -1839,13 +1853,13 @@ files = [
 
 [[package]]
 name = "pyright"
-version = "1.1.318"
+version = "1.1.320"
 description = "Command line wrapper for pyright"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pyright-1.1.318-py3-none-any.whl", hash = "sha256:056c1b2e711c3526e32919de1684ae599d34b7ec27e94398858a43f56ac9ba9b"},
-    {file = "pyright-1.1.318.tar.gz", hash = "sha256:69dcf9c32d5be27d531750de627e76a7cadc741d333b547c09044278b508db7b"},
+    {file = "pyright-1.1.320-py3-none-any.whl", hash = "sha256:cdf739f7827374575cefb134311457d08c189793c3da3097c023debec9acaedb"},
+    {file = "pyright-1.1.320.tar.gz", hash = "sha256:94223e3b82d0b4c99c5125bab4d628ec749ce0b5b2ae0471fd4921dd4eff460d"},
 ]
 
 [package.dependencies]
@@ -2676,4 +2690,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "627e9f222a27e8fe00223c01750d214a5a79ec6f6e42fd2379d9bc238486abeb"
+content-hash = "a20744b669f9d900487420bd6e28c76542675f0cbda0887efcb7600cfca377a0"

@@ -37,9 +37,9 @@ def claude_report_service():
     )
 
 
-# def test_generate_output(text: str, openai_report_service: ReportService):
-
-
-def test_generate_output(text: str, claude_report_service: ReportService):
-    terms = claude_report_service.generate_terms(text)
+def test_generate_output(text: str, openai_report_service: ReportService):
+    questions = openai_report_service.generate_questions(text)
     breakpoint()
+
+
+# def test_generate_output(text: str, claude_report_service: ReportService):

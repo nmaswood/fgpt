@@ -181,7 +181,7 @@ const CreateProjectModal: React.FC<{
     <Modal open onClose={onClose} keepMounted>
       <ModalDialog>
         <Box display="flex" flexDirection="column" gap={1}>
-          <Typography level="h6">Add a deal</Typography>
+          <Typography level="body-md">Add a deal</Typography>
           <Input
             autoFocus
             id="name"

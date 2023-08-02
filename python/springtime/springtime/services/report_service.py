@@ -2,16 +2,14 @@ import abc
 import json
 from typing import Any
 
+import json5
 import openai
 from loguru import logger
 from pydantic import BaseModel
 
 from springtime.models.open_ai import OpenAIModel
 from springtime.services.anthropic_client import AnthropicClient
-from springtime.services.prompts import (
-    questions_schema,
-    terms_schema,
-)
+from springtime.services.prompts import questions_schema, terms_schema
 
 
 class Question(BaseModel):
@@ -53,24 +51,55 @@ class OpenAIReportService(ReportService):
         self.model = model
 
     def generate_questions(self, text: str) -> list[str]:
-        req = CallFunctionRequest(
-            text=text,
-            prompt="You are an expert financial analyst. Parse the document for the requested information.",
-            json_schema=questions_schema,
-            function_name="parse_questions",
+        completion = openai.ChatCompletion.create(
+            model=self.model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an expert financial analyst AI assistant.",
+                },
+                {
+                    "role": "user",
+                    "content": "You will be given a document. Read the document and generate the most relevant questions you would want to ask about the data to better understand it for evaluating a potential investment.",
+                },
+                {
+                    "role": "user",
+                    "content": """
+* Speak in the third person, e.g. do not use "you"
+* Do not output the same question twice
+* Prefer proper, specific nouns to refer to entities
+""",
+                },
+                {"role": "user", "content": f"Document: {text}"},
+            ],
+            functions=[{"name": "generate_questions", "parameters": questions_schema}],
+            function_call={"name": "generate_questions"},
+            temperature=0,
         )
-        response = self.call_function(req)
+        response = parse_json(completion.choices[0].message.function_call.arguments)
         questions = Questions(**response)
         return [q.question for q in questions.questions]
 
     def generate_terms(self, text: str) -> list[Term]:
-        req = CallFunctionRequest(
-            text=text,
-            prompt="You are an expert financial analyst. Parse the document for the requested information. If the information is not available, do not return anything. Do not output the name of the term, only the value.",
-            json_schema=terms_schema,
-            function_name="parse_terms",
+        completion = openai.ChatCompletion.create(
+            model=self.model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an expert financial analyst AI assistant.",
+                },
+                {
+                    "role": "system",
+                    "content": "You will be given a document with specificied terms to parse. If the information is not available, do not return anything. Do not output the name of the term, only the value.",
+                },
+                {"role": "user", "content": f"Document: {text}"},
+            ],
+            functions=[{"name": "parse_terms", "parameters": terms_schema}],
+            function_call={"name": "parse_terms"},
+            temperature=0,
         )
-        response = self.call_function(req)
+        response = json.loads(completion.choices[0].message.function_call.arguments)
+
         terms = [t for t in response["terms"] if "term_value" in t]
         try:
             terms_from_model = Terms(terms=terms)
@@ -85,21 +114,12 @@ class OpenAIReportService(ReportService):
             logger.error("Invalid terms parsed")
             return []
 
-    def call_function(self, req: CallFunctionRequest) -> dict[str, Any]:
-        logger.info(f"Running function {req.function_name}")
-        completion = openai.ChatCompletion.create(
-            model=self.model,
-            messages=[
-                {"role": "system", "content": req.prompt},
-                {"role": "user", "content": f"Document: {req.text}"},
-            ],
-            functions=[{"name": req.function_name, "parameters": req.json_schema}],
-            function_call={"name": req.function_name},
-            temperature=0,
-        )
-        res = completion.choices[0].message.function_call.arguments
 
-        return json.loads(res)
+def parse_json(json_str: str):
+    try:
+        return json.loads(json_str)
+    except Exception as e:
+        return json5.loads(json_str)
 
 
 class ClaudeReportService(ReportService):
