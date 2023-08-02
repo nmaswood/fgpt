@@ -2,17 +2,8 @@ import { Term } from "@fgpt/precedent-iso/src/models/llm-outputs";
 import { AxiosInstance } from "axios";
 import { z } from "zod";
 
-export interface LLMOutputArgs {
-  text: string;
-}
-
 export interface LongFormArgs {
   text: string;
-}
-
-export interface LLMOutputResponse {
-  questions: string[];
-  terms: Term[];
 }
 
 export interface LongFormResponse {
@@ -21,16 +12,28 @@ export interface LongFormResponse {
 }
 
 export interface MLReportService {
-  llmOutput(args: LLMOutputArgs): Promise<LLMOutputResponse>;
+  generateQuestions(text: string): Promise<string[]>;
+  generateTerms(text: string): Promise<Term[]>;
   longForm(args: LongFormArgs): Promise<LongFormResponse>;
 }
 export class MLReportServiceImpl implements MLReportService {
   constructor(private readonly client: AxiosInstance) {}
-  async llmOutput({ text }: LLMOutputArgs): Promise<LLMOutputResponse> {
-    const response = await this.client.post<unknown>("/report/llm-output", {
+
+  async generateQuestions(text: string): Promise<string[]> {
+    const response = await this.client.post<unknown>(
+      "/report/generate-questions",
+      {
+        text,
+      },
+    );
+    return ZQuestionsResponse.parse(response.data).questions;
+  }
+
+  async generateTerms(text: string): Promise<Term[]> {
+    const response = await this.client.post<unknown>("/report/generate-terms", {
       text,
     });
-    return ZLLMOutputResponse.parse(response.data);
+    return ZTermsResponse.parse(response.data).terms;
   }
 
   async longForm({ text }: LongFormArgs): Promise<LongFormResponse> {
@@ -63,14 +66,10 @@ const ZTerm = z
     }),
   );
 
-const ZLLMOutputResponse = z
-  .object({
-    questions: z.array(z.string()),
-    terms: z.array(ZTerm),
-  })
-  .transform(
-    (row): LLMOutputResponse => ({
-      questions: row.questions,
-      terms: row.terms,
-    }),
-  );
+const ZQuestionsResponse = z.object({
+  questions: z.array(z.string()),
+});
+
+const ZTermsResponse = z.object({
+  terms: z.array(ZTerm),
+});

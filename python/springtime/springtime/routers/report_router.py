@@ -13,6 +13,14 @@ class LLMOutputRequest(BaseModel):
     text: str
 
 
+class GenerateQuestionsResponse(BaseModel):
+    questions: list[str]
+
+
+class GenerateTermsResponse(BaseModel):
+    terms: list[Term]
+
+
 class ScanRequest(BaseModel):
     file_name: str
     text: str
@@ -25,11 +33,6 @@ class LongFormReportRequest(BaseModel):
 class LongFormReportResponse(BaseModel):
     raw: str
     sanitized_html: str | None
-
-
-class LLMOutputResponse(BaseModel):
-    questions: list[str] = []
-    terms: list[Term] = []
 
 
 class ReportRouter:
@@ -46,9 +49,15 @@ class ReportRouter:
     def get_router(self):
         router = APIRouter(prefix="/report")
 
-        @router.post("/llm-output")
-        def llm_output_route(req: LLMOutputRequest):
-            return self.report_service.generate_output(req.text)
+        @router.post("/generate-questions")
+        def questions_route(req: LLMOutputRequest) -> GenerateQuestionsResponse:
+            questions = self.report_service.generate_questions(req.text)
+            return GenerateQuestionsResponse(questions=questions)
+
+        @router.post("/generate-terms")
+        def terms_route(req: LLMOutputRequest) -> GenerateTermsResponse:
+            terms = self.report_service.generate_terms(req.text)
+            return GenerateTermsResponse(terms=terms)
 
         @router.post("/scan")
         def scan_route(req: ScanRequest):

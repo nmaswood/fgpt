@@ -31,11 +31,6 @@ class Terms(BaseModel):
     terms: list[Term] = []
 
 
-class Output(BaseModel):
-    questions: list[str] = []
-    terms: list[Term] = []
-
-
 class CallFunctionRequest(BaseModel):
     text: str
     prompt: str
@@ -45,7 +40,11 @@ class CallFunctionRequest(BaseModel):
 
 class ReportService(abc.ABC):
     @abc.abstractmethod
-    def generate_output(self, text: str) -> Output:
+    def generate_questions(self, text: str) -> list[str]:
+        pass
+
+    @abc.abstractmethod
+    def generate_terms(self, text: str) -> list[Term]:
         pass
 
 
@@ -53,16 +52,7 @@ class OpenAIReportService(ReportService):
     def __init__(self, model: OpenAIModel) -> None:
         self.model = model
 
-    def generate_output(self, text: str) -> Output:
-        questions = self.get_questions(text)
-        terms = self.get_terms(text)
-
-        return Output(
-            questions=questions,
-            terms=terms,
-        )
-
-    def get_questions(self, text: str) -> list[str]:
+    def generate_questions(self, text: str) -> list[str]:
         req = CallFunctionRequest(
             text=text,
             prompt="You are an expert financial analyst. Parse the document for the requested information.",
@@ -73,7 +63,7 @@ class OpenAIReportService(ReportService):
         questions = Questions(**response)
         return [q.question for q in questions.questions]
 
-    def get_terms(self, text: str) -> list[Term]:
+    def generate_terms(self, text: str) -> list[Term]:
         req = CallFunctionRequest(
             text=text,
             prompt="You are an expert financial analyst. Parse the document for the requested information. If the information is not available, do not return anything. Do not output the name of the term, only the value.",
@@ -110,19 +100,3 @@ class OpenAIReportService(ReportService):
         res = completion.choices[0].message.function_call.arguments
 
         return json.loads(res)
-
-
-class ClaudeReportService(ReportService):
-    def __init__(self, client: AnthropicClient) -> None:
-        self._client = client
-
-    def generate_output(self, text: str) -> Output:
-        questions = self._get_questions(text)
-        terms = self._get_terms(text)
-        return Output()
-
-    def _get_questions(self, text: str) -> list[str]:
-        return []
-
-    def _get_terms(self, text: str) -> list[Term]:
-        return []

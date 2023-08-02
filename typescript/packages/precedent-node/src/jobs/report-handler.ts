@@ -110,9 +110,10 @@ export class ReportHandlerImpl implements ReportHandler {
     const { textChunkId } = config;
     const chunk = await this.textChunkStore.getTextChunkById(textChunkId);
 
-    const { questions, terms } = await this.mlReportService.llmOutput({
-      text: chunk.chunkText,
-    });
+    const [questions, terms] = await Promise.all([
+      this.mlReportService.generateQuestions(chunk.chunkText),
+      this.mlReportService.generateTerms(chunk.chunkText),
+    ]);
 
     const values: InsertMiscValue[] = [];
 

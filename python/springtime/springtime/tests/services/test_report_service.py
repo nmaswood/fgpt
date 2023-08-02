@@ -26,5 +26,6 @@ def report_service():
 
 
 def test_generate_output(text: str, report_service: ReportService):
-    output = report_service.generate_output(text)
+    questions = report_service.generate_questions(text)
+    terms = report_service.generate_terms(text)
     breakpoint()
