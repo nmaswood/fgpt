@@ -353,10 +353,10 @@ resource "google_cloud_run_v2_service" "springtime" {
         value = var.pinecone_namespace
       }
 
-      env {
-        name  = "TRACING_ENABLED"
-        value = "true"
-      }
+      #env {
+      #name  = "TRACING_ENABLED"
+      #value = "true"
+      #}
 
       env {
         name  = "SERVICE_TO_SERVICE_SECRET"

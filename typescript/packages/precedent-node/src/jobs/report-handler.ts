@@ -27,7 +27,7 @@ export interface ReportHandler {
   generateLongFormReport: (args: ReportHandler.Arguments) => Promise<void>;
 }
 
-const CHUNK_LIMIT = 6;
+const CHUNK_LIMIT = 2;
 export class ReportHandlerImpl implements ReportHandler {
   constructor(
     private readonly mlReportService: MLReportService,
