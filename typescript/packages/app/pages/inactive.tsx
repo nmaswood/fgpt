@@ -71,11 +71,11 @@ const Inactive: React.FC = () => {
               flexDirection="column"
               className={styles["message-text"]}
             >
-              <Typography level="h5">
+              <Typography level="body-lg">
                 Paredo is currently in private alpha
               </Typography>
               <Typography
-                level="h5"
+                level="body-lg"
                 component={Link}
                 href="https://jf5d2k3ur6o.typeform.com/to/sbYgEcSy?typeform-source=www.getparedo.com"
               >
