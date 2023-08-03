@@ -119,7 +119,6 @@ LIMIT 101
     googleSub: string,
     email: string,
   ): Promise<User> {
-    debugger;
     const user = await trx.maybeOne(sql.type(ZUserRow)`
 SELECT
     ${USER_FIELDS}

@@ -29,7 +29,7 @@ import {
 import Image from "next/image";
 import React from "react";
 
-import { DangerousHTMLElement } from "../html-element";
+import { DangerousHTMLElementReport } from "../html-element";
 import { TermsTable } from "../terms-table";
 import styles from "./display-report.module.css";
 import { ReportType } from "./report-type";
@@ -159,7 +159,7 @@ const ForExcel: React.FC<{ chunks: AnalyzeResponseChunk[] }> = ({ chunks }) => {
               {formatSheetNames(sheetNames)}
             </Typography>
             <Divider />
-            <DangerousHTMLElement html={html} />
+            <DangerousHTMLElementReport html={html} />
           </Box>
         ))}
       </Box>
@@ -208,6 +208,7 @@ const PdfReport: React.FC<{
       gap={1}
       maxHeight="100%"
       overflow="auto"
+      width="100%"
     >
       {reportType === "claude" && <ClaudeReport longForm={report.longForm} />}
       {reportType === "gpt4" && <ChatGPTReport report={report} />}
@@ -320,6 +321,7 @@ const ForOverview: React.FC<{
               gap={1}
               overflow="auto"
               padding={2}
+              height="100%"
             >
               <TermsTable terms={withDescription} />
             </Box>
@@ -512,7 +514,7 @@ const ClaudeReport: React.FC<{
   return (
     <Box>
       {allHtml.map((html, idx) => (
-        <DangerousHTMLElement key={idx} html={html} />
+        <DangerousHTMLElementReport key={idx} html={html} />
       ))}
     </Box>
   );

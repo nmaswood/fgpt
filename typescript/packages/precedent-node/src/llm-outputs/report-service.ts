@@ -55,13 +55,16 @@ export class ReportServiceImpl implements ReportService {
           );
           break;
         case "terms": {
-          const uniqueTerms = value.value.filter(
-            (term) => !alreadySeenTerms.has(term.termName),
-          );
-          acc.terms.push(...uniqueTerms);
-          for (const term of uniqueTerms) {
+          for (const term of value.value) {
+            if (alreadySeenTerms.has(term.termName)) {
+              continue;
+            }
+
+            acc.terms.push(term);
+
             alreadySeenTerms.add(term.termName);
           }
+
           break;
         }
         case "summary":
@@ -77,7 +80,6 @@ export class ReportServiceImpl implements ReportService {
           assertNever(value);
       }
     }
-
     return acc;
   }
 }
