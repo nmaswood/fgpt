@@ -25,6 +25,7 @@ import { useFetchChatEntries } from "../hooks/use-fetch-chat-entry";
 import { useFetchMe } from "../hooks/use-fetch-me";
 import { useFetchPrompt } from "../hooks/use-fetch-prompt";
 import { DisplayChatList } from "./display-chats";
+import { DangerousHTMLElement } from "./html-element";
 
 interface EntryToRender {
   index: number;
@@ -344,21 +345,7 @@ const RenderChatEntryFromServer: React.FC<{
             </Box>
 
             {chatEntry.html ? (
-              <Box
-                dangerouslySetInnerHTML={{ __html: chatEntry.html }}
-                sx={(theme) => ({
-                  "& *": {
-                    fontSize: "14px",
-                    fontFamily: theme.vars.fontFamily.body,
-                    whiteSpace: "pre-wrap",
-                  },
-                  "& table, th, td": {
-                    padding: "8px",
-                    border: "1px solid #E5E5E5",
-                    borderCollapse: "collapse",
-                  },
-                })}
-              />
+              <DangerousHTMLElement html={chatEntry.html} />
             ) : (
               <Typography level="body-sm" sx={{ whiteSpace: "pre-line" }}>
                 {chatEntry.answer}

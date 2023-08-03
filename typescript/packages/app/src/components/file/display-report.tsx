@@ -29,6 +29,7 @@ import {
 import Image from "next/image";
 import React from "react";
 
+import { DangerousHTMLElement } from "../html-element";
 import { TermsTable } from "../terms-table";
 import styles from "./display-report.module.css";
 import { ReportType } from "./report-type";
@@ -158,21 +159,7 @@ const ForExcel: React.FC<{ chunks: AnalyzeResponseChunk[] }> = ({ chunks }) => {
               {formatSheetNames(sheetNames)}
             </Typography>
             <Divider />
-            <Box
-              key={idx}
-              dangerouslySetInnerHTML={{ __html: html }}
-              sx={(theme) => ({
-                "& *": {
-                  fontSize: "14px",
-                  fontFamily: theme.vars.fontFamily.body,
-                },
-                "& table, th, td": {
-                  padding: "8px",
-                  border: "1px solid #E5E5E5",
-                  borderCollapse: "collapse",
-                },
-              })}
-            />
+            <DangerousHTMLElement html={html} />
           </Box>
         ))}
       </Box>
@@ -525,16 +512,7 @@ const ClaudeReport: React.FC<{
   return (
     <Box>
       {allHtml.map((html, idx) => (
-        <Box
-          key={idx}
-          dangerouslySetInnerHTML={{ __html: html }}
-          sx={(theme) => ({
-            "& *": {
-              fontSize: "14px",
-              fontFamily: theme.vars.fontFamily.body,
-            },
-          })}
-        />
+        <DangerousHTMLElement key={idx} html={html} />
       ))}
     </Box>
   );
