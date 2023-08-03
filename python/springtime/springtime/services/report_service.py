@@ -132,6 +132,8 @@ class OpenAIReportService(ReportService):
                 term
                 for term in terms_from_model.terms
                 if term.term_value != "Not Available"
+                and term.term_value != "Not specified"
+                and term.term_value != "Not available"
                 and len(term.term_value.strip()) > 0
             ]
         except Exception as e:
