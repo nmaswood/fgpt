@@ -6,51 +6,20 @@ export const DangerousHTMLElementChat: React.FC<{ html: string }> = ({
   return (
     <Box
       dangerouslySetInnerHTML={{ __html: html }}
+      className="dangerous-html-element-chat"
       sx={(theme) => ({
-        "& *": {
+        "&.dangerous-html-element-chat > *": {
           fontSize: "14px",
           fontFamily: theme.vars.fontFamily.body,
-          whiteSpace: "pre-wrap",
         },
-        "& table, th, td": {
+        "&.dangerous-html-element-chat > table, th, td, tbody, tr, td, thead": {
           padding: "8px",
           border: "1px solid #E5E5E5",
           borderCollapse: "collapse",
         },
 
-        "& ul > li": {
-          "line-height": "1px",
-        },
-        "& ol > li": {
-          "line-height": "1px",
-        },
-        "& p": {
-          marginY: "0px",
-        },
-      })}
-    />
-  );
-};
-
-export const DangerousHTMLElementReport: React.FC<{ html: string }> = ({
-  html,
-}) => {
-  return (
-    <Box
-      dangerouslySetInnerHTML={{ __html: html }}
-      sx={(theme) => ({
-        "& *": {
-          fontSize: "14px",
-          fontFamily: theme.vars.fontFamily.body,
+        "&.dangerous-html-element-chat > p": {
           whiteSpace: "pre-wrap",
-        },
-        "& table, th, td": {
-          padding: "8px",
-          border: "1px solid #E5E5E5",
-          borderCollapse: "collapse",
-        },
-        "& p": {
-          marginY: "0px",
         },
       })}
     />

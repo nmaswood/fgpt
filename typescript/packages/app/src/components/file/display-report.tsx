@@ -29,7 +29,7 @@ import {
 import Image from "next/image";
 import React from "react";
 
-import { DangerousHTMLElementReport } from "../html-element";
+import { DangerousHTMLElementChat } from "../html-element";
 import { TermsTable } from "../terms-table";
 import styles from "./display-report.module.css";
 import { ReportType } from "./report-type";
@@ -159,7 +159,7 @@ const ForExcel: React.FC<{ chunks: AnalyzeResponseChunk[] }> = ({ chunks }) => {
               {formatSheetNames(sheetNames)}
             </Typography>
             <Divider />
-            <DangerousHTMLElementReport html={html} />
+            <DangerousHTMLElementChat html={html} />
           </Box>
         ))}
       </Box>
@@ -514,7 +514,7 @@ const ClaudeReport: React.FC<{
   return (
     <Box>
       {allHtml.map((html, idx) => (
-        <DangerousHTMLElementReport key={idx} html={html} />
+        <DangerousHTMLElementChat key={idx} html={html} />
       ))}
     </Box>
   );
