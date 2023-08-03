@@ -69,7 +69,7 @@ OPENAI_REPORT_SERVICE = OpenAIReportService(
     SETTINGS.reports_openai_model,
 )
 CLAUDE_REPORT_SERVICE = ClaudeReportService(ANTHROPIC_CLIENT)
-CHAT_SERVICE = OpenAIChatService()
+CHAT_SERVICE = OpenAIChatService(OpenAIModel.gpt3_16k)
 
 
 app.include_router(ChatRouter(CHAT_SERVICE).get_router())

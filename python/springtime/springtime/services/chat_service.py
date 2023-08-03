@@ -6,6 +6,7 @@ import openai
 from loguru import logger
 
 from springtime.models.chat import ChatFileContext, ChatHistory
+from springtime.models.open_ai import OpenAIModel
 from springtime.services.prompt import create_prompt
 
 
@@ -33,8 +34,6 @@ class ChatService(abc.ABC):
         pass
 
 
-MODEL = "gpt-3.5-turbo"
-
 SYSTEM_1 = "You are an expert financial analyst AI having a converation with a user."
 SYSTEM_2 = """
 Output your response in well formatted markdown.
@@ -48,6 +47,9 @@ For example:
 
 
 class OpenAIChatService(ChatService):
+    def __init__(self, model: OpenAIModel) -> None:
+        self.model = model
+
     def get_prompt(
         self,
         context: list[ChatFileContext],
@@ -68,7 +70,7 @@ User: {create_prompt(context, question, history)}
     ) -> Generator[Any, Any, None]:
         prompt = create_prompt(context, question, history)
         response = openai.ChatCompletion.create(
-            model=MODEL,
+            model=self.model,
             messages=[
                 {"role": "system", "content": SYSTEM_1},
                 {
@@ -101,7 +103,7 @@ User: {create_prompt(context, question, history)}
             answer=answer,
         )
         response = openai.ChatCompletion.create(
-            model=MODEL,
+            model=self.model,
             messages=[
                 {
                     "role": "system",

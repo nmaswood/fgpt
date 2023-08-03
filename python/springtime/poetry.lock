@@ -124,13 +124,13 @@ frozenlist = ">=1.1.0"
 
 [[package]]
 name = "anthropic"
-version = "0.3.7"
+version = "0.3.8"
 description = "Client library for the anthropic API"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "anthropic-0.3.7-py3-none-any.whl", hash = "sha256:ca57635d7f13d609aa8a5b93a834e067760d96b9657bdf81e0c7444ddf41fc64"},
-    {file = "anthropic-0.3.7.tar.gz", hash = "sha256:0453f80ba8224364c8b0dae0b5088becd67277de57708d7b887ebb6c2ceb3c49"},
+    {file = "anthropic-0.3.8-py3-none-any.whl", hash = "sha256:97ffe1bacc4214dc89b19f496cf2769746971e86f7c835a05aa21b76f260d279"},
+    {file = "anthropic-0.3.8.tar.gz", hash = "sha256:6651099807456c3b95b3879f5ad7d00f7e7e4f7649a2394d18032ab8be54ef16"},
 ]
 
 [package.dependencies]
