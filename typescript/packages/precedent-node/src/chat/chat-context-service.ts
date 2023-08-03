@@ -52,22 +52,24 @@ export class ChatContextServiceImpl implements ChatContextService {
     ]);
 
     const textChunkIdsByFile = groupBy(
-      textChunks,
+      uniqBy(textChunks, (chunk) => chunk.hash),
       (chunk) => chunk.fileReferenceId,
     );
 
-    const forFiles: ChatFileContext[] = files.map(
-      (file): ChatFileContext => ({
+    const forFiles: ChatFileContext[] = [];
+    for (const file of files) {
+      const chunks = textChunkIdsByFile[file.id];
+      if (!chunks || chunks.length === 0) {
+        continue;
+      }
+      forFiles.push({
         fileName: file.fileName,
-        chunks: orderBy(
-          textChunkIdsByFile[file.id] ?? [],
-          (chunk) => chunk.chunkOrder,
-        ).map((chunk) => ({
+        chunks: orderBy(chunks, (chunk) => chunk.chunkOrder).map((chunk) => ({
           content: chunk.chunkText,
           order: chunk.chunkOrder,
         })),
-      }),
-    );
+      });
+    }
 
     return {
       question,
@@ -139,6 +141,7 @@ export const ZVectorMetadata = z
     fileReferenceId: z.string().optional(),
     next: z.string().optional(),
     prev: z.string().optional(),
+    hash: z.string().optional(),
   })
   .transform((row) => {
     const fileId = row.fileId ?? row.fileReferenceId;
@@ -149,5 +152,6 @@ export const ZVectorMetadata = z
       fileId,
       next: row.next ?? undefined,
       prev: row.prev ?? undefined,
+      hash: row.hash ?? undefined,
     };
   });

@@ -35,6 +35,17 @@ class ChatService(abc.ABC):
 
 MODEL = "gpt-3.5-turbo"
 
+SYSTEM_1 = "You are an expert financial analyst AI having a converation with a user."
+SYSTEM_2 = """
+Output your response in well formatted markdown.
+For example:
+
+* for list responses use bullet points
+* for headers use #, ##, ###, etc.
+* for links use [link text](link url)
+* for tables use table elements
+"""
+
 
 class OpenAIChatService(ChatService):
     def get_prompt(
@@ -44,8 +55,8 @@ class OpenAIChatService(ChatService):
         history: list[ChatHistory],
     ) -> str:
         return f"""
-System: You are an expert financial analyst.
-System: Format your output in markdown.
+System: {SYSTEM_1}
+System: {SYSTEM_2}
 User: {create_prompt(context, question, history)}
         """
 
@@ -59,10 +70,10 @@ User: {create_prompt(context, question, history)}
         response = openai.ChatCompletion.create(
             model=MODEL,
             messages=[
-                {"role": "system", "content": "You are an expert financial analyst."},
+                {"role": "system", "content": SYSTEM_1},
                 {
                     "role": "system",
-                    "content": "Output your format in an easy to read format, for example for list responses use bullet points and place line breaks in the appropriate locations.",
+                    "content": SYSTEM_2,
                 },
                 {"role": "user", "content": prompt},
             ],

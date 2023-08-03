@@ -2,14 +2,12 @@ import re
 
 from springtime.models.chat import ChatChunkContext, ChatFileContext, ChatHistory
 
-TOKEN_LIMIT = 12_000
-RESPOND_PROMPT = "Respond to the following prompt:"
 CONTEXT_PROMPT = (
-    "Potentially relevant information is provided in chunks from files below."
-    "Use the information to supplement your knowledge."
-    "If you do not know the answer. Reply:  I do not know."
+    "Potentially relevant information given the user's question is provided in chunks from files below.\n"
+    "Use the information to supplement your knowledge.\n"
+    "If you do not know the answer. Reply: I do not know.\n"
+    'The additional information will be delimited by "---"\n'
 )
-DEFAULT_PROMPT_LEN = len(RESPOND_PROMPT)
 
 
 def create_prompt(
@@ -23,10 +21,10 @@ def create_prompt(
     non_empty_prompts = [
         prompt
         for prompt in [
-            history_prompt,
             context_prompt,
-            f"\n\n{RESPOND_PROMPT}",
-            question,
+            history_prompt,
+            f"Human: {question}",
+            "AI:",
         ]
         if len(prompt.strip()) > 0
     ]
@@ -42,7 +40,7 @@ def create_prompt_for_context(context: list[ChatFileContext]):
         [create_prompt_for_file_context(file) for file in context],
     )
 
-    return f"{CONTEXT_PROMPT}\n{prompts}"
+    return f"{CONTEXT_PROMPT}\n---\n{prompts}\n---\n"
 
 
 def create_prompt_for_file_context(context: ChatFileContext):
@@ -50,9 +48,7 @@ def create_prompt_for_file_context(context: ChatFileContext):
         [create_prompt_for_file_chunk(chunk) for chunk in context.chunks],
     )
     return f"""
-file name: {context.file_name}
-
-{for_chunks}
+file name: {context.file_name}{for_chunks}
 """.strip()
 
 
@@ -71,7 +67,7 @@ def create_prompt_for_histories(history: list[ChatHistory]):
     total_len = len(history)
     prompt = "\n".join(
         [
-            "Previously, the user prompted you with the following questions/statements:\n",
+            "This is transcript of your conversation with the user so far. Please respond to the remaining question:\n",
             *[
                 create_prompt_for_history(h, total_len, idx)
                 for idx, h in enumerate(history)
@@ -91,6 +87,6 @@ def create_prompt_for_history(
 ):
     too_long = total_len - idx > WINDOW_LIMIT
     return f"""
-User: {history.question}
-You: {history.answer if not too_long else "OMITTED FOR BREVITY"}
+Human: {history.question}
+AI: {history.answer if not too_long else "..."}
 """

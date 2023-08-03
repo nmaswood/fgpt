@@ -1,4 +1,4 @@
-import { assertNever, FileToRender } from "@fgpt/precedent-iso";
+import { FileToRender } from "@fgpt/precedent-iso";
 import React from "react";
 import useSWR from "swr";
 

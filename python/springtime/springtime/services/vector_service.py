@@ -63,7 +63,7 @@ class PineconeVectorService(VectorService):
     ) -> list[VectorResult]:
         result = self.index.query(
             vector=vector,
-            top_k=15,
+            top_k=10,
             include_values=False,
             include_metadata=True,
             filter=metadata,

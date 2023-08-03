@@ -56,6 +56,7 @@ export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
             organizationId: textChunk.organizationId,
             projectId: textChunk.projectId,
             fileReferenceId: textChunk.fileReferenceId,
+            hash: textChunk.hash,
             ...orderMap[textChunk.chunkOrder],
           },
         }));

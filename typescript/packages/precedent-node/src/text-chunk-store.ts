@@ -22,6 +22,7 @@ export interface TextChunk {
   chunkOrder: number;
   chunkText: string;
   hasEmbedding: boolean;
+  hash: string;
 }
 
 export interface UpsertTextChunkCommon {
@@ -91,7 +92,7 @@ export interface TextChunkStore {
   getEmbeddings(ids: string[]): Promise<EmbeddingResult[]>;
 }
 
-const TEXT_CHUNK_FIELDS = sql.fragment`text_chunk.id, text_chunk.organization_id, text_chunk.project_id, text_chunk.file_reference_id, text_chunk.processed_file_id, text_chunk.chunk_order, text_chunk.chunk_text, text_chunk.embedding IS NOT NULL AS has_embedding, text_chunk_group_id`;
+const TEXT_CHUNK_FIELDS = sql.fragment`text_chunk.id, text_chunk.organization_id, text_chunk.project_id, text_chunk.file_reference_id, text_chunk.processed_file_id, text_chunk.chunk_order, text_chunk.chunk_text, text_chunk.embedding IS NOT NULL AS has_embedding, text_chunk_group_id, text_chunk.chunk_text_sha256 as hash`;
 
 const TEXT_CHUNK_GROUP_FIELDS = sql.fragment`text_chunk_group.id, organization_id, project_id, file_reference_id, processed_file_id, num_chunks`;
 
@@ -418,18 +419,22 @@ const ZTextChunkRow = z
     chunk_order: z.number(),
     chunk_text: z.string(),
     has_embedding: z.boolean(),
+    hash: z.string(),
   })
-  .transform((row) => ({
-    id: row.id,
-    organizationId: row.organization_id,
-    projectId: row.project_id,
-    fileReferenceId: row.file_reference_id,
-    processedFileId: row.processed_file_id,
-    textChunkGroupId: row.text_chunk_group_id,
-    chunkOrder: row.chunk_order,
-    chunkText: row.chunk_text,
-    hasEmbedding: row.has_embedding,
-  }));
+  .transform(
+    (row): TextChunk => ({
+      id: row.id,
+      organizationId: row.organization_id,
+      projectId: row.project_id,
+      fileReferenceId: row.file_reference_id,
+      processedFileId: row.processed_file_id,
+      textChunkGroupId: row.text_chunk_group_id,
+      chunkOrder: row.chunk_order,
+      chunkText: row.chunk_text,
+      hasEmbedding: row.has_embedding,
+      hash: row.hash,
+    }),
+  );
 
 const ZEmbeddingRow = z
   .object({
