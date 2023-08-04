@@ -48,8 +48,13 @@ class ReportService(abc.ABC):
 
 
 class OpenAIReportService(ReportService):
-    def __init__(self, model: OpenAIModel) -> None:
-        self.model = model
+    def __init__(
+        self,
+        model_for_terms: OpenAIModel,
+        model_for_questions: OpenAIModel,
+    ) -> None:
+        self.model_for_terms = model_for_terms
+        self.model_for_questions = model_for_questions
 
     def generate_questions(self, text: str) -> list[str]:
         for _attempt in range(3):
@@ -65,7 +70,7 @@ class OpenAIReportService(ReportService):
 
     def _generate_questions(self, text: str) -> list[str]:
         completion = openai.ChatCompletion.create(
-            model=self.model,
+            model=self.model_for_questions,
             messages=[
                 {
                     "role": "system",
@@ -73,7 +78,7 @@ class OpenAIReportService(ReportService):
                 },
                 {
                     "role": "user",
-                    "content": "You will be given a document. Read the document and generate up to ten of the most relevant questions you would want to ask about the data to better understand it for evaluating a potential investment.",
+                    "content": "You will be given a document. Read the document and generate the top 3 most relevant questions you would want to ask about the data to better understand it for evaluating a potential investment.",
                 },
                 {
                     "role": "user",
@@ -107,7 +112,7 @@ class OpenAIReportService(ReportService):
 
     def _generate_terms(self, text: str) -> list[Term]:
         completion = openai.ChatCompletion.create(
-            model=self.model,
+            model=self.model_for_terms,
             messages=[
                 {
                     "role": "system",
@@ -157,7 +162,7 @@ class ClaudeReportService(ReportService):
         prompt = f"""
 
 
-Human: You are an expert financial analyst AI assistant. I will provide you a document. The document will start after the delimiter _START_DOCUMENT_ and end after the delimiter _END_DOCUMENT_. Based on the document generate the 10 most relevant questions you would want to ask about the data to better understand it for evaluating a potential investment.
+Human: You are an expert financial analyst AI assistant. I will provide you a document. The document will start after the delimiter _START_DOCUMENT_ and end after the delimiter _END_DOCUMENT_. Based on the document generate the top 3 most relevant questions you would want to ask about the data to better understand it for evaluating a potential investment.
 
 * Output each question as an entry in a json array of strings.
 * Speak in the third person, e.g. do not use "you"

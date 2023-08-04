@@ -27,5 +27,6 @@ class CompletionResponse(BaseModel):
 
 
 class OpenAIModel(StrEnum):
+    gpt3 = "gpt-3.5-turbo"
     gpt3_16k = "gpt-3.5-turbo-16k"
     gpt4 = "gpt-4-0613"

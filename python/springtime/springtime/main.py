@@ -67,6 +67,7 @@ VECTOR_SERVICE = PineconeVectorService(
 )
 OPENAI_REPORT_SERVICE = OpenAIReportService(
     SETTINGS.reports_openai_model,
+    OpenAIModel.gpt3,
 )
 CLAUDE_REPORT_SERVICE = ClaudeReportService(ANTHROPIC_CLIENT)
 CHAT_SERVICE = OpenAIChatService(OpenAIModel.gpt3_16k)
