@@ -6,7 +6,6 @@ import SendIcon from "@mui/icons-material/SendOutlined";
 import {
   Avatar,
   Box,
-  CircularProgress,
   Divider,
   IconButton,
   Input,
