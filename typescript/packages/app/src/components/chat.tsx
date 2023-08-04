@@ -85,17 +85,6 @@ export const DisplayChat: React.FC<{
   );
 
   React.useEffect(() => {
-    if (!chatEntries.length || !selectedChatId) {
-      return;
-    }
-    setEntriesByChatId((prev) => {
-      const clone = structuredClone(prev);
-      delete clone[selectedChatId];
-      return clone;
-    });
-  }, [chatEntries, selectedChatId]);
-
-  React.useEffect(() => {
     setSelectedChatId(undefined);
   }, [projectId, fileReferenceId]);
 
@@ -103,6 +92,7 @@ export const DisplayChat: React.FC<{
     const forChatId = selectedChatId
       ? entriesByChatId[selectedChatId]
       : undefined;
+
     if (!forChatId) {
       return undefined;
     }
