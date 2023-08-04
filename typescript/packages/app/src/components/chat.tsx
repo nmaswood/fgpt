@@ -24,6 +24,7 @@ import { useAskQuestion } from "../hooks/use-ask-question";
 import { useFetchChatEntries } from "../hooks/use-fetch-chat-entry";
 import { useFetchMe } from "../hooks/use-fetch-me";
 import { useFetchPrompt } from "../hooks/use-fetch-prompt";
+import styles from "./chat.module.css";
 import { DisplayChatList } from "./display-chats";
 import { DangerousHTMLElementChat } from "./html-element";
 
@@ -417,7 +418,7 @@ const RenderChatEntryFromClient: React.FC<{
       >
         <Box display="flex" width="100%" alignItems="center">
           <Box ref={ref} display="flex" width="56" height="40" marginRight={2}>
-            <ResponseAvatar state={"data"} />
+            <ResponseAvatar state={"data"} loading={true} />
           </Box>
           {q.state.type === "rendered" && (
             <Typography level="body-sm" sx={{ whiteSpace: "pre-line" }}>
@@ -429,17 +430,16 @@ const RenderChatEntryFromClient: React.FC<{
               {text}
             </Typography>
           )}
-
-          {q.state.type === "rendering" && text.length === 0 && (
-            <CircularProgress size="sm" />
-          )}
         </Box>
       </ListItem>
     </>
   );
 };
 
-const ResponseAvatar: React.FC<{ state: "error" | "data" }> = ({ state }) => {
+const ResponseAvatar: React.FC<{
+  state: "error" | "data";
+  loading: boolean;
+}> = ({ state, loading }) => {
   switch (state) {
     case "error":
       return (
@@ -460,6 +460,7 @@ const ResponseAvatar: React.FC<{ state: "error" | "data" }> = ({ state }) => {
           }}
         >
           <Image
+            className={loading ? styles.spin : undefined}
             priority
             src="/paredo-icon.svg"
             height={18}
