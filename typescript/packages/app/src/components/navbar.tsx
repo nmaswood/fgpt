@@ -12,7 +12,6 @@ import {
   Menu,
   MenuButton,
   MenuItem,
-  MenuList,
   Typography,
 } from "@mui/joy";
 import Image from "next/image";
