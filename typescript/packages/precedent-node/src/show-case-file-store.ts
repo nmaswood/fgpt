@@ -12,7 +12,7 @@ export interface ShowCaseFileStore {
 }
 
 const FIELDS = sql.fragment`id, project_id, file_reference_id`;
-export class PsqlShowCaseFileStore {
+export class PsqlShowCaseFileStore implements ShowCaseFileStore {
   constructor(private readonly pool: DatabasePool) {}
 
   async set(projectId: string, fileReferenceId: string): Promise<ShowCaseFile> {
