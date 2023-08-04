@@ -9,10 +9,12 @@ import {
   Card,
   CardContent,
   CircularProgress,
+  Dropdown,
   IconButton,
   Link,
   ListItemDecorator,
   Menu,
+  MenuButton,
   MenuItem,
   Typography,
 } from "@mui/joy";
@@ -119,61 +121,52 @@ const ProjectCard: React.FC<{
 }> = ({ project, setEditingProject, setDeletingProject }) => {
   const [ref, hovering] = useHover();
 
-  const cardRef = React.useRef(null);
-
-  const [isOpen, setIsOpen] = React.useState(false);
-
-  const ActionMenu = () => (
-    <Menu
-      size="sm"
-      anchorEl={cardRef.current}
-      open={isOpen}
-      onClose={() => setIsOpen(false)}
-      placement="right"
-    >
-      <MenuItem
-        onClick={() => {
-          setEditingProject(project.id, project.name);
-          setIsOpen(false);
-        }}
-      >
-        <ListItemDecorator>
-          <ModeEditIcon color="info" fontSize="small" />
-        </ListItemDecorator>
-        Edit name
-      </MenuItem>
-      <MenuItem
-        onClick={() => {
-          setDeletingProject(project.id, project.name);
-          setIsOpen(false);
-        }}
-      >
-        <ListItemDecorator>
-          <DeleteIcon color="error" fontSize="small" />
-        </ListItemDecorator>
-        Delete deal
-      </MenuItem>
-    </Menu>
-  );
-
   return (
     <Badge
       key={project.id}
       ref={ref}
       invisible={!hovering}
-      onClick={() => setIsOpen(true)}
       badgeContent={
-        <IconButton
-          size="sm"
-          variant="plain"
-          sx={{
-            "&:hover": {
-              bgcolor: "transparent",
-            },
-          }}
-        >
-          <MoreVertOutlinedIcon />
-        </IconButton>
+        <Dropdown>
+          <MenuButton
+            slots={{ root: IconButton }}
+            slotProps={{
+              root: {
+                variant: "plain",
+                size: "sm",
+                sx: {
+                  "&:hover": {
+                    bgcolor: "transparent",
+                  },
+                },
+              },
+            }}
+          >
+            <MoreVertOutlinedIcon />
+          </MenuButton>
+          <Menu size="sm">
+            <MenuItem
+              onClick={() => {
+                setEditingProject(project.id, project.name);
+              }}
+            >
+              <ListItemDecorator>
+                <ModeEditIcon color="info" fontSize="small" />
+              </ListItemDecorator>
+              Edit name
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setDeletingProject(project.id, project.name);
+              }}
+            >
+              <ListItemDecorator>
+                <DeleteIcon color="error" fontSize="small" />
+              </ListItemDecorator>
+              Delete deal
+            </MenuItem>
+          </Menu>
+        </Dropdown>
       }
       sx={{
         "& .MuiBadge-badge": {
@@ -181,7 +174,6 @@ const ProjectCard: React.FC<{
         },
       }}
     >
-      <ActionMenu />
       <Card
         variant="outlined"
         sx={{
@@ -224,7 +216,6 @@ const ProjectCard: React.FC<{
           <Typography
             level="h1"
             fontSize="md"
-            ref={cardRef}
             textAlign={"center"}
             sx={{ mb: 0.5, color: "neutral.50" }}
           >

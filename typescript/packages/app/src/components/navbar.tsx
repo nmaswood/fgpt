@@ -5,11 +5,14 @@ import {
   Avatar,
   Box,
   Breadcrumbs,
+  Dropdown,
   IconButton,
   Link,
   ListItemDecorator,
   Menu,
+  MenuButton,
   MenuItem,
+  MenuList,
   Typography,
 } from "@mui/joy";
 import Image from "next/image";
@@ -138,25 +141,24 @@ const DisplayUser = () => {
   const { data: user } = useFetchMe();
   const isSuperAdmin = user?.role === "superadmin";
 
-  const [open, setOpen] = React.useState(false);
-
-  const handleClose = () => setOpen(false);
-  const buttonRef = React.useRef(null);
-
   return (
     <Box display="flex" alignItems="center">
       {auth0User && (
-        <>
-          <IconButton
-            ref={buttonRef}
-            variant="plain"
-            size="sm"
-            sx={{
-              padding: 0,
-              backgroundColor: "transparent",
-              transition: "all .2s ease-in-out",
+        <Dropdown>
+          <MenuButton
+            slots={{ root: IconButton }}
+            slotProps={{
+              root: {
+                variant: "plain",
+                color: "neutral",
+                size: "sm",
+                sx: {
+                  padding: 0,
+                  backgroundColor: "transparent",
+                  transition: "all .2s ease-in-out",
+                },
+              },
             }}
-            onClick={() => setOpen(true)}
           >
             <Avatar
               src={auth0User.picture ?? ""}
@@ -171,14 +173,9 @@ const DisplayUser = () => {
             >
               {getInitials(auth0User.name ?? "")}
             </Avatar>
-          </IconButton>
+          </MenuButton>
 
-          <Menu
-            anchorEl={buttonRef.current}
-            open={open}
-            onClose={handleClose}
-            placement="bottom-end"
-          >
+          <Menu>
             <MenuItem
               component={Link}
               href="/api/auth/logout"
@@ -189,7 +186,6 @@ const DisplayUser = () => {
               }}
               onClick={() => {
                 ImpersonateService.clear();
-                handleClose();
               }}
             >
               <ListItemDecorator>
@@ -202,7 +198,6 @@ const DisplayUser = () => {
               <MenuItem
                 component={Link}
                 href="/admin"
-                onClick={handleClose}
                 sx={{
                   ":hover": {
                     textDecoration: "none",
@@ -216,7 +211,7 @@ const DisplayUser = () => {
               </MenuItem>
             )}
           </Menu>
-        </>
+        </Dropdown>
       )}
     </Box>
   );
