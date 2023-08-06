@@ -1,15 +1,6 @@
+import { Prompt, PromptDefinition, ZPromptSlug } from "@fgpt/precedent-iso";
 import { DatabasePool, sql } from "slonik";
 import { z } from "zod";
-
-export interface PromptDefinition {
-  template: string;
-}
-
-export interface Prompt {
-  id: string;
-  slug: string;
-  definition: PromptDefinition;
-}
 
 interface UpsertPrompt {
   slug: string;
@@ -18,6 +9,7 @@ interface UpsertPrompt {
 export interface PromptStore {
   upsert(args: UpsertPrompt): Promise<Prompt>;
   get(slug: string): Promise<Prompt>;
+  list(): Promise<Prompt[]>;
 }
 
 const FIELDS = sql.fragment`id, slug, definition`;
@@ -44,6 +36,16 @@ WHERE
     slug = ${slug}
 `);
   }
+
+  async list(): Promise<Prompt[]> {
+    const rows = await this.pool.any(sql.type(ZPromptRow)`
+SELECT
+    ${FIELDS}
+FROM
+    prompt
+`);
+    return Array.from(rows);
+  }
 }
 
 const ZDefinition = z.object({
@@ -52,6 +54,6 @@ const ZDefinition = z.object({
 
 const ZPromptRow = z.object({
   id: z.string(),
-  slug: z.string(),
+  slug: ZPromptSlug,
   definition: ZDefinition,
 });

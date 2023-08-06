@@ -15,7 +15,7 @@ async function setup() {
   const userOrgService = new PsqlUserOrgService(pool);
 
   const prompt = await promptStore.upsert({
-    slug: "test",
+    slug: "kpi",
     definition: {
       template: "test",
     },
@@ -38,7 +38,9 @@ async function setup() {
 beforeEach(async () => {
   const pool = await dataBasePool(TEST_SETTINGS.sqlUri);
 
-  await pool.query(sql.unsafe`TRUNCATE TABLE prompt CASCADE`);
+  await pool.query(
+    sql.unsafe`TRUNCATE TABLE prompt, prompt_invocation CASCADE`,
+  );
 });
 
 test("insert", async () => {

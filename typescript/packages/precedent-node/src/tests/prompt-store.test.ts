@@ -25,7 +25,7 @@ test("upsert", async () => {
   const { store } = await setup();
 
   const prompt = await store.upsert({
-    slug: "test",
+    slug: "kpi",
     definition: {
       template: "test",
     },
@@ -38,7 +38,7 @@ test("get", async () => {
   const { store } = await setup();
 
   const prompt = await store.upsert({
-    slug: "test",
+    slug: "kpi",
     definition: {
       template: "test",
     },

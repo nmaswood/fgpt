@@ -14,6 +14,7 @@ export * as Outputs from "./models/llm-outputs";
 export * from "./models/organization";
 export * from "./models/progress";
 export * from "./models/project";
+export * from "./models/prompt";
 export * from "./models/render-file";
 export * from "./models/render-show-case-file";
 export * from "./models/sql-helpers";

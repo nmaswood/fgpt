@@ -1,6 +1,6 @@
 import useSWR from "swr";
 
-export const useFetchPrompt = (chatEntryId: string) => {
+export const useFetchChatPrompt = (chatEntryId: string) => {
   const { data, isLoading, mutate } = useSWR<
     string,
     ["/api/proxy/v1/chat/prompt", string]

@@ -35,6 +35,7 @@ import {
   PsqlLoadedFileStore,
   PsqlMiscOutputStore,
   PSqlProjectStore,
+  PsqlPromptStore,
   PsqlQuestionStore,
   PsqlShowCaseFileStore,
   PSqlTaskStore,
@@ -178,6 +179,8 @@ async function start() {
     vectorService,
   );
 
+  const promptStore = new PsqlPromptStore(pool);
+
   app.use(cors({ origin: SETTINGS.corsOrigin }));
 
   app.use("/api/v1/user-org", jwtCheck, addUser, new UserOrgRouter().init());
@@ -234,7 +237,7 @@ async function start() {
     jwtCheck,
     addUser,
     ensureAdmin,
-    new AdminRouter(userOrgService).init(),
+    new AdminRouter(userOrgService, promptStore).init(),
   );
 
   app.use("/ping", (_, res) => {
