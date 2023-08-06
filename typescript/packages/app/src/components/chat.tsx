@@ -22,7 +22,7 @@ import React from "react";
 import { useAskQuestion } from "../hooks/use-ask-question";
 import { useFetchChatEntries } from "../hooks/use-fetch-chat-entry";
 import { useFetchMe } from "../hooks/use-fetch-me";
-import { useFetchPrompt } from "../hooks/use-fetch-prompt";
+import { useFetchChatPrompt } from "../hooks/use-fetch-prompt";
 import styles from "./chat.module.css";
 import { DisplayChatList } from "./display-chats";
 import { DangerousHTMLElementChat } from "./html-element";
@@ -331,7 +331,7 @@ const RenderChatEntryFromServer: React.FC<{
         <Box display="flex" width="100%" flexDirection="column">
           <Box display="flex" width="100%" alignItems="center">
             <Box display="flex" width="56" height="40" marginRight={2}>
-              <ResponseAvatar state={"data"} />
+              <ResponseAvatar state={"data"} loading={false} />
             </Box>
 
             {chatEntry.html ? (
@@ -368,7 +368,7 @@ const RenderChatEntryFromServer: React.FC<{
 };
 
 const DisplayPrompt: React.FC<{ id: string }> = ({ id }) => {
-  const { data } = useFetchPrompt(id);
+  const { data } = useFetchChatPrompt(id);
   return <Typography whiteSpace="pre-wrap">{data}</Typography>;
 };
 
