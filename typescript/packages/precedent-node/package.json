@@ -6,14 +6,14 @@
   "packageManager": "yarn@3.3.0",
   "private": true,
   "devDependencies": {
-    "@types/eslint": "^8.44.1",
+    "@types/eslint": "^8.44.2",
     "@types/lodash": "^4.14.196",
     "@types/prettier": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^6.2.1",
     "@typescript-eslint/parser": "^6.2.1",
     "eslint": "^8.46.0",
     "eslint-plugin-simple-import-sort": "^10.0.0",
-    "eslint-plugin-sql": "^2.4.3",
+    "eslint-plugin-sql": "^2.4.4",
     "prettier": "^3.0.1",
     "typescript": "^5.1.6",
     "vitest": "^0.34.1"
@@ -34,12 +34,12 @@
   },
   "dependencies": {
     "@fgpt/precedent-iso": "workspace:^",
-    "@google-cloud/pubsub": "^3.7.3",
-    "@google-cloud/storage": "^6.12.0",
+    "@google-cloud/pubsub": "^4.0.0",
+    "@google-cloud/storage": "^7.0.0",
     "axios": "^1.4.0",
     "cheerio": "^1.0.0-rc.12",
     "lodash": "^4.17.21",
-    "pino": "^8.14.2",
+    "pino": "^8.15.0",
     "slonik": "^34.0.1",
     "zod": "^3.21.4"
   }
