@@ -186,7 +186,7 @@ const DisplayPrompts: React.FC<{ prompts: Prompt[] }> = ({ prompts }) => {
     >
       <Select
         value={selectedSlug ?? null}
-        onChange={(e, value) => {
+        onChange={(_, value) => {
           if (!value) {
             throw new Error("invalid state");
           }
