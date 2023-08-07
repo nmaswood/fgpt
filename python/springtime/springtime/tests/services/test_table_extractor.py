@@ -16,7 +16,7 @@ def table_extractor():
     return TabulaTableExtractor(object_store)
 
 
-PDF = os.path.join(os.path.dirname(__file__), "American-casinos-CIM.pdf")
+PDF = os.path.join(os.path.dirname(__file__), "../data/American-casinos-CIM.pdf")
 
 
 def test_extract(table_extractor: TableExtractor):

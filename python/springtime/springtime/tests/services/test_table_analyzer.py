@@ -2,9 +2,9 @@ import os
 
 import pandas as pd
 import pytest
+from anthropic import Anthropic
 
 from springtime.models.open_ai import OpenAIModel
-from springtime.services.anthropic_client import AnthropicClient
 from springtime.services.excel_analyzer import ClaudeExcelAnalyzer, OpenAIExcelAnalyzer
 from springtime.services.sheet_processor import (
     CLAUDE_SHEET_PROCESSOR,
@@ -16,7 +16,7 @@ XLSX = os.path.join(os.path.dirname(__file__), "../data/dummy-extracted.xlsx")
 
 
 GPT_EXCEL_ANALYZER = OpenAIExcelAnalyzer(OpenAIModel.gpt3_16k)
-CLAUDE_EXCEL_ANALYZER = ClaudeExcelAnalyzer(AnthropicClient())
+CLAUDE_EXCEL_ANALYZER = ClaudeExcelAnalyzer(Anthropic())
 
 
 @pytest.fixture()

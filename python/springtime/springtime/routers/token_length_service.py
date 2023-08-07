@@ -4,7 +4,7 @@ import tiktoken
 ENC_GPT4 = tiktoken.encoding_for_model("gpt-4")
 
 
-client = anthropic.Anthropic()
+anthropic_client = anthropic.Anthropic()
 
 
 class TokenLength:
@@ -14,4 +14,4 @@ class TokenLength:
 
     @staticmethod
     def claude100k(text: str):
-        return client.count_tokens(text)
+        return anthropic_client.count_tokens(text)

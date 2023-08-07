@@ -1,6 +1,6 @@
 import pytest
+from anthropic import Anthropic
 
-from springtime.services.anthropic_client import AnthropicClient
 from springtime.services.long_form_report_service import (
     ClaudeLongformReportService,
     LongformReportService,
@@ -8,13 +8,8 @@ from springtime.services.long_form_report_service import (
 
 
 @pytest.fixture()
-def anthropic_client():
-    return AnthropicClient()
-
-
-@pytest.fixture()
-def long_form_report_service(anthropic_client: AnthropicClient):
-    return ClaudeLongformReportService(anthropic_client)
+def long_form_report_service():
+    return ClaudeLongformReportService(Anthropic())
 
 
 DATA = """

@@ -1,8 +1,8 @@
 import abc
 
 import pydantic
+from anthropic import Anthropic
 
-from springtime.services.anthropic_client import AnthropicClient
 from springtime.services.html import html_from_text
 
 
@@ -84,8 +84,8 @@ For example:
 
 
 class ClaudeLongformReportService(LongformReportService):
-    def __init__(self, client: AnthropicClient) -> None:
-        self._client = client
+    def __init__(self, anthropic_client: Anthropic) -> None:
+        self.anthropic_client = anthropic_client
 
     def generate(self, text: str) -> LongformReport:
         prompt = f"""
@@ -101,9 +101,11 @@ Human: _START_DOCUMENT_{text.strip()}_END_DOCUMENT_
 
 
 Assistant:"""
-        raw = self._client.complete(
-            prompt,
-        ).strip()
+        raw = self.anthropic_client.completions.create(
+            prompt=prompt,
+            max_tokens_to_sample=1_000_000,
+            model="claude-2",
+        ).completion.strip()
         sanitized_html = html_from_text(raw)
         return LongformReport(
             raw=raw,

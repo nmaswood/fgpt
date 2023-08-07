@@ -44,7 +44,7 @@ pyright = "^1.1.317"
 
 [tool.ruff]
 select = ["ALL"]
-ignore = ["F841", "E501", "D102", "ANN101", "D107", "D101", "D106", "D100", "S101", "D103", "ANN201", "ANN202", "ANN205", "INP001"]
+ignore = ["F841", "E501", "D102", "ANN101", "D107", "D101", "D106", "D100", "S101", "D103", "ANN201", "ANN202", "ANN205", "INP001","PTH120", "PTH118"]
 
 [tool.ruff.pydocstyle]
 convention = "google"

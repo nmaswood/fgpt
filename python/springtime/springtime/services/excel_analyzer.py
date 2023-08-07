@@ -1,10 +1,10 @@
 import abc
 
 import openai
+from anthropic import Anthropic
 from pydantic import BaseModel
 
 from springtime.models.open_ai import CompletionResponse, OpenAIModel
-from springtime.services.anthropic_client import AnthropicClient
 from springtime.services.format_sheet import format_sheet
 from springtime.services.html import html_from_text
 from springtime.services.prompts import CLAUDE_PROMPT, GPT_PROMPT
@@ -55,8 +55,8 @@ class OpenAIExcelAnalyzer(ExcelAnalyzer):
 
 
 class ClaudeExcelAnalyzer(ExcelAnalyzer):
-    def __init__(self, anthropic_client: AnthropicClient) -> None:
-        self.anthropic_client = anthropic_client
+    def __init__(self, anthropic_client: Anthropic) -> None:
+        self.anthropic = anthropic_client
 
     def analyze(self, *, sheets: list[PreprocessedSheet]) -> ResponseWithPrompt:
         table_content = "\n---\n".join([format_sheet(sheet) for sheet in sheets])
@@ -72,7 +72,12 @@ __END_DATA__
 
 Assistant:
 """
-        content = self.anthropic_client.complete(prompt=prompt).strip()
+        content = self.anthropic.completions.create(
+            model="claude-2",
+            max_tokens_to_sample=1_000_000,
+            prompt=prompt,
+        ).completion.strip()
+
         return ResponseWithPrompt(
             prompt=prompt,
             content=content,

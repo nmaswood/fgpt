@@ -2,9 +2,9 @@ import os
 
 import pandas as pd
 import pytest
+from anthropic import Anthropic
 
 from springtime.models.open_ai import OpenAIModel
-from springtime.services.anthropic_client import AnthropicClient
 from springtime.services.excel_analyzer import (
     ClaudeExcelAnalyzer,
     ExcelAnalyzer,
@@ -28,7 +28,7 @@ def gpt_analyzer():
 
 @pytest.fixture()
 def claude_analyzer():
-    client = AnthropicClient()
+    client = Anthropic()
     return ClaudeExcelAnalyzer(client)
 
 

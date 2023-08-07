@@ -1,9 +1,9 @@
 import os
 
 import pytest
+from anthropic import Anthropic
 
 from springtime.models.open_ai import OpenAIModel
-from springtime.services.anthropic_client import AnthropicClient
 from springtime.services.excel_analyzer import OpenAIExcelAnalyzer
 from springtime.services.report_service import (
     ClaudeReportService,
@@ -27,13 +27,13 @@ def text():
 
 @pytest.fixture()
 def openai_report_service():
-    return OpenAIReportService(OpenAIModel.gpt3_16k)
+    return OpenAIReportService(OpenAIModel.gpt3_16k, OpenAIModel.gpt3_16k)
 
 
 @pytest.fixture()
 def claude_report_service():
     return ClaudeReportService(
-        AnthropicClient(),
+        Anthropic(),
     )
 
 

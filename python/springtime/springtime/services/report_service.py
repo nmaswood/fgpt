@@ -5,11 +5,11 @@ from typing import Any
 
 import json5
 import openai
+from anthropic import Anthropic
 from loguru import logger
 from pydantic import BaseModel
 
 from springtime.models.open_ai import OpenAIModel
-from springtime.services.anthropic_client import AnthropicClient
 from springtime.services.prompts import questions_schema, terms_schema
 
 
@@ -155,8 +155,8 @@ def parse_json(json_str: str):
 
 
 class ClaudeReportService(ReportService):
-    def __init__(self, client: AnthropicClient) -> None:
-        self._client = client
+    def __init__(self, anthropic_client: Anthropic) -> None:
+        self.anthropic_client = anthropic_client
 
     def generate_questions(self, text: str) -> list[str]:
         prompt = f"""
@@ -172,8 +172,8 @@ Human: _START_DOCUMENT_{text.strip()}_END_DOCUMENT_
 
 
 Assistant:"""
-        raw = self._client.complete(
-            prompt,
+        raw = self.anthropic_client.completions.create(
+            prompt=prompt, model="claude-2", max_tokens_to_sample=1_000_000,
         ).strip()
 
         start_index = raw.find("[")
@@ -225,7 +225,7 @@ Human: _START_DOCUMENT_{text.strip()}_END_DOCUMENT_
 
 Assistant:"""
 
-        raw = self._client.complete(
+        raw = self.anthropic_client.complete(
             prompt,
         ).strip()
 

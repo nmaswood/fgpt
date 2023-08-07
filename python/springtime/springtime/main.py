@@ -1,4 +1,5 @@
 import uvicorn
+from anthropic import Anthropic
 from fastapi import FastAPI
 from loguru import logger
 
@@ -8,15 +9,16 @@ from springtime.object_store.object_store import GCSObjectStore
 from springtime.routers.chat_router import ChatRouter
 from springtime.routers.embeddings_router import EmbeddingsRouter
 from springtime.routers.pdf_router import PdfRouter
+from springtime.routers.prompt_router import PromptRouter
 from springtime.routers.report_router import ReportRouter
 from springtime.routers.table_router import TableRouter
 from springtime.routers.text_router import TextRouter
 from springtime.routers.vector_router import VectorRouter
-from springtime.services.anthropic_client import AnthropicClient
 from springtime.services.chat_service import OpenAIChatService
 from springtime.services.embeddings_service import OpenAIEmbeddingsService
 from springtime.services.excel_analyzer import ClaudeExcelAnalyzer, OpenAIExcelAnalyzer
 from springtime.services.long_form_report_service import ClaudeLongformReportService
+from springtime.services.prompt_service import PromptServiceImpl
 from springtime.services.report_service import ClaudeReportService, OpenAIReportService
 from springtime.services.scan_service import OpenAIScanService
 from springtime.services.sheet_processor import (
@@ -43,10 +45,10 @@ if SETTINGS.tracing_enabled:
 
 
 OBJECT_STORE = GCSObjectStore()
-ANTHROPIC_CLIENT = AnthropicClient()
 TABLE_EXTRACTOR = TabulaTableExtractor(OBJECT_STORE)
 
 THUMBNAIL_SERVICE = FitzThumbnailService()
+ANTHROPIC_CLIENT = Anthropic()
 
 GPT_EXCEL_ANALYZER = OpenAIExcelAnalyzer(SETTINGS.reports_openai_model)
 SCAN_SERVICE = OpenAIScanService(OpenAIModel.gpt3_16k)
@@ -63,7 +65,6 @@ VECTOR_SERVICE = PineconeVectorService(
     environment=SETTINGS.pinecone_env,
     index_name=SETTINGS.pinecone_index,
     namespace=SETTINGS.pinecone_namespace,
-    indexed_fields=["organizationId", "projectId", "fileReferenceId"],
 )
 OPENAI_REPORT_SERVICE = OpenAIReportService(
     SETTINGS.reports_openai_model,
@@ -71,6 +72,8 @@ OPENAI_REPORT_SERVICE = OpenAIReportService(
 )
 CLAUDE_REPORT_SERVICE = ClaudeReportService(ANTHROPIC_CLIENT)
 CHAT_SERVICE = OpenAIChatService(OpenAIModel.gpt3_16k)
+
+PROMPT_SERVICE = PromptServiceImpl(ANTHROPIC_CLIENT)
 
 
 app.include_router(ChatRouter(CHAT_SERVICE).get_router())
@@ -95,6 +98,9 @@ app.include_router(
 app.include_router(TextRouter().get_router())
 app.include_router(VectorRouter(VECTOR_SERVICE).get_router())
 app.include_router(EmbeddingsRouter(EMBEDDING_SERVICE).get_router())
+
+
+app.include_router(PromptRouter(PROMPT_SERVICE).get_router())
 
 
 @app.get("/ping")

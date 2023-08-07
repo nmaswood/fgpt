@@ -31,7 +31,7 @@ test("upsert", async () => {
     },
   });
 
-  expect(prompt.slug).toBe("test");
+  expect(prompt.slug).toBe("kpi");
 });
 
 test("get", async () => {
@@ -44,6 +44,6 @@ test("get", async () => {
     },
   });
 
-  const prompt2 = await store.get("test");
+  const prompt2 = await store.get("kpi");
   expect(prompt2).toEqual(prompt);
 });
