@@ -47,7 +47,7 @@ test("insert", async () => {
   const { store, promptId, organizationId } = await setup();
 
   const prompt = await store.insert({
-    model: "claude-100",
+    model: "claude-2",
     organizationId,
     promptId,
     inputTokens: 1,

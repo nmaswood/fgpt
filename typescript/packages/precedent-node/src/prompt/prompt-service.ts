@@ -22,7 +22,7 @@ export class PromptServiceImpl implements PromptService {
     const prompt = await this.promptStore.get(promptId);
     const result = await this.runner.run(prompt.definition.template, args);
     await this.promptInvocationStore.insert({
-      model: "claude-100",
+      model: "claude-2",
       organizationId,
       promptId,
       inputTokens: result.inputTokens,

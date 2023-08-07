@@ -5,10 +5,8 @@ export interface RunResponse {
   prompt: string;
   inputTokens: number;
   outputTokens: number;
-  output: {
-    raw: string;
-    html: string | undefined;
-  };
+  raw: string;
+  html: string | undefined;
 }
 
 export interface PromptRunner {
@@ -29,22 +27,21 @@ export class HTTPPromptRunner implements PromptRunner {
   }
 }
 
-const ZOutput = z
+const ZRunResponse = z
   .object({
+    prompt: z.string(),
+    input_tokens: z.number().min(0),
+    output_tokens: z.number().min(0),
     raw: z.string(),
     html: z.string().nullable(),
   })
   .transform((row) => ({
+    prompt: row.prompt,
+    inputTokens: row.input_tokens,
+    outputTokens: row.output_tokens,
     raw: row.raw,
     html: row.html ?? undefined,
   }));
-
-const ZRunResponse = z.object({
-  prompt: z.string(),
-  inputTokens: z.number().min(0),
-  outputTokens: z.number().min(0),
-  output: ZOutput,
-});
 
 export class DummyPromptRunner implements PromptRunner {
   async run(_: string, __: Record<string, string>): Promise<RunResponse> {
@@ -52,10 +49,10 @@ export class DummyPromptRunner implements PromptRunner {
       prompt: "hi",
       inputTokens: 1,
       outputTokens: 1,
-      output: {
-        raw: "bye",
-        html: undefined,
-      },
+      raw: "bye",
+      html: "<p>bye</p>",
     };
   }
 }
+
+export const DUMMY_PROMPT_RUNNER = new DummyPromptRunner();
