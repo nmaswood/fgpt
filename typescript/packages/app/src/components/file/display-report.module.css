@@ -1,10 +1,6 @@
 .rotating {
-  animation: rotating 3s linear infinite;
-  animation-play-state: paused;
-}
-
-.rotating:hover {
-  animation-play-state: running;
+  animation: rotating 4s linear infinite;
+  animation-delay: 250ms;
 }
 
 @keyframes rotating {
