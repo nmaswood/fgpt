@@ -39,6 +39,10 @@ import {
   ExcelProgressServiceImpl,
   ProcessedFileProgressServiceImpl,
   ScanHandlerImpl,
+  PromptServiceImpl,
+  PsqlPromptStore,
+  PsqlPromptInvocationStore,
+  HTTPPromptRunner,
 } from "@fgpt/precedent-node";
 import { SETTINGS, Settings } from "./settings";
 import { MainRouter } from "./router";
@@ -148,6 +152,17 @@ async function start(settings: Settings) {
     processedFileStore,
   );
 
+  const promptStore = new PsqlPromptStore(pool);
+  const promptInvocationStore = new PsqlPromptInvocationStore(pool);
+
+  const promptRunner = new HTTPPromptRunner(springtimeClient);
+
+  const promptService = new PromptServiceImpl(
+    promptRunner,
+    promptStore,
+    promptInvocationStore,
+  );
+
   const taskExecutor = new TaskExecutorImpl(
     taskService,
     textExtractionHandler,
@@ -158,6 +173,7 @@ async function start(settings: Settings) {
     ingestFileHandler,
     thumbnailHandler,
     scanHandler,
+    promptService,
   );
 
   const processedFileProgressStore = new ProcessedFileProgressServiceImpl(

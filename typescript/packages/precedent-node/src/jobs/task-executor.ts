@@ -1,6 +1,7 @@
 import { assertNever, ChunkStrategy } from "@fgpt/precedent-iso";
 
 import { LOGGER } from "../logger";
+import { PromptService } from "../prompt/prompt-service";
 import { CreateTask, Task, TaskStore } from "../task-store";
 import { EmbeddingsHandler } from "./generate-embeddings-handler";
 import { IngestFileHandler } from "./ingest-file-handler";
@@ -27,6 +28,7 @@ export class TaskExecutorImpl implements TaskExecutor {
     private readonly ingestFileHandler: IngestFileHandler,
     private readonly thumbnailHandler: ThumbnailHandler,
     private readonly scanHandler: ScanHandler,
+    private readonly promptService: PromptService,
   ) {}
 
   async execute({ config, organizationId, projectId }: Task) {
@@ -216,6 +218,11 @@ export class TaskExecutorImpl implements TaskExecutor {
           processedFileId: config.processedFileId,
         });
         break;
+      }
+
+      case "run-prompt": {
+        this.promptService;
+        throw new Error("not implemented");
       }
 
       default:

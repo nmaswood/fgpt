@@ -16,6 +16,7 @@ export const ZTaskType = z.enum([
   "long-form",
   "thumbnail",
   "scan",
+  "run-prompt",
 ]);
 
 export const ZTaskStatus = z.enum([
@@ -150,6 +151,24 @@ export interface ScanConfig {
   processedFileId: string;
 }
 
+export const ZRunPromptConfig = z.object({
+  type: z.literal("run-prompt"),
+  fileReferenceId: z.string(),
+  slug: z.string(),
+});
+
+export interface RunPromptConfig {
+  type: "run-prompt";
+  fileReferenceId: string;
+  slug: string;
+}
+
+export interface ScanConfig {
+  type: "scan";
+  fileReferenceId: string;
+  processedFileId: string;
+}
+
 export const ZScanConfig = z.object({
   type: z.literal("scan"),
   fileReferenceId: z.string(),
@@ -166,7 +185,8 @@ export type TaskConfig =
   | LongFormReportConfig
   | AnalyzeTableConfig
   | ThumbnailConfig
-  | ScanConfig;
+  | ScanConfig
+  | RunPromptConfig;
 
 function analysis(row: z.infer<typeof ZAnalyzeTableConfig>): TableAnalysis {
   if (row.analysis) {
@@ -196,6 +216,7 @@ export const ZTaskConfig = z
     ZAnalyzeTableConfig,
     ZThumbnailConfig,
     ZScanConfig,
+    ZRunPromptConfig,
   ])
   .transform((row): TaskConfig => {
     switch (row.type) {
@@ -215,6 +236,7 @@ export const ZTaskConfig = z
       case "long-form":
       case "thumbnail":
       case "scan":
+      case "run-prompt":
         return row;
       default:
         assertNever(row);

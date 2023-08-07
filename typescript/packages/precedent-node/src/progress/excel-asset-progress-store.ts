@@ -50,6 +50,7 @@ export class ExcelProgressServiceImpl implements ExcelProgressService {
         case "text-chunk":
         case "thumbnail":
         case "scan":
+        case "run-prompt":
           break;
         default:
           assertNever(task.config);
