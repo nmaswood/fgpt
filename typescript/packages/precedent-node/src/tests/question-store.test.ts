@@ -40,6 +40,8 @@ async function setup() {
     bucketName: "test-bucket",
     contentType: "application/pdf",
     path: "my-path/foo",
+    fileSize: 100,
+    sha256: ShaHash.forData("hi"),
   });
 
   const processedFile = await processedFileStore.upsert({

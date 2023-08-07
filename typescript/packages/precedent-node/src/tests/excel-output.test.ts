@@ -39,6 +39,8 @@ async function setup() {
     bucketName: "test-bucket",
     contentType: "application/pdf",
     path: "my-path/foo",
+    fileSize: 100,
+    sha256: "abc",
   });
 
   const excelAsset = await excelStore.insert({
@@ -92,7 +94,13 @@ test("insertMany", async () => {
     excelAssetId,
     output: {
       type: "v0_chunks",
-      value: [{ content: "hi hi hi", sheetNames: ["sheet1"] }],
+      value: [
+        {
+          content: "hi hi hi",
+          sheetNames: ["sheet1"],
+          html: "hi",
+        },
+      ],
       model: "gpt",
     },
   });
@@ -116,7 +124,13 @@ test("forDerived", async () => {
     excelAssetId,
     output: {
       type: "v0_chunks",
-      value: [{ content: "hi hi hi", sheetNames: ["sheet1"] }],
+      value: [
+        {
+          content: "hi hi hi",
+          sheetNames: ["sheet1"],
+          html: "hi",
+        },
+      ],
       model: "claude",
     },
   });
@@ -139,7 +153,14 @@ test("forDirectUpload", async () => {
     excelAssetId: undefined,
     output: {
       type: "v0_chunks",
-      value: [{ content: "hi hi hi", sheetNames: ["sheet1"] }],
+      value: [
+        {
+          content: "hi hi hi",
+          sheetNames: ["sheet1"],
+
+          html: "hi",
+        },
+      ],
       model: "gpt",
     },
   });

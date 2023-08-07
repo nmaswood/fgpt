@@ -8,9 +8,6 @@ import { z } from "zod";
 
 export interface ExcelOutput {
   id: string;
-  organizationId: string;
-  projectId: string;
-  fileReferenceId: string;
   source: ExcelSource;
   output: AnalyzeOutput;
 }
@@ -29,7 +26,7 @@ export interface ExcelOutputStore {
   forDerived(fileReferenceId: string): Promise<ExcelOutput[]>;
 }
 
-const FIELDS = sql.fragment` id, organization_id, project_id, file_reference_id, excel_asset_id, output`;
+const FIELDS = sql.fragment` id, excel_asset_id, output`;
 
 export class PsqlExcelOutputStore implements ExcelOutputStore {
   constructor(private readonly pool: DatabasePool) {}
@@ -91,6 +88,7 @@ const ZAnalyzeOutput = z.object({
       sheetNames: z.array(z.string()),
       content: z.string(),
       sanitizedHtml: z.string().optional(),
+      html: z.string().optional(),
     })
     .array(),
   model: ZAnalyzeTableModel.optional(),
@@ -99,18 +97,12 @@ const ZAnalyzeOutput = z.object({
 const ZExcelOutputRow = z
   .object({
     id: z.string(),
-    project_id: z.string(),
-    organization_id: z.string(),
-    file_reference_id: z.string(),
     excel_asset_id: z.string().nullable(),
     output: ZAnalyzeOutput,
   })
   .transform(
     (row): ExcelOutput => ({
       id: row.id,
-      organizationId: row.organization_id,
-      projectId: row.project_id,
-      fileReferenceId: row.file_reference_id,
       source: row.excel_asset_id
         ? {
             type: "derived",
@@ -124,7 +116,7 @@ const ZExcelOutputRow = z
         value: row.output.value.map((chunk) => ({
           sheetNames: chunk.sheetNames,
           content: chunk.content,
-          sanitizedHtml: chunk.sanitizedHtml,
+          html: chunk.sanitizedHtml ?? chunk.html ?? undefined,
         })),
         model: row.output.model ?? "gpt",
       },

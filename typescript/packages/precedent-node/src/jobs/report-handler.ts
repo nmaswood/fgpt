@@ -1,9 +1,6 @@
 import { chunk } from "lodash";
 
-import {
-  InsertMiscValue,
-  MiscOutputStore,
-} from "../llm-outputs/misc-output-store";
+import { MiscOutputStore } from "../llm-outputs/misc-output-store";
 import { QuestionStore } from "../llm-outputs/question-store";
 import { LOGGER } from "../logger";
 import { LongFormResponse, MLReportService } from "../ml/ml-report-service";
@@ -66,8 +63,8 @@ export class ReportHandlerImpl implements ReportHandler {
         textChunkGroupId,
         value: {
           type: "long_form",
-          value: row.value.raw,
-          sanitizedHtml: row.value.sanitizedHtml ?? undefined,
+          raw: row.value.raw,
+          html: row.value.html,
         },
       })),
     );
@@ -122,19 +119,18 @@ export class ReportHandlerImpl implements ReportHandler {
       this.mlReportService.generateTerms(chunk.chunkText),
     ]);
 
-    const values: InsertMiscValue[] = [];
-
     if (terms.length > 0) {
-      values.push({
-        ...config,
-        value: {
-          type: "terms",
-          value: terms,
+      await this.miscOutputStore.insertMany([
+        {
+          ...config,
+          value: {
+            type: "terms",
+            value: terms,
+            order: chunk.chunkOrder,
+          },
         },
-      });
+      ]);
     }
-
-    await this.miscOutputStore.insertMany(values);
 
     await this.questionStore.insertMany(
       questions.map((question) => ({

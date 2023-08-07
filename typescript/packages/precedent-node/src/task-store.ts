@@ -38,6 +38,7 @@ interface SetAsCompleted {
 export interface TaskStore {
   get(taskId: string): Promise<Task>;
   getByFileReferenceId(fileReferenceId: string): Promise<Task[]>;
+
   insert(config: CreateTask): Promise<Task>;
   insertMany(configs: CreateTask[]): Promise<Task[]>;
   setToInProgress(taskId: string): Promise<Task>;

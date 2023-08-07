@@ -313,8 +313,8 @@ resource "google_cloud_run_v2_service" "springtime" {
 
       resources {
         limits = {
-          cpu    = "1"
-          memory = "4Gi"
+          cpu    = "2"
+          memory = "6Gi"
         }
 
         startup_cpu_boost = true

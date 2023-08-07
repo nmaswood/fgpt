@@ -35,7 +35,6 @@ export namespace FileToRender {
 }
 
 export interface ExcelOutputToRender {
-  gpt: AnalyzeResponseChunk[];
   claude: AnalyzeResponseChunk[];
 }
 

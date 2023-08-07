@@ -8,7 +8,7 @@ export interface LongFormArgs {
 
 export interface LongFormResponse {
   raw: string;
-  sanitizedHtml: string | undefined;
+  html: string | undefined;
 }
 
 export interface MLReportService {
@@ -66,7 +66,7 @@ const ZLongFormReportResponse = z
   })
   .transform((v) => ({
     raw: v.raw,
-    sanitizedHtml: v.sanitized_html ?? undefined,
+    html: v.sanitized_html ?? undefined,
   }));
 
 const ZTerm = z

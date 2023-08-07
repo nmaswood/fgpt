@@ -20,14 +20,27 @@ export interface UpsertProcessedFile {
 
 export interface ProcessedFileStore {
   upsert(args: UpsertProcessedFile): Promise<ProcessedFile>;
-  upsertMany(args: UpsertProcessedFile[]): Promise<ProcessedFile[]>;
   getText(id: string): Promise<string>;
+  getByFileReferenceId(id: string): Promise<ProcessedFile>;
 }
 
 const FIELDS = sql.fragment` id, organization_id, project_id, file_reference_id`;
 
 export class PsqlProcessedFileStore implements ProcessedFileStore {
   constructor(private readonly pool: DatabasePool) {}
+
+  async getByFileReferenceId(id: string): Promise<ProcessedFile> {
+    return this.pool.one(
+      sql.type(ZProcessedFileRow)`
+SELECT
+    ${FIELDS}
+FROM
+    processed_file
+WHERE
+    file_reference_id = ${id}
+`,
+    );
+  }
 
   async getText(id: string): Promise<string> {
     return this.pool.oneFirst(

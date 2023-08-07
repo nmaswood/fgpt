@@ -17,13 +17,8 @@ import {
   Chip,
   Divider,
   IconButton,
-  List,
-  ListItem,
-  ListItemContent,
   Menu,
   MenuItem,
-  Option,
-  Select,
   Typography,
 } from "@mui/joy";
 import Image from "next/image";
@@ -32,12 +27,10 @@ import React from "react";
 import { DangerousHTMLElementChat } from "../html-element";
 import { TermsTable } from "../terms-table";
 import styles from "./display-report.module.css";
-import { ReportType } from "./report-type";
 
 export const DisplayFileReport: React.FC<{
   file: FileToRender.File;
-  showAdminOnly: boolean;
-}> = ({ file, showAdminOnly }) => {
+}> = ({ file }) => {
   const terms = file.type === "pdf" ? file.report?.terms ?? [] : [];
   return (
     <Box
@@ -85,30 +78,22 @@ export const DisplayFileReport: React.FC<{
           terms={terms}
         />
       )}
-      <ForReport file={file} showAdminOnly={showAdminOnly} />
+      <ForReport file={file} />
     </Box>
   );
 };
 
 const Dispatch: React.FC<{
   file: FileToRender.File;
-  reportType: ReportType;
-  setReportType: (reportType: ReportType) => void;
-}> = ({ file, reportType, setReportType }) => {
+}> = ({ file }) => {
   switch (file.type) {
     case "pdf":
       if (!file.report) {
         return null;
       }
-      return (
-        <PdfReport
-          report={file.report}
-          reportType={reportType}
-          setReportType={setReportType}
-        />
-      );
+      return <PdfReport report={file.report} />;
     case "excel":
-      return <ForExcelOutput output={file.output} reportType={reportType} />;
+      return <ForExcelOutput output={file.output} />;
     default:
       assertNever(file);
   }
@@ -116,9 +101,7 @@ const Dispatch: React.FC<{
 
 const ForExcelOutput: React.FC<{
   output: ExcelOutputToRender;
-  reportType: ReportType;
-}> = ({ output: { claude, gpt }, reportType }) => {
-  const output = reportType == "gpt4" ? gpt : claude;
+}> = ({ output: { claude } }) => {
   return (
     <Box
       display="flex"
@@ -129,7 +112,7 @@ const ForExcelOutput: React.FC<{
       overflow="auto"
       flexDirection="column"
     >
-      <ForExcel chunks={output} />
+      <ForExcel chunks={claude} />
     </Box>
   );
 };
@@ -137,9 +120,9 @@ const ForExcelOutput: React.FC<{
 const ForExcel: React.FC<{ chunks: AnalyzeResponseChunk[] }> = ({ chunks }) => {
   const allHTML = chunks
     .map((chunk) =>
-      chunk.sanitizedHtml
+      chunk.html
         ? {
-            html: chunk.sanitizedHtml,
+            html: chunk.html,
             sheetNames: chunk.sheetNames,
           }
         : null,
@@ -198,9 +181,7 @@ const ForExcelValue: React.FC<{ chunk: AnalyzeResponseChunk }> = ({
 
 const PdfReport: React.FC<{
   report: Outputs.Report;
-  reportType: ReportType;
-  setReportType: (reportType: ReportType) => void;
-}> = ({ report, reportType }) => {
+}> = ({ report }) => {
   return (
     <Box
       display="flex"
@@ -210,8 +191,7 @@ const PdfReport: React.FC<{
       overflow="auto"
       width="100%"
     >
-      {reportType === "claude" && <ClaudeReport longForm={report.longForm} />}
-      {reportType === "gpt4" && <ChatGPTReport report={report} />}
+      <ClaudeReport longForm={report.longForm} />
     </Box>
   );
 };
@@ -334,9 +314,7 @@ const ForOverview: React.FC<{
 
 const ForReport: React.FC<{
   file: FileToRender.File;
-  showAdminOnly: boolean;
-}> = ({ file, showAdminOnly }) => {
-  const [reportType, setReportType] = React.useState<ReportType>("claude");
+}> = ({ file }) => {
   if (file.status === "pending") {
     return (
       <Box
@@ -401,23 +379,6 @@ const ForReport: React.FC<{
           >
             Report
           </Typography>
-          {showAdminOnly && (
-            <Select
-              size="sm"
-              value={reportType}
-              sx={{
-                width: "fit-content",
-              }}
-              onChange={(_, newValue) => {
-                if (newValue) {
-                  setReportType(newValue);
-                }
-              }}
-            >
-              <Option value="gpt4">GPT-4</Option>
-              <Option value="claude">Claude</Option>
-            </Select>
-          )}
         </Box>
 
         <DownloadButton
@@ -430,11 +391,7 @@ const ForReport: React.FC<{
       </Box>
       <Divider />
       <Box display="flex" padding={2} maxHeight="100%" overflow="auto">
-        <Dispatch
-          file={file}
-          reportType={reportType}
-          setReportType={setReportType}
-        />
+        <Dispatch file={file} />
       </Box>
     </Box>
   );
@@ -516,105 +473,6 @@ const ClaudeReport: React.FC<{
       {allHtml.map((html, idx) => (
         <DangerousHTMLElementChat key={idx} html={html} />
       ))}
-    </Box>
-  );
-};
-
-const ChatGPTReport: React.FC<{
-  report: Outputs.Report;
-}> = ({ report: { summaries, financialSummary } }) => {
-  return (
-    <Box display="flex" flexDirection="column" maxHeight="100%" overflow="auto">
-      {summaries.length > 0 && (
-        <>
-          <Typography
-            level="title-md"
-            sx={{
-              fontSize: "16px",
-              fontWeight: 700,
-            }}
-          >
-            Summary
-          </Typography>
-
-          <List sx={{ listStyleType: "disc", pl: 4 }}>
-            {summaries.map((summary, idx) => (
-              <ListItem
-                key={idx}
-                sx={{
-                  paddingX: 0,
-                  display: "list-item",
-                }}
-              >
-                <ListItemContent>{summary}</ListItemContent>
-              </ListItem>
-            ))}
-          </List>
-        </>
-      )}
-
-      {financialSummary.financialSummaries.length > 0 && (
-        <>
-          <Typography
-            level="title-md"
-            sx={{
-              fontSize: "16px",
-              fontWeight: 700,
-            }}
-          >
-            Financial Summary
-          </Typography>
-          <List sx={{ listStyleType: "disc" }}>
-            {financialSummary.financialSummaries.map((summary, idx) => (
-              <ListItem key={idx}>
-                <ListItemContent>{summary}</ListItemContent>
-              </ListItem>
-            ))}
-          </List>
-        </>
-      )}
-
-      {financialSummary.investmentRisks.length > 0 && (
-        <>
-          <Typography
-            level="title-md"
-            sx={{
-              fontSize: "16px",
-              fontWeight: 700,
-            }}
-          >
-            Investment Risks
-          </Typography>
-          <List sx={{ listStyleType: "disc" }}>
-            {financialSummary.investmentRisks.map((risk, idx) => (
-              <ListItem key={idx}>
-                <ListItemContent>{risk}</ListItemContent>
-              </ListItem>
-            ))}
-          </List>
-        </>
-      )}
-
-      {financialSummary.investmentMerits.length > 0 && (
-        <>
-          <Typography
-            level="title-md"
-            sx={{
-              fontSize: "16px",
-              fontWeight: 700,
-            }}
-          >
-            Investment Merits
-          </Typography>
-          <List sx={{ listStyleType: "disc" }}>
-            {financialSummary.investmentMerits.map((merit, idx) => (
-              <ListItem key={idx}>
-                <ListItemContent>{merit}</ListItemContent>
-              </ListItem>
-            ))}
-          </List>
-        </>
-      )}
     </Box>
   );
 };

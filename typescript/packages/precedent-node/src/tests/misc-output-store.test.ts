@@ -40,6 +40,8 @@ async function setup() {
     bucketName: "test-bucket",
     contentType: "application/pdf",
     path: "my-path/foo",
+    fileSize: 100,
+    sha256: ShaHash.forData("hi"),
   });
 
   const processedFile = await processedFileStore.upsert({
@@ -125,34 +127,6 @@ test("insertMany", async () => {
     miscOutputStore,
   } = await setup();
 
-  const [financialSummary] = await miscOutputStore.insertMany([
-    {
-      organizationId,
-      projectId,
-      fileReferenceId,
-      processedFileId,
-      textChunkGroupId,
-      textChunkId,
-      value: {
-        type: "financial_summary",
-        value: {
-          investmentRisks: ["foo"],
-          investmentMerits: ["bar"],
-          financialSummaries: ["baz"],
-        },
-      },
-    },
-  ]);
-
-  expect(financialSummary.value).toEqual({
-    type: "financial_summary",
-    value: {
-      investmentRisks: ["foo"],
-      investmentMerits: ["bar"],
-      financialSummaries: ["baz"],
-    },
-  });
-
   const [terms] = await miscOutputStore.insertMany([
     {
       organizationId,
@@ -163,6 +137,7 @@ test("insertMany", async () => {
       textChunkId,
       value: {
         type: "terms",
+        order: 0,
         value: [
           {
             termValue: "value",
@@ -175,6 +150,7 @@ test("insertMany", async () => {
 
   expect(terms.value).toEqual({
     type: "terms",
+    order: 0,
     value: [
       {
         termValue: "value",
@@ -182,29 +158,9 @@ test("insertMany", async () => {
       },
     ],
   });
-
-  const [summary] = await miscOutputStore.insertMany([
-    {
-      organizationId,
-      projectId,
-      fileReferenceId,
-      processedFileId,
-      textChunkGroupId,
-      textChunkId,
-      value: {
-        type: "summary",
-        value: ["hi there"],
-      },
-    },
-  ]);
-
-  expect(summary.value).toEqual({
-    type: "summary",
-    value: ["hi there"],
-  });
 });
 
-test("getFile", async () => {
+test("getForFile", async () => {
   const {
     organizationId,
     projectId,
@@ -224,23 +180,8 @@ test("getFile", async () => {
       textChunkGroupId,
       textChunkId,
       value: {
-        type: "financial_summary",
-        value: {
-          investmentRisks: ["foo"],
-          investmentMerits: ["bar"],
-          financialSummaries: ["baz"],
-        },
-      },
-    },
-    {
-      organizationId,
-      projectId,
-      fileReferenceId,
-      processedFileId,
-      textChunkGroupId,
-      textChunkId,
-      value: {
         type: "terms",
+        order: 0,
         value: [
           {
             termValue: "value",
@@ -249,6 +190,7 @@ test("getFile", async () => {
         ],
       },
     },
+
     {
       organizationId,
       projectId,
@@ -257,8 +199,23 @@ test("getFile", async () => {
       textChunkGroupId,
       textChunkId,
       value: {
-        type: "summary",
-        value: ["hi there"],
+        type: "output",
+        slug: "kpi",
+        raw: "hi",
+        html: "<p>hi</p>",
+      },
+    },
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      processedFileId,
+      textChunkGroupId,
+      textChunkId,
+      value: {
+        type: "long_form",
+        raw: "hi",
+        html: "<p>hi</p>",
       },
     },
   ]);
@@ -288,23 +245,8 @@ test("textChunkIdsPresent", async () => {
       textChunkGroupId,
       textChunkId,
       value: {
-        type: "financial_summary",
-        value: {
-          investmentRisks: ["foo"],
-          investmentMerits: ["bar"],
-          financialSummaries: ["baz"],
-        },
-      },
-    },
-    {
-      organizationId,
-      projectId,
-      fileReferenceId,
-      processedFileId,
-      textChunkGroupId,
-      textChunkId,
-      value: {
         type: "terms",
+        order: 0,
         value: [
           {
             termValue: "value",
@@ -321,8 +263,33 @@ test("textChunkIdsPresent", async () => {
       textChunkGroupId,
       textChunkId: textChunkId2,
       value: {
-        type: "summary",
-        value: ["hi there"],
+        type: "terms",
+        order: 1,
+        value: [
+          {
+            termValue: "value",
+            termName: "name",
+          },
+        ],
+      },
+    },
+
+    {
+      organizationId,
+      projectId,
+      fileReferenceId,
+      processedFileId,
+      textChunkGroupId: undefined,
+      textChunkId: undefined,
+      value: {
+        type: "terms",
+        order: 1,
+        value: [
+          {
+            termValue: "value",
+            termName: "name",
+          },
+        ],
       },
     },
   ]);

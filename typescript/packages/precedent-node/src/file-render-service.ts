@@ -103,23 +103,9 @@ export class FileToRenderServiceImpl implements FileRenderService {
 }
 
 function transformOutput(output: AnalyzeOutput[]): ExcelOutputToRender {
-  const acc: ExcelOutputToRender = {
-    gpt: [],
-    claude: [],
+  return {
+    claude: output
+      .filter((row) => row.model === "claude")
+      .flatMap((row) => row.value),
   };
-  for (const row of output) {
-    switch (row.model) {
-      case "gpt":
-        acc.gpt.push(...row.value);
-        break;
-      case "claude":
-        acc.claude.push(...row.value);
-        break;
-
-      default:
-        assertNever(row.model);
-    }
-  }
-
-  return acc;
 }

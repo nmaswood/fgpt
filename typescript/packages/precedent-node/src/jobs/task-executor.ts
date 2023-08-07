@@ -18,6 +18,7 @@ export interface TaskExecutor {
 
 export class TaskExecutorImpl implements TaskExecutor {
   STRATEGIES: ChunkStrategy[] = ["greedy_v0", "greedy_15k"];
+  MAX_REPORT_CHUNK_ITEMS = 4;
   constructor(
     private readonly taskStore: TaskStore,
     private readonly textExtractionHandler: TextExtractionHandler,
@@ -121,6 +122,12 @@ export class TaskExecutorImpl implements TaskExecutor {
             LOGGER.info(
               `Inserting an llm-output task with ${resp.textChunkIds.length} text chunks`,
             );
+            if (resp.textChunkIds.length > this.MAX_REPORT_CHUNK_ITEMS) {
+              LOGGER.warn(
+                `Truncating number of chunks from ${resp.textChunkIds.length} to ${this.MAX_REPORT_CHUNK_ITEMS} for ${config.fileReferenceId}`,
+              );
+            }
+
             await this.taskStore.insert({
               organizationId,
               projectId,
@@ -132,7 +139,10 @@ export class TaskExecutorImpl implements TaskExecutor {
                 fileReferenceId: config.fileReferenceId,
                 processedFileId: config.processedFileId,
                 textChunkGroupId: resp.textGroupId,
-                textChunkIds: resp.textChunkIds,
+                textChunkIds: resp.textChunkIds.slice(
+                  0,
+                  this.MAX_REPORT_CHUNK_ITEMS,
+                ),
               },
             });
 

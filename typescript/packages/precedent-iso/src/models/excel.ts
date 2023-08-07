@@ -21,7 +21,7 @@ export type ExcelSource = z.infer<typeof ZExcelSource>;
 export interface AnalyzeResponseChunk {
   content: string;
   sheetNames: string[];
-  sanitizedHtml: string | undefined;
+  html: string | undefined;
 }
 
 export interface AnalyzeOutput {

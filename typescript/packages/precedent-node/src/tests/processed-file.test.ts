@@ -39,6 +39,8 @@ async function setup() {
     bucketName: "test-bucket",
     contentType: "application/pdf",
     path: "my-path/foo",
+    sha256: "hi",
+    fileSize: 100,
   });
 
   return {
@@ -67,22 +69,52 @@ afterEach(async () => {
   );
 });
 
-test("insertMany", async () => {
+test("upsert", async () => {
   const { fileReference, processedFileStore } = await setup();
 
-  const [res] = await processedFileStore.upsertMany([
-    {
-      organizationId: fileReference.organizationId,
-      projectId: fileReference.projectId,
-      fileReferenceId: fileReference.id,
-      text: "hi",
-      hash: ShaHash.forData("hi"),
-      gpt4TokenLength: 1000,
-    },
-  ]);
+  const res = await processedFileStore.upsert({
+    organizationId: fileReference.organizationId,
+    projectId: fileReference.projectId,
+    fileReferenceId: fileReference.id,
+    text: "hi",
+    hash: ShaHash.forData("hi"),
+    gpt4TokenLength: 1000,
+  });
+
+  expect(res.id).toBeDefined();
+});
+
+test("getText", async () => {
+  const { fileReference, processedFileStore } = await setup();
+
+  const res = await processedFileStore.upsert({
+    organizationId: fileReference.organizationId,
+    projectId: fileReference.projectId,
+    fileReferenceId: fileReference.id,
+    text: "hi",
+    hash: ShaHash.forData("hi"),
+    gpt4TokenLength: 1000,
+  });
 
   expect(res.id).toBeDefined();
 
   const text = await processedFileStore.getText(res.id);
   expect(text).toEqual("hi");
+});
+
+test("getByFileReferenceId", async () => {
+  const { fileReference, processedFileStore } = await setup();
+
+  const res = await processedFileStore.upsert({
+    organizationId: fileReference.organizationId,
+    projectId: fileReference.projectId,
+    fileReferenceId: fileReference.id,
+    text: "hi",
+    hash: ShaHash.forData("hi"),
+    gpt4TokenLength: 1000,
+  });
+
+  const same = await processedFileStore.getByFileReferenceId(fileReference.id);
+
+  expect(res).toEqual(same);
 });

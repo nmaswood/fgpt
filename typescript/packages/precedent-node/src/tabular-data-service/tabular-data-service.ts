@@ -107,7 +107,7 @@ const ZAnalyzeResponseChunk = z
     sheetNames: row.sheet_names,
     content: row.content,
     prompt: row.prompt,
-    sanitizedHtml: row.sanitized_html ?? undefined,
+    html: row.sanitized_html ?? undefined,
   }));
 
 const ZAnalyzeResponse = z.object({

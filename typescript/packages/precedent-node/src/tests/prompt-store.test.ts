@@ -44,6 +44,6 @@ test("get", async () => {
     },
   });
 
-  const prompt2 = await store.get("kpi");
+  const prompt2 = await store.getBySlug("kpi");
   expect(prompt2).toEqual(prompt);
 });

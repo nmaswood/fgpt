@@ -57,9 +57,8 @@ function extractTerms(values: Outputs.MiscValue[]): Outputs.Term[] {
           alreadySeenTerms.add(term.termName);
         }
         break;
-      case "financial_summary":
       case "long_form":
-      case "summary":
+      case "output":
         break;
       default:
         assertNever(value);

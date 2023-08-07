@@ -137,9 +137,7 @@ class OpenAIReportService(ReportService):
             return [
                 term
                 for term in terms_from_model.terms
-                if term.term_value != "Not Available"
-                and term.term_value != "Not specified"
-                and term.term_value != "Not available"
+                if term.term_value.lower() not in IGNORE
                 and len(term.term_value.strip()) > 0
             ]
         except Exception as e:
@@ -247,6 +245,16 @@ Assistant:"""
             return []
 
 
+IGNORE = {
+    "not provided",
+    "not available",
+    "not specified",
+    "not provided in the document",
+    "not available",
+    "not specified",
+}
+
+
 def parse_term(value: str) -> Term | None:
     splat = value.split("|", 1)
     if len(splat) != 2:
@@ -254,6 +262,6 @@ def parse_term(value: str) -> Term | None:
     left, right = splat
     left = left.strip()
     right = right.strip()
-    if right == "Not provided":
+    if right.lower() in IGNORE:
         return None
     return Term(term_name=left, term_value=right)

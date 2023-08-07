@@ -141,7 +141,7 @@ async function start() {
 
   const questionStore = new PsqlQuestionStore(pool);
   const miscOutputStore = new PsqlMiscOutputStore(pool);
-  const reportService = new ReportServiceImpl(questionStore, miscOutputStore);
+  const reportService = new ReportServiceImpl(miscOutputStore);
   const processedFileProgressStore = new ProcessedFileProgressServiceImpl(
     taskStore,
   );

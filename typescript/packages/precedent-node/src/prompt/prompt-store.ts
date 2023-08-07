@@ -1,4 +1,9 @@
-import { Prompt, PromptDefinition, ZPromptSlug } from "@fgpt/precedent-iso";
+import {
+  Prompt,
+  PromptDefinition,
+  PromptSlug,
+  ZPromptSlug,
+} from "@fgpt/precedent-iso";
 import { DatabasePool, sql } from "slonik";
 import { z } from "zod";
 
@@ -8,7 +13,7 @@ interface UpsertPrompt {
 }
 export interface PromptStore {
   upsert(args: UpsertPrompt): Promise<Prompt>;
-  get(slug: string): Promise<Prompt>;
+  getBySlug(slug: PromptSlug): Promise<Prompt>;
   list(): Promise<Prompt[]>;
 }
 
@@ -26,7 +31,7 @@ ON CONFLICT (slug)
         ${FIELDS}
 `);
   }
-  get(slug: string): Promise<Prompt> {
+  getBySlug(slug: string): Promise<Prompt> {
     return this.pool.one(sql.type(ZPromptRow)`
 SELECT
     ${FIELDS}

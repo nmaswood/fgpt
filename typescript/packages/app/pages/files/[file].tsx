@@ -209,9 +209,7 @@ const ForFileId: React.FC<{ fileId: string; user: User | undefined }> = ({
             {tab === "progress" && file && (
               <DisplayProgress fileReferenceId={file.id} />
             )}
-            {tab === "report" && file && (
-              <DisplayFileReport file={file} showAdminOnly={showAdminOnly} />
-            )}
+            {tab === "report" && file && <DisplayFileReport file={file} />}
             {tab === "chat" && file && token && (
               <DisplayFileChat
                 fileReferenceId={fileId}

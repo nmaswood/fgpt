@@ -1,40 +1,22 @@
 import { assertNever, Outputs } from "@fgpt/precedent-iso";
 
 import { MiscOutputStore } from "./misc-output-store";
-import { QuestionStore } from "./question-store";
 
 export interface ReportService {
   forFileReferenceId(fileReferenceId: string): Promise<Outputs.Report>;
 }
 
 export class ReportServiceImpl implements ReportService {
-  constructor(
-    private readonly questionStore: QuestionStore,
-    private readonly miscValueStore: MiscOutputStore,
-  ) {}
+  constructor(private readonly miscValueStore: MiscOutputStore) {}
 
   async forFileReferenceId(fileReferenceId: string): Promise<Outputs.Report> {
-    const [questions, miscValues] = await Promise.all([
-      this.questionStore.getForFile(fileReferenceId),
-      this.miscValueStore.getForFile(fileReferenceId),
-    ]);
+    const miscValues = await this.miscValueStore.getForFile(fileReferenceId);
 
-    return {
-      questions,
-      ...this.#processMiscValues(miscValues),
-    };
+    return this.#processMiscValues(miscValues);
   }
 
-  #processMiscValues(
-    values: Outputs.MiscValue[],
-  ): Omit<Outputs.Report, "questions"> {
-    const acc: Omit<Outputs.Report, "questions"> = {
-      summaries: [],
-      financialSummary: {
-        investmentRisks: [],
-        investmentMerits: [],
-        financialSummaries: [],
-      },
+  #processMiscValues(values: Outputs.MiscValue[]): Outputs.Report {
+    const acc: Outputs.Report = {
       terms: [],
       longForm: [],
     };
@@ -43,17 +25,6 @@ export class ReportServiceImpl implements ReportService {
 
     for (const value of values) {
       switch (value.type) {
-        case "financial_summary":
-          acc.financialSummary.financialSummaries.push(
-            ...value.value.financialSummaries,
-          );
-          acc.financialSummary.investmentRisks.push(
-            ...value.value.investmentRisks,
-          );
-          acc.financialSummary.investmentMerits.push(
-            ...value.value.investmentMerits,
-          );
-          break;
         case "terms": {
           for (const term of value.value) {
             if (alreadySeenTerms.has(term.termName)) {
@@ -67,15 +38,16 @@ export class ReportServiceImpl implements ReportService {
 
           break;
         }
-        case "summary":
-          acc.summaries.push(...value.value);
-          break;
+
         case "long_form":
           acc.longForm.push({
-            raw: value.value,
-            html: value.sanitizedHtml,
+            raw: value.raw,
+            html: value.html,
           });
           break;
+        case "output":
+          throw new Error("not handled");
+
         default:
           assertNever(value);
       }

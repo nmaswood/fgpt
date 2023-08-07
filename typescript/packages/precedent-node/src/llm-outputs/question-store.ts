@@ -13,7 +13,7 @@ export interface InsertQuestion {
   hash: string;
 }
 
-const FIELDS = sql.fragment`id, organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, text_chunk_id, question`;
+const FIELDS = sql.fragment`id, question`;
 
 export interface QuestionStore {
   sampleForProject(projectId: string, limit: number): Promise<string[]>;
@@ -60,21 +60,16 @@ LIMIT ${limit}
   }
 
   async getForFile(fileReferenceId: string): Promise<string[]> {
-    const result = await this.pool.any(sql.type(ZGetForFileWithOrder)`
+    const result = await this.pool.anyFirst(sql.type(ZGetForFileWithOrder)`
 SELECT
-    question,
-    text_chunk.chunk_order as chunk_order
+    question
 FROM
     text_chunk_question
-    JOIN text_chunk ON text_chunk.id = text_chunk_question.text_chunk_id
 WHERE
-    text_chunk_question.file_reference_id = ${fileReferenceId}
+    file_reference_id = ${fileReferenceId}
 `);
 
-    const sorted = Array.from(result).sort(
-      (a, b) => a.chunk_order - b.chunk_order,
-    );
-    return sorted.map((row) => row.question);
+    return Array.from(result);
   }
 
   async insertMany(questions: InsertQuestion[]): Promise<Outputs.Question[]> {
@@ -104,7 +99,7 @@ WHERE
 `,
     );
 
-    const res = await this.pool.query(sql.type(ZQuestionRow)`
+    const res = await this.pool.any(sql.type(ZQuestionRow)`
 INSERT INTO text_chunk_question (organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, text_chunk_id, question, hash_sha256)
     VALUES
         ${sql.join(values, sql.fragment`, `)}
@@ -112,44 +107,19 @@ INSERT INTO text_chunk_question (organization_id, project_id, file_reference_id,
         ${FIELDS}
 `);
 
-    return Array.from(res.rows);
+    return Array.from(res);
   }
 }
 
-const ZQuestionRow = z
-  .object({
-    id: z.string(),
-    project_id: z.string(),
-    organization_id: z.string(),
-    file_reference_id: z.string(),
-    processed_file_id: z.string(),
-    text_chunk_group_id: z.string(),
-    text_chunk_id: z.string(),
-    question: z.string(),
-  })
-  .transform(
-    (row): Outputs.Question => ({
-      id: row.id,
-      organizationId: row.organization_id,
-      projectId: row.project_id,
-      fileReferenceId: row.file_reference_id,
-      processedFileId: row.processed_file_id,
-      textChunkGroupId: row.text_chunk_group_id,
-      textChunkId: row.text_chunk_id,
-      question: row.question,
-    }),
-  );
+const ZQuestionRow = z.object({
+  id: z.string(),
+  question: z.string(),
+});
 
 const ZGetForFile = z.object({
   question: z.string(),
 });
 
-const ZGetForFileWithOrder = z
-  .object({
-    question: z.string(),
-    chunk_order: z.number(),
-  })
-  .transform((row) => ({
-    question: row.question,
-    chunk_order: row.chunk_order,
-  }));
+const ZGetForFileWithOrder = z.object({
+  question: z.string(),
+});
