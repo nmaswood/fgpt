@@ -83,6 +83,17 @@ For example:
 """
 
 
+class DummyReportService(LongformReportService):
+    def generate(self, _: str) -> LongformReport:
+        return LongformReport(
+            raw="fake",
+            sanitized_html="<p>fake</p>",
+        )
+
+
+DUMMY_REPORT_SERVICE = DummyReportService()
+
+
 class ClaudeLongformReportService(LongformReportService):
     def __init__(self, anthropic_client: Anthropic) -> None:
         self.anthropic_client = anthropic_client

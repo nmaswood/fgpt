@@ -17,7 +17,10 @@ from springtime.routers.vector_router import VectorRouter
 from springtime.services.chat_service import OpenAIChatService
 from springtime.services.embeddings_service import OpenAIEmbeddingsService
 from springtime.services.excel_analyzer import ClaudeExcelAnalyzer, OpenAIExcelAnalyzer
-from springtime.services.long_form_report_service import ClaudeLongformReportService
+from springtime.services.long_form_report_service import (
+    DUMMY_REPORT_SERVICE,
+    ClaudeLongformReportService,
+)
 from springtime.services.prompt_service import PromptServiceImpl
 from springtime.services.report_service import ClaudeReportService, OpenAIReportService
 from springtime.services.scan_service import OpenAIScanService
@@ -58,7 +61,12 @@ GPT_TABLE_ANALYZER = TableAnalyzerImpl(GPT_EXCEL_ANALYZER, GPT_SHEET_PROCESSOR)
 CLAUDE_TABLE_ANALYZER = TableAnalyzerImpl(CLAUDE_EXCEL_ANALYZER, CLAUDE_SHEET_PROCESSOR)
 
 
-LONG_FORM_REPORT_SERVICE = ClaudeLongformReportService(ANTHROPIC_CLIENT)
+if SETTINGS.mock_out_claude:
+    logger.info("Claude is mocked out!")
+    LONG_FORM_REPORT_SERVICE = DUMMY_REPORT_SERVICE
+else:
+    LONG_FORM_REPORT_SERVICE = ClaudeLongformReportService(ANTHROPIC_CLIENT)
+
 EMBEDDING_SERVICE = OpenAIEmbeddingsService()
 VECTOR_SERVICE = PineconeVectorService(
     api_key=SETTINGS.pinecone_api_key,
@@ -67,8 +75,8 @@ VECTOR_SERVICE = PineconeVectorService(
     namespace=SETTINGS.pinecone_namespace,
 )
 OPENAI_REPORT_SERVICE = OpenAIReportService(
-    SETTINGS.reports_openai_model,
-    OpenAIModel.gpt3,
+    model_for_questions=OpenAIModel.gpt3_16k,
+    model_for_terms=SETTINGS.reports_openai_model,
 )
 CLAUDE_REPORT_SERVICE = ClaudeReportService(ANTHROPIC_CLIENT)
 CHAT_SERVICE = OpenAIChatService(OpenAIModel.gpt3_16k)

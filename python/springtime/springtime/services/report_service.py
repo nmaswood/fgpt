@@ -50,6 +50,7 @@ class ReportService(abc.ABC):
 class OpenAIReportService(ReportService):
     def __init__(
         self,
+        *,
         model_for_terms: OpenAIModel,
         model_for_questions: OpenAIModel,
     ) -> None:
@@ -173,7 +174,9 @@ Human: _START_DOCUMENT_{text.strip()}_END_DOCUMENT_
 
 Assistant:"""
         raw = self.anthropic_client.completions.create(
-            prompt=prompt, model="claude-2", max_tokens_to_sample=1_000_000,
+            prompt=prompt,
+            model="claude-2",
+            max_tokens_to_sample=1_000_000,
         ).strip()
 
         start_index = raw.find("[")
