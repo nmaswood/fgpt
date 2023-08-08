@@ -6,12 +6,14 @@ import {
   FileToRender,
   isNotNull,
   Outputs,
+  StatusForPrompts,
 } from "@fgpt/precedent-iso";
 import { Term } from "@fgpt/precedent-iso/src/models/llm-outputs";
 import ArrowDropDown from "@mui/icons-material/ArrowDropDownOutlined";
 import CloseFullscreenOutlinedIcon from "@mui/icons-material/CloseFullscreenOutlined";
 import OpenInFullOutlinedIcon from "@mui/icons-material/OpenInFullOutlined";
 import {
+  Alert,
   Box,
   Button,
   Chip,
@@ -24,6 +26,7 @@ import {
 import Image from "next/image";
 import React from "react";
 
+import { useTriggerOutput } from "../../hooks/use-trigger-output";
 import { DangerousHTMLElementChat } from "../html-element";
 import { TermsTable } from "../terms-table";
 import styles from "./display-report.module.css";
@@ -32,6 +35,7 @@ export const DisplayFileReport: React.FC<{
   file: FileToRender.File;
 }> = ({ file }) => {
   const terms = file.type === "pdf" ? file.report?.terms ?? [] : [];
+  file.type === "pdf" ? file.statusForPrompts.kpi : undefined;
   return (
     <Box
       display="flex"
@@ -73,12 +77,16 @@ export const DisplayFileReport: React.FC<{
       )}
       {file.type === "pdf" && (
         <ForOverview
+          projectId={file.projectId}
+          fileReferenceId={file.id}
           status={file.status}
           description={file.description}
           terms={terms}
+          statusForPrompts={file.statusForPrompts}
         />
       )}
       <ForReport file={file} />
+      {file.type === "pdf" && <ForPrompt file={file} />}
     </Box>
   );
 };
@@ -197,14 +205,25 @@ const PdfReport: React.FC<{
 };
 
 const ForOverview: React.FC<{
+  fileReferenceId: string;
+  projectId: string;
   status: FileStatus;
   description: string | undefined;
   terms: Term[];
-}> = ({ status, description, terms }) => {
-  const [collapsed, setCollapsed] = React.useState(true);
+  statusForPrompts: StatusForPrompts;
+}> = ({
+  fileReferenceId,
+  status,
+  description,
+  terms,
+  projectId,
+  statusForPrompts,
+}) => {
+  const [collapsed, setCollapsed] = React.useState(false);
   const withDescription = description
     ? [{ termName: "Description", termValue: description }, ...terms]
     : terms;
+  const { trigger, isMutating } = useTriggerOutput(fileReferenceId);
   if (status === "pending") {
     return (
       <Box
@@ -249,7 +268,7 @@ const ForOverview: React.FC<{
       width="100%"
       height="auto"
       maxHeight="100%"
-      overflow={collapsed ? "auto" : undefined}
+      overflow={collapsed ? undefined : "auto"}
       sx={(theme) => ({
         border: `1px solid ${theme.vars.palette.neutral[100]}`,
       })}
@@ -275,23 +294,40 @@ const ForOverview: React.FC<{
           </Typography>
           <StatusBubble status={status} />
         </Box>
-        <IconButton
-          size="sm"
-          onClick={() => setCollapsed((prev) => !prev)}
-          sx={{
-            "&:hover": {
-              bgcolor: "transparent",
-            },
-          }}
-        >
-          {collapsed ? (
-            <CloseFullscreenOutlinedIcon fontSize="small" />
-          ) : (
-            <OpenInFullOutlinedIcon fontSize="small" />
-          )}
-        </IconButton>
+        <Box display="flex" gap={2} alignItems="center">
+          <Button
+            onClick={() =>
+              trigger({
+                fileReferenceId,
+                slug: "kpi",
+                projectId,
+              })
+            }
+            loading={isMutating}
+            disabled={statusForPrompts["kpi"] !== "not_created"}
+            size="sm"
+          >
+            Generate KPI Report
+          </Button>
+
+          <IconButton
+            size="sm"
+            onClick={() => setCollapsed((prev) => !prev)}
+            sx={{
+              "&:hover": {
+                bgcolor: "transparent",
+              },
+            }}
+          >
+            {collapsed ? (
+              <OpenInFullOutlinedIcon fontSize="small" />
+            ) : (
+              <CloseFullscreenOutlinedIcon fontSize="small" />
+            )}
+          </IconButton>
+        </Box>
       </Box>
-      {collapsed && (
+      {!collapsed && (
         <>
           <Divider />
           {withDescription.length > 0 && (
@@ -315,6 +351,7 @@ const ForOverview: React.FC<{
 const ForReport: React.FC<{
   file: FileToRender.File;
 }> = ({ file }) => {
+  const [collapsed, setCollapsed] = React.useState(false);
   if (file.status === "pending") {
     return (
       <Box
@@ -322,7 +359,6 @@ const ForReport: React.FC<{
         width="100%"
         height="auto"
         maxHeight="100%"
-        overflow="auto"
         sx={(theme) => ({
           border: `1px solid ${theme.vars.palette.neutral[100]}`,
         })}
@@ -357,10 +393,9 @@ const ForReport: React.FC<{
     <Box
       display="flex"
       width="100%"
-      height="100%"
+      height={collapsed ? undefined : "100%"}
       maxHeight="100%"
-      overflow="auto"
-      minHeight="200px"
+      overflow={collapsed ? undefined : "auto"}
       sx={(theme) => ({
         border: `1px solid ${theme.vars.palette.neutral[100]}`,
       })}
@@ -368,31 +403,178 @@ const ForReport: React.FC<{
       borderRadius={8}
       bgcolor="white"
     >
-      <Box display="flex" gap={2} padding={2} justifyContent="space-between">
-        <Box display="flex" gap={2}>
-          <Typography
-            level="h4"
+      <Box
+        display="flex"
+        gap={2}
+        padding={2}
+        justifyContent="space-between"
+        alignItems="center"
+        height="auto"
+      >
+        <Typography
+          level="h4"
+          sx={{
+            fontWeight: 700,
+            color: "black",
+          }}
+        >
+          Report
+        </Typography>
+
+        <Box display="flex" alignItems="center" gap={2}>
+          <DownloadButton
+            fileName={file.fileName}
+            signedUrl={file.signedUrl}
+            extractedTablesSignedUrl={
+              file.type === "pdf" ? file.derivedSignedUrl : undefined
+            }
+          />
+          <IconButton
+            size="sm"
+            onClick={() => setCollapsed((prev) => !prev)}
             sx={{
-              fontWeight: 700,
-              color: "black",
+              "&:hover": {
+                bgcolor: "transparent",
+              },
             }}
           >
-            Report
-          </Typography>
+            {collapsed ? (
+              <OpenInFullOutlinedIcon fontSize="small" />
+            ) : (
+              <CloseFullscreenOutlinedIcon fontSize="small" />
+            )}
+          </IconButton>
         </Box>
+      </Box>
+      {!collapsed && (
+        <>
+          <Divider />
+          <Box display="flex" padding={2} maxHeight="100%" overflow="auto">
+            <Dispatch file={file} />
+          </Box>
+        </>
+      )}
+    </Box>
+  );
+};
 
-        <DownloadButton
-          fileName={file.fileName}
-          signedUrl={file.signedUrl}
-          extractedTablesSignedUrl={
-            file.type === "pdf" ? file.derivedSignedUrl : undefined
-          }
-        />
+const ForPrompt: React.FC<{ file: FileToRender.PDFFile }> = ({ file }) => {
+  const [collapsed, setCollapsed] = React.useState(false);
+  const statusForKpi = file.statusForPrompts["kpi"];
+  if (statusForKpi === "not_created" || !file.report) {
+    return null;
+  }
+  const outputForSlug = file.report.outputs.find(
+    (output) => output.slug === "kpi",
+  );
+
+  const isLoading = statusForKpi === "queued" || statusForKpi === "in-progress";
+  return (
+    <Box
+      display="flex"
+      width="100%"
+      height="auto"
+      maxHeight="100%"
+      sx={(theme) => ({
+        border: `1px solid ${theme.vars.palette.neutral[100]}`,
+      })}
+      borderRadius={8}
+      bgcolor="neutral.0"
+      alignItems="center"
+      justifyContent="space-between"
+      flexDirection="column"
+      overflow={isLoading || collapsed ? undefined : "auto"}
+    >
+      <Box
+        display="flex"
+        width="100%"
+        justifyContent="space-between"
+        alignItems="center"
+        height="auto"
+        padding={2}
+      >
+        <Typography
+          level="h4"
+          sx={{
+            fontWeight: 700,
+            color: "#666",
+          }}
+        >
+          Outputs
+        </Typography>
+
+        {isLoading && (
+          <Image
+            priority
+            src="/paredo-second.svg"
+            height={64}
+            width={64}
+            className={styles.rotating}
+            alt="Paredo icon"
+          />
+        )}
+        {!isLoading && (
+          <IconButton
+            size="sm"
+            onClick={() => setCollapsed((prev) => !prev)}
+            sx={{
+              "&:hover": {
+                bgcolor: "transparent",
+              },
+            }}
+          >
+            {collapsed ? (
+              <OpenInFullOutlinedIcon fontSize="small" />
+            ) : (
+              <CloseFullscreenOutlinedIcon fontSize="small" />
+            )}
+          </IconButton>
+        )}
       </Box>
-      <Divider />
-      <Box display="flex" padding={2} maxHeight="100%" overflow="auto">
-        <Dispatch file={file} />
-      </Box>
+      {!isLoading && !collapsed && (
+        <>
+          <Divider />
+          <DispatchForKpi status={statusForKpi} output={outputForSlug} />
+        </>
+      )}
+    </Box>
+  );
+};
+
+const DispatchForKpi: React.FC<{
+  status: "succeeded" | "failed";
+  output: Outputs.PromptOutput | undefined;
+}> = ({ status, output }) => {
+  return (
+    <Box
+      display="flex"
+      width="100%"
+      maxHeight="100%"
+      overflow="auto"
+      padding={2}
+    >
+      {status === "failed" && (
+        <Alert variant="outlined" size="sm" color="danger">
+          This operation errored
+        </Alert>
+      )}
+      {status === "succeeded" && output === undefined && (
+        <Alert variant="outlined" size="sm" color="danger">
+          This operation succeeded, but no output was generated
+        </Alert>
+      )}
+      {status === "succeeded" && output && (
+        <Box
+          display="flex"
+          flexDirection="column"
+          gap={1}
+          maxHeight="100%"
+          overflow="auto"
+          width="100%"
+        >
+          <ClaudeReport longForm={[output]} />
+        </Box>
+      )}
     </Box>
   );
 };
@@ -504,7 +686,7 @@ const DownloadButton: React.FC<{
 
   if (!extractedTablesSignedUrl) {
     return (
-      <Button component="a" href={signedUrl} target="_blank">
+      <Button component="a" href={signedUrl} target="_blank" size="sm">
         Download Asset
       </Button>
     );
@@ -519,6 +701,7 @@ const DownloadButton: React.FC<{
           setOpen(!open);
         }}
         endDecorator={<ArrowDropDown />}
+        size="sm"
       >
         Download
       </Button>

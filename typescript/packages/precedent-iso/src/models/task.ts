@@ -4,6 +4,7 @@ import { assertNever } from "../assert-never";
 import { ZFileType } from "../file-type";
 import { ZChunkStrategy } from "../text-chunker/text-chunker";
 import { ExcelSource, ZExcelSource } from "./excel";
+import { PromptSlug, ZPromptSlug } from "./prompt";
 
 export const ZTaskType = z.enum([
   "ingest-file",
@@ -104,14 +105,8 @@ export const ZTableTextAnalysis = z.object({
   model: ZAnalyzeTableModel,
 });
 
-export const ZTableCodeAnalysis = z.object({
-  type: z.literal("code"),
-  model: ZAnalyzeTableModel,
-});
-
 export const ZTableAnalysis = z.discriminatedUnion("type", [
   ZTableTextAnalysis,
-  ZTableCodeAnalysis,
 ]);
 
 export type TableAnalysis = z.infer<typeof ZTableAnalysis>;
@@ -154,13 +149,13 @@ export interface ScanConfig {
 export const ZRunPromptConfig = z.object({
   type: z.literal("run-prompt"),
   fileReferenceId: z.string(),
-  slug: z.string(),
+  slug: ZPromptSlug,
 });
 
 export interface RunPromptConfig {
   type: "run-prompt";
   fileReferenceId: string;
-  slug: string;
+  slug: PromptSlug;
 }
 
 export interface ScanConfig {

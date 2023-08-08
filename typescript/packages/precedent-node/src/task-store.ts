@@ -1,6 +1,7 @@
 import {
   TaskConfig,
   TaskStatus,
+  TaskType,
   ZTaskConfig,
   ZTaskStatus,
 } from "@fgpt/precedent-iso";
@@ -38,6 +39,7 @@ interface SetAsCompleted {
 export interface TaskStore {
   get(taskId: string): Promise<Task>;
   getByFileReferenceId(fileReferenceId: string): Promise<Task[]>;
+  getByType(fileReferenceId: string, type: TaskType): Promise<Task[]>;
 
   insert(config: CreateTask): Promise<Task>;
   insertMany(configs: CreateTask[]): Promise<Task[]>;
@@ -73,6 +75,19 @@ FROM
     task
 WHERE
     file_reference_id = ${fileReferenceId}
+`);
+    return Array.from(resp);
+  }
+
+  async getByType(fileReferenceId: string, type: TaskType): Promise<Task[]> {
+    const resp = await this.pool.any(sql.type(ZFromTaskRow)`
+SELECT
+    ${FIELDS}
+FROM
+    task
+WHERE
+    file_reference_id = ${fileReferenceId}
+    and task_type = ${type}
 `);
     return Array.from(resp);
   }

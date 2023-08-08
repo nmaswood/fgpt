@@ -224,7 +224,8 @@ FROM
 WHERE
     chat_id = ${chatId}
 `);
-    return Array.from(result.rows);
+    const copy = Array.from(result.rows);
+    return copy.sort((a, b) => a.index - b.index);
   }
 
   async deleteChat(chatId: string): Promise<boolean> {

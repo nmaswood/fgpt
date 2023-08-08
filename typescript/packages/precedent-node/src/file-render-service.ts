@@ -14,6 +14,7 @@ import { FileReferenceStore } from "./file-reference-store";
 import { ReportService } from "./llm-outputs/report-service";
 import { ObjectStorageService } from "./object-store/object-store";
 import { ProjectStore } from "./project-store";
+import { PromptTaskService } from "./prompt/prompt-task-service";
 
 export interface FileRenderService {
   forFile(fileReferenceId: string): Promise<FileToRender.File>;
@@ -27,6 +28,7 @@ export class FileToRenderServiceImpl implements FileRenderService {
     private readonly excelOutputStore: ExcelOutputStore,
     private readonly excelAssetStore: ExcelAssetStore,
     private readonly projectStore: ProjectStore,
+    private readonly promptTaskService: PromptTaskService,
   ) {}
 
   async forFile(fileReferenceId: string): Promise<FileToRender.File> {
@@ -69,7 +71,7 @@ export class FileToRenderServiceImpl implements FileRenderService {
   }
 
   async #forPDF(file: FileReference): Promise<FileToRender.PDFFile> {
-    const [signedUrl, [derived], report, project] = await Promise.all([
+    const [signedUrl, [derived], report, project, tasks] = await Promise.all([
       this.objectStorageService.getSignedUrl(
         file.bucketName,
         file.path,
@@ -78,7 +80,14 @@ export class FileToRenderServiceImpl implements FileRenderService {
       this.excelAssetStore.list(file.id),
       this.reportService.forFileReferenceId(file.id),
       this.projectStore.get(file.projectId),
+      this.promptTaskService.getForSlug({
+        fileReferenceId: file.id,
+        slug: "kpi",
+      }),
     ]);
+
+    const [kpiTask] = tasks;
+    const kpiStatus = kpiTask?.status ?? "not_created";
 
     return {
       type: "pdf",
@@ -98,6 +107,9 @@ export class FileToRenderServiceImpl implements FileRenderService {
 
       status: file.status,
       description: file.description,
+      statusForPrompts: {
+        kpi: kpiStatus,
+      },
     };
   }
 }

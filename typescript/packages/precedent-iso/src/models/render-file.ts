@@ -2,6 +2,7 @@ import { FileType } from "../file-type";
 import { AnalyzeResponseChunk } from "./excel";
 import { FileStatus } from "./file";
 import { Report } from "./llm-outputs";
+import { TaskStatus } from "./task";
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace FileToRender {
@@ -16,6 +17,7 @@ export namespace FileToRender {
     derivedSignedUrl: string | undefined;
     status: FileStatus;
     description: string | undefined;
+    statusForPrompts: StatusForPrompts;
   }
 
   export type File = PDFFile | ExcelFile;
@@ -41,4 +43,8 @@ export interface ExcelOutputToRender {
 export interface DisplayFile {
   signedUrl: string;
   type: FileType | undefined;
+}
+
+export interface StatusForPrompts {
+  kpi: TaskStatus | "not_created";
 }

@@ -19,6 +19,7 @@ export class ReportServiceImpl implements ReportService {
     const acc: Outputs.Report = {
       terms: [],
       longForm: [],
+      outputs: [],
     };
 
     const alreadySeenTerms = new Set<string>();
@@ -46,7 +47,8 @@ export class ReportServiceImpl implements ReportService {
           });
           break;
         case "output":
-          throw new Error("not handled");
+          acc.outputs.push(value);
+          break;
 
         default:
           assertNever(value);

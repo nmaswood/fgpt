@@ -245,3 +245,34 @@ test("getByFileReferenceId", async () => {
   const res = await taskStore.getByFileReferenceId(fileReferenceId1);
   expect(res).toEqual([task1]);
 });
+
+test("getByType", async () => {
+  const { user, project, taskStore, fileReferenceId1, fileReferenceId2 } =
+    await setup();
+
+  const [task1] = await taskStore.insertMany([
+    {
+      organizationId: user.organizationId,
+      projectId: project.id,
+      fileReferenceId: fileReferenceId1,
+      config: {
+        type: "run-prompt",
+        fileReferenceId: fileReferenceId1,
+        slug: "kpi",
+      },
+    },
+    {
+      organizationId: user.organizationId,
+      projectId: project.id,
+      fileReferenceId: fileReferenceId2,
+      config: {
+        organizationId: user.organizationId,
+        projectId: project.id,
+        type: "text-extraction",
+        fileReferenceId: fileReferenceId2,
+      },
+    },
+  ]);
+  const res = await taskStore.getByType(fileReferenceId1, "run-prompt");
+  expect(res).toEqual([task1]);
+});

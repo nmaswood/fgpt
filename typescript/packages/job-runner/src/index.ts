@@ -43,6 +43,7 @@ import {
   PsqlPromptStore,
   PsqlPromptInvocationStore,
   HTTPPromptRunner,
+  PromptRunnerHandlerImpl,
 } from "@fgpt/precedent-node";
 import { SETTINGS, Settings } from "./settings";
 import { MainRouter } from "./router";
@@ -163,6 +164,12 @@ async function start(settings: Settings) {
     promptInvocationStore,
   );
 
+  const promptRunnerHandler = new PromptRunnerHandlerImpl(
+    promptService,
+    miscOutputStore,
+    processedFileStore,
+  );
+
   const taskExecutor = new TaskExecutorImpl(
     taskService,
     textExtractionHandler,
@@ -173,7 +180,7 @@ async function start(settings: Settings) {
     ingestFileHandler,
     thumbnailHandler,
     scanHandler,
-    promptService,
+    promptRunnerHandler,
   );
 
   const processedFileProgressStore = new ProcessedFileProgressServiceImpl(

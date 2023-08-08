@@ -4,13 +4,8 @@ import { MiscOutputStore } from "../llm-outputs/misc-output-store";
 import { ProcessedFileStore } from "../processed-file-store";
 import { PromptService } from "../prompt/prompt-service";
 
-export interface RunArgs {
-  fileReferenceId: string;
-  slug: PromptSlug;
-}
-
 export interface PromptRunnerHandler {
-  run(args: RunArgs): Promise<void>;
+  run(fileReferenceId: string, slug: PromptSlug): Promise<void>;
 }
 
 const DOCUMENT_KEY = "paredo_document" as const;
@@ -22,7 +17,7 @@ export class PromptRunnerHandlerImpl implements PromptRunnerHandler {
     private readonly processedFileStore: ProcessedFileStore,
   ) {}
 
-  async run({ fileReferenceId, slug }: RunArgs): Promise<void> {
+  async run(fileReferenceId: string, slug: PromptSlug): Promise<void> {
     const processedFile = await this.processedFileStore.getByFileReferenceId(
       fileReferenceId,
     );
@@ -36,6 +31,18 @@ export class PromptRunnerHandlerImpl implements PromptRunnerHandler {
         [DOCUMENT_KEY]: text,
       },
     });
-    console.log({ raw, html, store: this.miscOutputStore });
+
+    await this.miscOutputStore.insert({
+      organizationId: processedFile.organizationId,
+      projectId: processedFile.projectId,
+      fileReferenceId,
+      processedFileId: processedFile.id,
+      value: {
+        type: "output",
+        slug,
+        raw,
+        html,
+      },
+    });
   }
 }

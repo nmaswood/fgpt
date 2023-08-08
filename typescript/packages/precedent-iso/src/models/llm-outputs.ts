@@ -43,6 +43,13 @@ export interface Term {
 export interface Report {
   terms: Term[];
   longForm: LongForm[];
+  outputs: PromptOutput[];
+}
+
+export interface PromptOutput {
+  slug: PromptSlug;
+  raw: string;
+  html: string | undefined;
 }
 
 export interface LongForm {

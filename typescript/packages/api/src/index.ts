@@ -28,6 +28,7 @@ import {
   MLServiceClientImpl,
   PineconeVectorService,
   ProcessedFileProgressServiceImpl,
+  PromptTaskServiceImpl,
   PsqlChatStore,
   PsqlExcelAssetStore,
   PsqlExcelOutputStore,
@@ -145,18 +146,11 @@ async function start() {
   const processedFileProgressStore = new ProcessedFileProgressServiceImpl(
     taskStore,
   );
+  const promptTaskService = new PromptTaskServiceImpl(taskStore);
 
   const excelProgressStore = new ExcelProgressServiceImpl(taskStore);
   const showCaseFileStore = new PsqlShowCaseFileStore(pool);
 
-  const fileRenderService = new FileToRenderServiceImpl(
-    fileReferenceStore,
-    reportService,
-    objectStoreService,
-    excelOutputStore,
-    excelAssetStore,
-    projectStore,
-  );
   const renderShowCaseFileService = new RenderShowCaseFileServiceImpl(
     showCaseFileStore,
     objectStoreService,
@@ -180,6 +174,16 @@ async function start() {
   );
 
   const promptStore = new PsqlPromptStore(pool);
+
+  const fileRenderService = new FileToRenderServiceImpl(
+    fileReferenceStore,
+    reportService,
+    objectStoreService,
+    excelOutputStore,
+    excelAssetStore,
+    projectStore,
+    promptTaskService,
+  );
 
   app.use(cors({ origin: SETTINGS.corsOrigin }));
 
@@ -206,6 +210,7 @@ async function start() {
       showCaseFileStore,
       renderShowCaseFileService,
       fileStatusUpdater,
+      promptTaskService,
     ).init(),
   );
 

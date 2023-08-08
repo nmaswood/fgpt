@@ -1,4 +1,4 @@
-import { DisplayFile, getFileType } from "@fgpt/precedent-iso";
+import { DisplayFile, getFileType, ZPromptSlug } from "@fgpt/precedent-iso";
 import {
   FileReferenceStore,
   FileStatusService,
@@ -6,6 +6,7 @@ import {
   LoadedFileStore,
   ObjectStorageService,
   ProjectStore,
+  PromptTaskService,
   RenderShowCaseFileService,
   ShaHash,
   ShowCaseFileStore,
@@ -37,6 +38,7 @@ export class FileRouter {
     private readonly showCaseFileStore: ShowCaseFileStore,
     private readonly renderShowCaseFileService: RenderShowCaseFileService,
     private readonly fileStatusService: FileStatusService,
+    private readonly promptTaskService: PromptTaskService,
   ) {}
   init() {
     const router = express.Router();
@@ -180,9 +182,45 @@ export class FileRouter {
       },
     );
 
+    router.put(
+      "/trigger",
+      async (req: express.Request, res: express.Response) => {
+        const { fileReferenceId, slug, projectId } = ZTrigger.parse(req.body);
+        const tasksForSlug = await this.promptTaskService.getForSlug({
+          fileReferenceId,
+          slug,
+        });
+
+        const hasTask = tasksForSlug.length > 0;
+        if (hasTask) {
+          res.json({ status: "task-exists" });
+          return;
+        }
+
+        await this.taskStore.insert({
+          organizationId: req.user.organizationId,
+          projectId,
+          fileReferenceId,
+          config: {
+            type: "run-prompt",
+            fileReferenceId,
+            slug: "kpi",
+          },
+        });
+
+        res.json({ status: "created-task" });
+      },
+    );
+
     return router;
   }
 }
+
+const ZTrigger = z.object({
+  projectId: z.string(),
+  fileReferenceId: z.string(),
+  slug: ZPromptSlug,
+});
 
 const ZSetShowCaseRequest = z.object({
   fileReferenceId: z.string(),

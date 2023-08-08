@@ -97,7 +97,7 @@ test("getProgress#success", async () => {
       projectId,
       type: "analyze-table",
       analysis: {
-        type: "code",
+        type: "text",
         model: "claude",
       },
       fileReferenceId,
@@ -134,7 +134,7 @@ test("getProgress#fail", async () => {
       projectId,
       type: "analyze-table",
       analysis: {
-        type: "code",
+        type: "text",
         model: "claude",
       },
       fileReferenceId,
