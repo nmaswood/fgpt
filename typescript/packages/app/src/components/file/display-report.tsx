@@ -483,7 +483,9 @@ const ForPrompt: React.FC<{ file: FileToRender.PDFFile }> = ({ file }) => {
       alignItems="center"
       justifyContent="space-between"
       flexDirection="column"
-      overflow={isLoading || collapsed ? undefined : "auto"}
+      overflow={
+        isLoading || collapsed || statusForKpi === "failed" ? undefined : "auto"
+      }
     >
       <Box
         display="flex"
