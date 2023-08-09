@@ -49,7 +49,7 @@ SELECT
 FROM
     prompt
 `);
-    return Array.from(rows);
+    return Array.from(rows).sort((a, b) => a.slug.localeCompare(b.slug));
   }
 }
 
