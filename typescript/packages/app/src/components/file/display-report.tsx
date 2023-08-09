@@ -5,6 +5,7 @@ import {
   FileToRender,
   isNotNull,
   Outputs,
+  PromptSlug,
   StatusForPrompts,
 } from "@fgpt/precedent-iso";
 import { Term } from "@fgpt/precedent-iso/src/models/llm-outputs";
@@ -16,8 +17,10 @@ import {
   Box,
   Button,
   Divider,
+  Dropdown,
   IconButton,
   Menu,
+  MenuButton,
   MenuItem,
   Typography,
 } from "@mui/joy";
@@ -230,6 +233,10 @@ const ForOverview: React.FC<{
           >
             Generate KPI Report
           </Button>
+          <CustomReportButton
+            projectId={projectId}
+            fileReferenceId={fileReferenceId}
+          />
 
           <CollapseButton
             toggle={() => setCollapsed((prev) => !prev)}
@@ -482,7 +489,7 @@ const DownloadButton: React.FC<{
           component="a"
           href={signedUrl}
           target="_blank"
-          onClick={() => handleClose()}
+          onClick={handleClose}
         >
           Download Source Document
         </MenuItem>
@@ -592,3 +599,37 @@ const HardAtWork: React.FC = () => (
     </Typography>
   </Box>
 );
+
+const CustomReportButton: React.FC<{
+  projectId: string;
+  fileReferenceId: string;
+}> = ({ projectId, fileReferenceId }) => {
+  const { trigger, isMutating } = useTriggerOutput(fileReferenceId);
+
+  const forSlug = (slug: PromptSlug) => () =>
+    trigger({ projectId, slug, fileReferenceId });
+
+  return (
+    <Dropdown size="sm" color="primary">
+      <MenuButton
+        color="primary"
+        size="sm"
+        variant="solid"
+        endDecorator={<ArrowDropDown />}
+        loading={isMutating}
+      >
+        Additional Reports
+      </MenuButton>
+      <Menu size="sm">
+        <MenuItem onClick={forSlug("kpi")}>KPI Report</MenuItem>
+        <MenuItem onClick={forSlug("business_model")}>Business Model</MenuItem>
+        <MenuItem onClick={forSlug("expense_drivers")}>
+          Expense Drivers
+        </MenuItem>
+        <MenuItem onClick={forSlug("ebitda_adjustments")}>
+          EBITDA Adjustments
+        </MenuItem>
+      </Menu>
+    </Dropdown>
+  );
+};
