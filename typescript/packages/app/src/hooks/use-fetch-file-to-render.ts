@@ -1,6 +1,8 @@
-import { FileToRender } from "@fgpt/precedent-iso";
+import { FileToRender, TaskStatus } from "@fgpt/precedent-iso";
 import React from "react";
 import useSWR from "swr";
+
+const TIMEOUT = 15_000;
 
 export const useFetchFileToRender = (fileReferenceId: string) => {
   const limit = React.useRef(10);
@@ -9,12 +11,23 @@ export const useFetchFileToRender = (fileReferenceId: string) => {
     ["/api/proxy/v1/output/render-file", string]
   >(["/api/proxy/v1/output/render-file", fileReferenceId], fileFetcher, {
     refreshInterval: (data) => {
-      if (limit.current <= 0) {
+      if (limit.current <= 0 || !data) {
         return 0;
       }
 
       if (data?.status === "pending") {
-        return 15_000;
+        return TIMEOUT;
+      }
+      if (data.type === "pdf") {
+        const statuses = Object.values(data.statusForPrompts) as (
+          | TaskStatus
+          | "not_created"
+        )[];
+        for (const status of statuses) {
+          if (status === "in-progress" || status == "queued") {
+            return TIMEOUT;
+          }
+        }
       }
 
       return 0;

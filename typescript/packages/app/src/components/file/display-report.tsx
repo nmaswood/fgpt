@@ -333,6 +333,7 @@ const ForPrompt: React.FC<{ file: FileToRender.PDFFile }> = ({ file }) => {
   if (isLoading) {
     return <LoadingHeader copy="Outputs" />;
   }
+  const isError = statusForKpi === "failed";
   return (
     <Box
       display="flex"
@@ -347,9 +348,7 @@ const ForPrompt: React.FC<{ file: FileToRender.PDFFile }> = ({ file }) => {
       alignItems="center"
       justifyContent="space-between"
       flexDirection="column"
-      overflow={
-        isLoading || collapsed || statusForKpi === "failed" ? undefined : "auto"
-      }
+      overflow={collapsed || isError ? undefined : "auto"}
     >
       <Box
         display="flex"
@@ -359,25 +358,27 @@ const ForPrompt: React.FC<{ file: FileToRender.PDFFile }> = ({ file }) => {
         height="auto"
         padding={2}
       >
-        <Typography
-          level="h4"
-          fontWeight={700}
-          sx={{
-            color: "black",
-          }}
-        >
-          Outputs
-        </Typography>
+        <Box display="flex" gap={2} alignItems="center">
+          <Typography
+            level="h4"
+            fontWeight={700}
+            sx={{
+              color: "black",
+            }}
+          >
+            Outputs
+          </Typography>
 
-        {isLoading && <ParedoIcon />}
-        {!isLoading && (
+          {isError && <StatusBubble status={"error"} />}
+        </Box>
+        {!isError && (
           <CollapseButton
             toggle={() => setCollapsed((prev) => !prev)}
             collapsed={collapsed}
           />
         )}
       </Box>
-      {!isLoading && !collapsed && (
+      {!isLoading && !collapsed && !isError && (
         <>
           <Divider />
           <DispatchForKpi status={statusForKpi} output={file.report.kpi} />
