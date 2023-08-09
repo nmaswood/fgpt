@@ -182,7 +182,7 @@ const ForOverview: React.FC<{
   const withDescription = description
     ? [{ termName: "Description", termValue: description }, ...terms]
     : terms;
-  const { trigger, isMutating } = useTriggerOutput(fileReferenceId);
+
   if (status === "pending") {
     return <LoadingHeader copy="Overview" />;
   }
@@ -219,23 +219,10 @@ const ForOverview: React.FC<{
           <StatusBubble status={status} />
         </Box>
         <Box display="flex" gap={2} alignItems="center">
-          <Button
-            onClick={() =>
-              trigger({
-                fileReferenceId,
-                slug: "kpi",
-                projectId,
-              })
-            }
-            loading={isMutating}
-            disabled={statusForPrompts["kpi"] !== "not_created"}
-            size="sm"
-          >
-            Generate KPI Report
-          </Button>
           <CustomReportButton
             projectId={projectId}
             fileReferenceId={fileReferenceId}
+            statusForPrompts={statusForPrompts}
           />
 
           <CollapseButton
@@ -603,7 +590,8 @@ const HardAtWork: React.FC = () => (
 const CustomReportButton: React.FC<{
   projectId: string;
   fileReferenceId: string;
-}> = ({ projectId, fileReferenceId }) => {
+  statusForPrompts: StatusForPrompts;
+}> = ({ projectId, fileReferenceId, statusForPrompts }) => {
   const { trigger, isMutating } = useTriggerOutput(fileReferenceId);
 
   const forSlug = (slug: PromptSlug) => () =>
@@ -620,13 +608,18 @@ const CustomReportButton: React.FC<{
       >
         Additional Reports
       </MenuButton>
-      <Menu size="sm">
-        <MenuItem onClick={forSlug("kpi")}>KPI Report</MenuItem>
+      <Menu size="sm" variant="soft">
+        <MenuItem
+          onClick={forSlug("kpi")}
+          disabled={statusForPrompts.kpi !== "not_created"}
+        >
+          KPI Report
+        </MenuItem>
         <MenuItem onClick={forSlug("business_model")}>Business Model</MenuItem>
-        <MenuItem onClick={forSlug("expense_drivers")}>
+        <MenuItem disabled onClick={forSlug("expense_drivers")}>
           Expense Drivers
         </MenuItem>
-        <MenuItem onClick={forSlug("ebitda_adjustments")}>
+        <MenuItem disabled onClick={forSlug("ebitda_adjustments")}>
           EBITDA Adjustments
         </MenuItem>
       </Menu>

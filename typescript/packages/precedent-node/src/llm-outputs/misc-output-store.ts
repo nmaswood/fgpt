@@ -18,7 +18,7 @@ export interface InsertMiscValue {
   value: Outputs.MiscValue;
 }
 
-const FIELDS = sql.fragment`id, text_chunk_group_id, text_chunk_id, metrics`;
+const FIELDS = sql.fragment`id, text_chunk_group_id, text_chunk_id, value`;
 export interface MiscOutputStore {
   textChunkIdsPresent(fileReferenceId: string): Promise<string[]>;
   getForFile(fileReferenceId: string): Promise<Outputs.MiscValue[]>;
@@ -38,7 +38,7 @@ export class PsqlMiscOutputStore implements MiscOutputStore {
 SELECT
     text_chunk_id as id
 FROM
-    text_chunk_metrics
+    misc_output
 WHERE
     file_reference_id = ${fileReferenceId}
 `);
@@ -46,11 +46,11 @@ WHERE
   }
 
   async getForFile(fileReferenceId: string): Promise<Outputs.MiscValue[]> {
-    const result = await this.pool.anyFirst(sql.type(ZGetMetricsForFile)`
+    const result = await this.pool.anyFirst(sql.type(ZGetValueForFile)`
 SELECT
-    metrics
+    value
 FROM
-    text_chunk_metrics
+    misc_output
 WHERE
     file_reference_id = ${fileReferenceId}
 `);
@@ -66,13 +66,11 @@ WHERE
     return res;
   }
 
-  async insertMany(
-    metrics: InsertMiscValue[],
-  ): Promise<Outputs.MiscValueRow[]> {
-    if (metrics.length === 0) {
+  async insertMany(values: InsertMiscValue[]): Promise<Outputs.MiscValueRow[]> {
+    if (values.length === 0) {
       return [];
     }
-    const values = metrics.map(
+    const sqlValues = values.map(
       ({
         organizationId,
         projectId,
@@ -89,15 +87,14 @@ WHERE
     ${processedFileId},
     ${textChunkGroupId ?? null},
     ${textChunkId ?? null},
-    ${null},
     ${JSON.stringify(value)})
 `,
     );
 
-    const res = await this.pool.any(sql.type(ZMetricsRow)`
-INSERT INTO text_chunk_metrics (organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, text_chunk_id, value, metrics)
+    const res = await this.pool.any(sql.type(ZRow)`
+INSERT INTO misc_output (organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, text_chunk_id, value)
     VALUES
-        ${sql.join(values, sql.fragment`, `)}
+        ${sql.join(sqlValues, sql.fragment`, `)}
     RETURNING
         ${FIELDS}
 `);
@@ -171,19 +168,19 @@ const ZMiscValue = z
     }
   });
 
-const ZGetMetricsForFile = z.object({
-  metrics: ZMiscValue,
+const ZGetValueForFile = z.object({
+  value: ZMiscValue,
 });
 
-const ZMetricsRow = z
+const ZRow = z
   .object({
     id: z.string(),
     text_chunk_group_id: z.string().nullable(),
     text_chunk_id: z.string().nullable(),
-    metrics: ZMiscValue,
+    value: ZMiscValue,
   })
   .transform((row): Outputs.MiscValueRow | undefined => {
-    if (!row.metrics) {
+    if (!row.value) {
       return undefined;
     }
 
@@ -199,6 +196,6 @@ const ZMetricsRow = z
     return {
       id: row.id,
       chunk,
-      value: row.metrics,
+      value: row.value,
     };
   });
