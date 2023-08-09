@@ -1,7 +1,6 @@
 import {
   AnalyzeOutput,
   assertNever,
-  ExcelOutputToRender,
   FileReference,
   FileToRender,
   getFileType,
@@ -114,10 +113,8 @@ export class FileToRenderServiceImpl implements FileRenderService {
   }
 }
 
-function transformOutput(output: AnalyzeOutput[]): ExcelOutputToRender {
-  return {
-    claude: output
-      .filter((row) => row.model === "claude")
-      .flatMap((row) => row.value),
-  };
+function transformOutput(output: AnalyzeOutput[]) {
+  return output
+    .filter((row) => row.model === "claude")
+    .flatMap((row) => row.value);
 }

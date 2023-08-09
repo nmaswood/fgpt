@@ -42,17 +42,11 @@ export interface Term {
 
 export interface Report {
   terms: Term[];
-  longForm: LongForm[];
-  outputs: PromptOutput[];
+  cim: DisplayOutput;
+  kpi: DisplayOutput;
 }
 
-export interface PromptOutput {
-  slug: PromptSlug;
-  raw: string;
-  html: string | undefined;
-}
-
-export interface LongForm {
-  raw: string;
-  html: string | undefined;
+export interface DisplayOutput {
+  type: "html" | "raw";
+  value: string[];
 }

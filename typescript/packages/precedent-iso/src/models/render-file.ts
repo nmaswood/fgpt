@@ -29,15 +29,11 @@ export namespace FileToRender {
     projectName: string;
     fileName: string;
     signedUrl: string;
-    output: ExcelOutputToRender;
+    output: AnalyzeResponseChunk[];
     status: FileStatus;
 
     description: string | undefined;
   }
-}
-
-export interface ExcelOutputToRender {
-  claude: AnalyzeResponseChunk[];
 }
 
 export interface DisplayFile {

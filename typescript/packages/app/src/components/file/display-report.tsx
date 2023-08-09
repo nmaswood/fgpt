@@ -1,7 +1,6 @@
 import {
   AnalyzeResponseChunk,
   assertNever,
-  ExcelOutputToRender,
   FileStatus,
   FileToRender,
   isNotNull,
@@ -16,7 +15,6 @@ import {
   Alert,
   Box,
   Button,
-  Chip,
   Divider,
   IconButton,
   Menu,
@@ -30,12 +28,13 @@ import { useTriggerOutput } from "../../hooks/use-trigger-output";
 import { DangerousHTMLElementChat } from "../html-element";
 import { TermsTable } from "../terms-table";
 import styles from "./display-report.module.css";
+import { formatSheetNames } from "./format-sheet-names";
+import { StatusBubble } from "./status-bubble";
 
 export const DisplayFileReport: React.FC<{
   file: FileToRender.File;
 }> = ({ file }) => {
   const terms = file.type === "pdf" ? file.report?.terms ?? [] : [];
-  file.type === "pdf" ? file.statusForPrompts.kpi : undefined;
   return (
     <Box
       display="flex"
@@ -49,32 +48,7 @@ export const DisplayFileReport: React.FC<{
       gap={2}
       bgcolor="#F5F5F5"
     >
-      {file.status === "pending" && (
-        <Box
-          display="flex"
-          bgcolor="#2B1657"
-          flexDirection="column"
-          padding={2}
-          borderRadius={8}
-          gap={1}
-        >
-          <Typography
-            level="h4"
-            className={styles.analyzing}
-            sx={{ fontWeight: 700, color: "white", fontSize: "16px" }}
-          >
-            Analyzing
-          </Typography>
-
-          <Typography
-            sx={{ fontWeight: 400, color: "white", fontSize: "14px" }}
-          >
-            Paredo is hard at work analyzing this document for you!
-            <br /> This can take a few minutes. You do not have to stay on this
-            screen.
-          </Typography>
-        </Box>
-      )}
+      {file.status === "pending" && <HardAtWork />}
       {file.type === "pdf" && (
         <ForOverview
           projectId={file.projectId}
@@ -99,30 +73,34 @@ const Dispatch: React.FC<{
       if (!file.report) {
         return null;
       }
-      return <PdfReport report={file.report} />;
+      return (
+        <Box
+          display="flex"
+          flexDirection="column"
+          maxHeight="100%"
+          overflow="auto"
+          width="100%"
+        >
+          <ClaudeReport longForm={file.report.cim} />
+        </Box>
+      );
     case "excel":
-      return <ForExcelOutput output={file.output} />;
+      return (
+        <Box
+          display="flex"
+          height="100"
+          width="100%"
+          maxHeight="100%"
+          maxWidth="100%"
+          overflow="auto"
+          flexDirection="column"
+        >
+          <ForExcel chunks={file.output} />
+        </Box>
+      );
     default:
       assertNever(file);
   }
-};
-
-const ForExcelOutput: React.FC<{
-  output: ExcelOutputToRender;
-}> = ({ output: { claude } }) => {
-  return (
-    <Box
-      display="flex"
-      height="100"
-      width="100%"
-      maxHeight="100%"
-      maxWidth="100%"
-      overflow="auto"
-      flexDirection="column"
-    >
-      <ForExcel chunks={claude} />
-    </Box>
-  );
 };
 
 const ForExcel: React.FC<{ chunks: AnalyzeResponseChunk[] }> = ({ chunks }) => {
@@ -141,12 +119,7 @@ const ForExcel: React.FC<{ chunks: AnalyzeResponseChunk[] }> = ({ chunks }) => {
       <Box>
         {allHTML.map(({ html, sheetNames }, idx) => (
           <Box key={idx}>
-            <Typography
-              level="title-md"
-              sx={{
-                fontWeight: 700,
-              }}
-            >
+            <Typography fontWeight={700} level="title-md">
               {formatSheetNames(sheetNames)}
             </Typography>
             <Divider />
@@ -187,23 +160,6 @@ const ForExcelValue: React.FC<{ chunk: AnalyzeResponseChunk }> = ({
   );
 };
 
-const PdfReport: React.FC<{
-  report: Outputs.Report;
-}> = ({ report }) => {
-  return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      gap={1}
-      maxHeight="100%"
-      overflow="auto"
-      width="100%"
-    >
-      <ClaudeReport longForm={report.longForm} />
-    </Box>
-  );
-};
-
 const ForOverview: React.FC<{
   fileReferenceId: string;
   projectId: string;
@@ -225,42 +181,7 @@ const ForOverview: React.FC<{
     : terms;
   const { trigger, isMutating } = useTriggerOutput(fileReferenceId);
   if (status === "pending") {
-    return (
-      <Box
-        display="flex"
-        width="100%"
-        height="auto"
-        maxHeight="100%"
-        overflow="auto"
-        sx={(theme) => ({
-          border: `1px solid ${theme.vars.palette.neutral[100]}`,
-        })}
-        borderRadius={8}
-        bgcolor="neutral.0"
-        alignItems="center"
-        justifyContent="space-between"
-        padding={2}
-      >
-        <Typography
-          level="h4"
-          sx={{
-            fontWeight: 700,
-            color: "#666",
-          }}
-        >
-          Overview
-        </Typography>
-
-        <Image
-          priority
-          src="/paredo-second.svg"
-          height={64}
-          width={64}
-          className={styles.rotating}
-          alt="Paredo icon"
-        />
-      </Box>
-    );
+    return <LoadingHeader copy="Overview" />;
   }
   return (
     <Box
@@ -285,8 +206,8 @@ const ForOverview: React.FC<{
         <Box display="flex" gap={2} alignItems="center">
           <Typography
             level="h4"
+            fontWeight={700}
             sx={{
-              fontWeight: 700,
               color: "black",
             }}
           >
@@ -310,21 +231,10 @@ const ForOverview: React.FC<{
             Generate KPI Report
           </Button>
 
-          <IconButton
-            size="sm"
-            onClick={() => setCollapsed((prev) => !prev)}
-            sx={{
-              "&:hover": {
-                bgcolor: "transparent",
-              },
-            }}
-          >
-            {collapsed ? (
-              <OpenInFullOutlinedIcon fontSize="small" />
-            ) : (
-              <CloseFullscreenOutlinedIcon fontSize="small" />
-            )}
-          </IconButton>
+          <CollapseButton
+            toggle={() => setCollapsed((prev) => !prev)}
+            collapsed={collapsed}
+          />
         </Box>
       </Box>
       {!collapsed && (
@@ -353,41 +263,7 @@ const ForReport: React.FC<{
 }> = ({ file }) => {
   const [collapsed, setCollapsed] = React.useState(false);
   if (file.status === "pending") {
-    return (
-      <Box
-        display="flex"
-        width="100%"
-        height="auto"
-        maxHeight="100%"
-        sx={(theme) => ({
-          border: `1px solid ${theme.vars.palette.neutral[100]}`,
-        })}
-        borderRadius={8}
-        bgcolor="neutral.0"
-        alignItems="center"
-        justifyContent="space-between"
-        padding={2}
-      >
-        <Typography
-          level="h4"
-          sx={{
-            fontWeight: 700,
-            color: "#666",
-          }}
-        >
-          Report
-        </Typography>
-
-        <Image
-          priority
-          src="/paredo-second.svg"
-          height={64}
-          width={64}
-          className={styles.rotating}
-          alt="Paredo icon"
-        />
-      </Box>
-    );
+    return <LoadingHeader copy="Report" />;
   }
   return (
     <Box
@@ -413,8 +289,8 @@ const ForReport: React.FC<{
       >
         <Typography
           level="h4"
+          fontWeight={700}
           sx={{
-            fontWeight: 700,
             color: "black",
           }}
         >
@@ -429,21 +305,10 @@ const ForReport: React.FC<{
               file.type === "pdf" ? file.derivedSignedUrl : undefined
             }
           />
-          <IconButton
-            size="sm"
-            onClick={() => setCollapsed((prev) => !prev)}
-            sx={{
-              "&:hover": {
-                bgcolor: "transparent",
-              },
-            }}
-          >
-            {collapsed ? (
-              <OpenInFullOutlinedIcon fontSize="small" />
-            ) : (
-              <CloseFullscreenOutlinedIcon fontSize="small" />
-            )}
-          </IconButton>
+          <CollapseButton
+            toggle={() => setCollapsed((prev) => !prev)}
+            collapsed={collapsed}
+          />
         </Box>
       </Box>
       {!collapsed && (
@@ -459,16 +324,15 @@ const ForReport: React.FC<{
 };
 
 const ForPrompt: React.FC<{ file: FileToRender.PDFFile }> = ({ file }) => {
-  const [collapsed, setCollapsed] = React.useState(false);
+  const [collapsed, setCollapsed] = React.useState(true);
   const statusForKpi = file.statusForPrompts["kpi"];
   if (statusForKpi === "not_created" || !file.report) {
     return null;
   }
-  const outputForSlug = file.report.outputs.find(
-    (output) => output.slug === "kpi",
-  );
-
   const isLoading = statusForKpi === "queued" || statusForKpi === "in-progress";
+  if (isLoading) {
+    return <LoadingHeader copy="Outputs" />;
+  }
   return (
     <Box
       display="flex"
@@ -497,46 +361,26 @@ const ForPrompt: React.FC<{ file: FileToRender.PDFFile }> = ({ file }) => {
       >
         <Typography
           level="h4"
+          fontWeight={700}
           sx={{
-            fontWeight: 700,
-            color: "#666",
+            color: "black",
           }}
         >
           Outputs
         </Typography>
 
-        {isLoading && (
-          <Image
-            priority
-            src="/paredo-second.svg"
-            height={64}
-            width={64}
-            className={styles.rotating}
-            alt="Paredo icon"
-          />
-        )}
+        {isLoading && <ParedoIcon />}
         {!isLoading && (
-          <IconButton
-            size="sm"
-            onClick={() => setCollapsed((prev) => !prev)}
-            sx={{
-              "&:hover": {
-                bgcolor: "transparent",
-              },
-            }}
-          >
-            {collapsed ? (
-              <OpenInFullOutlinedIcon fontSize="small" />
-            ) : (
-              <CloseFullscreenOutlinedIcon fontSize="small" />
-            )}
-          </IconButton>
+          <CollapseButton
+            toggle={() => setCollapsed((prev) => !prev)}
+            collapsed={collapsed}
+          />
         )}
       </Box>
       {!isLoading && !collapsed && (
         <>
           <Divider />
-          <DispatchForKpi status={statusForKpi} output={outputForSlug} />
+          <DispatchForKpi status={statusForKpi} output={file.report.kpi} />
         </>
       )}
     </Box>
@@ -545,7 +389,7 @@ const ForPrompt: React.FC<{ file: FileToRender.PDFFile }> = ({ file }) => {
 
 const DispatchForKpi: React.FC<{
   status: "succeeded" | "failed";
-  output: Outputs.PromptOutput | undefined;
+  output: Outputs.DisplayOutput | undefined;
 }> = ({ status, output }) => {
   return (
     <Box
@@ -574,105 +418,33 @@ const DispatchForKpi: React.FC<{
           overflow="auto"
           width="100%"
         >
-          <ClaudeReport longForm={[output]} />
+          <ClaudeReport longForm={output} />
         </Box>
       )}
     </Box>
   );
 };
 
-const StatusBubble: React.FC<{ status: FileStatus }> = ({ status }) => {
-  const Inner = () => {
-    switch (status) {
-      case "pending":
-        return (
-          <Chip
-            size="sm"
-            sx={{
-              background: "#fff",
-              fontSize: "14px",
-              color: "neutral.600",
-              border: "1px solid #E5E5E5",
-              fontWeight: 700,
-            }}
-          >
-            Analyzing
-          </Chip>
-        );
-      case "ready":
-        return (
-          <Chip
-            size="sm"
-            sx={{
-              background: "#fff",
-              fontSize: "14px",
-              color: "success.solidColor",
-              border: "1px solid #E5E5E5",
-              fontWeight: 700,
-            }}
-          >
-            Ready
-          </Chip>
-        );
-      case "error":
-        return (
-          <Chip
-            size="sm"
-            sx={{
-              background: "#fff",
-              fontSize: "14px",
-              color: "danger.solidColor",
-              border: "1px solid #E5E5E5",
-              fontWeight: 700,
-            }}
-          >
-            Error
-          </Chip>
-        );
-
-      default:
-        assertNever(status);
-    }
-  };
-
-  return (
-    <Box>
-      <Inner />
-    </Box>
-  );
-};
-
 const ClaudeReport: React.FC<{
-  longForm: Outputs.LongForm[];
+  longForm: Outputs.DisplayOutput;
 }> = ({ longForm }) => {
-  const hasHtml = longForm.some((lf) => lf.html);
-  if (!hasHtml) {
-    const allText = longForm.map((lf) => lf.raw).join("\n");
-    return <Typography whiteSpace="pre-wrap"> {allText}</Typography>;
+  switch (longForm.type) {
+    case "raw": {
+      const text = longForm.value.join("\n");
+      return <Typography whiteSpace="pre-wrap"> {text}</Typography>;
+    }
+    case "html":
+      return (
+        <Box>
+          {longForm.value.map((html, idx) => (
+            <DangerousHTMLElementChat key={idx} html={html} />
+          ))}
+        </Box>
+      );
+    default:
+      assertNever(longForm.type);
   }
-
-  const allHtml = longForm.map((lf) => lf.html).filter(isNotNull);
-  return (
-    <Box>
-      {allHtml.map((html, idx) => (
-        <DangerousHTMLElementChat key={idx} html={html} />
-      ))}
-    </Box>
-  );
 };
-
-function formatSheetNames(sheetNames: string[]): string {
-  if (sheetNames.length === 0) {
-    return "";
-  } else if (sheetNames.length === 1) {
-    return sheetNames[0]!;
-  }
-
-  const [first] = sheetNames;
-  const last = sheetNames.at(-1);
-
-  return `${first} to ${last}`;
-}
 
 const DownloadButton: React.FC<{
   fileName: string;
@@ -682,14 +454,11 @@ const DownloadButton: React.FC<{
   const buttonRef = React.useRef(null);
   const [open, setOpen] = React.useState(false);
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
+  const handleClose = () => setOpen(false);
   if (!extractedTablesSignedUrl) {
     return (
       <Button component="a" href={signedUrl} target="_blank" size="sm">
-        Download Asset
+        Download Source Document
       </Button>
     );
   }
@@ -714,19 +483,111 @@ const DownloadButton: React.FC<{
           target="_blank"
           onClick={() => handleClose()}
         >
-          Download asset
+          Download Source Document
         </MenuItem>
         {extractedTablesSignedUrl && (
           <MenuItem
             component="a"
             href={extractedTablesSignedUrl}
             target="_blank"
-            onClick={() => handleClose()}
+            onClick={handleClose}
           >
-            Download extracted tables
+            Download Extracted Tables
           </MenuItem>
         )}
       </Menu>
     </div>
   );
 };
+
+const CollapseButton: React.FC<{
+  collapsed: boolean;
+  toggle: () => void;
+}> = ({ collapsed, toggle }) => (
+  <IconButton
+    size="sm"
+    onClick={toggle}
+    sx={{
+      "&:hover": {
+        bgcolor: "transparent",
+      },
+    }}
+  >
+    {collapsed ? (
+      <OpenInFullOutlinedIcon fontSize="small" />
+    ) : (
+      <CloseFullscreenOutlinedIcon fontSize="small" />
+    )}
+  </IconButton>
+);
+
+const LoadingHeader: React.FC<{
+  copy: string;
+}> = ({ copy }) => {
+  return (
+    <Box
+      display="flex"
+      width="100%"
+      height="auto"
+      maxHeight="100%"
+      sx={(theme) => ({
+        border: `1px solid ${theme.vars.palette.neutral[100]}`,
+      })}
+      borderRadius={8}
+      bgcolor="neutral.0"
+      alignItems="center"
+      justifyContent="space-between"
+      padding={2}
+    >
+      <Typography
+        level="h4"
+        fontWeight={700}
+        sx={{
+          color: "neutral.600",
+        }}
+      >
+        {copy}
+      </Typography>
+
+      <ParedoIcon />
+    </Box>
+  );
+};
+
+const ParedoIcon = () => (
+  <Image
+    priority
+    src="/paredo-second.svg"
+    height={64}
+    width={64}
+    className={styles.rotating}
+    alt="Paredo icon"
+  />
+);
+
+const HardAtWork: React.FC = () => (
+  <Box
+    display="flex"
+    bgcolor="primary.800"
+    flexDirection="column"
+    padding={2}
+    borderRadius={8}
+    gap={1}
+  >
+    <Typography
+      level="h4"
+      className={styles.analyzing}
+      fontWeight={700}
+      fontSize="16px"
+      sx={{ color: "white" }}
+    >
+      Analyzing
+    </Typography>
+
+    <Typography fontWeight={400} fontSize="14px" sx={{ color: "white" }}>
+      Paredo is hard at work analyzing this document for you!
+      <br /> This can take a few minutes. You do not have to stay on this
+      screen.
+    </Typography>
+  </Box>
+);

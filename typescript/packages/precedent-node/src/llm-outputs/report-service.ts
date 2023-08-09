@@ -16,11 +16,9 @@ export class ReportServiceImpl implements ReportService {
   }
 
   #processMiscValues(values: Outputs.MiscValue[]): Outputs.Report {
-    const acc: Outputs.Report = {
-      terms: [],
-      longForm: [],
-      outputs: [],
-    };
+    const terms: Outputs.Term[] = [];
+    const cim: Intermediate = { raw: [], html: [] };
+    const kpi: Intermediate = { raw: [], html: [] };
 
     const alreadySeenTerms = new Set<string>();
 
@@ -32,7 +30,7 @@ export class ReportServiceImpl implements ReportService {
               continue;
             }
 
-            acc.terms.push(term);
+            terms.push(term);
 
             alreadySeenTerms.add(term.termName);
           }
@@ -41,19 +39,45 @@ export class ReportServiceImpl implements ReportService {
         }
 
         case "long_form":
-          acc.longForm.push({
-            raw: value.raw,
-            html: value.html,
-          });
+          cim.raw.push(value.raw);
+          if (value.html) {
+            cim.html.push(value.html);
+          }
+
           break;
-        case "output":
-          acc.outputs.push(value);
+        case "output": {
+          if (value.slug !== "kpi") {
+            throw new Error("not supported");
+          }
+          kpi.raw.push(value.raw);
+          if (value.html) {
+            kpi.html.push(value.html);
+          }
+
           break;
+        }
 
         default:
           assertNever(value);
       }
     }
-    return acc;
+
+    return {
+      terms,
+      cim: toOutput(cim),
+      kpi: toOutput(kpi),
+    };
   }
+}
+
+interface Intermediate {
+  raw: string[];
+  html: string[];
+}
+
+function toOutput(value: Intermediate): Outputs.DisplayOutput {
+  if (value.html.length > 0) {
+    return { type: "html", value: value.html };
+  }
+  return { type: "raw", value: value.raw };
 }
