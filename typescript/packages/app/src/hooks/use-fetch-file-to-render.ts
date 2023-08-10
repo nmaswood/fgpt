@@ -1,4 +1,4 @@
-import { FileToRender, TaskStatus } from "@fgpt/precedent-iso";
+import { FileToRender, StatusForPrompt } from "@fgpt/precedent-iso";
 import React from "react";
 import useSWR from "swr";
 
@@ -19,10 +19,9 @@ export const useFetchFileToRender = (fileReferenceId: string) => {
         return TIMEOUT;
       }
       if (data.type === "pdf") {
-        const statuses = Object.values(data.statusForPrompts) as (
-          | TaskStatus
-          | "not_created"
-        )[];
+        const statuses = Object.values(
+          data.statusForPrompts,
+        ) as StatusForPrompt[];
         for (const status of statuses) {
           if (status === "in-progress" || status == "queued") {
             return TIMEOUT;

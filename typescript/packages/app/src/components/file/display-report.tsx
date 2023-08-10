@@ -8,6 +8,7 @@ import {
   PROMPT_SLUGS,
   PromptSlug,
   SLUG_DISPLAY_NAME,
+  StatusForPrompt,
   StatusForPrompts,
 } from "@fgpt/precedent-iso";
 import { Term } from "@fgpt/precedent-iso/src/models/llm-outputs";
@@ -15,9 +16,9 @@ import ArrowDropDown from "@mui/icons-material/ArrowDropDownOutlined";
 import CheckIcon from "@mui/icons-material/CheckOutlined";
 import CloseFullscreenOutlinedIcon from "@mui/icons-material/CloseFullscreenOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import OpenInFullOutlinedIcon from "@mui/icons-material/OpenInFullOutlined";
 import {
-  Alert,
   Box,
   Button,
   CircularProgress,
@@ -67,6 +68,11 @@ export const DisplayFileReport: React.FC<{
           description={file.description}
           terms={file.report.terms}
           statusForPrompts={file.statusForPrompts}
+          fileName={file.fileName}
+          signedUrl={file.signedUrl}
+          extractedTablesSignedUrl={
+            file.type === "pdf" ? file.derivedSignedUrl : undefined
+          }
         />
       )}
       <ForReport file={file} />
@@ -179,6 +185,9 @@ const ForOverview: React.FC<{
   description: string | undefined;
   terms: Term[];
   statusForPrompts: StatusForPrompts;
+  fileName: string;
+  signedUrl: string;
+  extractedTablesSignedUrl: string | undefined;
 }> = ({
   fileReferenceId,
   status,
@@ -186,6 +195,9 @@ const ForOverview: React.FC<{
   terms,
   projectId,
   statusForPrompts,
+  fileName,
+  signedUrl,
+  extractedTablesSignedUrl,
 }) => {
   const [collapsed, setCollapsed] = React.useState(false);
   const withDescription = description
@@ -227,17 +239,24 @@ const ForOverview: React.FC<{
           </Typography>
           <StatusBubble status={status} />
         </Box>
-        <Box display="flex" gap={2} alignItems="center">
+        <Box display="flex" gap={1} alignItems="center">
           <CustomReportButton
             projectId={projectId}
             fileReferenceId={fileReferenceId}
             statusForPrompts={statusForPrompts}
           />
 
-          <CollapseButton
-            toggle={() => setCollapsed((prev) => !prev)}
-            collapsed={collapsed}
-          />
+          <Box display="flex" gap={1} alignItems="center">
+            <DownloadButton
+              fileName={fileName}
+              signedUrl={signedUrl}
+              extractedTablesSignedUrl={extractedTablesSignedUrl}
+            />
+            <CollapseButton
+              toggle={() => setCollapsed((prev) => !prev)}
+              collapsed={collapsed}
+            />
+          </Box>
         </Box>
       </Box>
       {!collapsed && (
@@ -301,13 +320,6 @@ const ForReport: React.FC<{
         </Typography>
 
         <Box display="flex" alignItems="center" gap={2}>
-          <DownloadButton
-            fileName={file.fileName}
-            signedUrl={file.signedUrl}
-            extractedTablesSignedUrl={
-              file.type === "pdf" ? file.derivedSignedUrl : undefined
-            }
-          />
           <CollapseButton
             toggle={() => setCollapsed((prev) => !prev)}
             collapsed={collapsed}
@@ -328,15 +340,18 @@ const ForReport: React.FC<{
 
 const ForPrompt: React.FC<{ file: FileToRender.PDFFile }> = ({ file }) => {
   const [collapsed, setCollapsed] = React.useState(true);
-  const statusForKpi = file.statusForPrompts["kpi"];
-  if (statusForKpi === "not_created" || !file.report) {
+
+  const atleastOne = (
+    Object.values(file.statusForPrompts) as StatusForPrompt[]
+  ).some((p) => p === "succeeded");
+  if (!atleastOne) {
     return null;
   }
-  const isLoading = statusForKpi === "queued" || statusForKpi === "in-progress";
-  if (isLoading) {
-    return <LoadingHeader copy="Outputs" />;
-  }
-  const isError = statusForKpi === "failed";
+
+  //const isLoading = statusForKpi === "queued" || statusForKpi === "in-progress";
+  //if (isLoading) {
+  //return <LoadingHeader copy="Outputs" />;
+  //}
 
   return (
     <Box
@@ -352,7 +367,7 @@ const ForPrompt: React.FC<{ file: FileToRender.PDFFile }> = ({ file }) => {
       alignItems="center"
       justifyContent="space-between"
       flexDirection="column"
-      overflow={collapsed || isError ? undefined : "auto"}
+      overflow={collapsed ? undefined : "auto"}
     >
       <Box
         display="flex"
@@ -372,17 +387,14 @@ const ForPrompt: React.FC<{ file: FileToRender.PDFFile }> = ({ file }) => {
           >
             Outputs
           </Typography>
-
-          {isError && <StatusBubble status={"error"} />}
         </Box>
-        {!isError && (
-          <CollapseButton
-            toggle={() => setCollapsed((prev) => !prev)}
-            collapsed={collapsed}
-          />
-        )}
+
+        <CollapseButton
+          toggle={() => setCollapsed((prev) => !prev)}
+          collapsed={collapsed}
+        />
       </Box>
-      {!isLoading && !collapsed && file.report.outputs.length > 0 && (
+      {!collapsed && file.report.outputs.length > 0 && (
         <>
           <Divider />
           <DisplayPrompts outputs={file.report.outputs} />
@@ -491,9 +503,9 @@ const DownloadButton: React.FC<{
   const handleClose = () => setOpen(false);
   if (!extractedTablesSignedUrl) {
     return (
-      <Button component="a" href={signedUrl} target="_blank" size="sm">
-        Download Source Document
-      </Button>
+      <IconButton component="a" href={signedUrl} target="_blank" size="sm">
+        <DownloadOutlinedIcon />
+      </IconButton>
     );
   }
 
