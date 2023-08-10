@@ -17,3 +17,17 @@ export interface Prompt {
   slug: PromptSlug;
   definition: PromptDefinition;
 }
+
+export const SLUG_DISPLAY_NAME = {
+  kpi: "Key Financials",
+  ebitda_adjustments: "EBITDA Adjustments",
+  business_model: "Business Model",
+  expense_drivers: "Expense Drivers",
+};
+
+export const PROMPT_SLUGS = [
+  "business_model",
+  "kpi",
+  "expense_drivers",
+  "ebitda_adjustments",
+] as const;

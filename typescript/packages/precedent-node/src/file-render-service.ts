@@ -70,23 +70,18 @@ export class FileToRenderServiceImpl implements FileRenderService {
   }
 
   async #forPDF(file: FileReference): Promise<FileToRender.PDFFile> {
-    const [signedUrl, [derived], report, project, tasks] = await Promise.all([
-      this.objectStorageService.getSignedUrl(
-        file.bucketName,
-        file.path,
-        file.fileName,
-      ),
-      this.excelAssetStore.list(file.id),
-      this.reportService.forFileReferenceId(file.id),
-      this.projectStore.get(file.projectId),
-      this.promptTaskService.getForSlug({
-        fileReferenceId: file.id,
-        slug: "kpi",
-      }),
-    ]);
-
-    const [kpiTask] = tasks;
-    const kpiStatus = kpiTask?.status ?? "not_created";
+    const [signedUrl, [derived], report, project, statusForPrompts] =
+      await Promise.all([
+        this.objectStorageService.getSignedUrl(
+          file.bucketName,
+          file.path,
+          file.fileName,
+        ),
+        this.excelAssetStore.list(file.id),
+        this.reportService.forFileReferenceId(file.id),
+        this.projectStore.get(file.projectId),
+        this.promptTaskService.getForSlugs(file.id),
+      ]);
 
     return {
       type: "pdf",
@@ -106,9 +101,7 @@ export class FileToRenderServiceImpl implements FileRenderService {
 
       status: file.status,
       description: file.description,
-      statusForPrompts: {
-        kpi: kpiStatus,
-      },
+      statusForPrompts,
     };
   }
 }

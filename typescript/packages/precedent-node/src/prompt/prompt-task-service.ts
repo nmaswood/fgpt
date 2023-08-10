@@ -1,37 +1,32 @@
-import { PromptSlug, TaskStatus } from "@fgpt/precedent-iso";
+import { StatusForPrompts } from "@fgpt/precedent-iso";
 
 import { TaskStore } from "../task-store";
 
-interface GetForSlugArgs {
-  fileReferenceId: string;
-  slug: PromptSlug;
-}
 export interface PromptTaskService {
-  getForSlug(args: GetForSlugArgs): Promise<PromptTask[]>;
-}
-
-export interface PromptTask {
-  id: string;
-  status: TaskStatus;
+  getForSlugs(fileReferenceId: string): Promise<StatusForPrompts>;
 }
 
 export class PromptTaskServiceImpl implements PromptTaskService {
   constructor(private readonly taskStore: TaskStore) {}
 
-  async getForSlug({
-    fileReferenceId,
-    slug,
-  }: GetForSlugArgs): Promise<PromptTask[]> {
-    const acc: PromptTask[] = [];
+  async getForSlugs(fileReferenceId: string): Promise<StatusForPrompts> {
+    let totalCreated = 0;
+
     const tasks = await this.taskStore.getByType(fileReferenceId, "run-prompt");
 
-    for (const task of tasks) {
-      if (task.config.type === "run-prompt" && task.config.slug === slug) {
-        acc.push({
-          id: task.id,
-          status: task.status,
-        });
+    const acc: StatusForPrompts = {
+      kpi: "not_created",
+      business_model: "not_created",
+      expense_drivers: "not_created",
+      ebitda_adjustments: "not_created",
+    };
+
+    for (const t of tasks) {
+      if (t.config.type !== "run-prompt") {
+        continue;
       }
+      acc[t.config.slug] = t.status;
+      totalCreated++;
     }
     return acc;
   }

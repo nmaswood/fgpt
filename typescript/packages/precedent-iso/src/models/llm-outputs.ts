@@ -42,8 +42,13 @@ export interface Term {
 
 export interface Report {
   terms: Term[];
-  cim: DisplayOutput;
-  kpi: DisplayOutput;
+  cim: DisplayOutput | undefined;
+  outputs: SlugWithOutput[];
+}
+
+export interface SlugWithOutput {
+  slug: PromptSlug;
+  output: DisplayOutput;
 }
 
 export interface DisplayOutput {

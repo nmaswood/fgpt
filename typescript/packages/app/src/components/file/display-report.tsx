@@ -5,23 +5,31 @@ import {
   FileToRender,
   isNotNull,
   Outputs,
+  PROMPT_SLUGS,
   PromptSlug,
+  SLUG_DISPLAY_NAME,
   StatusForPrompts,
 } from "@fgpt/precedent-iso";
 import { Term } from "@fgpt/precedent-iso/src/models/llm-outputs";
 import ArrowDropDown from "@mui/icons-material/ArrowDropDownOutlined";
+import CheckIcon from "@mui/icons-material/CheckOutlined";
 import CloseFullscreenOutlinedIcon from "@mui/icons-material/CloseFullscreenOutlined";
+import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import OpenInFullOutlinedIcon from "@mui/icons-material/OpenInFullOutlined";
 import {
   Alert,
   Box,
   Button,
+  CircularProgress,
   Divider,
   Dropdown,
   IconButton,
+  ListItemDecorator,
   Menu,
   MenuButton,
   MenuItem,
+  Option,
+  Select,
   Typography,
 } from "@mui/joy";
 import Image from "next/image";
@@ -37,7 +45,6 @@ import { StatusBubble } from "./status-bubble";
 export const DisplayFileReport: React.FC<{
   file: FileToRender.File;
 }> = ({ file }) => {
-  const terms = file.type === "pdf" ? file.report?.terms ?? [] : [];
   return (
     <Box
       display="flex"
@@ -58,7 +65,7 @@ export const DisplayFileReport: React.FC<{
           fileReferenceId={file.id}
           status={file.status}
           description={file.description}
-          terms={terms}
+          terms={file.report.terms}
           statusForPrompts={file.statusForPrompts}
         />
       )}
@@ -72,8 +79,9 @@ const Dispatch: React.FC<{
   file: FileToRender.File;
 }> = ({ file }) => {
   switch (file.type) {
-    case "pdf":
-      if (!file.report) {
+    case "pdf": {
+      const cim = file.report.cim;
+      if (!cim) {
         return null;
       }
       return (
@@ -84,9 +92,10 @@ const Dispatch: React.FC<{
           overflow="auto"
           width="100%"
         >
-          <ClaudeReport longForm={file.report.cim} />
+          <ClaudeReport longForm={cim} />
         </Box>
       );
+    }
     case "excel":
       return (
         <Box
@@ -328,6 +337,7 @@ const ForPrompt: React.FC<{ file: FileToRender.PDFFile }> = ({ file }) => {
     return <LoadingHeader copy="Outputs" />;
   }
   const isError = statusForKpi === "failed";
+
   return (
     <Box
       display="flex"
@@ -372,50 +382,79 @@ const ForPrompt: React.FC<{ file: FileToRender.PDFFile }> = ({ file }) => {
           />
         )}
       </Box>
-      {!isLoading && !collapsed && !isError && (
+      {!isLoading && !collapsed && file.report.outputs.length > 0 && (
         <>
           <Divider />
-          <DispatchForKpi status={statusForKpi} output={file.report.kpi} />
+          <DisplayPrompts outputs={file.report.outputs} />
         </>
       )}
     </Box>
   );
 };
 
-const DispatchForKpi: React.FC<{
-  status: "succeeded" | "failed";
-  output: Outputs.DisplayOutput | undefined;
-}> = ({ status, output }) => {
+const DisplayPrompts: React.FC<{
+  outputs: Outputs.SlugWithOutput[];
+}> = ({ outputs }) => {
+  const [slug, setSlug] = React.useState<PromptSlug>(() => {
+    const [output] = outputs;
+    if (!output) {
+      throw new Error("No outputs");
+    }
+    return output.slug;
+  });
+
+  const slugs = new Set(outputs.map((output) => output.slug));
+
+  const output = outputs.find((output) => output.slug === slug);
   return (
     <Box
       display="flex"
       width="100%"
       maxHeight="100%"
-      overflow="auto"
+      height="100%"
       padding={2}
+      flexDirection="column"
+      overflow="auto"
     >
-      {status === "failed" && (
-        <Alert variant="outlined" size="sm" color="danger">
-          This operation errored
-        </Alert>
-      )}
-      {status === "succeeded" && output === undefined && (
-        <Alert variant="outlined" size="sm" color="danger">
-          This operation succeeded, but no output was generated
-        </Alert>
-      )}
-      {status === "succeeded" && output && (
-        <Box
-          display="flex"
-          flexDirection="column"
-          gap={1}
-          maxHeight="100%"
-          overflow="auto"
-          width="100%"
-        >
-          <ClaudeReport longForm={output} />
-        </Box>
-      )}
+      <Box display="flex" width="300px">
+        {slugs.size > 1 && (
+          <Select
+            size="sm"
+            value={slug}
+            onChange={(_, value) => {
+              if (!value) {
+                return;
+              }
+              setSlug(value);
+            }}
+          >
+            {PROMPT_SLUGS.filter((slug) => slugs.has(slug)).map((slug) => (
+              <Option key={slug} value={slug}>
+                {SLUG_DISPLAY_NAME[slug]}
+              </Option>
+            ))}
+          </Select>
+        )}
+      </Box>
+
+      {output && <DisplayPrompt output={output.output} />}
+    </Box>
+  );
+};
+
+const DisplayPrompt: React.FC<{
+  output: Outputs.DisplayOutput;
+}> = ({ output }) => {
+  return (
+    <Box
+      display="flex"
+      width="100%"
+      maxHeight="100%"
+      height="100%"
+      flexDirection="column"
+      overflow="auto"
+    >
+      <ClaudeReport longForm={output} />
     </Box>
   );
 };
@@ -594,9 +633,6 @@ const CustomReportButton: React.FC<{
 }> = ({ projectId, fileReferenceId, statusForPrompts }) => {
   const { trigger, isMutating } = useTriggerOutput(fileReferenceId);
 
-  const forSlug = (slug: PromptSlug) => () =>
-    trigger({ projectId, slug, fileReferenceId });
-
   return (
     <Dropdown size="sm" color="primary">
       <MenuButton
@@ -606,22 +642,28 @@ const CustomReportButton: React.FC<{
         endDecorator={<ArrowDropDown />}
         loading={isMutating}
       >
-        Additional Reports
+        Generate Additional Reports
       </MenuButton>
       <Menu size="sm" variant="soft">
-        <MenuItem
-          onClick={forSlug("kpi")}
-          disabled={statusForPrompts.kpi !== "not_created"}
-        >
-          KPI Report
-        </MenuItem>
-        <MenuItem onClick={forSlug("business_model")}>Business Model</MenuItem>
-        <MenuItem disabled onClick={forSlug("expense_drivers")}>
-          Expense Drivers
-        </MenuItem>
-        <MenuItem disabled onClick={forSlug("ebitda_adjustments")}>
-          EBITDA Adjustments
-        </MenuItem>
+        {PROMPT_SLUGS.map((slug) => {
+          const status = statusForPrompts[slug];
+          return (
+            <MenuItem
+              key={slug}
+              onClick={() => trigger({ projectId, slug, fileReferenceId })}
+              disabled={status !== "not_created"}
+            >
+              <ListItemDecorator>
+                {(status === "in-progress" || status === "queued") && (
+                  <CircularProgress size="sm" />
+                )}
+                {status === "succeeded" && <CheckIcon color="success" />}
+                {status === "failed" && <CloseOutlinedIcon color="error" />}
+              </ListItemDecorator>
+              {SLUG_DISPLAY_NAME[slug]}
+            </MenuItem>
+          );
+        })}
       </Menu>
     </Dropdown>
   );

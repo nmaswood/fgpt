@@ -10,7 +10,7 @@ export namespace FileToRender {
     type: "pdf";
     id: string;
     signedUrl: string;
-    report: Report | undefined;
+    report: Report;
     projectId: string;
     projectName: string;
     fileName: string;
@@ -41,6 +41,10 @@ export interface DisplayFile {
   type: FileType | undefined;
 }
 
+export type StatusForPrompt = TaskStatus | "not_created";
 export interface StatusForPrompts {
-  kpi: TaskStatus | "not_created";
+  kpi: StatusForPrompt;
+  business_model: StatusForPrompt;
+  expense_drivers: StatusForPrompt;
+  ebitda_adjustments: StatusForPrompt;
 }

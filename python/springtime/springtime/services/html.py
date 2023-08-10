@@ -3,24 +3,25 @@ import markdown
 from loguru import logger
 
 TAGS = set(bleach.ALLOWED_TAGS) | {
+    "br",
+    "caption",
+    "code",
     "h1",
     "h2",
     "h3",
     "h4",
     "h5",
     "h6",
-    "p",
-    "ul",
     "li",
+    "p",
     "table",
-    "tr",
+    "tbody",
     "td",
+    "tfoot",
     "th",
     "thead",
-    "tbody",
-    "tfoot",
-    "caption",
-    "code",
+    "tr",
+    "ul",
 }
 
 

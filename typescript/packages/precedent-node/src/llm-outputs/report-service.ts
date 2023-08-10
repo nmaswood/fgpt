@@ -1,4 +1,9 @@
-import { assertNever, Outputs } from "@fgpt/precedent-iso";
+import {
+  assertNever,
+  isNotNull,
+  Outputs,
+  PROMPT_SLUGS,
+} from "@fgpt/precedent-iso";
 
 import { MiscOutputStore } from "./misc-output-store";
 
@@ -18,7 +23,13 @@ export class ReportServiceImpl implements ReportService {
   #processMiscValues(values: Outputs.MiscValue[]): Outputs.Report {
     const terms: Outputs.Term[] = [];
     const cim: Intermediate = { raw: [], html: [] };
-    const kpi: Intermediate = { raw: [], html: [] };
+
+    const acc: Acc = {
+      kpi: { raw: [], html: [] },
+      business_model: { raw: [], html: [] },
+      expense_drivers: { raw: [], html: [] },
+      ebitda_adjustments: { raw: [], html: [] },
+    };
 
     const alreadySeenTerms = new Set<string>();
 
@@ -46,12 +57,9 @@ export class ReportServiceImpl implements ReportService {
 
           break;
         case "output": {
-          if (value.slug !== "kpi") {
-            throw new Error("not supported");
-          }
-          kpi.raw.push(value.raw);
+          acc[value.slug].raw.push(value.raw);
           if (value.html) {
-            kpi.html.push(value.html);
+            acc[value.slug].html.push(value.html);
           }
 
           break;
@@ -65,9 +73,19 @@ export class ReportServiceImpl implements ReportService {
     return {
       terms,
       cim: toOutput(cim),
-      kpi: toOutput(kpi),
+      outputs: PROMPT_SLUGS.map((slug) => {
+        const output = toOutput(acc[slug]);
+        return output ? { slug, output } : undefined;
+      }).filter(isNotNull),
     };
   }
+}
+
+interface Acc {
+  kpi: Intermediate;
+  business_model: Intermediate;
+  expense_drivers: Intermediate;
+  ebitda_adjustments: Intermediate;
 }
 
 interface Intermediate {
@@ -75,9 +93,11 @@ interface Intermediate {
   html: string[];
 }
 
-function toOutput(value: Intermediate): Outputs.DisplayOutput {
+function toOutput(value: Intermediate): Outputs.DisplayOutput | undefined {
   if (value.html.length > 0) {
     return { type: "html", value: value.html };
+  } else if (value.raw.length > 0) {
+    return { type: "raw", value: value.raw };
   }
-  return { type: "raw", value: value.raw };
+  return undefined;
 }
