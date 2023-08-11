@@ -17,7 +17,9 @@ import CheckIcon from "@mui/icons-material/CheckOutlined";
 import CloseFullscreenOutlinedIcon from "@mui/icons-material/CloseFullscreenOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
+import HideSourceOutlinedIcon from "@mui/icons-material/HideSourceOutlined";
 import OpenInFullOutlinedIcon from "@mui/icons-material/OpenInFullOutlined";
+import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import {
   Box,
   CircularProgress,
@@ -44,7 +46,9 @@ import { StatusBubble } from "./status-bubble";
 
 export const DisplayFileReport: React.FC<{
   file: FileToRender.File;
-}> = ({ file }) => {
+  showAsset: boolean;
+  toggleShowAsset: () => void;
+}> = ({ file, showAsset, toggleShowAsset }) => {
   return (
     <Box
       display="flex"
@@ -72,6 +76,8 @@ export const DisplayFileReport: React.FC<{
           extractedTablesSignedUrl={
             file.type === "pdf" ? file.derivedSignedUrl : undefined
           }
+          showAsset={showAsset}
+          toggleShowAsset={toggleShowAsset}
         />
       )}
       <ForReport file={file} />
@@ -187,6 +193,8 @@ const ForOverview: React.FC<{
   fileName: string;
   signedUrl: string;
   extractedTablesSignedUrl: string | undefined;
+  showAsset: boolean;
+  toggleShowAsset: () => void;
 }> = ({
   fileReferenceId,
   status,
@@ -197,6 +205,8 @@ const ForOverview: React.FC<{
   fileName,
   signedUrl,
   extractedTablesSignedUrl,
+  showAsset,
+  toggleShowAsset,
 }) => {
   const [collapsed, setCollapsed] = React.useState(false);
   const withDescription = description
@@ -252,6 +262,8 @@ const ForOverview: React.FC<{
               signedUrl={signedUrl}
               extractedTablesSignedUrl={extractedTablesSignedUrl}
             />
+            <HidePDF showAsset={showAsset} toggleShowAsset={toggleShowAsset} />
+
             <CollapseButton
               toggle={() => setCollapsed((prev) => !prev)}
               collapsed={collapsed}
@@ -339,17 +351,16 @@ const ForReport: React.FC<{
 const ForPrompt: React.FC<{ file: FileToRender.PDFFile }> = ({ file }) => {
   const [collapsed, setCollapsed] = React.useState(true);
 
-  const atleastOne = (
+  const atleastOneLoading = (
     Object.values(file.statusForPrompts) as StatusForPrompt[]
-  ).some((p) => p === "succeeded");
-  if (!atleastOne) {
+  ).some((p) => p === "queued" || p === "in-progress");
+
+  if (!atleastOneLoading) {
     return null;
   }
-
-  //const isLoading = statusForKpi === "queued" || statusForKpi === "in-progress";
-  //if (isLoading) {
-  //return <LoadingHeader copy="Outputs" />;
-  //}
+  if (atleastOneLoading && file.report.outputs.length === 0) {
+    return <LoadingHeader copy="Outputs" />;
+  }
 
   return (
     <Box
@@ -509,9 +520,12 @@ const DownloadButton: React.FC<{
         color="primary"
         size="sm"
         variant="solid"
-        endDecorator={<ArrowDropDown />}
+        slots={{ root: IconButton }}
+        slotProps={{
+          root: { color: "neutral", size: "sm" },
+        }}
       >
-        Download
+        <DownloadOutlinedIcon />
       </MenuButton>
       <Menu size="sm">
         <MenuItem component="a" href={signedUrl} target="_blank">
@@ -531,19 +545,24 @@ const DownloadButton: React.FC<{
   );
 };
 
+const HidePDF: React.FC<{
+  showAsset: boolean;
+  toggleShowAsset: () => void;
+}> = ({ showAsset, toggleShowAsset }) => (
+  <IconButton size="sm" onClick={toggleShowAsset}>
+    {showAsset ? (
+      <HideSourceOutlinedIcon fontSize="small" />
+    ) : (
+      <PictureAsPdfOutlinedIcon fontSize="small" />
+    )}
+  </IconButton>
+);
+
 const CollapseButton: React.FC<{
   collapsed: boolean;
   toggle: () => void;
 }> = ({ collapsed, toggle }) => (
-  <IconButton
-    size="sm"
-    onClick={toggle}
-    sx={{
-      "&:hover": {
-        bgcolor: "transparent",
-      },
-    }}
-  >
+  <IconButton size="sm" onClick={toggle}>
     {collapsed ? (
       <OpenInFullOutlinedIcon fontSize="small" />
     ) : (

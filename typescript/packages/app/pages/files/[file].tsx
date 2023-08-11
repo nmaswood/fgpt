@@ -56,6 +56,7 @@ const ForFileId: React.FC<{ fileId: string; user: User | undefined }> = ({
   const { data: displayFile } = useFetchDisplayFile(fileId);
 
   const [tab, setTab] = useTabState();
+  const [showAsset, setShowAsset] = React.useState(true);
 
   const showAdminOnly = (user && user.role === "superadmin") ?? false;
 
@@ -209,7 +210,13 @@ const ForFileId: React.FC<{ fileId: string; user: User | undefined }> = ({
             {tab === "progress" && file && (
               <DisplayProgress fileReferenceId={file.id} />
             )}
-            {tab === "report" && file && <DisplayFileReport file={file} />}
+            {tab === "report" && file && (
+              <DisplayFileReport
+                file={file}
+                showAsset={showAsset}
+                toggleShowAsset={() => setShowAsset((prev) => !prev)}
+              />
+            )}
             {tab === "chat" && file && token && (
               <DisplayFileChat
                 fileReferenceId={fileId}
@@ -219,7 +226,7 @@ const ForFileId: React.FC<{ fileId: string; user: User | undefined }> = ({
             )}
           </Box>
         </Box>
-        {!isExcel && (
+        {!isExcel && showAsset && (
           <Box
             width="100%"
             height="100%"
