@@ -20,7 +20,6 @@ import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import OpenInFullOutlinedIcon from "@mui/icons-material/OpenInFullOutlined";
 import {
   Box,
-  Button,
   CircularProgress,
   Divider,
   Dropdown,
@@ -220,6 +219,7 @@ const ForOverview: React.FC<{
       flexDirection="column"
       borderRadius={8}
       bgcolor="neutral.0"
+      flexShrink={1.25}
     >
       <Box
         display="flex"
@@ -266,9 +266,7 @@ const ForOverview: React.FC<{
             <Box
               display="flex"
               flexDirection="column"
-              gap={1}
               overflow="auto"
-              padding={2}
               height="100%"
             >
               <TermsTable terms={withDescription} />
@@ -497,10 +495,6 @@ const DownloadButton: React.FC<{
   signedUrl: string;
   extractedTablesSignedUrl: string | undefined;
 }> = ({ signedUrl, extractedTablesSignedUrl }) => {
-  const buttonRef = React.useRef(null);
-  const [open, setOpen] = React.useState(false);
-
-  const handleClose = () => setOpen(false);
   if (!extractedTablesSignedUrl) {
     return (
       <IconButton component="a" href={signedUrl} target="_blank" size="sm">
@@ -510,39 +504,30 @@ const DownloadButton: React.FC<{
   }
 
   return (
-    <div>
-      <Button
-        ref={buttonRef}
-        variant="outlined"
-        onClick={() => {
-          setOpen(!open);
-        }}
-        endDecorator={<ArrowDropDown />}
+    <Dropdown>
+      <MenuButton
+        color="primary"
         size="sm"
+        variant="solid"
+        endDecorator={<ArrowDropDown />}
       >
         Download
-      </Button>
-      <Menu anchorEl={buttonRef.current} open={open} onClose={handleClose}>
-        <MenuItem
-          component="a"
-          href={signedUrl}
-          target="_blank"
-          onClick={handleClose}
-        >
-          Download Source Document
+      </MenuButton>
+      <Menu size="sm">
+        <MenuItem component="a" href={signedUrl} target="_blank">
+          Source Document
         </MenuItem>
         {extractedTablesSignedUrl && (
           <MenuItem
             component="a"
             href={extractedTablesSignedUrl}
             target="_blank"
-            onClick={handleClose}
           >
-            Download Extracted Tables
+            Extracted Tables
           </MenuItem>
         )}
       </Menu>
-    </div>
+    </Dropdown>
   );
 };
 
@@ -646,7 +631,7 @@ const CustomReportButton: React.FC<{
   const { trigger, isMutating } = useTriggerOutput(fileReferenceId);
 
   return (
-    <Dropdown size="sm" color="primary">
+    <Dropdown>
       <MenuButton
         color="primary"
         size="sm"

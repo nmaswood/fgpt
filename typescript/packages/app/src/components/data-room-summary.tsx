@@ -6,7 +6,7 @@ import Link from "next/link";
 import React from "react";
 
 import { BLUR_DATA_URL } from "./make-blur-data-url";
-import { TermsTable } from "./terms-table";
+import { DataGridTermsTable } from "./terms-table";
 
 export const DataRoomSummary: React.FC<{
   loading: boolean;
@@ -188,7 +188,7 @@ const Dispatch: React.FC<{ showCaseFile: RenderShowCaseFile.File }> = ({
               </Alert>
             )}
             {showCaseFile.terms.length > 0 && (
-              <TermsTable terms={showCaseFile.terms} />
+              <DataGridTermsTable terms={showCaseFile.terms} />
             )}
           </Box>
         </Box>
