@@ -1,4 +1,9 @@
-import { DisplayFile, getFileType, ZPromptSlug } from "@fgpt/precedent-iso";
+import {
+  DisplayFile,
+  getFileType,
+  ZFileUpload,
+  ZPromptSlug,
+} from "@fgpt/precedent-iso";
 import {
   FileReferenceStore,
   FileStatusService,
@@ -8,24 +13,13 @@ import {
   ProjectStore,
   PromptTaskService,
   RenderShowCaseFileService,
-  ShaHash,
   ShowCaseFileStore,
   TaskStore,
 } from "@fgpt/precedent-node";
 import crypto from "crypto";
 import express from "express";
-import * as F from "fs/promises";
-import multer from "multer";
 import path from "path";
 import { z } from "zod";
-
-const upload = multer({
-  dest: "/var/tmp/api-upload",
-
-  limits: {
-    fileSize: 100 * 1024 * 1024 * 10000,
-  },
-});
 
 export class FileRouter {
   constructor(
@@ -63,46 +57,32 @@ export class FileRouter {
 
     router.post(
       "/upload",
-      upload.array("file"),
-
       async (req: express.Request, res: express.Response) => {
-        const body = ZFileBody.parse(req.body);
-        const file = getFile(req);
-        const buffer = await F.readFile(file.path);
-
+        const { name, storageUrl, projectId, fileSize, contentType } =
+          ZFileUpload.parse(req.body);
         const organizationId = req.user.organizationId;
-        const projectId = body.projectId;
 
-        const extension = path.extname(file.originalname);
-
-        const filePath = path.join(
-          "user-uploads",
-          organizationId,
-          projectId,
-          `${crypto.randomBytes(16).toString("hex")}${extension}`,
-        );
-
-        await this.blobStorageService.upload(this.bucket, filePath, buffer);
+        const parsed = new URL(storageUrl);
+        const path = parsed.pathname.split(this.bucket, 2)[1];
+        if (path === undefined) {
+          throw new Error("Invalid path");
+        }
 
         const ref: InsertFileReference = {
           projectId,
           organizationId,
-          fileName: file.originalname,
-          contentType: file.mimetype,
+          fileName: name,
+          contentType,
           bucketName: this.bucket,
-          path: filePath,
-          sha256: ShaHash.forData(buffer),
-          fileSize: file.size,
+          path: trimLeadingSlash(path),
+          fileSize,
         };
 
         const fileReference = await this.fileReferenceStore.insert(ref);
         await this.projectStore.addToFileCount(projectId, 1);
 
-        const fileType = getFileType(file.mimetype);
+        const fileType = getFileType(contentType);
 
-        if (fileReference === undefined) {
-          throw new Error("failed to insert file reference");
-        }
         if (fileType === undefined) {
           throw new Error("Unrecognized file type");
         }
@@ -120,9 +100,37 @@ export class FileRouter {
           },
         });
 
-        await F.unlink(file.path);
-
         res.json({ ok: true });
+      },
+    );
+
+    router.post(
+      "/upload-presigned",
+
+      async (req: express.Request, res: express.Response) => {
+        debugger;
+        const body = ZUploadPreSigned.parse(req.body);
+
+        const extension = path.extname(body.filename);
+        const fileId = crypto.randomUUID();
+        const filePath = path.join(
+          "user-uploads",
+          req.user.organizationId,
+          req.body.projectId,
+          `${fileId}${extension}`,
+        );
+
+        const url = await this.blobStorageService.getPresignedUrl(
+          this.bucket,
+          filePath,
+        );
+
+        return res.json({
+          method: "put",
+          url,
+          fields: {},
+          headers: { "content-type": body.contentType },
+        });
       },
     );
 
@@ -225,31 +233,12 @@ const ZSetShowCaseRequest = z.object({
   fileReferenceId: z.string(),
 });
 
-const ZFileBody = z.object({
+const ZUploadPreSigned = z.object({
+  filename: z.string(),
+  contentType: z.string(),
   projectId: z.string(),
 });
 
-const ZFile = z.object({
-  fieldname: z.string(),
-  originalname: z.string(),
-  mimetype: z.string(),
-  filename: z.string(),
-  path: z.string(),
-  size: z.number(),
-});
-
-const getFile = (req: express.Request) => {
-  const files = req.files ?? [];
-  if (!Array.isArray(files)) {
-    throw new Error("files was not an Array");
-  }
-  const [file] = files;
-  if (!file) {
-    throw new Error("no file");
-  }
-  if (files.length !== 1) {
-    throw new Error("unexpected number of files");
-  }
-
-  return ZFile.parse(file);
-};
+function trimLeadingSlash(str: string) {
+  return str.startsWith("/") ? str.substr(1) : str;
+}

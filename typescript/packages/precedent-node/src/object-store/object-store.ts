@@ -9,6 +9,8 @@ export interface ObjectStorageService {
     path: string,
     fileName?: string,
   ): Promise<string>;
+
+  getPresignedUrl(bucketName: string, path: string): Promise<string>;
 }
 
 export interface CloudFile {
@@ -63,6 +65,17 @@ export class GoogleCloudStorageService implements ObjectStorageService {
         return buffer;
       },
     }));
+  }
+
+  async getPresignedUrl(bucketName: string, path: string): Promise<string> {
+    const bucket = this.#storage.bucket(bucketName);
+    const resp = await bucket.file(path).getSignedUrl({
+      version: "v4",
+      action: "write",
+      expires: getTruncatedTime(),
+    });
+
+    return resp[0];
   }
 
   async getSignedUrl(

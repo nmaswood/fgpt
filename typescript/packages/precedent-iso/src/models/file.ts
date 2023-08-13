@@ -27,3 +27,11 @@ export interface LoadedFile {
   status: FileStatus;
   description: string | undefined;
 }
+
+export const ZFileUpload = z.object({
+  name: z.string(),
+  storageUrl: z.string(),
+  projectId: z.string(),
+  fileSize: z.number(),
+  contentType: z.string(),
+});

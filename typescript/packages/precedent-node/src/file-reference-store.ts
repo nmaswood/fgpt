@@ -22,7 +22,7 @@ export interface InsertFileReference {
   bucketName: string;
   path: string;
   contentType: string;
-  sha256: string;
+  sha256?: string;
   fileSize: number;
 }
 

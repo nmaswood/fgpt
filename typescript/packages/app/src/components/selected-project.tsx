@@ -1,6 +1,6 @@
 import "@uppy/dashboard/dist/style.min.css";
 
-import { MAX_FILE_SIZE_BYTES } from "@fgpt/precedent-iso";
+import { MAX_FILE_SIZE_BYTES, ZFileUpload } from "@fgpt/precedent-iso";
 import { Project } from "@fgpt/precedent-iso";
 import { ChatOutlined } from "@mui/icons-material";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
@@ -13,14 +13,13 @@ import {
   ListItemButton,
   Typography,
 } from "@mui/joy";
+import AwsS3 from "@uppy/aws-s3";
 import Uppy from "@uppy/core";
 import Dashboard from "@uppy/dashboard";
-import XHRUpload from "@uppy/xhr-upload";
 import { useRouter } from "next/router";
 import React from "react";
 import { z } from "zod";
 
-import { CLIENT_SETTINGS } from "../client-settings";
 import { useCreateChat } from "../hooks/use-create-chat";
 import { useDeleteChat } from "../hooks/use-delete-chat";
 import { useEditChat } from "../hooks/use-edit-chat";
@@ -76,33 +75,53 @@ export const SelectedProject: React.FC<{
         maxFileSize: MAX_FILE_SIZE_BYTES,
       },
     })
-      .use(XHRUpload, {
-        endpoint: `${CLIENT_SETTINGS.publicApiEndpoint}/api/v1/files/upload`,
+      .use(AwsS3, {
+        limit: 1,
+        timeout: 1000 * 60 * 60,
+        async getUploadParameters(file) {
+          // Send a request to our signing endpoint.
+          const response = await fetch(`/api/proxy/v1/files/upload-presigned`, {
+            method: "post",
+            headers: {
+              accept: "application/json",
+              "content-type": "application/json",
+            },
+            body: JSON.stringify({
+              filename: file.name,
+              contentType: file.type,
+              projectId: file.meta.projectId,
+            }),
+          });
+          return await response.json();
+        },
       })
       .use(Dashboard, {
         inline: false,
         proudlyDisplayPoweredByUppy: false,
         height: 470,
         browserBackButtonClose: false,
+      })
+      .on("upload-success", async (file) => {
+        const fileData = ZFileUpload.parse({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          storageUrl: (file as any).xhrUpload.endpoint,
+          projectId: file?.meta.projectId,
+          fileSize: file?.size,
+          contentType: file?.type,
+          name: file?.meta.name,
+        });
+
+        const res = await fetch(`/api/proxy/v1/files/upload`, {
+          method: "post",
+          headers: {
+            accept: "application/json",
+            "content-type": "application/json",
+          },
+          body: JSON.stringify(fileData),
+        });
+        await res.json();
       });
   }, []);
-
-  React.useEffect(() => {
-    if (!token) {
-      return;
-    }
-    const plugin = uppy.getPlugin("XHRUpload");
-    if (!plugin) {
-      return;
-    }
-
-    plugin!.setOptions({
-      endpoint: `${CLIENT_SETTINGS.publicApiEndpoint}/api/v1/files/upload`,
-      headers: {
-        authorization: `Bearer ${token}`,
-      },
-    });
-  }, [uppy, token]);
 
   const projectId = project?.id;
   React.useEffect(() => {
@@ -115,6 +134,7 @@ export const SelectedProject: React.FC<{
       uppy.setFileMeta(file.id, {
         projectId,
       });
+      uppy.setMeta({ projectId });
     });
   }, [uppy, projectId]);
 
