@@ -106,9 +106,7 @@ export class FileRouter {
 
     router.post(
       "/upload-presigned",
-
       async (req: express.Request, res: express.Response) => {
-        debugger;
         const body = ZUploadPreSigned.parse(req.body);
 
         const extension = path.extname(body.filename);
