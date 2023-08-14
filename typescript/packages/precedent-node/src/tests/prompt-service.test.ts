@@ -67,8 +67,9 @@ test("run#mock", async () => {
   const { mockPromptService, user } = await setup();
 
   await mockPromptService.run({
+    model: "claude-2",
     organizationId: user.organizationId,
-    promptId: "kpi",
+    slug: "kpi",
     args: {
       letter: "A",
     },
@@ -80,8 +81,9 @@ test.skip("run#real", async () => {
   const { httpPromptService, user } = await setup();
 
   await httpPromptService.run({
+    model: "claude-2",
     organizationId: user.organizationId,
-    promptId: "kpi",
+    slug: "kpi",
     args: {
       letter: "A",
     },

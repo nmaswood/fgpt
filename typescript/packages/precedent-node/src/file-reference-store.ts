@@ -1,8 +1,10 @@
 import {
   FileReference,
+  FileReferenceMetadata,
   FileStatus,
   MAX_FILE_COUNT,
   ZFileStatus,
+  ZTrafficLightAnswer,
 } from "@fgpt/precedent-iso";
 import { DatabasePool, DatabaseTransactionConnection, sql } from "slonik";
 import { z } from "zod";
@@ -13,6 +15,7 @@ export interface UpdateFileArgs {
   id: string;
   description?: string;
   status?: FileStatus;
+  metadata?: FileReferenceMetadata;
 }
 
 export interface InsertFileReference {
@@ -28,6 +31,7 @@ export interface InsertFileReference {
 
 export interface FileReferenceStore {
   get(fileId: string): Promise<FileReference>;
+  getMetadata(fileId: string): Promise<FileReferenceMetadata>;
   getMany(fileIds: string[]): Promise<FileReference[]>;
   update(args: UpdateFileArgs): Promise<FileReference>;
   list(projectId: string): Promise<FileReference[]>;
@@ -49,6 +53,19 @@ export class PsqlFileReferenceStore implements FileReferenceStore {
       throw new Error("file not found");
     }
     return file;
+  }
+
+  async getMetadata(id: string): Promise<FileReferenceMetadata> {
+    return this.pool.one(
+      sql.type(ZMetadataRow)`
+SELECT
+    metadata
+FROM
+    file_reference
+WHERE
+    id = ${id}
+`,
+    );
   }
 
   async getThumbnailPath(fileReferenceId: string): Promise<string | undefined> {
@@ -187,13 +204,15 @@ WHERE
     id,
     status,
     description,
+    metadata,
   }: UpdateFileArgs): Promise<FileReference> {
     return this.pool.one(sql.type(ZFileReferenceRow)`
 UPDATE
     file_reference
 SET
     status = COALESCE(${status ?? null}, status),
-    description = COALESCE(${description ?? null}, description)
+    description = COALESCE(${description ?? null}, description),
+    metadata = COALESCE(${metadata ? JSON.stringify(metadata) : null}, metadata)
 WHERE
     id = ${id}
 RETURNING
@@ -237,3 +256,28 @@ const ZThumbnailRow = z
     thumbnail_path: z.string().nullable(),
   })
   .transform((row) => row.thumbnail_path ?? undefined);
+
+const ZMetadataRow = z
+  .object({
+    metadata: z
+      .object({
+        tags: z.array(z.string()).optional(),
+        isFinancialDocument: ZTrafficLightAnswer.optional(),
+        isCim: ZTrafficLightAnswer.optional(),
+      })
+      .nullable(),
+  })
+  .transform((row): FileReferenceMetadata => {
+    if (row.metadata === null) {
+      return {
+        tags: [],
+        isFinancialDocument: undefined,
+        isCim: undefined,
+      };
+    }
+    return {
+      tags: row.metadata.tags ?? [],
+      isFinancialDocument: row.metadata.isFinancialDocument ?? undefined,
+      isCim: row.metadata.isCim ?? undefined,
+    };
+  });

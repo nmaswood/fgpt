@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { FileType } from "../file-type";
+import { TrafficLightAnswer } from "./common";
 
 export const ZFileStatus = z.enum(["pending", "ready", "error"]);
 export type FileStatus = z.infer<typeof ZFileStatus>;
@@ -35,3 +36,9 @@ export const ZFileUpload = z.object({
   fileSize: z.number(),
   contentType: z.string(),
 });
+
+export interface FileReferenceMetadata {
+  tags: string[];
+  isFinancialDocument: TrafficLightAnswer | undefined;
+  isCim: TrafficLightAnswer | undefined;
+}

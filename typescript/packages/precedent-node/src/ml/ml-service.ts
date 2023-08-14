@@ -1,3 +1,4 @@
+import { TrafficLightAnswer, ZTrafficLightAnswer } from "@fgpt/precedent-iso";
 import { AxiosInstance } from "axios";
 import z from "zod";
 
@@ -30,6 +31,9 @@ export interface ScanArgs {
 }
 export interface ScanResponse {
   description: string;
+  tags: string[];
+  isFinancialDocument: TrafficLightAnswer;
+  isCim: TrafficLightAnswer;
 }
 
 export interface MLServiceClient {
@@ -153,9 +157,19 @@ const ZTokenLengthResponse = z.object({
   claude100k: z.number(),
 });
 
-const ZScanResponse = z.object({
-  description: z.string(),
-});
+const ZScanResponse = z
+  .object({
+    description: z.string(),
+    tags: z.array(z.string()),
+    is_financial_document: ZTrafficLightAnswer,
+    is_cim: ZTrafficLightAnswer,
+  })
+  .transform((row) => ({
+    description: row.description,
+    tags: row.tags,
+    isFinancialDocument: row.is_financial_document,
+    isCim: row.is_cim,
+  }));
 
 const ZHtmlFromText = z.object({
   html: z.string().nullable(),

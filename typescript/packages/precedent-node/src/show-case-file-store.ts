@@ -7,7 +7,8 @@ export interface ShowCaseFile {
   fileReferenceId: string;
 }
 export interface ShowCaseFileStore {
-  set(projectId: string, fileReferenceId: string): Promise<ShowCaseFile>;
+  upsert(projectId: string, fileReferenceId: string): Promise<ShowCaseFile>;
+  setIfEmpty(projectId: string, fileReferenceId: string): Promise<ShowCaseFile>;
   get(projectId: string): Promise<ShowCaseFile | undefined>;
 }
 
@@ -15,24 +16,42 @@ const FIELDS = sql.fragment`id, project_id, file_reference_id`;
 export class PsqlShowCaseFileStore implements ShowCaseFileStore {
   constructor(private readonly pool: DatabasePool) {}
 
-  async set(projectId: string, fileReferenceId: string): Promise<ShowCaseFile> {
+  async upsert(
+    projectId: string,
+    fileReferenceId: string,
+  ): Promise<ShowCaseFile> {
+    return this.#set("update", projectId, fileReferenceId);
+  }
+
+  async setIfEmpty(
+    projectId: string,
+    fileReferenceId: string,
+  ): Promise<ShowCaseFile> {
+    return this.#set("nothing", projectId, fileReferenceId);
+  }
+
+  async #set(
+    conflict: "nothing" | "update",
+    projectId: string,
+    fileReferenceId: string,
+  ): Promise<ShowCaseFile> {
     const res = await this.pool.maybeOne(
       sql.type(ZShowCaseFileRow)`
 INSERT INTO show_case_file (project_id, file_reference_id)
     VALUES (${projectId}, ${fileReferenceId})
-ON CONFLICT (project_id)
-    DO UPDATE SET
-        file_reference_id = ${fileReferenceId}
-    RETURNING
-        ${FIELDS}
+ON CONFLICT (project_id) ${
+        conflict === "nothing"
+          ? sql.fragment`DO NOTHING`
+          : sql.fragment`DO UPDATE SET file_reference_id = ${fileReferenceId}`
+      }
+RETURNING
+    ${FIELDS}
 `,
     );
-    if (res) {
-      return res;
-    }
-    const value = await this.get(projectId);
+
+    const value = res ?? (await this.get(projectId));
     if (!value) {
-      throw new Error("illeal state");
+      throw new Error("illegal state");
     }
     return value;
   }

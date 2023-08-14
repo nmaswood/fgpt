@@ -96,6 +96,7 @@ test("getMany", async () => {
       bucketName: "test-bucket",
       contentType: "application/pdf",
       path: "my-path/foo",
+      fileSize: 100,
     },
   ];
   const [res] = await fileReferenceStore.insertMany(refs);
@@ -119,6 +120,7 @@ test("setThumbnailPath+getThumbnailPath", async () => {
     bucketName: "test-bucket",
     contentType: "application/pdf",
     path: "my-path/foo",
+    fileSize: 100,
   });
 
   await fileReferenceStore.setThumbnailPath(id, "some-made-up-path");
@@ -136,6 +138,7 @@ test("setThumbnailPath+getThumbnailPath", async () => {
     bucketName: "test-bucket",
     contentType: "application/pdf",
     path: "my-path/foo",
+    fileSize: 100,
   });
 
   await fileReferenceStore.setThumbnailPath(id, "some-made-up-path");
@@ -153,6 +156,7 @@ test("update", async () => {
     bucketName: "test-bucket",
     contentType: "application/pdf",
     path: "my-path/foo",
+    fileSize: 100,
   });
 
   expect(file.status).toEqual("pending");
@@ -166,5 +170,43 @@ test("update", async () => {
   await fileReferenceStore.update({
     id: file.id,
     description: "i love cats",
+  });
+});
+
+test("getMetadata", async () => {
+  const { project, fileReferenceStore } = await setup();
+
+  const file = await fileReferenceStore.insert({
+    fileName: "test-file-name.pdf",
+    organizationId: project.organizationId,
+    projectId: project.id,
+    bucketName: "test-bucket",
+    contentType: "application/pdf",
+    path: "my-path/foo",
+    fileSize: 100,
+  });
+
+  const metadata = await fileReferenceStore.getMetadata(file.id);
+
+  expect(metadata).toEqual({
+    tags: [],
+    isFinancialDocument: undefined,
+    isCim: undefined,
+  });
+
+  await fileReferenceStore.update({
+    id: file.id,
+    metadata: {
+      tags: ["foo", "bar"],
+      isFinancialDocument: "green",
+      isCim: "green",
+    },
+  });
+
+  const metadataAgain = await fileReferenceStore.getMetadata(file.id);
+  expect(metadataAgain).toEqual({
+    tags: ["foo", "bar"],
+    isFinancialDocument: "green",
+    isCim: "green",
   });
 });

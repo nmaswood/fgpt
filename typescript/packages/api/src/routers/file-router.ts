@@ -172,7 +172,7 @@ export class FileRouter {
       async (req: express.Request, res: express.Response) => {
         const params = ZSetShowCaseRequest.parse(req.params);
         const file = await this.fileReferenceStore.get(params.fileReferenceId);
-        await this.showCaseFileStore.set(file.projectId, file.id);
+        await this.showCaseFileStore.upsert(file.projectId, file.id);
         res.json({ status: "ok" });
       },
     );

@@ -1,17 +1,25 @@
 import abc
-import json
 import re
 from enum import Enum
 
 import openai
-from pydantic import BaseModel, Field
+from loguru import logger
+from pydantic import BaseModel
 
 from springtime.models.open_ai import OpenAIModel
+
+
+class TrafficlightAnswer(str, Enum):
+    red = "red"
+    yellow = "yellow"
+    green = "green"
 
 
 class ScanResult(BaseModel):
     description: str
     tags: list[str]
+    is_financial_document: TrafficlightAnswer
+    is_cim: TrafficlightAnswer
 
 
 class ScanService(abc.ABC):
@@ -28,23 +36,24 @@ class ScanService(abc.ABC):
 LIMIT = 7000
 
 
-class Answer(str, Enum):
-    red = "red"
-    yellow = "yellow"
-    green = "green"
+PROMPT = """
 
+You are an expert financial analyst.
 
-class ScanSchema(BaseModel):
-    description: str = Field(
-        description="A concise 1 line description of the document",
-    )
-    tags: list[str] = Field(description="tags describing the category of the document")
-    is_financial_document: Answer = Field(
-        description="Is this is a financial document? Respond with green if you very sure, yellow if you are unsure, and red if you are very sure it is not a financial document ",
-    )
+You will be given an excerpt from a document.
 
+* Provide a 1 line description of the entire document. Do not start with "This document is about..." or "This document describes..." or "Excerpt from ..." just describe the document in 1 line.
+* Provide tags describing the category of the document
+* Is this is a financial document? Reply with green if you are very sure it is financial document. Reply with yellow if you are not sure. Reply with red if you are very sure it is not a financial document.
+* Is this is document a  Confidential Information Memorandum? Reply with green if you are very sure it is financial document. Reply with yellow if you are not sure. Reply with red if you are very sure it is not a financial document.
 
-SCHEMA = ScanSchema.schema()
+Output your reponse in the following format:
+
+Description: <description>
+Tags: <tag1>, <tag2>, <tag3>
+Is financial document: <green/yellow/red>
+Is confidential information memorandum: <green/yellow/red>
+"""
 
 
 class OpenAIScanService(ScanService):
@@ -60,9 +69,13 @@ class OpenAIScanService(ScanService):
         processed_text = first_chunk(text, LIMIT)
         with_out_white_space = remove_extra_whitespace(processed_text)
 
-        completion = openai.ChatCompletion.create(
+        response = openai.ChatCompletion.create(
             model=self.model,
             messages=[
+                {
+                    "role": "system",
+                    "content": PROMPT,
+                },
                 {
                     "role": "user",
                     "content": f"""
@@ -71,27 +84,42 @@ file excerpt: {with_out_white_space}
                  """,
                 },
             ],
-            functions=[{"name": "parse_data", "parameters": SCHEMA}],
-            function_call={"name": "parse_data"},
             temperature=0,
         )
-
-        res = completion.choices[0].message.function_call.arguments
-
-        as_json = json.loads(res)
-        breakpoint()
-
+        choices = response["choices"]
+        if len(choices) == 0:
+            logger.warning("No choices returned from OpenAI")
+        first_choice = choices[0]
+        description = first_choice["message"]["content"]
         return parse_response(description)
 
 
 def parse_response(response: str) -> ScanResult:
-    start = response.find("Description:")
-    end = response.find("Tags:")
+    description = response.find("Description:")
+    tags = response.find("Tags:")
+    fin_document = response.find("Is financial document:")
+    cim = response.find("Is confidential information memorandum:")
 
-    description = response[start:end].split("Description:")[1].strip()
-    tag_string = response[end:].split("Tags:")[1].strip()
+    description = response[description:tags].split("Description:")[1].strip()
+    tag_string = response[tags:fin_document].split("Tags:")[1].strip()
+    fin_document_string = (
+        response[fin_document:cim].split("Is financial document:")[1].strip().lower()
+    )
+    cim_string = (
+        response[cim:]
+        .split("Is confidential information memorandum:")[1]
+        .strip()
+        .lower()
+    )
+
+    final_tag_string = tag_string.split("Is financial document:")[0].strip()
     tags = sorted({tag.strip() for tag in tag_string.split(",")})
-    return ScanResult(description=description, tags=tags)
+    return ScanResult(
+        description=description,
+        tags=tags,
+        is_financial_document=TrafficlightAnswer(fin_document_string),
+        is_cim=TrafficlightAnswer(cim_string),
+    )
 
 
 def remove_extra_whitespace(s: str) -> str:

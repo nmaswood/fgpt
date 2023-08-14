@@ -30,7 +30,23 @@ async function setup() {
     organizationId: user.organizationId,
   });
 
+  const project2 = await projectService.create({
+    name: "test-project-2",
+    creatorUserId: user.id,
+    organizationId: user.organizationId,
+  });
+
   const res = await fileReferenceStore.insert({
+    fileName: "test-file-name.pdf",
+    organizationId: project.organizationId,
+    projectId: project.id,
+    bucketName: "test-bucket",
+    contentType: "application/pdf",
+    path: "my-path/foo",
+    fileSize: 100,
+  });
+
+  const res2 = await fileReferenceStore.insert({
     fileName: "test-file-name.pdf",
     organizationId: project.organizationId,
     projectId: project.id,
@@ -45,7 +61,9 @@ async function setup() {
   return {
     pool,
     projectId: project.id,
+    projectId2: project2.id,
     fileReferenceId: res.id,
+    fileReferenceId2: res2.id,
     store,
   };
 }
@@ -66,13 +84,23 @@ afterEach(async () => {
   );
 });
 
-test("get+set", async () => {
+test("upsert", async () => {
   const { projectId, store, fileReferenceId } = await setup();
 
   const value = await store.get(projectId);
   expect(value).toBeUndefined();
-  const value2 = await store.set(projectId, fileReferenceId);
+  const value2 = await store.upsert(projectId, fileReferenceId);
   expect(value2.fileReferenceId).toEqual(fileReferenceId);
   const value3 = await store.get(projectId);
   expect(value3.fileReferenceId).toEqual(fileReferenceId);
+});
+
+test("setIfEmpty", async () => {
+  const { projectId, store, fileReferenceId, fileReferenceId2 } = await setup();
+
+  const value = await store.get(projectId);
+  expect(value).toBeUndefined();
+  await store.setIfEmpty(projectId, fileReferenceId);
+  const value2 = await store.setIfEmpty(projectId, fileReferenceId2);
+  expect(value2.fileReferenceId).toEqual(fileReferenceId);
 });
