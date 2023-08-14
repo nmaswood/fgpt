@@ -355,7 +355,7 @@ const ForPrompt: React.FC<{ file: FileToRender.PDFFile }> = ({ file }) => {
     Object.values(file.statusForPrompts) as StatusForPrompt[]
   ).some((p) => p === "queued" || p === "in-progress");
 
-  if (!atleastOneLoading) {
+  if (!atleastOneLoading && file.report.outputs.length === 0) {
     return null;
   }
   if (atleastOneLoading && file.report.outputs.length === 0) {
