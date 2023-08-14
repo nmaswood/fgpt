@@ -3,7 +3,7 @@ import { chunk } from "lodash";
 import { MiscOutputStore } from "../llm-outputs/misc-output-store";
 import { QuestionStore } from "../llm-outputs/question-store";
 import { LOGGER } from "../logger";
-import { LongFormResponse, MLReportService } from "../ml/ml-report-service";
+import { MLReportService } from "../ml/ml-report-service";
 import { ShaHash } from "../sha-hash";
 import { TextChunkStore } from "../text-chunk-store";
 
@@ -21,7 +21,6 @@ export namespace ReportHandler {
 
 export interface ReportHandler {
   generateReport: (args: ReportHandler.Arguments) => Promise<void>;
-  generateLongFormReport: (args: ReportHandler.Arguments) => Promise<void>;
 }
 
 const CHUNK_LIMIT = 2;
@@ -32,43 +31,6 @@ export class ReportHandlerImpl implements ReportHandler {
     private readonly questionStore: QuestionStore,
     private readonly miscOutputStore: MiscOutputStore,
   ) {}
-
-  async generateLongFormReport(config: ReportHandler.Arguments): Promise<void> {
-    const { textChunkGroupId, textChunkIds } = config;
-    const acc: {
-      value: LongFormResponse;
-      textChunkId: string;
-    }[] = [];
-
-    for (const textChunkId of textChunkIds) {
-      const chunk = await this.textChunkStore.getTextChunkById(textChunkId);
-
-      const value = await this.mlReportService.longForm({
-        text: chunk.chunkText,
-      });
-
-      acc.push({
-        value,
-        textChunkId,
-      });
-    }
-
-    await this.miscOutputStore.insertMany(
-      acc.map((row) => ({
-        textChunkId: row.textChunkId,
-        organizationId: config.organizationId,
-        projectId: config.projectId,
-        fileReferenceId: config.fileReferenceId,
-        processedFileId: config.processedFileId,
-        textChunkGroupId,
-        value: {
-          type: "long_form",
-          raw: row.value.raw,
-          html: row.value.html,
-        },
-      })),
-    );
-  }
 
   async generateReport(config: ReportHandler.Arguments): Promise<void> {
     const { textChunkGroupId } = config;

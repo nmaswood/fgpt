@@ -20,7 +20,7 @@ class AnalyzeArguments(BaseModel):
 class AnalyzeResponseChunk(BaseModel):
     content: str
     prompt: str
-    sanitized_html: str | None
+    html: str | None
     sheet_names: list[str]
 
 
@@ -69,7 +69,7 @@ class TableAnalyzerImpl(TableAnalyzer):
                     sheet_names=[sheet.sheet_name for sheet in sheet_chunk],
                     content=resp.content,
                     prompt=resp.prompt,
-                    sanitized_html=resp.html,
+                    html=resp.html,
                 ),
             )
 

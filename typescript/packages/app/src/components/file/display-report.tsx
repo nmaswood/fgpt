@@ -83,7 +83,13 @@ export const DisplayFileReport: React.FC<{
       <ForReport file={file} />
       {file.type === "pdf" && (
         <ForPrompt
-          statusForPrompts={file.statusForPrompts}
+          statusForPrompts={
+            Object.fromEntries(
+              Object.entries(file.statusForPrompts).filter(
+                ([k]) => k !== "cim",
+              ),
+            ) as StatusForPrompts
+          }
           file={file}
           outputs={file.report.outputs.filter((row) => row.slug !== "cim")}
         />

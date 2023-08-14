@@ -60,20 +60,6 @@ export class TaskExecutorImpl implements TaskExecutor {
             strategy,
           },
         }));
-        LOGGER.info("Enqueueing greedy_150k chunking");
-        taskConfig.push({
-          organizationId: config.organizationId,
-          projectId: config.projectId,
-          fileReferenceId: config.fileReferenceId,
-          config: {
-            type: "text-chunk",
-            organizationId,
-            projectId,
-            fileReferenceId: config.fileReferenceId,
-            processedFileId,
-            strategy: "greedy_150k",
-          },
-        });
 
         taskConfig.push({
           organizationId: config.organizationId,
@@ -83,6 +69,17 @@ export class TaskExecutorImpl implements TaskExecutor {
             type: "scan",
             fileReferenceId: config.fileReferenceId,
             processedFileId,
+          },
+        });
+
+        taskConfig.push({
+          organizationId: config.organizationId,
+          projectId: config.projectId,
+          fileReferenceId: config.fileReferenceId,
+          config: {
+            type: "run-prompt",
+            fileReferenceId: config.fileReferenceId,
+            slug: "cim",
           },
         });
 
@@ -148,22 +145,6 @@ export class TaskExecutorImpl implements TaskExecutor {
 
             break;
           }
-          case "long-form":
-            await this.taskStore.insert({
-              organizationId,
-              projectId,
-              fileReferenceId: config.fileReferenceId,
-              config: {
-                type: "long-form",
-                organizationId,
-                projectId,
-                fileReferenceId: config.fileReferenceId,
-                processedFileId: config.processedFileId,
-                textChunkGroupId: resp.textGroupId,
-                textChunkIds: resp.textChunkIds,
-              },
-            });
-            break;
           default:
             assertNever(resp);
         }
@@ -183,7 +164,9 @@ export class TaskExecutorImpl implements TaskExecutor {
         break;
       }
       case "long-form": {
-        await this.reportHandler.generateLongFormReport(config);
+        LOGGER.warn(
+          `Generating skipping long form report for ${config.fileReferenceId}`,
+        );
         break;
       }
 

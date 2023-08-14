@@ -25,7 +25,7 @@ export namespace TextChunkHandler {
   export type Response =
     | { type: "embeddings"; textGroupId: string }
     | {
-        type: "llm-output" | "long-form";
+        type: "llm-output";
         textGroupId: string;
         textChunkIds: string[];
       }
@@ -116,11 +116,7 @@ export class TextChunkHandlerImpl implements TextChunkHandler {
       }
       case "greedy_125k":
       case "greedy_150k": {
-        return {
-          type: "long-form",
-          textChunkIds: textChunks.map((chunk) => chunk.id),
-          textGroupId: textChunkGroup.id,
-        };
+        return undefined;
       }
 
       default:

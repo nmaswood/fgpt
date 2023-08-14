@@ -16,7 +16,6 @@ export interface MLReportService {
   generateQuestionsClaude(text: string): Promise<string[]>;
   generateTerms(text: string): Promise<Term[]>;
   generateTermsClaude(text: string): Promise<Term[]>;
-  longForm(args: LongFormArgs): Promise<LongFormResponse>;
 }
 export class MLReportServiceImpl implements MLReportService {
   constructor(private readonly client: AxiosInstance) {}
@@ -50,24 +49,7 @@ export class MLReportServiceImpl implements MLReportService {
     });
     return ZTermsResponse.parse(response.data).terms;
   }
-
-  async longForm({ text }: LongFormArgs): Promise<LongFormResponse> {
-    const response = await this.client.post<unknown>("/report/long-form", {
-      text,
-    });
-    return ZLongFormReportResponse.parse(response.data);
-  }
 }
-
-const ZLongFormReportResponse = z
-  .object({
-    raw: z.string(),
-    sanitized_html: z.string().nullable(),
-  })
-  .transform((v) => ({
-    raw: v.raw,
-    html: v.sanitized_html ?? undefined,
-  }));
 
 const ZTerm = z
   .object({

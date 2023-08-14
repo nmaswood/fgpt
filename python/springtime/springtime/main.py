@@ -17,10 +17,6 @@ from springtime.routers.vector_router import VectorRouter
 from springtime.services.chat_service import OpenAIChatService
 from springtime.services.embeddings_service import OpenAIEmbeddingsService
 from springtime.services.excel_analyzer import ClaudeExcelAnalyzer
-from springtime.services.long_form_report_service import (
-    DUMMY_REPORT_SERVICE,
-    ClaudeLongformReportService,
-)
 from springtime.services.prompt_service import PromptServiceImpl
 from springtime.services.report_service import ClaudeReportService, OpenAIReportService
 from springtime.services.scan_service import OpenAIScanService
@@ -58,12 +54,6 @@ CLAUDE_EXCEL_ANALYZER = ClaudeExcelAnalyzer(ANTHROPIC_CLIENT)
 CLAUDE_TABLE_ANALYZER = TableAnalyzerImpl(CLAUDE_EXCEL_ANALYZER, CLAUDE_SHEET_PROCESSOR)
 
 
-if SETTINGS.mock_out_claude:
-    logger.info("Claude is mocked out!")
-    LONG_FORM_REPORT_SERVICE = DUMMY_REPORT_SERVICE
-else:
-    LONG_FORM_REPORT_SERVICE = ClaudeLongformReportService(ANTHROPIC_CLIENT)
-
 EMBEDDING_SERVICE = OpenAIEmbeddingsService()
 VECTOR_SERVICE = PineconeVectorService(
     api_key=SETTINGS.pinecone_api_key,
@@ -86,7 +76,6 @@ app.include_router(
     ReportRouter(
         OPENAI_REPORT_SERVICE,
         CLAUDE_REPORT_SERVICE,
-        LONG_FORM_REPORT_SERVICE,
         SCAN_SERVICE,
     ).get_router(),
 )

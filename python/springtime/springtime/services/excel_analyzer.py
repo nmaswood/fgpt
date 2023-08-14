@@ -12,7 +12,7 @@ from springtime.services.sheet_processor import PreprocessedSheet
 class ResponseWithPrompt(BaseModel):
     prompt: str
     content: str
-    sanitized_html: str | None
+    html: str | None
 
 
 class ExcelAnalyzer(abc.ABC):
@@ -48,5 +48,5 @@ Assistant:
         return ResponseWithPrompt(
             prompt=prompt,
             content=content,
-            sanitized_html=html_from_text(content),
+            html=html_from_text(content),
         )

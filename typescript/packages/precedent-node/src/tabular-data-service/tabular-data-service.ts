@@ -88,13 +88,13 @@ const ZAnalyzeResponseChunk = z
     sheet_names: z.string().array(),
     content: z.string(),
     prompt: z.string(),
-    sanitized_html: z.string().nullable(),
+    html: z.string().nullable(),
   })
   .transform((row) => ({
     sheetNames: row.sheet_names,
     content: row.content,
     prompt: row.prompt,
-    html: row.sanitized_html ?? undefined,
+    html: row.html ?? undefined,
   }));
 
 const ZAnalyzeResponse = z.object({

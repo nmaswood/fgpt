@@ -31,9 +31,7 @@ export class ProcessedFileProgressServiceImpl
       extractTable: "task_does_not_exist",
       scan: "task_does_not_exist",
       thumbnail: "task_does_not_exist",
-
       longFormReport: "task_does_not_exist",
-      longFormReportChunk: "task_does_not_exist",
     };
 
     for (const task of tasks) {
@@ -50,7 +48,6 @@ export class ProcessedFileProgressServiceImpl
             }
             case "greedy_125k":
             case "greedy_150k": {
-              forTask.longFormReportChunk = task.status;
               break;
             }
             default:
@@ -85,10 +82,23 @@ export class ProcessedFileProgressServiceImpl
           forTask.scan = task.status;
           break;
         }
+
+        case "run-prompt":
+          switch (task.config.slug) {
+            case "cim":
+              forTask.longFormReport = task.status;
+              break;
+            case "kpi":
+            case "ebitda_adjustments":
+            case "business_model":
+            case "expense_drivers":
+              break;
+          }
+          break;
+
         case "ingest-file":
         case "text-extraction":
         case "analyze-table":
-        case "run-prompt":
           break;
 
         default:
