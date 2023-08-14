@@ -81,7 +81,13 @@ export const DisplayFileReport: React.FC<{
         />
       )}
       <ForReport file={file} />
-      {file.type === "pdf" && <ForPrompt file={file} />}
+      {file.type === "pdf" && (
+        <ForPrompt
+          statusForPrompts={file.statusForPrompts}
+          file={file}
+          outputs={file.report.outputs.filter((row) => row.slug !== "cim")}
+        />
+      )}
     </Box>
   );
 };
@@ -91,7 +97,7 @@ const Dispatch: React.FC<{
 }> = ({ file }) => {
   switch (file.type) {
     case "pdf": {
-      const cim = file.report.cim;
+      const cim = file.report.outputs.find((row) => row.slug === "cim");
       if (!cim) {
         return null;
       }
@@ -103,7 +109,7 @@ const Dispatch: React.FC<{
           overflow="auto"
           width="100%"
         >
-          <ClaudeReport longForm={cim} />
+          <ClaudeReport longForm={cim.output} />
         </Box>
       );
     }
@@ -348,17 +354,21 @@ const ForReport: React.FC<{
   );
 };
 
-const ForPrompt: React.FC<{ file: FileToRender.PDFFile }> = ({ file }) => {
+const ForPrompt: React.FC<{
+  statusForPrompts: StatusForPrompts;
+  file: FileToRender.PDFFile;
+  outputs: Outputs.SlugWithOutput[];
+}> = ({ file, statusForPrompts, outputs }) => {
   const [collapsed, setCollapsed] = React.useState(true);
 
   const atleastOneLoading = (
-    Object.values(file.statusForPrompts) as StatusForPrompt[]
+    Object.values(statusForPrompts) as StatusForPrompt[]
   ).some((p) => p === "queued" || p === "in-progress");
 
-  if (!atleastOneLoading && file.report.outputs.length === 0) {
+  if (!atleastOneLoading && outputs.length === 0) {
     return null;
   }
-  if (atleastOneLoading && file.report.outputs.length === 0) {
+  if (atleastOneLoading && outputs.length === 0) {
     return <LoadingHeader copy="Outputs" />;
   }
 
@@ -425,6 +435,7 @@ const DisplayPrompts: React.FC<{
   });
 
   const slugs = new Set(outputs.map((output) => output.slug));
+  slugs.delete("cim");
 
   const output = outputs.find((output) => output.slug === slug);
   return (
@@ -661,7 +672,7 @@ const CustomReportButton: React.FC<{
         Generate Additional Reports
       </MenuButton>
       <Menu size="sm" variant="soft">
-        {PROMPT_SLUGS.map((slug) => {
+        {PROMPT_SLUGS.filter((s) => s !== "cim").map((slug) => {
           const status = statusForPrompts[slug];
           return (
             <MenuItem

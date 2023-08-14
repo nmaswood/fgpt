@@ -43,6 +43,7 @@ export interface DisplayFile {
 
 export type StatusForPrompt = TaskStatus | "not_created";
 export interface StatusForPrompts {
+  cim: StatusForPrompt;
   kpi: StatusForPrompt;
   business_model: StatusForPrompt;
   expense_drivers: StatusForPrompt;

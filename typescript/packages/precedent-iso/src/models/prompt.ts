@@ -5,6 +5,7 @@ export const ZPromptSlug = z.enum([
   "ebitda_adjustments",
   "business_model",
   "expense_drivers",
+  "cim",
 ]);
 export type PromptSlug = z.infer<typeof ZPromptSlug>;
 
@@ -19,6 +20,7 @@ export interface Prompt {
 }
 
 export const SLUG_DISPLAY_NAME = {
+  cim: "CIM Report",
   kpi: "Key Financials",
   ebitda_adjustments: "EBITDA Adjustments",
   business_model: "Business Model",
@@ -30,6 +32,7 @@ export const PROMPT_SLUGS = [
   "kpi",
   "expense_drivers",
   "ebitda_adjustments",
+  "cim",
 ] as const;
 
 export const ZModel = z.enum(["claude-2"]);

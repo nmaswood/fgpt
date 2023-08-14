@@ -42,7 +42,6 @@ export interface Term {
 
 export interface Report {
   terms: Term[];
-  cim: DisplayOutput | undefined;
   outputs: SlugWithOutput[];
 }
 

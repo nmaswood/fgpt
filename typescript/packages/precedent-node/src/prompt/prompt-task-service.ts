@@ -10,11 +10,10 @@ export class PromptTaskServiceImpl implements PromptTaskService {
   constructor(private readonly taskStore: TaskStore) {}
 
   async getForSlugs(fileReferenceId: string): Promise<StatusForPrompts> {
-    let totalCreated = 0;
-
     const tasks = await this.taskStore.getByType(fileReferenceId, "run-prompt");
 
     const acc: StatusForPrompts = {
+      cim: "not_created",
       kpi: "not_created",
       business_model: "not_created",
       expense_drivers: "not_created",
@@ -26,7 +25,6 @@ export class PromptTaskServiceImpl implements PromptTaskService {
         continue;
       }
       acc[t.config.slug] = t.status;
-      totalCreated++;
     }
     return acc;
   }

@@ -22,9 +22,9 @@ export class ReportServiceImpl implements ReportService {
 
   #processMiscValues(values: Outputs.MiscValue[]): Outputs.Report {
     const terms: Outputs.Term[] = [];
-    const cim: Intermediate = { raw: [], html: [] };
 
     const acc: Acc = {
+      cim: { raw: [], html: [] },
       kpi: { raw: [], html: [] },
       business_model: { raw: [], html: [] },
       expense_drivers: { raw: [], html: [] },
@@ -50,9 +50,9 @@ export class ReportServiceImpl implements ReportService {
         }
 
         case "long_form":
-          cim.raw.push(value.raw);
+          acc.cim.raw.push(value.raw);
           if (value.html) {
-            cim.html.push(value.html);
+            acc.cim.html.push(value.html);
           }
 
           break;
@@ -72,7 +72,6 @@ export class ReportServiceImpl implements ReportService {
 
     return {
       terms,
-      cim: toOutput(cim),
       outputs: PROMPT_SLUGS.map((slug) => {
         const output = toOutput(acc[slug]);
         return output ? { slug, output } : undefined;
@@ -82,6 +81,7 @@ export class ReportServiceImpl implements ReportService {
 }
 
 interface Acc {
+  cim: Intermediate;
   kpi: Intermediate;
   business_model: Intermediate;
   expense_drivers: Intermediate;
