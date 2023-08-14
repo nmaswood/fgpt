@@ -1,15 +1,17 @@
 import abc
+import json
 import re
+from enum import Enum
 
 import openai
-from loguru import logger
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from springtime.models.open_ai import OpenAIModel
 
 
 class ScanResult(BaseModel):
     description: str
+    tags: list[str]
 
 
 class ScanService(abc.ABC):
@@ -20,10 +22,29 @@ class ScanService(abc.ABC):
         file_name: str,
         text: str,
     ) -> ScanResult:
-        return ScanResult(description="")
+        pass
 
 
 LIMIT = 7000
+
+
+class Answer(str, Enum):
+    red = "red"
+    yellow = "yellow"
+    green = "green"
+
+
+class ScanSchema(BaseModel):
+    description: str = Field(
+        description="A concise 1 line description of the document",
+    )
+    tags: list[str] = Field(description="tags describing the category of the document")
+    is_financial_document: Answer = Field(
+        description="Is this is a financial document? Respond with green if you very sure, yellow if you are unsure, and red if you are very sure it is not a financial document ",
+    )
+
+
+SCHEMA = ScanSchema.schema()
 
 
 class OpenAIScanService(ScanService):
@@ -39,13 +60,9 @@ class OpenAIScanService(ScanService):
         processed_text = first_chunk(text, LIMIT)
         with_out_white_space = remove_extra_whitespace(processed_text)
 
-        response = openai.ChatCompletion.create(
+        completion = openai.ChatCompletion.create(
             model=self.model,
             messages=[
-                {
-                    "role": "system",
-                    "content": "You are an expert financial analyst. You will be given an excerpt from a document. Provide a 1 line description of the document. Do not respond with anything except the description",
-                },
                 {
                     "role": "user",
                     "content": f"""
@@ -54,14 +71,27 @@ file excerpt: {with_out_white_space}
                  """,
                 },
             ],
+            functions=[{"name": "parse_data", "parameters": SCHEMA}],
+            function_call={"name": "parse_data"},
             temperature=0,
         )
-        choices = response["choices"]
-        if len(choices) == 0:
-            logger.warning("No choices returned from OpenAI")
-        first_choice = choices[0]
-        description = first_choice["message"]["content"]
-        return ScanResult(description=description)
+
+        res = completion.choices[0].message.function_call.arguments
+
+        as_json = json.loads(res)
+        breakpoint()
+
+        return parse_response(description)
+
+
+def parse_response(response: str) -> ScanResult:
+    start = response.find("Description:")
+    end = response.find("Tags:")
+
+    description = response[start:end].split("Description:")[1].strip()
+    tag_string = response[end:].split("Tags:")[1].strip()
+    tags = sorted({tag.strip() for tag in tag_string.split(",")})
+    return ScanResult(description=description, tags=tags)
 
 
 def remove_extra_whitespace(s: str) -> str:
