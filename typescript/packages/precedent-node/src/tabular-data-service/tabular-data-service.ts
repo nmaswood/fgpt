@@ -32,7 +32,6 @@ export interface TabularDataService {
     model: AnalyzeTableModel,
     args: AnalyzeArguments,
   ): Promise<AnalyzeResponse>;
-  analyzeGPT(args: AnalyzeArguments): Promise<AnalyzeResponse>;
   analyzeClaude(args: AnalyzeArguments): Promise<AnalyzeResponse>;
 }
 
@@ -61,7 +60,7 @@ export class HttpTabularDataService implements TabularDataService {
   ): Promise<AnalyzeResponse> {
     switch (model) {
       case "gpt": {
-        return this.analyzeGPT({ bucket, objectPath });
+        throw new Error("not implemented");
       }
       case "claude": {
         return this.analyzeClaude({ bucket, objectPath });
@@ -69,18 +68,6 @@ export class HttpTabularDataService implements TabularDataService {
       default:
         assertNever(model);
     }
-  }
-
-  async analyzeGPT({
-    bucket,
-    objectPath,
-  }: AnalyzeArguments): Promise<AnalyzeResponse> {
-    const response = await this.client.post<unknown>("/excel/analyze-gpt", {
-      bucket,
-      object_path: objectPath,
-    });
-
-    return { responses: ZAnalyzeResponse.parse(response.data).chunks };
   }
 
   async analyzeClaude({

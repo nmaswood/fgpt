@@ -1,13 +1,11 @@
 import abc
 
-import openai
 from anthropic import Anthropic
 from pydantic import BaseModel
 
-from springtime.models.open_ai import CompletionResponse, OpenAIModel
 from springtime.services.format_sheet import format_sheet
 from springtime.services.html import html_from_text
-from springtime.services.prompts import CLAUDE_PROMPT, GPT_PROMPT
+from springtime.services.prompts import CLAUDE_PROMPT
 from springtime.services.sheet_processor import PreprocessedSheet
 
 
@@ -21,37 +19,6 @@ class ExcelAnalyzer(abc.ABC):
     @abc.abstractmethod
     def analyze(self, *, sheets: list[PreprocessedSheet]) -> ResponseWithPrompt:
         pass
-
-
-class OpenAIExcelAnalyzer(ExcelAnalyzer):
-    def __init__(self, model: OpenAIModel) -> None:
-        self.model = model
-
-    def analyze(self, *, sheets: list[PreprocessedSheet]) -> ResponseWithPrompt:
-        table_content = "\n---\n".join([format_sheet(sheet) for sheet in sheets])
-        response = self._chat_completion(table_content)
-
-        content = response.choices[0].message.content
-
-        return ResponseWithPrompt(
-            prompt=table_content,
-            content=content,
-            sanitized_html=html_from_text(content),
-        )
-
-    def _chat_completion(self, table: str) -> CompletionResponse:
-        completion = openai.ChatCompletion.create(
-            model=self.model,
-            messages=[
-                {
-                    "role": "system",
-                    "content": GPT_PROMPT,
-                },
-                {"role": "user", "content": table},
-            ],
-            temperature=0,
-        )
-        return CompletionResponse(**completion)
 
 
 class ClaudeExcelAnalyzer(ExcelAnalyzer):

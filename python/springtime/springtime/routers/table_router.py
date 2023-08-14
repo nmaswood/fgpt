@@ -24,20 +24,14 @@ class AnalyzeTableResponse(BaseModel):
 class TableRouter:
     def __init__(
         self,
-        gpt_table_analyzer: TableAnalyzer,
         claude_table_analyzer: TableAnalyzer,
         object_store: ObjectStore,
     ) -> None:
-        self.gpt_table_analyzer = gpt_table_analyzer
         self.claude_table_analyzer = claude_table_analyzer
         self.object_store = object_store
 
     def get_router(self):
         router = APIRouter(prefix="/excel")
-
-        @router.post("/analyze-gpt")
-        def analyze_tables_gpt(req: AnalyzeTableRequest) -> AnalyzeTableResponse:
-            return self.analyze_table(self.gpt_table_analyzer, req)
 
         @router.post("/analyze-claude")
         def analyze_tables_claude(
