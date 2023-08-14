@@ -69,7 +69,7 @@ class TableAnalyzerImpl(TableAnalyzer):
                     sheet_names=[sheet.sheet_name for sheet in sheet_chunk],
                     content=resp.content,
                     prompt=resp.prompt,
-                    sanitized_html=resp.sanitized_html,
+                    sanitized_html=resp.html,
                 ),
             )
 

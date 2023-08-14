@@ -25,6 +25,7 @@ export class PromptRunnerHandlerImpl implements PromptRunnerHandler {
     const text = await this.processedFileStore.getText(processedFile.id);
 
     const { raw, html } = await this.promptService.run({
+      model: "claude-2",
       organizationId: processedFile.organizationId,
       slug,
       args: {

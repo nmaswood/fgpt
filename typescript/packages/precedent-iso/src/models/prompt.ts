@@ -31,3 +31,6 @@ export const PROMPT_SLUGS = [
   "expense_drivers",
   "ebitda_adjustments",
 ] as const;
+
+export const ZModel = z.enum(["claude-2"]);
+export type Model = z.infer<typeof ZModel>;
