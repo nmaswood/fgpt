@@ -2,7 +2,6 @@ import os
 
 import pytest
 
-from springtime.models.open_ai import OpenAIModel
 from springtime.services.report_service import (
     OpenAIReportService,
     ReportService,
@@ -22,9 +21,13 @@ def text():
 
 @pytest.fixture()
 def openai_report_service():
-    return OpenAIReportService(OpenAIModel.gpt3_16k)
+    return OpenAIReportService()
 
 
 def test_generate_output(text: str, openai_report_service: ReportService):
-    questions = openai_report_service.generate_questions_for_text(text)
-    breakpoint()
+    questions = openai_report_service.generate_questions(text)
+    assert questions[0]
+
+    question = questions[0]
+
+    assert len(question.value) == 3
