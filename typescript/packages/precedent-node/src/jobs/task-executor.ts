@@ -155,6 +155,7 @@ export class TaskExecutorImpl implements TaskExecutor {
       case "gen-embeddings": {
         await this.generateEmbeddingsHandler.generateAndUpsertEmbeddings({
           textChunkGroupId: config.textChunkGroupId,
+          projectId,
         });
         break;
       }

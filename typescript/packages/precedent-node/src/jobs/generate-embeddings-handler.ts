@@ -7,6 +7,7 @@ import { TextChunkStore } from "../text-chunk-store";
 
 export interface GenerateAndUpsertArguments {
   textChunkGroupId: string;
+  projectId: string;
 }
 
 export interface EmbeddingsHandler {
@@ -29,6 +30,7 @@ export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
 
   async generateAndUpsertEmbeddings({
     textChunkGroupId,
+    projectId,
   }: GenerateAndUpsertArguments): Promise<void> {
     const chunkGenerator = this.textChunkStore.iterateTextChunks(
       50,
@@ -54,7 +56,7 @@ export class EmbeddingsHandlerImpl implements EmbeddingsHandler {
           vector,
           metadata: {
             organizationId: textChunk.organizationId,
-            projectId: textChunk.projectId,
+            projectId,
             fileReferenceId: textChunk.fileReferenceId,
             hash: textChunk.hash,
             ...orderMap[textChunk.chunkOrder],
