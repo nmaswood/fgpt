@@ -18,6 +18,7 @@ export interface TextChunk {
   chunkOrder: number;
   chunkText: string;
   hasEmbedding: boolean;
+  hash: string;
 }
 
 export const ZTextWithPage = z.object({

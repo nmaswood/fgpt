@@ -3,6 +3,23 @@ import { expect, test } from "vitest";
 import { GreedyTextChunker } from "../text-chunker/text-chunker";
 
 const chunker = new GreedyTextChunker();
+
+test("empty with text", () => {
+  const result = chunker.chunk(10, {
+    type: "text_only",
+    text: "",
+  });
+  expect(result.chunks).toEqual([]);
+});
+
+test("empty with pages", () => {
+  const result = chunker.chunk(10, {
+    type: "has_pages",
+    pages: [],
+  });
+  expect(result.chunks).toEqual([]);
+});
+
 test("basic example", () => {
   const result = chunker.chunk(10, {
     type: "text_only",

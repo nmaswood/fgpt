@@ -59,6 +59,13 @@ export class GreedyTextChunker implements TextChunker {
   chunk(tokenChunkLimit: number, text: SourceText): Chunks {
     switch (text.type) {
       case "text_only": {
+        if (text.text.length === 0) {
+          return {
+            type: "without_location",
+            chunks: [],
+          };
+        }
+
         const results = this.#chunkWithLocation(tokenChunkLimit, [
           {
             page: -1,

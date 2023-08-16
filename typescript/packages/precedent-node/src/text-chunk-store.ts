@@ -1,4 +1,4 @@
-import { ChunkStrategy, TextChunkGroup } from "@fgpt/precedent-iso";
+import { ChunkStrategy, TextChunkGroup, TextChunk } from "@fgpt/precedent-iso";
 import {
   DatabasePool,
   DatabaseTransactionConnection,
@@ -11,19 +11,6 @@ const EMBEDDING_INFO = {
   type: "ada-002",
   size: 1536,
 } as const;
-
-export interface TextChunk {
-  id: string;
-  organizationId: string;
-  projectId: string;
-  fileReferenceId: string;
-  processedFileId: string;
-  textChunkGroupId: string;
-  chunkOrder: number;
-  chunkText: string;
-  hasEmbedding: boolean;
-  hash: string;
-}
 
 export interface UpsertTextChunkCommon {
   organizationId: string;
@@ -46,7 +33,6 @@ export interface UpsertTextChunkGroup {
   processedFileId: string;
   numChunks: number;
   strategy: ChunkStrategy;
-  embeddingsWillBeGenerated: boolean;
 }
 
 export interface EmbeddingResult {
@@ -211,7 +197,6 @@ WHERE
         processedFileId,
         numChunks,
         strategy,
-        embeddingsWillBeGenerated,
       }) =>
         sql.fragment`
 (${organizationId},
@@ -222,13 +207,13 @@ WHERE
     ${strategy},
     ${EMBEDDING_INFO.type},
     ${EMBEDDING_INFO.size},
-    ${embeddingsWillBeGenerated})
+    )
 `,
     );
     // fix this later
     const { rows } = await trx.query(
       sql.type(ZTextChunkGroupRow)`
-INSERT INTO text_chunk_group (organization_id, project_id, file_reference_id, processed_file_id, num_chunks, chunk_strategy, embedding_strategy, embedding_size, embeddings_will_be_generated)
+INSERT INTO text_chunk_group (organization_id, project_id, file_reference_id, processed_file_id, num_chunks, chunk_strategy, embedding_strategy, embedding_size)
     VALUES
         ${sql.join(values, sql.fragment`, `)}
     ON CONFLICT (organization_id, project_id, file_reference_id, processed_file_id, chunk_strategy, embedding_strategy)

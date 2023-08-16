@@ -69,16 +69,21 @@ export class TextChunkHandlerImpl implements TextChunkHandler {
     if (chunkSize === undefined) {
       throw new Error("illegal state");
     }
-    const chunks = this.CHUNKER.chunk({
-      tokenChunkLimit: chunkSize,
+    const fromChunker = this.CHUNKER.chunk(chunkSize, {
+      type: "text_only",
       text,
     });
+
+    if (fromChunker.type === "with_location") {
+      throw new Error("not supported");
+    }
+
+    const chunks = fromChunker.chunks;
 
     const textChunkGroup = await this.textChunkStore.upsertTextChunkGroup({
       ...common,
       numChunks: chunks.length,
       strategy,
-      embeddingsWillBeGenerated: strategy === "greedy_v0",
     });
     const upsertTextChunkArgs = chunks.map((chunkText, chunkOrder) => ({
       chunkOrder,

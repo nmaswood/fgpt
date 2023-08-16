@@ -23,7 +23,8 @@ export interface UpsertProcessedFile {
 
 export interface ProcessedFileStore {
   upsert(args: UpsertProcessedFile): Promise<ProcessedFile>;
-  getText(id: string): Promise<SourceText>;
+  getText(id: string): Promise<string>;
+  getSourceText(id: string): Promise<SourceText>;
   getByFileReferenceId(id: string): Promise<ProcessedFile>;
 }
 
@@ -45,9 +46,22 @@ WHERE
     );
   }
 
-  async getText(id: string): Promise<SourceText> {
+  async getText(id: string): Promise<string> {
+    return this.pool.oneFirst(
+      sql.type(ZGetText)`
+SELECT
+  extracted_text
+FROM
+    processed_file
+WHERE
+    id = ${id}
+`,
+    );
+  }
+
+  async getSourceText(id: string): Promise<SourceText> {
     return this.pool.one(
-      sql.type(ZGetTextRow)`
+      sql.type(ZGetSourceText)`
 SELECT
 CASE WHEN text_with_pages IS NULL THEN extracted_text ELSE NULL END as extracted_text,
     text_with_pages
@@ -132,7 +146,11 @@ const ZProcessedFileRow = z
     fileReferenceId: row.file_reference_id,
   }));
 
-const ZGetTextRow = z
+const ZGetText = z.object({
+  extracted_text: z.string(),
+});
+
+const ZGetSourceText = z
   .object({
     extracted_text: z.string().nullable(),
     text_with_pages: ZTextWithPage.array().nullable(),
