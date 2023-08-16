@@ -24,11 +24,6 @@ export namespace TextChunkHandler {
 
   export type Response =
     | { type: "embeddings"; textGroupId: string }
-    | {
-        type: "llm-output";
-        textGroupId: string;
-        textChunkIds: string[];
-      }
     | undefined;
 }
 
@@ -52,9 +47,8 @@ export class TextChunkHandlerImpl implements TextChunkHandler {
     processedFileId,
     strategy,
   }: TextChunkHandler.Arguments): Promise<TextChunkHandler.Response> {
-    const sourceText = await this.processedFileStore.getSourceText(
-      processedFileId,
-    );
+    const sourceText =
+      await this.processedFileStore.getSourceText(processedFileId);
     if (sourceText.type === "text_only") {
       throw new Error("text only not supported");
     }
@@ -119,16 +113,10 @@ export class TextChunkHandlerImpl implements TextChunkHandler {
           textGroupId: textChunkGroup.id,
         };
       }
-      case "greedy_15k": {
-        return {
-          type: "llm-output",
-          textChunkIds: textChunks.map((chunk) => chunk.id),
-          textGroupId: textChunkGroup.id,
-        };
-      }
+      case "greedy_15k":
       case "greedy_125k":
       case "greedy_150k": {
-        return undefined;
+        throw new Error("chunk size not expected");
       }
 
       default:

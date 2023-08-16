@@ -35,9 +35,8 @@ export class TextExtractionHandlerImpl implements TextExtractionHandler {
     fileReferenceId,
   }: TextExtractionHandler.Arguments): Promise<TextExtractionHandler.Response> {
     const { text, pages } = await this.textExtractor.extract(fileReferenceId);
-
     const { gpt4, claude100k } = await this.mlService.tokenLength(text);
-    const processedFile = await this.processedFileStore.upsert({
+    const { id } = await this.processedFileStore.upsert({
       organizationId,
       projectId,
       fileReferenceId,
@@ -50,7 +49,7 @@ export class TextExtractionHandlerImpl implements TextExtractionHandler {
     });
 
     return {
-      processedFileId: processedFile.id,
+      processedFileId: id,
     };
   }
 }

@@ -18,9 +18,8 @@ export class PromptRunnerHandlerImpl implements PromptRunnerHandler {
   ) {}
 
   async run(fileReferenceId: string, slug: PromptSlug): Promise<void> {
-    const processedFile = await this.processedFileStore.getByFileReferenceId(
-      fileReferenceId,
-    );
+    const processedFile =
+      await this.processedFileStore.getByFileReferenceId(fileReferenceId);
 
     const text = await this.processedFileStore.getText(processedFile.id);
 

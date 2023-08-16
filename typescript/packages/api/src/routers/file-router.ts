@@ -193,9 +193,8 @@ export class FileRouter {
       async (req: express.Request, res: express.Response) => {
         const { fileReferenceId, slug, projectId } = ZTrigger.parse(req.body);
 
-        const tasksForSlug = await this.promptTaskService.getForSlugs(
-          fileReferenceId,
-        );
+        const tasksForSlug =
+          await this.promptTaskService.getForSlugs(fileReferenceId);
 
         if (tasksForSlug[slug] !== "not_created") {
           res.json({ status: "task-exists" });

@@ -39,9 +39,8 @@ export class FileStatusServiceImpl implements FileStatusService {
     const type = getFileType(file.contentType);
     switch (type) {
       case "excel": {
-        const excelProgress = await this.excelProgressStore.getProgress(
-          fileReferenceId,
-        );
+        const excelProgress =
+          await this.excelProgressStore.getProgress(fileReferenceId);
         return excelProgress;
       }
       case "pdf": {

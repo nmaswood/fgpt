@@ -23,9 +23,8 @@ export class ScanHandlerImpl implements ScanHandler {
     fileReferenceId,
     processedFileId,
   }: ScanHandlerArguments): Promise<void> {
-    const { fileName, projectId } = await this.fileReferenceStore.get(
-      fileReferenceId,
-    );
+    const { fileName, projectId } =
+      await this.fileReferenceStore.get(fileReferenceId);
     // todo truncate
     const text = await this.processedFileStore.getText(processedFileId);
     const { description, tags, isFinancialDocument, isCim } =
