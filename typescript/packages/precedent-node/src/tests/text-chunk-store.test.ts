@@ -39,6 +39,7 @@ async function setup() {
     bucketName: "test-bucket",
     contentType: "application/pdf",
     path: "my-path/foo",
+    fileSize: 1,
   });
 
   const processedFile = await processedFileStore.upsert({
@@ -46,7 +47,16 @@ async function setup() {
     projectId: project.id,
     fileReferenceId: fileReference.id,
     text: "hi",
-    hash: ShaHash.forData("hi"),
+    numPages: 1,
+    hash: "0",
+    claude100kLength: 1,
+    gpt4TokenLength: 1,
+    textWithPages: [
+      {
+        text: "hi",
+        page: 0,
+      },
+    ],
   });
 
   const chunkStore = new PsqlTextChunkStore(pool);
@@ -87,7 +97,6 @@ test("insertMany", async () => {
     processedFileId: processedFile.id,
     numChunks: 2,
     strategy: "greedy_v0",
-    embeddingsWillBeGenerated: true,
   });
 
   const res = await chunkStore.upsertTextChunk(
@@ -102,6 +111,11 @@ test("insertMany", async () => {
       chunkOrder: 0,
       chunkText: "hi",
       hash: ShaHash.forData("hi"),
+      location: {
+        type: "range",
+        start: 0,
+        end: 1,
+      },
     },
   );
 
@@ -127,6 +141,11 @@ test("insertMany", async () => {
         chunkOrder: 0,
         chunkText: "hi",
         hash: ShaHash.forData("hi"),
+        location: {
+          type: "range",
+          start: 0,
+          end: 1,
+        },
       },
     ],
   );
@@ -148,6 +167,11 @@ test("insertMany", async () => {
         chunkOrder: 1,
         chunkText: "bye",
         hash: ShaHash.forData("bye"),
+        location: {
+          type: "range",
+          start: 0,
+          end: 1,
+        },
       },
     ],
   );
@@ -168,7 +192,6 @@ test("setManyEmbeddings", async () => {
     processedFileId: processedFile.id,
     numChunks: 2,
     strategy: "greedy_v0",
-    embeddingsWillBeGenerated: true,
   });
 
   const [t1, t2] = await chunkStore.upsertManyTextChunks(
@@ -184,11 +207,21 @@ test("setManyEmbeddings", async () => {
         chunkOrder: 0,
         chunkText: "hi",
         hash: ShaHash.forData("hi"),
+        location: {
+          type: "range",
+          start: 0,
+          end: 1,
+        },
       },
       {
         chunkOrder: 1,
         chunkText: "hi",
         hash: ShaHash.forData("hi"),
+        location: {
+          type: "range",
+          start: 0,
+          end: 1,
+        },
       },
     ],
   );
@@ -227,7 +260,6 @@ test("getEmbedding", async () => {
     processedFileId: processedFile.id,
     numChunks: 1,
     strategy: "greedy_v0",
-    embeddingsWillBeGenerated: true,
   });
 
   const textChunk = await chunkStore.upsertTextChunk(
@@ -243,6 +275,11 @@ test("getEmbedding", async () => {
       chunkOrder: 0,
       chunkText: "hi",
       hash: ShaHash.forData("hi"),
+      location: {
+        type: "range",
+        start: 0,
+        end: 1,
+      },
     },
   );
 
@@ -268,7 +305,6 @@ test("iterateTextChunks", async () => {
     processedFileId: processedFile.id,
     numChunks: 3,
     strategy: "greedy_v0",
-    embeddingsWillBeGenerated: false,
   });
 
   await chunkStore.upsertManyTextChunks(
@@ -284,16 +320,30 @@ test("iterateTextChunks", async () => {
         chunkOrder: 0,
         chunkText: "hi",
         hash: ShaHash.forData("hi"),
+        location: {
+          type: "range",
+          start: 0,
+          end: 1,
+        },
       },
       {
         chunkOrder: 1,
         chunkText: "bye",
         hash: ShaHash.forData("hi"),
+        location: {
+          type: "range",
+          start: 0,
+          end: 1,
+        },
       },
       {
         chunkOrder: 2,
         chunkText: "bye",
         hash: ShaHash.forData("hi"),
+        location: {
+          type: "single",
+          page: 2,
+        },
       },
     ],
   );

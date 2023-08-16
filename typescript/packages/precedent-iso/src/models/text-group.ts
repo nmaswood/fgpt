@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { ChunkLocation } from "../text-chunker/text-chunker";
+
 export interface TextChunkGroup {
   id: string;
   organizationId: string;
@@ -15,6 +17,7 @@ export interface TextChunk {
   chunkText: string;
   hasEmbedding: boolean;
   hash: string;
+  location: ChunkLocation | undefined;
 }
 
 export const ZTextWithPage = z.object({

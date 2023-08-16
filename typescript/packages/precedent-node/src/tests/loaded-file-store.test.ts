@@ -50,6 +50,15 @@ async function setup() {
     fileReferenceId: fileReference.id,
     text: "hi",
     hash: ShaHash.forData("hi"),
+    gpt4TokenLength: 1000,
+    claude100kLength: 1000,
+    numPages: 1,
+    textWithPages: [
+      {
+        text: "hi",
+        page: 1,
+      },
+    ],
   });
 
   const chunkStore = new PsqlTextChunkStore(pool);
@@ -57,7 +66,7 @@ async function setup() {
   return {
     pool,
     user,
-    project,
+    projectId: project.id,
     fileReference,
     processedFile,
     chunkStore,
@@ -74,7 +83,8 @@ beforeEach(async () => {
 });
 
 test("paginate", async () => {
-  const { processedFile, chunkStore, loadedFileStore } = await setup();
+  const { processedFile, chunkStore, loadedFileStore, projectId } =
+    await setup();
 
   const textChunkGroup = await chunkStore.upsertTextChunkGroup({
     organizationId: processedFile.organizationId,
@@ -83,7 +93,6 @@ test("paginate", async () => {
     processedFileId: processedFile.id,
     numChunks: 1,
     strategy: "greedy_v0",
-    embeddingsWillBeGenerated: true,
   });
 
   const textChunk = await chunkStore.upsertTextChunk(
@@ -99,6 +108,10 @@ test("paginate", async () => {
       chunkOrder: 0,
       chunkText: "hi",
       hash: ShaHash.forData("hi"),
+      location: {
+        type: "single",
+        page: 0,
+      },
     },
   );
 
@@ -110,7 +123,7 @@ test("paginate", async () => {
   ]);
 
   const [loadedFile] = await loadedFileStore.paginate({
-    projectId: textChunk.projectId,
+    projectId,
     cursor: { type: "first" },
   });
 

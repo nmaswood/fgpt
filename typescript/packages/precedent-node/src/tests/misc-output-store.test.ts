@@ -50,6 +50,15 @@ async function setup() {
     fileReferenceId: fileReference.id,
     text: "hi",
     hash: ShaHash.forData("hi"),
+    gpt4TokenLength: 1000,
+    claude100kLength: 1000,
+    numPages: 1,
+    textWithPages: [
+      {
+        text: "hi",
+        page: 1,
+      },
+    ],
   });
 
   const chunkStore = new PsqlTextChunkStore(pool);
@@ -61,7 +70,6 @@ async function setup() {
     processedFileId: processedFile.id,
     numChunks: 2,
     strategy: "greedy_v0",
-    embeddingsWillBeGenerated: true,
   });
 
   const [chunk, chunkTwo] = await chunkStore.upsertManyTextChunks(
@@ -77,11 +85,19 @@ async function setup() {
         chunkOrder: 0,
         chunkText: "hi",
         hash: ShaHash.forData("hi"),
+        location: {
+          type: "single",
+          page: 0,
+        },
       },
       {
         chunkOrder: 1,
         chunkText: "hi",
         hash: ShaHash.forData("hi"),
+        location: {
+          type: "single",
+          page: 0,
+        },
       },
     ],
   );

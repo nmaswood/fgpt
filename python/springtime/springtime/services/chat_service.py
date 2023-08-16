@@ -51,6 +51,7 @@ For example:
 * for headers use #, ##, ###, etc.
 * for links use [link text](link url)
 * for tables use table elements
+* use br tags for line breaks
 """
 
 

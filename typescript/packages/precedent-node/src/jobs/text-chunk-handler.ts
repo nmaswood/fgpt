@@ -52,8 +52,16 @@ export class TextChunkHandlerImpl implements TextChunkHandler {
     processedFileId,
     strategy,
   }: TextChunkHandler.Arguments): Promise<TextChunkHandler.Response> {
-    const text = await this.processedFileStore.getText(processedFileId);
-    if (text.length === 0) {
+    const sourceText = await this.processedFileStore.getSourceText(
+      processedFileId,
+    );
+    if (sourceText.type === "text_only") {
+      throw new Error("text only not supported");
+    }
+
+    const { pages } = sourceText;
+
+    if (pages.length === 0) {
       LOGGER.warn({ processedFileId }, "No text to extract");
       return undefined;
     }
@@ -69,12 +77,9 @@ export class TextChunkHandlerImpl implements TextChunkHandler {
     if (chunkSize === undefined) {
       throw new Error("illegal state");
     }
-    const fromChunker = this.CHUNKER.chunk(chunkSize, {
-      type: "text_only",
-      text,
-    });
+    const fromChunker = this.CHUNKER.chunk(chunkSize, sourceText);
 
-    if (fromChunker.type === "with_location") {
+    if (fromChunker.type === "without_location") {
       throw new Error("not supported");
     }
 
@@ -85,10 +90,12 @@ export class TextChunkHandlerImpl implements TextChunkHandler {
       numChunks: chunks.length,
       strategy,
     });
-    const upsertTextChunkArgs = chunks.map((chunkText, chunkOrder) => ({
+
+    const upsertTextChunkArgs = chunks.map((chunkWithLocation, chunkOrder) => ({
       chunkOrder,
-      chunkText,
-      hash: ShaHash.forData(chunkText),
+      chunkText: chunkWithLocation.chunk,
+      hash: ShaHash.forData(chunkWithLocation.chunk),
+      location: chunkWithLocation.location,
     }));
     const commonArgs = {
       ...common,

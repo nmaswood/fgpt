@@ -114,8 +114,7 @@ test("getText", async () => {
 
   expect(res.id).toBeDefined();
 
-  const text = await processedFileStore.getText(res.id);
-  expect(text).toEqual({
+  expect(await processedFileStore.getSourceText(res.id)).toEqual({
     pages: [
       {
         page: 0,
@@ -124,6 +123,8 @@ test("getText", async () => {
     ],
     type: "has_pages",
   });
+
+  expect(await processedFileStore.getText(res.id)).toEqual("hi");
 });
 
 test("getByFileReferenceId", async () => {

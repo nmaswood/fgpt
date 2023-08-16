@@ -1,10 +1,12 @@
-import { ChunkStrategy, TextChunk, TextChunkGroup } from "@fgpt/precedent-iso";
 import {
-  DatabasePool,
-  DatabaseTransactionConnection,
-  QueryResult,
-  sql,
-} from "slonik";
+  assertNever,
+  ChunkLocation,
+  ChunkStrategy,
+  TextChunk,
+  TextChunkGroup,
+} from "@fgpt/precedent-iso";
+
+import { DatabasePool, QueryResult, sql } from "slonik";
 import { z } from "zod";
 
 const EMBEDDING_INFO = {
@@ -24,6 +26,7 @@ export interface UpsertTextChunk {
   chunkOrder: number;
   chunkText: string;
   hash: string;
+  location: ChunkLocation;
 }
 
 export interface UpsertTextChunkGroup {
@@ -78,7 +81,7 @@ export interface TextChunkStore {
   getEmbeddings(ids: string[]): Promise<EmbeddingResult[]>;
 }
 
-const TEXT_CHUNK_FIELDS = sql.fragment`text_chunk.id, text_chunk.organization_id, text_chunk.file_reference_id, text_chunk.chunk_order, text_chunk.chunk_text, text_chunk.embedding IS NOT NULL AS has_embedding, text_chunk.chunk_text_sha256 as hash`;
+const TEXT_CHUNK_FIELDS = sql.fragment`text_chunk.id, text_chunk.organization_id, text_chunk.file_reference_id, text_chunk.chunk_order, text_chunk.chunk_text, text_chunk.embedding IS NOT NULL AS has_embedding, text_chunk.chunk_text_sha256 as hash, page_start, page_end`;
 
 const TEXT_CHUNK_GROUP_FIELDS = sql.fragment`text_chunk_group.id, organization_id, project_id, file_reference_id, processed_file_id, num_chunks`;
 
@@ -180,13 +183,10 @@ WHERE
     if (args.length === 0) {
       return [];
     }
-    return this.pool.transaction((trx) =>
-      this.#upsertManyTextChunkGroups(trx, args),
-    );
+    return this.#upsertManyTextChunkGroups(args);
   }
 
   async #upsertManyTextChunkGroups(
-    trx: DatabaseTransactionConnection,
     args: UpsertTextChunkGroup[],
   ): Promise<TextChunkGroup[]> {
     const values = args.map(
@@ -206,12 +206,11 @@ WHERE
     ${numChunks},
     ${strategy},
     ${EMBEDDING_INFO.type},
-    ${EMBEDDING_INFO.size},
-)
+    ${EMBEDDING_INFO.size})
 `,
     );
     // fix this later
-    const { rows } = await trx.query(
+    const rows = await this.pool.any(
       sql.type(ZTextChunkGroupRow)`
 INSERT INTO text_chunk_group (organization_id, project_id, file_reference_id, processed_file_id, num_chunks, chunk_strategy, embedding_strategy, embedding_size)
     VALUES
@@ -262,15 +261,10 @@ WHERE
       return [];
     }
 
-    return this.pool.transaction(async (trx) =>
-      this.#setManyEmbeddings(trx, args),
-    );
+    return this.#setManyEmbeddings(args);
   }
 
-  async #setManyEmbeddings(
-    trx: DatabaseTransactionConnection,
-    args: SetManyEmbeddings[],
-  ): Promise<TextChunk[]> {
+  async #setManyEmbeddings(args: SetManyEmbeddings[]): Promise<TextChunk[]> {
     const rows = args.map(
       ({ chunkId, embedding }) =>
         sql.fragment`
@@ -278,7 +272,7 @@ WHERE
     ${sql.jsonb(JSON.stringify(embedding))})
 `,
     );
-    const resp = await trx.query(
+    const resp = await this.pool.any(
       sql.type(ZTextChunkRow)`
 UPDATE
     text_chunk
@@ -293,7 +287,7 @@ RETURNING
 `,
     );
 
-    return Array.from(resp.rows);
+    return Array.from(resp);
   }
 
   async getTextChunks(ids: string[]): Promise<TextChunk[]> {
@@ -334,19 +328,16 @@ WHERE
       return [];
     }
 
-    return this.pool.transaction((trx) =>
-      this.#upsertManyTextChunks(trx, common, args),
-    );
+    return this.#upsertManyTextChunks(common, args);
   }
 
   async #upsertManyTextChunks(
-    trx: DatabaseTransactionConnection,
     common: UpsertTextChunkCommon,
     args: UpsertTextChunk[],
   ): Promise<TextChunk[]> {
-    const values = args.map(
-      ({ chunkOrder, chunkText, hash }) =>
-        sql.fragment`
+    const values = args.map(({ chunkOrder, chunkText, hash, location }) => {
+      const [start, end] = locationForSQL(location);
+      return sql.fragment`
 (${common.organizationId},
     ${common.projectId},
     ${common.fileReferenceId},
@@ -354,13 +345,16 @@ WHERE
     ${common.textChunkGroupId},
     ${chunkOrder},
     ${chunkText},
-    ${hash})
-`,
-    );
+    ${hash},
+    ${start},
+    ${end}
+)
+`;
+    });
 
-    const { rows } = await trx.query(
+    const rows = await this.pool.any(
       sql.type(ZTextChunkRow)`
-INSERT INTO text_chunk (organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, chunk_order, chunk_text, chunk_text_sha256)
+INSERT INTO text_chunk (organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, chunk_order, chunk_text, chunk_text_sha256, page_start, page_end)
     VALUES
         ${sql.join(values, sql.fragment`, `)}
     ON CONFLICT (organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, chunk_order)
@@ -398,14 +392,15 @@ const ZTextChunkRow = z
     id: z.string(),
     organization_id: z.string(),
     file_reference_id: z.string(),
-    processed_file_id: z.string(),
     chunk_order: z.number(),
     chunk_text: z.string(),
     has_embedding: z.boolean(),
     hash: z.string(),
+    page_start: z.number().nullable(),
+    page_end: z.number().nullable(),
   })
-  .transform(
-    (row): TextChunk => ({
+  .transform((row): TextChunk => {
+    return {
       id: row.id,
       organizationId: row.organization_id,
       fileReferenceId: row.file_reference_id,
@@ -413,8 +408,45 @@ const ZTextChunkRow = z
       chunkText: row.chunk_text,
       hasEmbedding: row.has_embedding,
       hash: row.hash,
-    }),
-  );
+      location: getLocation(row.page_start, row.page_end),
+    };
+  });
+
+function getLocation(
+  start: number | null,
+  end: number | null,
+): ChunkLocation | undefined {
+  if (start === null && end === null) {
+    return undefined;
+  } else if (start === null && end !== null) {
+    throw new Error("illegal state");
+  } else if (end !== null && start !== null) {
+    return {
+      type: "range",
+      start: start,
+      end: end,
+    };
+  } else if (start !== null) {
+    return {
+      type: "single",
+      page: start,
+    };
+  }
+  throw new Error("illegal state");
+}
+
+function locationForSQL(
+  location: ChunkLocation,
+): [number | null, number | null] {
+  switch (location.type) {
+    case "single":
+      return [location.page, null];
+    case "range":
+      return [location.start, location.end];
+    default:
+      assertNever(location);
+  }
+}
 
 const ZEmbeddingRow = z
   .object({
