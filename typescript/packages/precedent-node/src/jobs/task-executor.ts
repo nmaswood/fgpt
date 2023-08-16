@@ -165,9 +165,7 @@ export class TaskExecutorImpl implements TaskExecutor {
         break;
       }
       case "long-form": {
-        LOGGER.warn(
-          `Generating skipping long form report for ${config.fileReferenceId}`,
-        );
+        LOGGER.warn("Generating skipping long form report");
         break;
       }
 

@@ -5,7 +5,6 @@ import {
   TextChunk,
   TextChunkGroup,
 } from "@fgpt/precedent-iso";
-
 import { DatabasePool, QueryResult, sql } from "slonik";
 import { z } from "zod";
 
@@ -347,8 +346,7 @@ WHERE
     ${chunkText},
     ${hash},
     ${start},
-    ${end}
-)
+    ${end})
 `;
     });
 

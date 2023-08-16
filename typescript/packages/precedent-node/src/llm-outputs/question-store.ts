@@ -1,4 +1,3 @@
-import { Outputs } from "@fgpt/precedent-iso";
 import { DatabasePool, sql } from "slonik";
 import { z } from "zod";
 
@@ -7,19 +6,16 @@ export interface InsertQuestion {
   projectId: string;
   fileReferenceId: string;
   processedFileId: string;
-  textChunkId: string;
-  textChunkGroupId: string;
   question: string;
   hash: string;
 }
 
-const FIELDS = sql.fragment`id, question`;
+const FIELDS = sql.fragment`question`;
 
 export interface QuestionStore {
   sampleForProject(projectId: string, limit: number): Promise<string[]>;
   sampleForFile(fileReferenceId: string, limit: number): Promise<string[]>;
-  getForFile(fileReferenceId: string): Promise<string[]>;
-  insertMany(questions: InsertQuestion[]): Promise<Outputs.Question[]>;
+  insertMany(questions: InsertQuestion[]): Promise<string[]>;
 }
 
 export class PsqlQuestionStore implements QuestionStore {
@@ -59,20 +55,7 @@ LIMIT ${limit}
     return result.rows.map((row) => row.question);
   }
 
-  async getForFile(fileReferenceId: string): Promise<string[]> {
-    const result = await this.pool.anyFirst(sql.type(ZGetForFileWithOrder)`
-SELECT
-    question
-FROM
-    text_chunk_question
-WHERE
-    file_reference_id = ${fileReferenceId}
-`);
-
-    return Array.from(result);
-  }
-
-  async insertMany(questions: InsertQuestion[]): Promise<Outputs.Question[]> {
+  async insertMany(questions: InsertQuestion[]): Promise<string[]> {
     if (questions.length === 0) {
       return [];
     }
@@ -82,8 +65,6 @@ WHERE
         projectId,
         fileReferenceId,
         processedFileId,
-        textChunkGroupId,
-        textChunkId,
         question,
         hash,
       }) =>
@@ -92,15 +73,13 @@ WHERE
     ${projectId},
     ${fileReferenceId},
     ${processedFileId},
-    ${textChunkGroupId},
-    ${textChunkId},
     ${question},
     ${hash})
 `,
     );
 
-    const res = await this.pool.any(sql.type(ZQuestionRow)`
-INSERT INTO text_chunk_question (organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, text_chunk_id, question, hash_sha256)
+    const res = await this.pool.anyFirst(sql.type(ZQuestionRow)`
+INSERT INTO text_chunk_question (organization_id, project_id, file_reference_id, processed_file_id, question, hash_sha256)
     VALUES
         ${sql.join(values, sql.fragment`, `)}
     RETURNING
@@ -112,14 +91,9 @@ INSERT INTO text_chunk_question (organization_id, project_id, file_reference_id,
 }
 
 const ZQuestionRow = z.object({
-  id: z.string(),
   question: z.string(),
 });
 
 const ZGetForFile = z.object({
-  question: z.string(),
-});
-
-const ZGetForFileWithOrder = z.object({
   question: z.string(),
 });

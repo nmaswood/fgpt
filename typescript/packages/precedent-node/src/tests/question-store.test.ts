@@ -126,8 +126,6 @@ test("insertMany", async () => {
     projectId,
     fileReferenceId,
     processedFileId,
-    textChunkGroupId,
-    textChunkId,
     questionStore,
   } = await setup();
 
@@ -137,41 +135,10 @@ test("insertMany", async () => {
       projectId,
       fileReferenceId,
       processedFileId,
-      textChunkGroupId,
-      textChunkId,
       question: "hi",
       hash: "foo",
     },
   ]);
-
-  expect(question.question).toEqual("hi");
-});
-
-test("getForFile", async () => {
-  const {
-    organizationId,
-    projectId,
-    fileReferenceId,
-    processedFileId,
-    textChunkGroupId,
-    textChunkId,
-    questionStore,
-  } = await setup();
-
-  await questionStore.insertMany([
-    {
-      organizationId,
-      projectId,
-      fileReferenceId,
-      processedFileId,
-      textChunkGroupId,
-      textChunkId,
-      question: "hi",
-      hash: "foo",
-    },
-  ]);
-
-  const [question] = await questionStore.getForFile(fileReferenceId);
 
   expect(question).toEqual("hi");
 });
@@ -182,25 +149,20 @@ test("getForFile", async () => {
     projectId,
     fileReferenceId,
     processedFileId,
-    textChunkGroupId,
-    textChunkId,
     questionStore,
   } = await setup();
 
-  await questionStore.insertMany([
+  const [question] = await questionStore.insertMany([
     {
       organizationId,
       projectId,
       fileReferenceId,
       processedFileId,
-      textChunkGroupId,
-      textChunkId,
+
       question: "hi",
       hash: "foo",
     },
   ]);
-
-  const [question] = await questionStore.getForFile(fileReferenceId);
 
   expect(question).toEqual("hi");
 });
@@ -211,8 +173,6 @@ test("sampleForFile", async () => {
     projectId,
     fileReferenceId,
     processedFileId,
-    textChunkGroupId,
-    textChunkId,
     questionStore,
   } = await setup();
 
@@ -222,14 +182,13 @@ test("sampleForFile", async () => {
       projectId,
       fileReferenceId,
       processedFileId,
-      textChunkGroupId,
-      textChunkId,
+
       question: "hi",
       hash: "foo",
     },
   ]);
 
-  const [question] = await questionStore.getForFile(fileReferenceId);
+  const [question] = await questionStore.sampleForFile(fileReferenceId, 100);
 
   expect(question).toEqual("hi");
 });
@@ -240,8 +199,7 @@ test("sampleForProjectId", async () => {
     projectId,
     fileReferenceId,
     processedFileId,
-    textChunkGroupId,
-    textChunkId,
+
     questionStore,
   } = await setup();
 
@@ -251,8 +209,6 @@ test("sampleForProjectId", async () => {
       projectId,
       fileReferenceId,
       processedFileId,
-      textChunkGroupId,
-      textChunkId,
       question: "hi",
       hash: "foo",
     },
@@ -261,8 +217,6 @@ test("sampleForProjectId", async () => {
       projectId,
       fileReferenceId,
       processedFileId,
-      textChunkGroupId,
-      textChunkId,
       question: "hi",
       hash: "foo",
     },

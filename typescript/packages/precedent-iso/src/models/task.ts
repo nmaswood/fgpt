@@ -80,12 +80,7 @@ export const ZLLMOutputsConfig = z.object({
 
 export const ZLongFormReportConfig = z.object({
   type: z.literal("long-form"),
-  organizationId: z.string(),
-  projectId: z.string(),
   fileReferenceId: z.string(),
-  processedFileId: z.string(),
-  textChunkGroupId: z.string(),
-  textChunkIds: z.string().array(),
 });
 
 export type LongFormReportConfig = z.infer<typeof ZLongFormReportConfig>;

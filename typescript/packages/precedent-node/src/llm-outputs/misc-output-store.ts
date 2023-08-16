@@ -13,37 +13,18 @@ export interface InsertMiscValue {
   projectId: string;
   fileReferenceId: string;
   processedFileId: string;
-  textChunkId?: string | undefined;
-  textChunkGroupId?: string | undefined;
   value: Outputs.MiscValue;
 }
 
-const FIELDS = sql.fragment`id, text_chunk_group_id, text_chunk_id, value`;
+const FIELDS = sql.fragment`value`;
 export interface MiscOutputStore {
-  textChunkIdsPresent(fileReferenceId: string): Promise<string[]>;
   getForFile(fileReferenceId: string): Promise<Outputs.MiscValue[]>;
-  insertMany(values: InsertMiscValue[]): Promise<Outputs.MiscValueRow[]>;
-  insert(value: InsertMiscValue): Promise<Outputs.MiscValueRow>;
+  insertMany(values: InsertMiscValue[]): Promise<Outputs.MiscValue[]>;
+  insert(value: InsertMiscValue): Promise<Outputs.MiscValue>;
 }
-
-const ZIdRow = z.object({
-  id: z.string().nullable(),
-});
 
 export class PsqlMiscOutputStore implements MiscOutputStore {
   constructor(private readonly pool: DatabasePool) {}
-
-  async textChunkIdsPresent(fileReferenceId: string): Promise<string[]> {
-    const result = await this.pool.anyFirst(sql.type(ZIdRow)`
-SELECT
-    text_chunk_id as id
-FROM
-    misc_output
-WHERE
-    file_reference_id = ${fileReferenceId}
-`);
-    return [...new Set(result.filter(isNotNull))].sort();
-  }
 
   async getForFile(fileReferenceId: string): Promise<Outputs.MiscValue[]> {
     const result = await this.pool.anyFirst(sql.type(ZGetValueForFile)`
@@ -58,7 +39,7 @@ WHERE
     return result.filter(isNotNull);
   }
 
-  async insert(value: InsertMiscValue): Promise<Outputs.MiscValueRow> {
+  async insert(value: InsertMiscValue): Promise<Outputs.MiscValue> {
     const [res] = await this.insertMany([value]);
     if (!res) {
       throw new Error("invalid state");
@@ -66,7 +47,7 @@ WHERE
     return res;
   }
 
-  async insertMany(values: InsertMiscValue[]): Promise<Outputs.MiscValueRow[]> {
+  async insertMany(values: InsertMiscValue[]): Promise<Outputs.MiscValue[]> {
     if (values.length === 0) {
       return [];
     }
@@ -76,8 +57,6 @@ WHERE
         projectId,
         fileReferenceId,
         processedFileId,
-        textChunkGroupId,
-        textChunkId,
         value,
       }) =>
         sql.fragment`
@@ -85,14 +64,12 @@ WHERE
     ${projectId},
     ${fileReferenceId},
     ${processedFileId},
-    ${textChunkGroupId ?? null},
-    ${textChunkId ?? null},
     ${JSON.stringify(value)})
 `,
     );
 
     const res = await this.pool.any(sql.type(ZRow)`
-INSERT INTO misc_output (organization_id, project_id, file_reference_id, processed_file_id, text_chunk_group_id, text_chunk_id, value)
+INSERT INTO misc_output (organization_id, project_id, file_reference_id, processed_file_id, value)
     VALUES
         ${sql.join(sqlValues, sql.fragment`, `)}
     RETURNING
@@ -174,28 +151,8 @@ const ZGetValueForFile = z.object({
 
 const ZRow = z
   .object({
-    id: z.string(),
-    text_chunk_group_id: z.string().nullable(),
-    text_chunk_id: z.string().nullable(),
     value: ZMiscValue,
   })
-  .transform((row): Outputs.MiscValueRow | undefined => {
-    if (!row.value) {
-      return undefined;
-    }
-
-    const chunk = row.text_chunk_id
-      ? row.text_chunk_group_id
-        ? {
-            textChunkId: row.text_chunk_id,
-            textChunkGroupId: row.text_chunk_group_id,
-          }
-        : undefined
-      : undefined;
-
-    return {
-      id: row.id,
-      chunk,
-      value: row.value,
-    };
+  .transform((row): Outputs.MiscValue | undefined => {
+    return row.value ?? undefined;
   });
