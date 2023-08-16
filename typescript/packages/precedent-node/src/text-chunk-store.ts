@@ -1,4 +1,4 @@
-import { ChunkStrategy, TextChunkGroup, TextChunk } from "@fgpt/precedent-iso";
+import { ChunkStrategy, TextChunk, TextChunkGroup } from "@fgpt/precedent-iso";
 import {
   DatabasePool,
   DatabaseTransactionConnection,
@@ -207,7 +207,7 @@ WHERE
     ${strategy},
     ${EMBEDDING_INFO.type},
     ${EMBEDDING_INFO.size},
-    )
+)
 `,
     );
     // fix this later

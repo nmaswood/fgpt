@@ -50,7 +50,7 @@ WHERE
     return this.pool.oneFirst(
       sql.type(ZGetText)`
 SELECT
-  extracted_text
+    extracted_text
 FROM
     processed_file
 WHERE
@@ -63,7 +63,11 @@ WHERE
     return this.pool.one(
       sql.type(ZGetSourceText)`
 SELECT
-CASE WHEN text_with_pages IS NULL THEN extracted_text ELSE NULL END as extracted_text,
+    CASE WHEN text_with_pages IS NULL THEN
+        extracted_text
+    ELSE
+        NULL
+    END as extracted_text,
     text_with_pages
 FROM
     processed_file
