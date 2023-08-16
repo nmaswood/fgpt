@@ -30,32 +30,39 @@ export class ReportHandlerImpl implements ReportHandler {
     fileReferenceId,
     processedFileId,
   }: ReportHandler.Arguments): Promise<void> {
-    const file = await this.fileReferenceStore.get(fileReferenceId);
+    const { organizationId, projectId } =
+      await this.fileReferenceStore.get(fileReferenceId);
     const text = await this.processedFileStore.getText(processedFileId);
 
-    const [questions, terms] = await Promise.all([
+    const [questionPages, termPages] = await Promise.all([
       this.mlReportService.generateQuestions(text),
       this.mlReportService.generateTerms(text),
     ]);
 
+    const questions = questionPages.flatMap((page) => page.value);
+
+    const terms = termPages;
+
     if (terms.length > 0) {
-      await this.miscOutputStore.insert({
-        organizationId: file.organizationId,
-        projectId: file.projectId,
-        fileReferenceId,
-        processedFileId,
-        value: {
-          type: "terms",
-          value: terms,
-          order: 0,
-        },
-      });
+      await this.miscOutputStore.insertMany(
+        termPages.map(({ value, order }) => ({
+          organizationId,
+          projectId,
+          fileReferenceId,
+          processedFileId,
+          value: {
+            type: "terms",
+            value,
+            order,
+          },
+        })),
+      );
     }
 
     await this.questionStore.insertMany(
       questions.map((question) => ({
-        organizationId: file.organizationId,
-        projectId: file.projectId,
+        organizationId,
+        projectId,
         fileReferenceId,
         processedFileId,
         question,

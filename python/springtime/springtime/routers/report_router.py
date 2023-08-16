@@ -2,8 +2,9 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 from springtime.services.report_service import (
+    PageOfQuestions,
+    PageOfTerms,
     ReportService,
-    Term,
 )
 from springtime.services.scan_service import ScanService
 
@@ -13,11 +14,11 @@ class LLMOutputRequest(BaseModel):
 
 
 class GenerateQuestionsResponse(BaseModel):
-    questions: list[str]
+    questions: list[PageOfQuestions]
 
 
 class GenerateTermsResponse(BaseModel):
-    terms: list[Term]
+    terms: list[PageOfTerms]
 
 
 class ScanRequest(BaseModel):
@@ -49,7 +50,7 @@ class ReportRouter:
         # GPT
         @router.post("/generate-questions")
         def questions_route(req: LLMOutputRequest) -> GenerateQuestionsResponse:
-            questions = self.gpt_report_service.generate_questions_for_text(req.text)
+            questions = self.gpt_report_service.generate_questions(req.text)
             return GenerateQuestionsResponse(questions=questions)
 
         @router.post("/generate-terms")

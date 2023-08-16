@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from springtime.models.open_ai import OpenAIModel
 from springtime.services.prompts import questions_schema, terms_schema
+from springtime.services.scan_service import get_chunks
 
 
 class Question(BaseModel):
@@ -28,27 +29,43 @@ class Terms(BaseModel):
     terms: list[Term] = []
 
 
-class Page(BaseModel):
+class PageOfQuestions(BaseModel):
     order: int
-    terms: list[Term] = []
+    value: list[str] = []
+
+
+class PageOfTerms(BaseModel):
+    order: int
+    value: list[Term] = []
 
 
 class ReportService(abc.ABC):
     @abc.abstractmethod
-    def generate_questions_for_text(self, text: str) -> list[str]:
+    def generate_questions(self, text: str) -> list[PageOfQuestions]:
         pass
 
     @abc.abstractmethod
-    def generate_terms(self, text: str) -> list[Term]:
+    def generate_terms(self, text: str) -> list[PageOfTerms]:
         pass
 
 
+MODEL = OpenAIModel.gpt3_16k
+
+
 class OpenAIReportService(ReportService):
-    def __init__(
-        self,
-        model: OpenAIModel,
-    ) -> None:
-        self.model = model
+    def generate_questions(self, text: str) -> list[PageOfQuestions]:
+        acc: list[PageOfQuestions] = []
+        for idx, chunk in enumerate(get_chunks(text, 30_000)):
+            if questions := self.generate_questions_for_text(chunk):
+                acc.append(PageOfQuestions(order=idx, value=questions))
+        return acc
+
+    def generate_terms(self, text: str) -> list[PageOfTerms]:
+        acc: list[PageOfTerms] = []
+        for idx, chunk in enumerate(get_chunks(text, 30_000)):
+            if terms := self.generate_terms_for_text(chunk):
+                acc.append(PageOfTerms(order=idx, value=terms))
+        return acc
 
     def generate_questions_for_text(self, text: str) -> list[str]:
         for _attempt in range(3):
@@ -64,7 +81,7 @@ class OpenAIReportService(ReportService):
 
     def _generate_questions_for_text(self, text: str) -> list[str]:
         completion = openai.ChatCompletion.create(
-            model=self.model,
+            model=MODEL,
             messages=[
                 {
                     "role": "system",
@@ -92,7 +109,7 @@ class OpenAIReportService(ReportService):
         questions = Questions(**response)
         return [q.question for q in questions.questions]
 
-    def generate_terms(self, text: str) -> list[Term]:
+    def generate_terms_for_text(self, text: str) -> list[Term]:
         for _attempt in range(3):
             try:
                 return self._generate_terms(text)
@@ -106,7 +123,7 @@ class OpenAIReportService(ReportService):
 
     def _generate_terms(self, text: str) -> list[Term]:
         completion = openai.ChatCompletion.create(
-            model=self.model,
+            model=MODEL,
             messages=[
                 {
                     "role": "system",

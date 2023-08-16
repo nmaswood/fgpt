@@ -61,9 +61,7 @@ VECTOR_SERVICE = PineconeVectorService(
     index_name=SETTINGS.pinecone_index,
     namespace=SETTINGS.pinecone_namespace,
 )
-OPENAI_REPORT_SERVICE = OpenAIReportService(
-    OpenAIModel.gpt3_16k,
-)
+OPENAI_REPORT_SERVICE = OpenAIReportService()
 CHAT_SERVICE = OpenAIChatService(OpenAIModel.gpt3_16k)
 
 PROMPT_SERVICE = PromptServiceImpl(ANTHROPIC_CLIENT)
