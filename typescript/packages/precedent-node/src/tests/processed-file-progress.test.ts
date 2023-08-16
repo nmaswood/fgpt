@@ -96,7 +96,6 @@ test("getProgress#no_tasks", async () => {
     status: "pending",
     forTask: {
       embeddingChunk: "task_does_not_exist",
-      reportChunk: "task_does_not_exist",
       report: "task_does_not_exist",
       longFormReport: "task_does_not_exist",
       upsertEmbeddings: "task_does_not_exist",
@@ -149,7 +148,6 @@ test("getProgress#pending", async () => {
     status: "pending",
     forTask: {
       embeddingChunk: "queued",
-      reportChunk: "queued",
       report: "task_does_not_exist",
       longFormReport: "task_does_not_exist",
       upsertEmbeddings: "task_does_not_exist",
@@ -207,7 +205,6 @@ test("getProgress#has_failure", async () => {
     status: "error",
     forTask: {
       embeddingChunk: "failed",
-      reportChunk: "succeeded",
       report: "task_does_not_exist",
       longFormReport: "task_does_not_exist",
       upsertEmbeddings: "task_does_not_exist",

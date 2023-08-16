@@ -25,7 +25,6 @@ export class ProcessedFileProgressServiceImpl
 
     const forTask: ProgressForPdfTasks = {
       embeddingChunk: "task_does_not_exist",
-      reportChunk: "task_does_not_exist",
       report: "task_does_not_exist",
       upsertEmbeddings: "task_does_not_exist",
       extractTable: "task_does_not_exist",
@@ -42,10 +41,8 @@ export class ProcessedFileProgressServiceImpl
               forTask.embeddingChunk = task.status;
               break;
             }
-            case "greedy_15k": {
-              forTask.reportChunk = task.status;
-              break;
-            }
+
+            case "greedy_15k":
             case "greedy_125k":
             case "greedy_150k": {
               break;

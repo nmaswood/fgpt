@@ -12,7 +12,6 @@ export interface FileProgress<
 
 export interface ProgressForPdfTasks {
   embeddingChunk: ProgressTaskStatus;
-  reportChunk: ProgressTaskStatus;
   report: ProgressTaskStatus;
 
   upsertEmbeddings: ProgressTaskStatus;

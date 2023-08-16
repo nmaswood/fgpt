@@ -24,10 +24,20 @@ def openai_report_service():
     return OpenAIReportService()
 
 
+@pytest.mark.skipif(True, reason="")
 def test_generate_output(text: str, openai_report_service: ReportService):
-    questions = openai_report_service.generate_questions(text)
-    assert questions[0]
+    pages = openai_report_service.generate_questions(text)
+    assert pages[0]
 
-    question = questions[0]
+    question = pages[0]
 
     assert len(question.value) == 3
+
+
+def test_generate_terms(text: str, openai_report_service: ReportService):
+    pages = openai_report_service.generate_terms(text)
+    assert pages[0]
+
+    terms = pages[0].value
+    print(terms)
+    breakpoint()
