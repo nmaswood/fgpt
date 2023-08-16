@@ -1,11 +1,9 @@
 import abc
 import json
 import time
-from typing import Any
 
 import json5
 import openai
-from anthropic import Anthropic
 from loguru import logger
 from pydantic import BaseModel
 
@@ -30,16 +28,14 @@ class Terms(BaseModel):
     terms: list[Term] = []
 
 
-class CallFunctionRequest(BaseModel):
-    text: str
-    prompt: str
-    json_schema: dict[str, Any]
-    function_name: str
+class Page(BaseModel):
+    order: int
+    terms: list[Term] = []
 
 
 class ReportService(abc.ABC):
     @abc.abstractmethod
-    def generate_questions(self, text: str) -> list[str]:
+    def generate_questions_for_text(self, text: str) -> list[str]:
         pass
 
     @abc.abstractmethod
@@ -50,17 +46,14 @@ class ReportService(abc.ABC):
 class OpenAIReportService(ReportService):
     def __init__(
         self,
-        *,
-        model_for_terms: OpenAIModel,
-        model_for_questions: OpenAIModel,
+        model: OpenAIModel,
     ) -> None:
-        self.model_for_terms = model_for_terms
-        self.model_for_questions = model_for_questions
+        self.model = model
 
-    def generate_questions(self, text: str) -> list[str]:
+    def generate_questions_for_text(self, text: str) -> list[str]:
         for _attempt in range(3):
             try:
-                return self._generate_questions(text)
+                return self._generate_questions_for_text(text)
             except openai.error.RateLimitError as e:
                 logger.error(e)
                 logger.error("OpenAI response for questions failed")
@@ -69,9 +62,9 @@ class OpenAIReportService(ReportService):
         msg = "OpenAI response for questions failed"
         raise Exception(msg)
 
-    def _generate_questions(self, text: str) -> list[str]:
+    def _generate_questions_for_text(self, text: str) -> list[str]:
         completion = openai.ChatCompletion.create(
-            model=self.model_for_questions,
+            model=self.model,
             messages=[
                 {
                     "role": "system",
@@ -113,7 +106,7 @@ class OpenAIReportService(ReportService):
 
     def _generate_terms(self, text: str) -> list[Term]:
         completion = openai.ChatCompletion.create(
-            model=self.model_for_terms,
+            model=self.model,
             messages=[
                 {
                     "role": "system",
@@ -151,98 +144,6 @@ def parse_json(json_str: str):
         return json.loads(json_str)
     except Exception as e:
         return json5.loads(json_str)
-
-
-class ClaudeReportService(ReportService):
-    def __init__(self, anthropic_client: Anthropic) -> None:
-        self.anthropic_client = anthropic_client
-
-    def generate_questions(self, text: str) -> list[str]:
-        prompt = f"""
-
-
-Human: You are an expert financial analyst AI assistant. I will provide you a document. The document will start after the delimiter _START_DOCUMENT_ and end after the delimiter _END_DOCUMENT_. Based on the document generate the top 3 most relevant questions you would want to ask about the data to better understand it for evaluating a potential investment.
-
-* Output each question as an entry in a json array of strings.
-* Speak in the third person, e.g. do not use "you"
-* Prefer proper, specific nouns to refer to entities
-
-Human: _START_DOCUMENT_{text.strip()}_END_DOCUMENT_
-
-
-Assistant:"""
-        raw = self.anthropic_client.completions.create(
-            prompt=prompt,
-            model="claude-2",
-            max_tokens_to_sample=1_000_000,
-        ).strip()
-
-        start_index = raw.find("[")
-        value = raw[start_index:]
-
-        try:
-            return json.loads(value)
-        except Exception as e:
-            logger.error(e)
-            logger.error(value)
-            logger.error(raw)
-            logger.error("Claude response for questions failed")
-            return []
-
-    def generate_terms(self, text: str) -> list[Term]:
-        prompt = f"""
-
-
-Human: You are an expert financial analyst AI assistant. I will provide you a document. The document will start after the delimiter _START_DOCUMENT_ and end after the delimiter _END_DOCUMENT_. From the document try to parse the following:
-
-Company Overview
-
-Company Description
-
-Company Industry
-
-Document Overview
-
-Document Name
-
-Document Date
-
-Lead Arranger
-
-Most Recent Revenue
-
-Most Recent Full Year EBITDA
-
-Most Recent Full Year Net Income
-
-* Output each term as an entry in a json array of strings. Put the term name on the left and the term value on the right with a "|" separating the two. e.g. "Document Name | Investment Document January"
-
-* Do not output anything else
-* If you cannot find a term in the document output "Not provided" for that term. For example "Most Recent Full Year EBITDA | Not provided"
-
-
-Human: _START_DOCUMENT_{text.strip()}_END_DOCUMENT_
-
-
-Assistant:"""
-
-        raw = self.anthropic_client.complete(
-            prompt,
-        ).strip()
-
-        start_index = raw.find("[")
-        value = raw[start_index:]
-
-        try:
-            parsed = json.loads(value)
-            terms = [parse_term(term) for term in parsed]
-            return [term for term in terms if term is not None]
-        except Exception as e:
-            logger.error(e)
-            logger.error(value)
-            logger.error(raw)
-            logger.error("Claude response for terms failed")
-            return []
 
 
 IGNORE = {

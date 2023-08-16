@@ -13,19 +13,13 @@ export interface LongFormResponse {
 
 export interface MLReportService {
   generateQuestions(text: string): Promise<string[]>;
-  generateQuestionsClaude(text: string): Promise<string[]>;
   generateTerms(text: string): Promise<Term[]>;
-  generateTermsClaude(text: string): Promise<Term[]>;
 }
 export class MLReportServiceImpl implements MLReportService {
   constructor(private readonly client: AxiosInstance) {}
 
   async generateQuestions(text: string): Promise<string[]> {
     return this.#generateQuestions("/report/generate-questions", text);
-  }
-
-  async generateQuestionsClaude(text: string): Promise<string[]> {
-    return this.#generateQuestions("/report/generate-questions-claude", text);
   }
 
   async #generateQuestions(url: string, text: string): Promise<string[]> {
@@ -37,10 +31,6 @@ export class MLReportServiceImpl implements MLReportService {
 
   async generateTerms(text: string): Promise<Term[]> {
     return this.#generateTerms("/report/generate-terms", text);
-  }
-
-  async generateTermsClaude(text: string): Promise<Term[]> {
-    return this.#generateTerms("/report/generate-terms-claude", text);
   }
 
   async #generateTerms(url: string, text: string): Promise<Term[]> {
