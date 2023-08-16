@@ -30,7 +30,15 @@ test("extract-longer", async () => {
     `${__dirname}/test-documents/sample-pitch.pdf`,
   );
   const text = await tikaClient.extract(fileName, buffer);
-  const xml = cheerio.load(text);
-  const bodyText = xml("body").text().trim();
-  expect(bodyText.includes("Business Intermediary")).toBeTruthy();
+  //const xml = cheerio.load(text);
+  const $ = cheerio.load(text);
+
+  const val = $("div.page")
+    .map((page, element) => ({
+      page,
+      text: $(element).text(),
+    }))
+    .toArray();
+
+  expect(val).toHaveLength(21);
 });

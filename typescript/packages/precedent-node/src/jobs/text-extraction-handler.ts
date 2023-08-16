@@ -23,7 +23,6 @@ export interface TextExtractionHandler {
 }
 
 export class TextExtractionHandlerImpl implements TextExtractionHandler {
-  STRATEGIES = ["greedy_v0", "greedy_15k"] as const;
   constructor(
     private readonly textExtractor: TextExtractor,
     private readonly processedFileStore: ProcessedFileStore,
@@ -35,7 +34,7 @@ export class TextExtractionHandlerImpl implements TextExtractionHandler {
     projectId,
     fileReferenceId,
   }: TextExtractionHandler.Arguments): Promise<TextExtractionHandler.Response> {
-    const { text } = await this.textExtractor.extract(fileReferenceId);
+    const { text, pages } = await this.textExtractor.extract(fileReferenceId);
 
     const { gpt4, claude100k } = await this.mlService.tokenLength(text);
     const processedFile = await this.processedFileStore.upsert({
@@ -46,6 +45,8 @@ export class TextExtractionHandlerImpl implements TextExtractionHandler {
       hash: ShaHash.forData(text),
       gpt4TokenLength: gpt4,
       claude100kLength: claude100k,
+      textWithPages: pages,
+      numPages: pages.length,
     });
 
     return {

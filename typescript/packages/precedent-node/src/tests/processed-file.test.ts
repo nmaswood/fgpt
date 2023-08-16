@@ -79,6 +79,14 @@ test("upsert", async () => {
     text: "hi",
     hash: ShaHash.forData("hi"),
     gpt4TokenLength: 1000,
+    claude100kLength: 1000,
+    textWithPages: [
+      {
+        page: 0,
+        text: "hi",
+      },
+    ],
+    numPages: 1,
   });
 
   expect(res.id).toBeDefined();
@@ -94,12 +102,28 @@ test("getText", async () => {
     text: "hi",
     hash: ShaHash.forData("hi"),
     gpt4TokenLength: 1000,
+    claude100kLength: 1000,
+    textWithPages: [
+      {
+        page: 0,
+        text: "hi",
+      },
+    ],
+    numPages: 1,
   });
 
   expect(res.id).toBeDefined();
 
   const text = await processedFileStore.getText(res.id);
-  expect(text).toEqual("hi");
+  expect(text).toEqual({
+    pages: [
+      {
+        page: 0,
+        text: "hi",
+      },
+    ],
+    type: "has_pages",
+  });
 });
 
 test("getByFileReferenceId", async () => {
@@ -112,6 +136,14 @@ test("getByFileReferenceId", async () => {
     text: "hi",
     hash: ShaHash.forData("hi"),
     gpt4TokenLength: 1000,
+    claude100kLength: 1000,
+    textWithPages: [
+      {
+        page: 0,
+        text: "hi",
+      },
+    ],
+    numPages: 1,
   });
 
   const same = await processedFileStore.getByFileReferenceId(fileReference.id);

@@ -1,3 +1,4 @@
+import { z } from "zod";
 export interface TextChunkGroup {
   id: string;
   organizationId: string;
@@ -18,3 +19,20 @@ export interface TextChunk {
   chunkText: string;
   hasEmbedding: boolean;
 }
+
+export const ZTextWithPage = z.object({
+  page: z.number(),
+  text: z.string(),
+});
+
+export type TextWithPage = z.infer<typeof ZTextWithPage>;
+
+export type SourceText =
+  | {
+      type: "text_only";
+      text: string;
+    }
+  | {
+      type: "has_pages";
+      pages: TextWithPage[];
+    };

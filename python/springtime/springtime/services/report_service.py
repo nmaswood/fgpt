@@ -250,8 +250,7 @@ IGNORE = {
     "not available",
     "not specified",
     "not provided in the document",
-    "not available",
-    "not specified",
+    "n/a",
 }
 
 

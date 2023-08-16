@@ -7,6 +7,30 @@ CONTEXT_PROMPT = (
     "Use the information to supplement your knowledge.\n"
     "If you do not know the answer. Reply: I do not know.\n"
     'The additional information will be delimited by "---"\n'
+    """
+When referencing information from a source
+cite the appropriate source(s) using their corresponding file name using footnote citations containing only the file name after your response.
+For example:
+
+file name: Investment-Memo.pdf
+Profits increased in 2020.
+
+file name: Investment-Memo-2.pdf
+A new product XYZ was introduced in 2021.
+
+Question: Was a new product introduced in 2021?
+Answer:
+Yes. Product XYZ was introduced in 2021
+
+
+[Investment-Memo-2.pdf]
+
+Question: Did profits decrease in 2020?
+Answer: No. Profits increased in 2020
+
+
+[Investment-Memo-1.pdf]
+ """
 )
 
 
@@ -54,8 +78,8 @@ file name: {context.file_name}{for_chunks}
 
 def create_prompt_for_file_chunk(chunk: ChatChunkContext):
     stripped = re.sub(r"\n+", "\n", chunk.content).strip()
+    # TODO  order: {chunk.order}
     return f"""
-order: {chunk.order}
 content: {stripped}
 """
 
