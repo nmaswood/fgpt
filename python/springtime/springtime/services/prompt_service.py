@@ -4,6 +4,7 @@ import time
 import anthropic
 import pydantic
 from anthropic import Anthropic
+from loguru import logger
 
 from springtime.services.html import html_from_text
 
@@ -63,7 +64,10 @@ Assistant:
                         prompt=prompt,
                     ).completion.strip()
                 except anthropic.RateLimitError:
-                    time.sleep(2 ** (attempt + 1))
+                    seconds = 2 ** (attempt + 2)
+                    logger.info(f"Rate limit exceeded sleeping {seconds}")
+
+                    time.sleep(seconds)
             msg = "Rate limit exceeded"
             raise Exception(msg)
 
