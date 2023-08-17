@@ -124,20 +124,20 @@ frozenlist = ">=1.1.0"
 
 [[package]]
 name = "anthropic"
-version = "0.3.9"
+version = "0.3.10"
 description = "Client library for the anthropic API"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "anthropic-0.3.9-py3-none-any.whl", hash = "sha256:23e8daf266c707faa0b85328ada03dcf885e62c2f236eb0159352e29b9c4e2e3"},
-    {file = "anthropic-0.3.9.tar.gz", hash = "sha256:c19b75308c07cb1ecbea03ffcdde9ba68e5ca22a22479217712396385678bde3"},
+    {file = "anthropic-0.3.10-py3-none-any.whl", hash = "sha256:95cd73168296a4f91a5899a28660991e044322cf94442d07b99901d4ca74acd6"},
+    {file = "anthropic-0.3.10.tar.gz", hash = "sha256:d1f66efc541fbff0ecfd37fd4d3690f9daaa748fc42d9ded5863a10815a5d97b"},
 ]
 
 [package.dependencies]
 anyio = ">=3.5.0,<4"
 distro = ">=1.7.0,<2"
 httpx = ">=0.23.0,<1"
-pydantic = ">=1.9.0,<2.0.0"
+pydantic = ">=1.9.0,<3"
 tokenizers = ">=0.13.0"
 typing-extensions = ">=4.5,<5"
 
@@ -388,13 +388,13 @@ files = [
 
 [[package]]
 name = "click"
-version = "8.1.6"
+version = "8.1.7"
 description = "Composable command line interface toolkit"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "click-8.1.6-py3-none-any.whl", hash = "sha256:fa244bb30b3b5ee2cae3da8f55c9e5e0c0e86093306301fb418eb9dc40fbded5"},
-    {file = "click-8.1.6.tar.gz", hash = "sha256:48ee849951919527a045bfe3bf7baa8a959c423134e1a5b98c05c20ba75a1cbd"},
+    {file = "click-8.1.7-py3-none-any.whl", hash = "sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28"},
+    {file = "click-8.1.7.tar.gz", hash = "sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"},
 ]
 
 [package.dependencies]

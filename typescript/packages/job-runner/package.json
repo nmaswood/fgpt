@@ -46,6 +46,6 @@
     "eslint-plugin-sql": "^2.4.4",
     "pino-pretty": "^10.2.0",
     "prettier": "^3.0.2",
-    "vitest": "^0.34.1"
+    "vitest": "^0.34.2"
   }
 }

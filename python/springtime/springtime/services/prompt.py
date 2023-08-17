@@ -14,9 +14,9 @@ CONTEXT_PROMPT = (
     "If you do not know the answer. Reply: I do not know.\n"
     """
 * When referencing information from a source
-use end footnote citations containing the file name and page number of the source in the following style [citation: file name, page number]. Output the citation as a seperate markdown paragraph at the end of your response.
-
-
+use end footnote citations containing the file name and page number of the source in the following style [citation|file name,page number]. Output the citation as a seperate markdown paragraph at the end of your response
+* For example, a reference from page 2 of the file "fileA" would be [citation|fileA,2]
+* A reference from page 2 to 3 of the file "fileB" would be [citation|fileB,2-3].
  """
 )
 

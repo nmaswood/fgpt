@@ -21,6 +21,14 @@ export const DangerousHTMLElementChat: React.FC<{ html: string }> = ({
         "&.dangerous-html-element-chat > p": {
           whiteSpace: "pre-wrap",
         },
+        "a.fgpt-citation": {
+          color: theme.palette.primary[500],
+          fontSize: "12px",
+          verticalAlign: "super",
+        },
+        "span.fgpt-citation-footnote-marker": {
+          color: theme.palette.primary[500],
+        },
       })}
     />
   );

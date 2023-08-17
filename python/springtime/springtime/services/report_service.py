@@ -1,32 +1,17 @@
 import abc
-import json
 import time
 
-import json5
 import openai
 from loguru import logger
 from pydantic import BaseModel
 
 from springtime.models.open_ai import OpenAIModel
-from springtime.services.prompts import questions_schema, terms_schema
 from springtime.services.scan_service import get_chunks
-
-
-class Question(BaseModel):
-    question: str
-
-
-class Questions(BaseModel):
-    questions: list[Question] = []
 
 
 class Term(BaseModel):
     term_value: str
     term_name: str
-
-
-class Terms(BaseModel):
-    terms: list[Term] = []
 
 
 class PageOfQuestions(BaseModel):
@@ -52,6 +37,22 @@ class ReportService(abc.ABC):
 MODEL = OpenAIModel.gpt3_16k
 
 
+ALL_TERMS = frozenset(
+    {
+        "Company Overview",
+        "Company Description",
+        "Company Industry",
+        "Document Overview",
+        "Document Name",
+        "Document Date",
+        "Lead Arranger",
+        "Most Recent Revenue",
+        "Most Recent Full Year EBITDA",
+        "Most Recent Full Year Net Income",
+    },
+)
+
+
 class OpenAIReportService(ReportService):
     def generate_questions(self, text: str) -> list[PageOfQuestions]:
         acc: list[PageOfQuestions] = []
@@ -62,9 +63,16 @@ class OpenAIReportService(ReportService):
 
     def generate_terms(self, text: str) -> list[PageOfTerms]:
         acc: list[PageOfTerms] = []
+        terms_needed = set(ALL_TERMS)
+
         for idx, chunk in enumerate(get_chunks(text, 30_000)):
-            if terms := self.generate_terms_for_text(chunk):
+            if terms := self.generate_terms_for_text(terms_needed, chunk):
+                for term in terms:
+                    terms_needed.remove(term.term_name)
                 acc.append(PageOfTerms(order=idx, value=terms))
+
+            if not terms_needed:
+                return acc
         return acc
 
     def generate_questions_for_text(self, text: str) -> list[str]:
@@ -89,30 +97,28 @@ class OpenAIReportService(ReportService):
                 },
                 {
                     "role": "user",
-                    "content": "You will be given a document. Read the document and generate the top 3 most relevant questions you would want to ask about the data to better understand it for evaluating a potential investment.",
+                    "content": "You will be given a document. Read the document and generate the top 5 most relevant/interesting questions you would want to ask about the data to better understand it for evaluating a potential investment.",
                 },
                 {
                     "role": "user",
                     "content": """
 * Speak in the third person, e.g. do not use "you"
-* Do not output the same question twice
 * Prefer proper, specific nouns to refer to entities
+* Output each question on a new line. Do not output any other text.
+* Use '*' for each question
 """,
                 },
                 {"role": "user", "content": f"Document: {text}"},
             ],
-            functions=[{"name": "generate_questions", "parameters": questions_schema}],
-            function_call={"name": "generate_questions"},
-            temperature=0,
+            temperature=0.5,
         )
-        response = parse_json(completion.choices[0].message.function_call.arguments)
-        questions = Questions(**response)
-        return [q.question for q in questions.questions]
+        value = completion.choices[0].message.content
+        return [question.lstrip("*-").strip() for question in value.split("\n")]
 
-    def generate_terms_for_text(self, text: str) -> list[Term]:
+    def generate_terms_for_text(self, terms_needed: set[str], text: str) -> list[Term]:
         for _attempt in range(3):
             try:
-                return self._generate_terms(text)
+                return self._generate_terms(terms_needed, text)
             except openai.error.RateLimitError as e:
                 logger.error(e)
                 logger.error("OpenAI response for questions failed")
@@ -121,7 +127,24 @@ class OpenAIReportService(ReportService):
         msg = "OpenAI response for terms failed"
         raise Exception(msg)
 
-    def _generate_terms(self, text: str) -> list[Term]:
+    def _generate_terms(self, terms_needed: set[str], text: str) -> list[Term]:
+        terms_list = "\n".join(terms_needed)
+
+        terms = f"""
+Search the document for the following terms and output their value:
+
+{terms_list}
+
+* Be as objective as possible. Do not output any opinions or judgments.
+* If information for a term is not available, do not return anything for that term.
+* Structure your output as Term Name | Term Value
+
+For example,
+For Lead Arranger output:
+
+Lead Arranger | Goldman Sachs
+        """
+
         completion = openai.ChatCompletion.create(
             model=MODEL,
             messages=[
@@ -129,38 +152,20 @@ class OpenAIReportService(ReportService):
                     "role": "system",
                     "content": "You are an expert financial analyst AI assistant.",
                 },
-                {
-                    "role": "system",
-                    "content": "You will be given a document with specificied terms to parse. If the information is not available, do not return anything. Do not output the name of the term, only the value.",
-                },
+                {"role": "system", "content": terms},
                 {"role": "user", "content": f"Document: {text}"},
             ],
-            functions=[{"name": "parse_terms", "parameters": terms_schema}],
-            function_call={"name": "parse_terms"},
-            temperature=0,
         )
-        response = json.loads(completion.choices[0].message.function_call.arguments)
-
-        terms = [t for t in response["terms"] if "term_value" in t]
+        response = completion.choices[0].message.content
         try:
-            terms_from_model = Terms(terms=terms)
-            return [
-                term
-                for term in terms_from_model.terms
-                if term.term_value.lower() not in IGNORE
-                and len(term.term_value.strip()) > 0
-            ]
+            by_new_line = response.split("\n")
+            terms = [term for line in by_new_line if (term := parse_term(line))]
+            return terms
+
         except Exception as e:
             logger.error(e)
             logger.error("Invalid terms parsed")
             return []
-
-
-def parse_json(json_str: str):
-    try:
-        return json.loads(json_str)
-    except Exception as e:
-        return json5.loads(json_str)
 
 
 IGNORE = {
@@ -169,6 +174,7 @@ IGNORE = {
     "not specified",
     "not provided in the document",
     "n/a",
+    "not mentioned in the document",
 }
 
 

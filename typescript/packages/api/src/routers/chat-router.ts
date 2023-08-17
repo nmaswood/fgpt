@@ -6,6 +6,7 @@ import {
   MLServiceClient,
   ProjectStore,
 } from "@fgpt/precedent-node";
+import { randomUUID } from "crypto";
 import express from "express";
 import { z } from "zod";
 
@@ -132,7 +133,10 @@ export class ChatRouter {
           onEnd: async () => {
             const answer = answerBuffer.join("");
 
-            const html = await this.mlClient.htmlFromText(answer);
+            const html = await this.mlClient.htmlFromText({
+              text: answer,
+              id: randomUUID(),
+            });
 
             const prompt = await this.mlClient.prompt(context);
             await this.chatStore.insertChatEntry({
