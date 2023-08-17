@@ -132,9 +132,10 @@ async function start(settings: Settings) {
   );
   const reportHandler = new ReportHandlerImpl(
     mlReportService,
-    textChunkStore,
     questionStore,
     miscOutputStore,
+    processedFileStore,
+    fileReferenceStore,
   );
 
   const tableHandler = new TableHandlerImpl(

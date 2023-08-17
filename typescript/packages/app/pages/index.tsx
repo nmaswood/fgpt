@@ -104,6 +104,7 @@ const Index: React.FC = () => {
             if (newlyCreatedProject) {
               router.push(`/projects/${newlyCreatedProject.id}`);
             }
+            closeModal();
           }}
           loading={isMutating}
         />

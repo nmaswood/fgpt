@@ -1,3 +1,4 @@
+import { SourceText, TextWithPage, ZTextWithPage } from "@fgpt/precedent-iso";
 import { DatabasePool, sql } from "slonik";
 import { z } from "zod";
 
@@ -13,14 +14,17 @@ export interface UpsertProcessedFile {
   projectId: string;
   fileReferenceId: string;
   text: string;
+  textWithPages: TextWithPage[];
+  numPages: number;
   hash: string;
-  gpt4TokenLength?: number;
-  claude100kLength?: number;
+  gpt4TokenLength: number;
+  claude100kLength: number;
 }
 
 export interface ProcessedFileStore {
   upsert(args: UpsertProcessedFile): Promise<ProcessedFile>;
   getText(id: string): Promise<string>;
+  getSourceText(id: string): Promise<SourceText>;
   getByFileReferenceId(id: string): Promise<ProcessedFile>;
 }
 
@@ -44,9 +48,27 @@ WHERE
 
   async getText(id: string): Promise<string> {
     return this.pool.oneFirst(
-      sql.type(ZGetTextRow)`
+      sql.type(ZGetText)`
 SELECT
     extracted_text
+FROM
+    processed_file
+WHERE
+    id = ${id}
+`,
+    );
+  }
+
+  async getSourceText(id: string): Promise<SourceText> {
+    return this.pool.one(
+      sql.type(ZGetSourceText)`
+SELECT
+    CASE WHEN text_with_pages IS NULL THEN
+        extracted_text
+    ELSE
+        NULL
+    END as extracted_text,
+    text_with_pages
 FROM
     processed_file
 WHERE
@@ -81,6 +103,8 @@ WHERE
         hash,
         gpt4TokenLength,
         claude100kLength,
+        textWithPages,
+        numPages,
       }) =>
         sql.fragment`
 (${organizationId},
@@ -89,18 +113,20 @@ WHERE
     ${text},
     ${hash},
     ${text.length},
-    ${gpt4TokenLength ?? null},
-    ${claude100kLength ?? null})
+    ${gpt4TokenLength},
+    ${claude100kLength},
+    ${JSON.stringify(textWithPages)},
+    ${numPages})
 `,
     );
     const { rows } = await this.pool.query(
       sql.type(ZProcessedFileRow)`
-INSERT INTO processed_file (organization_id, project_id, file_reference_id, extracted_text, extracted_text_sha256, token_length, gpt4_token_length, claude_100k_length)
+INSERT INTO processed_file (organization_id, project_id, file_reference_id, extracted_text, extracted_text_sha256, token_length, gpt4_token_length, claude_100k_length, text_with_pages, num_pages)
     VALUES
         ${sql.join(values, sql.fragment`, `)}
     ON CONFLICT (organization_id, project_id, file_reference_id)
         DO UPDATE SET
-            extracted_text = COALESCE(EXCLUDED.extracted_text, processed_file.extracted_text)
+            extracted_text = EXCLUDED.extracted_text, extracted_text_sha256 = EXCLUDED.extracted_text_sha256, token_length = EXCLUDED.token_length, gpt4_token_length = EXCLUDED.gpt4_token_length, claude_100k_length = EXCLUDED.claude_100k_length, text_with_pages = EXCLUDED.text_with_pages, num_pages = EXCLUDED.num_pages
         RETURNING
             ${FIELDS}
 `,
@@ -124,10 +150,29 @@ const ZProcessedFileRow = z
     fileReferenceId: row.file_reference_id,
   }));
 
-const ZGetTextRow = z
+const ZGetText = z.object({
+  extracted_text: z.string(),
+});
+
+const ZGetSourceText = z
   .object({
-    extracted_text: z.string(),
+    extracted_text: z.string().nullable(),
+    text_with_pages: ZTextWithPage.array().nullable(),
   })
-  .transform((row) => ({
-    extractedText: row.extracted_text,
-  }));
+  .transform((row): SourceText => {
+    if (row.extracted_text && row.text_with_pages) {
+      throw new Error("Text with pages and extracted text are both present");
+    }
+    if (row.text_with_pages) {
+      return {
+        type: "has_pages",
+        pages: row.text_with_pages,
+      };
+    } else if (row.extracted_text) {
+      return {
+        type: "text_only",
+        text: row.extracted_text,
+      };
+    }
+    throw new Error("illegal state");
+  });

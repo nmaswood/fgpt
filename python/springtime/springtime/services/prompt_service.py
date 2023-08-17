@@ -1,5 +1,7 @@
 import abc
+import time
 
+import anthropic
 import pydantic
 from anthropic import Anthropic
 
@@ -51,11 +53,22 @@ Assistant:
         prompt = prompt.format(**req.args)
 
         input_tokens = self.anthropic.count_tokens(prompt)
-        response = self.anthropic.completions.create(
-            model="claude-2",
-            max_tokens_to_sample=1_000_000,
-            prompt=prompt,
-        ).completion.strip()
+
+        def get_response() -> str:
+            for attempt in range(3):
+                try:
+                    return self.anthropic.completions.create(
+                        model="claude-2",
+                        max_tokens_to_sample=1_000_000,
+                        prompt=prompt,
+                    ).completion.strip()
+                except anthropic.RateLimitError:
+                    time.sleep(2 ** (attempt + 1))
+            msg = "Rate limit exceeded"
+            raise Exception(msg)
+
+        response = get_response()
+
         output_tokens = self.anthropic.count_tokens(response)
         html = html_from_text(response)
 

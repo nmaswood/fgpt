@@ -1,18 +1,12 @@
 import { z } from "zod";
 
-export interface ChunkTextArgs {
-  tokenChunkLimit: number;
-  text: string;
-}
+import { assertNever } from "../assert-never";
+import { SourceText, TextWithPage } from "../models/text-group";
 
-export interface TextChunkResponse {
-  chunks: string[];
-}
 export interface TextChunker {
-  chunk(args: ChunkTextArgs): string[];
+  chunk(tokenChunkLimit: number, text: SourceText): Chunks;
 }
 
-// 5k does not have embeddings generated
 export const ZChunkStrategy = z.enum([
   "greedy_v0",
   "greedy_15k",
@@ -34,28 +28,133 @@ export const CHUNK_STRATEGY_TO_CHUNK_SIZE = {
 
 export type ChunkStrategy = z.infer<typeof ZChunkStrategy>;
 
-export class GreedyTextChunker implements TextChunker {
-  chunk({ text, tokenChunkLimit }: ChunkTextArgs): string[] {
-    const chunks: string[] = [];
+export type ChunkLocation =
+  | {
+      type: "single";
+      page: number;
+    }
+  | {
+      type: "range";
+      start: number;
+      end: number;
+    };
 
-    let currentChunk: string[] = [];
+export interface ChunkWithLocation {
+  chunk: string;
+  location: ChunkLocation;
+}
+
+export interface ChunksWithLocation {
+  type: "with_location";
+  chunks: ChunkWithLocation[];
+}
+
+export interface ChunksWithoutLocation {
+  type: "without_location";
+  chunks: string[];
+}
+
+export type Chunks = ChunksWithLocation | ChunksWithoutLocation;
+
+export class GreedyTextChunker implements TextChunker {
+  chunk(tokenChunkLimit: number, text: SourceText): Chunks {
+    switch (text.type) {
+      case "text_only": {
+        if (text.text.length === 0) {
+          return {
+            type: "without_location",
+            chunks: [],
+          };
+        }
+
+        const results = this.#chunkWithLocation(tokenChunkLimit, [
+          {
+            page: -1,
+            text: text.text,
+          },
+        ]);
+        return {
+          type: "without_location",
+          chunks: results.map((r) => r.chunk),
+        };
+      }
+      case "has_pages":
+        return {
+          type: "with_location",
+          chunks: this.#chunkWithLocation(tokenChunkLimit, text.pages),
+        };
+
+      default:
+        assertNever(text);
+    }
+  }
+
+  #chunkWithLocation(
+    tokenChunkLimit: number,
+    pages: TextWithPage[],
+  ): ChunkWithLocation[] {
+    const acc: ChunkWithLocation[] = [];
+
+    let currentChunk: IntermediateChunk | undefined = undefined;
     let currentChunkLength = 0;
 
-    const words = text.split(" ");
+    for (const page of pages) {
+      const words = page.text.split(" ");
+      for (const word of words) {
+        if (currentChunkLength + word.length > tokenChunkLimit) {
+          if (!currentChunk) {
+            throw new Error("currentChunk is undefined");
+          }
+          acc.push({
+            chunk: currentChunk.values.join(" "),
+            location:
+              currentChunk.startPage === page.page
+                ? { type: "single", page: page.page }
+                : {
+                    type: "range",
+                    start: currentChunk.startPage,
+                    end: page.page,
+                  },
+          });
+          currentChunk = undefined;
 
-    for (const word of words) {
-      if (currentChunkLength + word.length > tokenChunkLimit) {
-        chunks.push(currentChunk.join(" "));
-        currentChunk = [];
-        currentChunkLength = 0;
+          currentChunkLength = 0;
+        }
+        if (!currentChunk) {
+          currentChunk = {
+            startPage: page.page,
+            values: [],
+          };
+        }
+
+        currentChunk.values.push(word);
+        currentChunkLength += word.length;
+      }
+    }
+
+    if (currentChunk && currentChunk.values.length > 0) {
+      const lastPage = pages.at(-1)?.page;
+      if (lastPage === undefined) {
+        throw new Error("lastPage is undefined");
       }
 
-      currentChunk.push(word);
-      currentChunkLength += word.length;
+      acc.push({
+        chunk: currentChunk.values.join(" "),
+        location:
+          currentChunk.startPage === lastPage
+            ? { type: "single", page: lastPage }
+            : {
+                type: "range",
+                start: currentChunk.startPage,
+                end: lastPage,
+              },
+      });
     }
-    if (currentChunk.length > 0) {
-      chunks.push(currentChunk.join(" "));
-    }
-    return chunks;
+    return acc;
   }
+}
+
+interface IntermediateChunk {
+  startPage: number;
+  values: string[];
 }

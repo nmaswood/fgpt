@@ -1,10 +1,11 @@
 from fastapi import APIRouter
+from loguru import logger
 from pydantic import BaseModel
 from starlette.responses import StreamingResponse
 
 from springtime.models.chat import ChatFileContext, ChatHistory
 from springtime.services.chat_service import ChatService
-from springtime.services.html import html_from_text
+from springtime.services.html import html_from_text, parse_citations
 
 
 class AskQuestionResponse(BaseModel):
@@ -32,6 +33,8 @@ class GetPromptResponse(BaseModel):
 
 class HtmlFromTextRequest(BaseModel):
     text: str
+    id: str
+    citations: bool
 
 
 class HtmlFromTextResponse(BaseModel):
@@ -72,6 +75,12 @@ class ChatRouter:
         @router.post("/sanitize")
         def get_sanitize(req: HtmlFromTextRequest) -> HtmlFromTextResponse:
             html = html_from_text(req.text)
+            if req.citations and html is not None:
+                try:
+                    html = parse_citations(html, req.id)
+                except Exception as e:
+                    logger.warning(f"Error parsing citations: {e}")
+                    pass
             return HtmlFromTextResponse(html=html)
 
         return router

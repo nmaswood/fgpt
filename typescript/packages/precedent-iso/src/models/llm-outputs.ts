@@ -1,10 +1,5 @@
 import { PromptSlug } from "./prompt";
 
-export interface Question {
-  id: string;
-  question: string;
-}
-
 export type MiscValue =
   | {
       type: "terms";
@@ -22,18 +17,6 @@ export type MiscValue =
       raw: string;
       html: string | undefined;
     };
-
-export interface MiscValueRow {
-  id: string;
-  chunk:
-    | {
-        textChunkId: string;
-        textChunkGroupId: string;
-      }
-    | undefined;
-
-  value: MiscValue;
-}
 
 export interface Term {
   termValue: string;

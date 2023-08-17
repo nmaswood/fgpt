@@ -52,6 +52,14 @@ async function setup() {
     text: "hi",
     hash: "hi",
     gpt4TokenLength: 1000,
+    claude100kLength: 1000,
+    textWithPages: [
+      {
+        text: "hi",
+        page: 1,
+      },
+    ],
+    numPages: 1,
   });
   const taskStore = new PSqlTaskStore(pool, NOOP_MESSAGE_BUS_SERVICE);
 
@@ -88,10 +96,8 @@ test("getProgress#no_tasks", async () => {
     status: "pending",
     forTask: {
       embeddingChunk: "task_does_not_exist",
-      reportChunk: "task_does_not_exist",
       report: "task_does_not_exist",
       longFormReport: "task_does_not_exist",
-      longFormReportChunk: "task_does_not_exist",
       upsertEmbeddings: "task_does_not_exist",
       extractTable: "task_does_not_exist",
       scan: "task_does_not_exist",
@@ -142,10 +148,8 @@ test("getProgress#pending", async () => {
     status: "pending",
     forTask: {
       embeddingChunk: "queued",
-      reportChunk: "queued",
       report: "task_does_not_exist",
       longFormReport: "task_does_not_exist",
-      longFormReportChunk: "task_does_not_exist",
       upsertEmbeddings: "task_does_not_exist",
       extractTable: "task_does_not_exist",
       thumbnail: "task_does_not_exist",
@@ -201,10 +205,8 @@ test("getProgress#has_failure", async () => {
     status: "error",
     forTask: {
       embeddingChunk: "failed",
-      reportChunk: "succeeded",
       report: "task_does_not_exist",
       longFormReport: "task_does_not_exist",
-      longFormReportChunk: "task_does_not_exist",
       upsertEmbeddings: "task_does_not_exist",
       extractTable: "task_does_not_exist",
       thumbnail: "task_does_not_exist",
@@ -300,22 +302,6 @@ test("getProgress#complete", async () => {
         projectId,
         type: "extract-table",
         fileReferenceId,
-      },
-    },
-    {
-      organizationId,
-      projectId,
-      fileReferenceId,
-      config: {
-        organizationId,
-        projectId,
-        type: "analyze-table",
-        fileReferenceId,
-        source: null,
-        analysis: {
-          type: "code",
-          model: "gpt",
-        },
       },
     },
     {

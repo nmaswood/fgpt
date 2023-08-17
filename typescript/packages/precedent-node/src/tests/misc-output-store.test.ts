@@ -50,6 +50,15 @@ async function setup() {
     fileReferenceId: fileReference.id,
     text: "hi",
     hash: ShaHash.forData("hi"),
+    gpt4TokenLength: 1000,
+    claude100kLength: 1000,
+    numPages: 1,
+    textWithPages: [
+      {
+        text: "hi",
+        page: 1,
+      },
+    ],
   });
 
   const chunkStore = new PsqlTextChunkStore(pool);
@@ -61,7 +70,6 @@ async function setup() {
     processedFileId: processedFile.id,
     numChunks: 2,
     strategy: "greedy_v0",
-    embeddingsWillBeGenerated: true,
   });
 
   const [chunk, chunkTwo] = await chunkStore.upsertManyTextChunks(
@@ -77,11 +85,19 @@ async function setup() {
         chunkOrder: 0,
         chunkText: "hi",
         hash: ShaHash.forData("hi"),
+        location: {
+          type: "single",
+          page: 0,
+        },
       },
       {
         chunkOrder: 1,
         chunkText: "hi",
         hash: ShaHash.forData("hi"),
+        location: {
+          type: "single",
+          page: 0,
+        },
       },
     ],
   );
@@ -122,33 +138,28 @@ test("insertMany", async () => {
     projectId,
     fileReferenceId,
     processedFileId,
-    textChunkGroupId,
-    textChunkId,
+
     miscOutputStore,
   } = await setup();
 
-  const [terms] = await miscOutputStore.insertMany([
-    {
-      organizationId,
-      projectId,
-      fileReferenceId,
-      processedFileId,
-      textChunkGroupId,
-      textChunkId,
-      value: {
-        type: "terms",
-        order: 0,
-        value: [
-          {
-            termValue: "value",
-            termName: "name",
-          },
-        ],
-      },
+  const terms = await miscOutputStore.insert({
+    organizationId,
+    projectId,
+    fileReferenceId,
+    processedFileId,
+    value: {
+      type: "terms",
+      order: 0,
+      value: [
+        {
+          termValue: "value",
+          termName: "name",
+        },
+      ],
     },
-  ]);
+  });
 
-  expect(terms.value).toEqual({
+  expect(terms).toEqual({
     type: "terms",
     order: 0,
     value: [
@@ -166,8 +177,7 @@ test("getForFile", async () => {
     projectId,
     fileReferenceId,
     processedFileId,
-    textChunkGroupId,
-    textChunkId,
+
     miscOutputStore,
   } = await setup();
 
@@ -177,8 +187,7 @@ test("getForFile", async () => {
       projectId,
       fileReferenceId,
       processedFileId,
-      textChunkGroupId,
-      textChunkId,
+
       value: {
         type: "terms",
         order: 0,
@@ -196,8 +205,6 @@ test("getForFile", async () => {
       projectId,
       fileReferenceId,
       processedFileId,
-      textChunkGroupId,
-      textChunkId,
       value: {
         type: "output",
         slug: "kpi",
@@ -210,8 +217,6 @@ test("getForFile", async () => {
       projectId,
       fileReferenceId,
       processedFileId,
-      textChunkGroupId,
-      textChunkId,
       value: {
         type: "long_form",
         raw: "hi",
@@ -222,78 +227,4 @@ test("getForFile", async () => {
 
   const output = await miscOutputStore.getForFile(fileReferenceId);
   expect(output.length).toEqual(3);
-});
-
-test("textChunkIdsPresent", async () => {
-  const {
-    organizationId,
-    projectId,
-    fileReferenceId,
-    processedFileId,
-    textChunkGroupId,
-    textChunkId,
-    textChunkId2,
-    miscOutputStore,
-  } = await setup();
-
-  await miscOutputStore.insertMany([
-    {
-      organizationId,
-      projectId,
-      fileReferenceId,
-      processedFileId,
-      textChunkGroupId,
-      textChunkId,
-      value: {
-        type: "terms",
-        order: 0,
-        value: [
-          {
-            termValue: "value",
-            termName: "name",
-          },
-        ],
-      },
-    },
-    {
-      organizationId,
-      projectId,
-      fileReferenceId,
-      processedFileId,
-      textChunkGroupId,
-      textChunkId: textChunkId2,
-      value: {
-        type: "terms",
-        order: 1,
-        value: [
-          {
-            termValue: "value",
-            termName: "name",
-          },
-        ],
-      },
-    },
-
-    {
-      organizationId,
-      projectId,
-      fileReferenceId,
-      processedFileId,
-      textChunkGroupId: undefined,
-      textChunkId: undefined,
-      value: {
-        type: "terms",
-        order: 1,
-        value: [
-          {
-            termValue: "value",
-            termName: "name",
-          },
-        ],
-      },
-    },
-  ]);
-
-  const output = await miscOutputStore.textChunkIdsPresent(fileReferenceId);
-  expect(output).toEqual([textChunkId, textChunkId2].sort());
 });

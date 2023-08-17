@@ -67,6 +67,7 @@ export class ChatContextServiceImpl implements ChatContextService {
         chunks: orderBy(chunks, (chunk) => chunk.chunkOrder).map((chunk) => ({
           content: chunk.chunkText,
           order: chunk.chunkOrder,
+          location: chunk.location,
         })),
       });
     }

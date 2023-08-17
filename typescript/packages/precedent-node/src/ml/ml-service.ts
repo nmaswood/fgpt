@@ -36,6 +36,11 @@ export interface ScanResponse {
   isCim: TrafficLightAnswer;
 }
 
+export interface HtmlFromTextRequest {
+  text: string;
+  id: string;
+}
+
 export interface MLServiceClient {
   ping: () => Promise<"pong">;
   scan: (args: ScanArgs) => Promise<ScanResponse>;
@@ -45,7 +50,7 @@ export interface MLServiceClient {
   prompt(context: ChatContextResponse): Promise<string>;
   getTitle(args: GenerateTitleArgs): Promise<string>;
   tokenLength(text: string): Promise<TokenLength>;
-  htmlFromText(text: string): Promise<string | undefined>;
+  htmlFromText(args: HtmlFromTextRequest): Promise<string | undefined>;
 }
 
 export class MLServiceClientImpl implements MLServiceClient {
@@ -143,9 +148,14 @@ export class MLServiceClientImpl implements MLServiceClient {
     return ZTokenLengthResponse.parse(response.data);
   }
 
-  async htmlFromText(text: string): Promise<string | undefined> {
+  async htmlFromText({
+    text,
+    id,
+  }: HtmlFromTextRequest): Promise<string | undefined> {
     const response = await this.client.post<unknown>("/chat/sanitize", {
       text,
+      citations: true,
+      id,
     });
     const html = ZHtmlFromText.parse(response.data).html;
     return html ?? undefined;

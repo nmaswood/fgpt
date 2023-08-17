@@ -1,12 +1,23 @@
 import re
 
-from springtime.models.chat import ChatChunkContext, ChatFileContext, ChatHistory
+from springtime.models.chat import (
+    ChatChunkContext,
+    ChatFileContext,
+    ChatHistory,
+    RangeLocation,
+    SingleLocation,
+)
 
 CONTEXT_PROMPT = (
-    "Potentially relevant information given the user's question is provided in chunks from files below.\n"
+    "Potentially relevant information to the user's question is provided in chunks from files below.\n"
     "Use the information to supplement your knowledge.\n"
     "If you do not know the answer. Reply: I do not know.\n"
-    'The additional information will be delimited by "---"\n'
+    """
+* When referencing information from a source
+use end footnote citations containing the file name and page number of the source in the following style [citation|file name,page number]. Output the citation as a seperate markdown paragraph at the end of your response
+* For example, a reference from page 2 of the file "fileA" would be [citation|fileA,2]
+* A reference from page 2 to 3 of the file "fileB" would be [citation|fileB,2-3].
+ """
 )
 
 
@@ -36,7 +47,7 @@ def create_prompt_for_context(context: list[ChatFileContext]):
     if not context:
         return ""
 
-    prompts = "\n".join(
+    prompts = "\n\n".join(
         [create_prompt_for_file_context(file) for file in context],
     )
 
@@ -49,15 +60,25 @@ def create_prompt_for_file_context(context: ChatFileContext):
     )
     return f"""
 file name: {context.file_name}{for_chunks}
+
 """.strip()
 
 
 def create_prompt_for_file_chunk(chunk: ChatChunkContext):
     stripped = re.sub(r"\n+", "\n", chunk.content).strip()
-    return f"""
-order: {chunk.order}
-content: {stripped}
+    # TODO  order: {chunk.order}
+    return f"""{format_chunk_location(chunk.location)}content: {stripped}
 """
+
+
+def format_chunk_location(location: SingleLocation | RangeLocation | None):
+    match location:
+        case SingleLocation(page=page):
+            return f"\npage: {page + 1}\n"
+        case RangeLocation(start=start, end=end):
+            return f"\npages: {start + 1} to {end + 1}\n"
+        case None:
+            return ""
 
 
 def create_prompt_for_histories(history: list[ChatHistory]):

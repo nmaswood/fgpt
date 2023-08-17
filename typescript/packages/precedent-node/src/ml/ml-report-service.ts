@@ -12,43 +12,33 @@ export interface LongFormResponse {
 }
 
 export interface MLReportService {
-  generateQuestions(text: string): Promise<string[]>;
-  generateQuestionsClaude(text: string): Promise<string[]>;
-  generateTerms(text: string): Promise<Term[]>;
-  generateTermsClaude(text: string): Promise<Term[]>;
+  generateQuestions(text: string): Promise<Page<string[]>[]>;
+  generateTerms(text: string): Promise<Page<Term[]>[]>;
 }
 export class MLReportServiceImpl implements MLReportService {
   constructor(private readonly client: AxiosInstance) {}
 
-  async generateQuestions(text: string): Promise<string[]> {
-    return this.#generateQuestions("/report/generate-questions", text);
+  async generateQuestions(text: string): Promise<Page<string[]>[]> {
+    const response = await this.client.post<unknown>(
+      "/report/generate-questions",
+      {
+        text,
+      },
+    );
+    return ZQuestionsResponse.parse(response.data);
   }
 
-  async generateQuestionsClaude(text: string): Promise<string[]> {
-    return this.#generateQuestions("/report/generate-questions-claude", text);
-  }
-
-  async #generateQuestions(url: string, text: string): Promise<string[]> {
-    const response = await this.client.post<unknown>(url, {
+  async generateTerms(text: string): Promise<Page<Term[]>[]> {
+    const response = await this.client.post<unknown>("/report/generate-terms", {
       text,
     });
-    return ZQuestionsResponse.parse(response.data).questions;
+    return ZTermsResponse.parse(response.data);
   }
+}
 
-  async generateTerms(text: string): Promise<Term[]> {
-    return this.#generateTerms("/report/generate-terms", text);
-  }
-
-  async generateTermsClaude(text: string): Promise<Term[]> {
-    return this.#generateTerms("/report/generate-terms-claude", text);
-  }
-
-  async #generateTerms(url: string, text: string): Promise<Term[]> {
-    const response = await this.client.post<unknown>(url, {
-      text,
-    });
-    return ZTermsResponse.parse(response.data).terms;
-  }
+export interface Page<T> {
+  order: number;
+  value: T;
 }
 
 const ZTerm = z
@@ -63,10 +53,24 @@ const ZTerm = z
     }),
   );
 
-const ZQuestionsResponse = z.object({
-  questions: z.array(z.string()),
-});
+const ZQuestionsResponse = z
+  .object({
+    questions: z.array(
+      z.object({
+        order: z.number(),
+        value: z.string().array(),
+      }),
+    ),
+  })
+  .transform((row): Page<string[]>[] => row.questions);
 
-const ZTermsResponse = z.object({
-  terms: z.array(ZTerm),
-});
+const ZTermsResponse = z
+  .object({
+    terms: z.array(
+      z.object({
+        order: z.number(),
+        value: ZTerm.array(),
+      }),
+    ),
+  })
+  .transform((row): Page<Term[]>[] => row.terms);

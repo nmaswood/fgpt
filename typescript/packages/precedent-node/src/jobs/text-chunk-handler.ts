@@ -24,11 +24,6 @@ export namespace TextChunkHandler {
 
   export type Response =
     | { type: "embeddings"; textGroupId: string }
-    | {
-        type: "llm-output";
-        textGroupId: string;
-        textChunkIds: string[];
-      }
     | undefined;
 }
 
@@ -52,8 +47,15 @@ export class TextChunkHandlerImpl implements TextChunkHandler {
     processedFileId,
     strategy,
   }: TextChunkHandler.Arguments): Promise<TextChunkHandler.Response> {
-    const text = await this.processedFileStore.getText(processedFileId);
-    if (text.length === 0) {
+    const sourceText =
+      await this.processedFileStore.getSourceText(processedFileId);
+    if (sourceText.type === "text_only") {
+      throw new Error("text only not supported");
+    }
+
+    const { pages } = sourceText;
+
+    if (pages.length === 0) {
       LOGGER.warn({ processedFileId }, "No text to extract");
       return undefined;
     }
@@ -69,21 +71,25 @@ export class TextChunkHandlerImpl implements TextChunkHandler {
     if (chunkSize === undefined) {
       throw new Error("illegal state");
     }
-    const chunks = this.CHUNKER.chunk({
-      tokenChunkLimit: chunkSize,
-      text,
-    });
+    const fromChunker = this.CHUNKER.chunk(chunkSize, sourceText);
+
+    if (fromChunker.type === "without_location") {
+      throw new Error("not supported");
+    }
+
+    const chunks = fromChunker.chunks;
 
     const textChunkGroup = await this.textChunkStore.upsertTextChunkGroup({
       ...common,
       numChunks: chunks.length,
       strategy,
-      embeddingsWillBeGenerated: strategy === "greedy_v0",
     });
-    const upsertTextChunkArgs = chunks.map((chunkText, chunkOrder) => ({
+
+    const upsertTextChunkArgs = chunks.map((chunkWithLocation, chunkOrder) => ({
       chunkOrder,
-      chunkText,
-      hash: ShaHash.forData(chunkText),
+      chunkText: chunkWithLocation.chunk,
+      hash: ShaHash.forData(chunkWithLocation.chunk),
+      location: chunkWithLocation.location,
     }));
     const commonArgs = {
       ...common,
@@ -107,16 +113,10 @@ export class TextChunkHandlerImpl implements TextChunkHandler {
           textGroupId: textChunkGroup.id,
         };
       }
-      case "greedy_15k": {
-        return {
-          type: "llm-output",
-          textChunkIds: textChunks.map((chunk) => chunk.id),
-          textGroupId: textChunkGroup.id,
-        };
-      }
+      case "greedy_15k":
       case "greedy_125k":
       case "greedy_150k": {
-        return undefined;
+        throw new Error("chunk size not expected");
       }
 
       default:

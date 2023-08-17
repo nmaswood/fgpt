@@ -1,4 +1,4 @@
-import { ChatHistory } from "@fgpt/precedent-iso";
+import { ChatHistory, ChunkLocation } from "@fgpt/precedent-iso";
 export interface ChatContextResponse {
   question: string;
   shouldGenerateName: boolean;
@@ -13,4 +13,5 @@ export interface ChatFileContext {
 export interface ChatChunkContext {
   order: number;
   content: string;
+  location: ChunkLocation | undefined;
 }
