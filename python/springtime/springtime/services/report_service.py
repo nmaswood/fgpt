@@ -39,16 +39,12 @@ MODEL = OpenAIModel.gpt3_16k
 
 ALL_TERMS = frozenset(
     {
+        "Document Name",
         "Company Overview",
-        "Company Description",
         "Company Industry",
         "Document Overview",
-        "Document Name",
         "Document Date",
         "Lead Arranger",
-        "Most Recent Revenue",
-        "Most Recent Full Year EBITDA",
-        "Most Recent Full Year Net Income",
     },
 )
 
@@ -135,7 +131,7 @@ Search the document for the following terms and output their value:
 
 {terms_list}
 
-* Be as objective as possible. Do not output any opinions or judgments.
+* Be as objective as possible. Do not output any opinions or judgments. Avoid sounding like a sales pitch
 * If information for a term is not available, do not return anything for that term.
 * Structure your output as Term Name | Term Value
 
@@ -155,6 +151,7 @@ Lead Arranger | Goldman Sachs
                 {"role": "system", "content": terms},
                 {"role": "user", "content": f"Document: {text}"},
             ],
+            temperature=0,
         )
         response = completion.choices[0].message.content
         try:
