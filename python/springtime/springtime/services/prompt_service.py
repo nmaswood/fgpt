@@ -56,7 +56,7 @@ Assistant:
         input_tokens = self.anthropic.count_tokens(prompt)
 
         def get_response() -> str:
-            for attempt in range(3):
+            for attempt in range(9):
                 try:
                     return self.anthropic.completions.create(
                         model="claude-2",
