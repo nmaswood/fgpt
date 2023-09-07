@@ -69,7 +69,7 @@ def preprocess(
     return acc
 
 
-STRINGIFY_ATTEMPTS = 5
+STRINGIFY_ATTEMPTS = 10
 
 
 def stringify_sheet(
@@ -96,7 +96,6 @@ def stringify_sheet(
 def chunk(
     *,
     max_length: int,
-    get_length: GetLength,
     sheets: list[PreprocessedSheet],
 ) -> ChunkedSheets:
     acc = ChunkedSheets(sheets=[])
@@ -130,7 +129,6 @@ class GPT4SheetProcessor(SheetPreprocessor):
 
     def chunk(self, sheets: list[PreprocessedSheet]) -> ChunkedSheets:
         return chunk(
-            get_length=TokenLength.gpt4,
             max_length=GPT4_TOKEN_LIMIT,
             sheets=sheets,
         )
@@ -151,7 +149,6 @@ class ClaudeSheetProcessor(SheetPreprocessor):
 
     def chunk(self, sheets: list[PreprocessedSheet]) -> ChunkedSheets:
         return chunk(
-            get_length=TokenLength.claude100k,
             max_length=CLAUDE_TOKEN_LIMIT,
             sheets=sheets,
         )
