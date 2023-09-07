@@ -172,6 +172,8 @@ IGNORE = {
     "not provided",
     "not available",
     "not specified",
+    "unknown",
+    "not available in the provided document.",
     "not provided in the document",
     "n/a",
     "not mentioned in the document",
@@ -185,6 +187,7 @@ def parse_term(value: str) -> Term | None:
     left, right = splat
     left = left.strip()
     right = right.strip()
-    if right.lower() in IGNORE:
+    lowered = right.lower()
+    if right.lower() in IGNORE or right.lower().startswith("not available"):
         return None
     return Term(term_name=left, term_value=right)
