@@ -51,6 +51,8 @@ export interface MLServiceClient {
   getTitle(args: GenerateTitleArgs): Promise<string>;
   tokenLength(text: string): Promise<TokenLength>;
   htmlFromText(args: HtmlFromTextRequest): Promise<string | undefined>;
+
+  hfm(args: unknown): Promise<unknown>;
 }
 
 export class MLServiceClientImpl implements MLServiceClient {
@@ -159,6 +161,11 @@ export class MLServiceClientImpl implements MLServiceClient {
     });
     const html = ZHtmlFromText.parse(response.data).html;
     return html ?? undefined;
+  }
+
+  async hfm(_: unknown): Promise<unknown> {
+    //
+    return undefined;
   }
 }
 

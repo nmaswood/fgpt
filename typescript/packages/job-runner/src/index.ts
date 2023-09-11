@@ -176,7 +176,11 @@ async function start(settings: Settings) {
     processedFileStore,
   );
 
-  const hfmHandler = new HFMHandlerImpl(processedFileStore);
+  const hfmHandler = new HFMHandlerImpl(
+    promptService,
+    processedFileStore,
+    mlServiceClient,
+  );
 
   const taskExecutor = new TaskExecutorImpl(
     taskService,
