@@ -96,6 +96,7 @@ export class ProcessedFileProgressServiceImpl
         case "ingest-file":
         case "text-extraction":
         case "analyze-table":
+        case "hfm":
           break;
 
         default:

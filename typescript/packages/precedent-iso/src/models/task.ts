@@ -18,6 +18,7 @@ export const ZTaskType = z.enum([
   "thumbnail",
   "scan",
   "run-prompt",
+  "hfm",
 ]);
 
 export const ZTaskStatus = z.enum([
@@ -156,9 +157,20 @@ export interface ScanConfig {
   fileReferenceId: string;
   processedFileId: string;
 }
-
 export const ZScanConfig = z.object({
   type: z.literal("scan"),
+  fileReferenceId: z.string(),
+  processedFileId: z.string(),
+});
+
+export interface HFMConfig {
+  type: "hfm";
+  fileReferenceId: string;
+  processedFileId: string;
+}
+
+export const ZHFMConfig = z.object({
+  type: z.literal("config"),
   fileReferenceId: z.string(),
   processedFileId: z.string(),
 });
@@ -174,7 +186,8 @@ export type TaskConfig =
   | AnalyzeTableConfig
   | ThumbnailConfig
   | ScanConfig
-  | RunPromptConfig;
+  | RunPromptConfig
+  | HFMConfig;
 
 function analysis(row: z.infer<typeof ZAnalyzeTableConfig>): TableAnalysis {
   if (row.analysis) {

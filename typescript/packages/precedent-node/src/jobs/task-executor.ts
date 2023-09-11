@@ -185,6 +185,8 @@ export class TaskExecutorImpl implements TaskExecutor {
         await this.promptRunnerHandler.run(config.fileReferenceId, config.slug);
         break;
       }
+      case "hfm":
+        break;
 
       default:
         assertNever(config);

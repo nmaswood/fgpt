@@ -51,6 +51,7 @@ export class ExcelProgressServiceImpl implements ExcelProgressService {
         case "thumbnail":
         case "scan":
         case "run-prompt":
+        case "hfm":
           break;
         default:
           assertNever(task.config);
