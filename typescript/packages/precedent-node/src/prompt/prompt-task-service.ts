@@ -18,6 +18,7 @@ export class PromptTaskServiceImpl implements PromptTaskService {
       business_model: "not_created",
       expense_drivers: "not_created",
       ebitda_adjustments: "not_created",
+      hfm: "not_created",
     };
 
     for (const t of tasks) {

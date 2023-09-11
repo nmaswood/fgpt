@@ -29,6 +29,7 @@ export class ReportServiceImpl implements ReportService {
       business_model: { raw: [], html: [] },
       expense_drivers: { raw: [], html: [] },
       ebitda_adjustments: { raw: [], html: [] },
+      hfm: { raw: [], html: [] },
     };
 
     const alreadySeenTerms = new Set<string>();
@@ -86,6 +87,7 @@ interface Acc {
   business_model: Intermediate;
   expense_drivers: Intermediate;
   ebitda_adjustments: Intermediate;
+  hfm: Intermediate;
 }
 
 interface Intermediate {

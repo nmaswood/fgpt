@@ -48,4 +48,5 @@ export interface StatusForPrompts {
   business_model: StatusForPrompt;
   expense_drivers: StatusForPrompt;
   ebitda_adjustments: StatusForPrompt;
+  hfm: StatusForPrompt;
 }

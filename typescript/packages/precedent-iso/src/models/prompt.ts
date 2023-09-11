@@ -6,6 +6,7 @@ export const ZPromptSlug = z.enum([
   "business_model",
   "expense_drivers",
   "cim",
+  "hfm",
 ]);
 export type PromptSlug = z.infer<typeof ZPromptSlug>;
 
