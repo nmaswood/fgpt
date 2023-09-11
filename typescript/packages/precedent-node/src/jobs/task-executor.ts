@@ -3,6 +3,7 @@ import { assertNever } from "@fgpt/precedent-iso";
 import { LOGGER } from "../logger";
 import { Task, TaskStore } from "../task-store";
 import { EmbeddingsHandler } from "./generate-embeddings-handler";
+import { HFMHandler } from "./hfm-handler";
 import { IngestFileHandler } from "./ingest-file-handler";
 import { PromptRunnerHandler } from "./prompt-runner-handler";
 import { ReportHandler } from "./report-handler";
@@ -28,6 +29,7 @@ export class TaskExecutorImpl implements TaskExecutor {
     private readonly thumbnailHandler: ThumbnailHandler,
     private readonly scanHandler: ScanHandler,
     private readonly promptRunnerHandler: PromptRunnerHandler,
+    private readonly hfmHandler: HFMHandler,
   ) {}
 
   async execute({ config, organizationId, projectId }: Task) {
@@ -88,6 +90,15 @@ export class TaskExecutorImpl implements TaskExecutor {
               projectId,
               fileReferenceId: config.fileReferenceId,
               processedFileId,
+            },
+          },
+          {
+            organizationId,
+            projectId,
+            fileReferenceId: config.fileReferenceId,
+            config: {
+              type: "hfm",
+              fileReferenceId: config.fileReferenceId,
             },
           },
         ]);
@@ -185,9 +196,11 @@ export class TaskExecutorImpl implements TaskExecutor {
         await this.promptRunnerHandler.run(config.fileReferenceId, config.slug);
         break;
       }
-      case "hfm":
-        break;
+      case "hfm": {
+        await this.hfmHandler.run(config.fileReferenceId);
 
+        break;
+      }
       default:
         assertNever(config);
     }

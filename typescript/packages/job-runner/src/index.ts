@@ -45,6 +45,7 @@ import {
   HTTPPromptRunner,
   PromptRunnerHandlerImpl,
   PsqlShowCaseFileStore,
+  HFMHandlerImpl,
 } from "@fgpt/precedent-node";
 import { SETTINGS, Settings } from "./settings";
 import { MainRouter } from "./router";
@@ -175,6 +176,8 @@ async function start(settings: Settings) {
     processedFileStore,
   );
 
+  const hfmHandler = new HFMHandlerImpl(processedFileStore);
+
   const taskExecutor = new TaskExecutorImpl(
     taskService,
     textExtractionHandler,
@@ -186,6 +189,7 @@ async function start(settings: Settings) {
     thumbnailHandler,
     scanHandler,
     promptRunnerHandler,
+    hfmHandler,
   );
 
   const processedFileProgressStore = new ProcessedFileProgressServiceImpl(

@@ -45,14 +45,14 @@ You will be given an excerpt from a document.
 * Provide a 1 line description of the entire document. Do not start with "This document is about..." or "This document describes..." or "Excerpt from ..." just describe the document in 1 line.
 * Provide tags describing the category of the document
 * Is this is a financial document? Reply with green if you are very sure it is financial document. Reply with yellow if you are not sure. Reply with red if you are very sure it is not a financial document.
-* Is this is document a  Confidential Information Memorandum or Investor Prospectus? Reply with green if you are very sure it is financial document. Reply with yellow if you are not sure. Reply with red if you are very sure it is not a financial document.
+* Is this is document a  Confidential Information Memorandum or Investor Prospectus or Management Presentation? Reply with green if you are very sure it is financial document. Reply with yellow if you are not sure. Reply with red if you are very sure it is not a financial document.
 
 Output your reponse in the following format:
 
 Description: <description>
 Tags: <tag1>, <tag2>, <tag3>
 Is financial document: <green/yellow/red>
-Is confidential information memorandum or management presentation: <green/yellow/red>
+Is confidential information memorandum: <green/yellow/red>
 """
 
 

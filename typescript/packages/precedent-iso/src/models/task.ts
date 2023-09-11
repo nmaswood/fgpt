@@ -166,13 +166,11 @@ export const ZScanConfig = z.object({
 export interface HFMConfig {
   type: "hfm";
   fileReferenceId: string;
-  processedFileId: string;
 }
 
 export const ZHFMConfig = z.object({
-  type: z.literal("config"),
+  type: z.literal("hfm"),
   fileReferenceId: z.string(),
-  processedFileId: z.string(),
 });
 
 export type TaskConfig =
@@ -218,6 +216,7 @@ export const ZTaskConfig = z
     ZThumbnailConfig,
     ZScanConfig,
     ZRunPromptConfig,
+    ZHFMConfig,
   ])
   .transform((row): TaskConfig => {
     switch (row.type) {
@@ -238,6 +237,7 @@ export const ZTaskConfig = z
       case "thumbnail":
       case "scan":
       case "run-prompt":
+      case "hfm":
         return row;
       default:
         assertNever(row);
