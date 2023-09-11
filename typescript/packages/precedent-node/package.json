@@ -11,12 +11,12 @@
     "@types/prettier": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^6.6.0",
     "@typescript-eslint/parser": "^6.6.0",
-    "eslint": "^8.48.0",
+    "eslint": "^8.49.0",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "eslint-plugin-sql": "^2.4.4",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2",
-    "vitest": "^0.34.3"
+    "vitest": "^0.34.4"
   },
   "scripts": {
     "build": "tsc",
@@ -34,12 +34,12 @@
   },
   "dependencies": {
     "@fgpt/precedent-iso": "workspace:^",
-    "@google-cloud/pubsub": "^4.0.3",
-    "@google-cloud/storage": "^7.0.1",
+    "@google-cloud/pubsub": "^4.0.5",
+    "@google-cloud/storage": "^7.1.0",
     "axios": "^1.5.0",
     "cheerio": "^1.0.0-rc.12",
     "lodash": "^4.17.21",
-    "pino": "^8.15.0",
+    "pino": "^8.15.1",
     "slonik": "^34.1.0",
     "zod": "^3.22.2"
   }

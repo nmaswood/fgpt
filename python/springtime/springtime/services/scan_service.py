@@ -52,7 +52,7 @@ Output your reponse in the following format:
 Description: <description>
 Tags: <tag1>, <tag2>, <tag3>
 Is financial document: <green/yellow/red>
-Is confidential information memorandum: <green/yellow/red>
+Is confidential information memorandum or management presentation: <green/yellow/red>
 """
 
 
