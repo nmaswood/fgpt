@@ -41,6 +41,12 @@ export interface HtmlFromTextRequest {
   id: string;
 }
 
+export interface HFMArguments {
+  analysis: string[];
+  personas: string[];
+  text: string;
+}
+
 export interface MLServiceClient {
   ping: () => Promise<"pong">;
   scan: (args: ScanArgs) => Promise<ScanResponse>;
@@ -52,7 +58,7 @@ export interface MLServiceClient {
   tokenLength(text: string): Promise<TokenLength>;
   htmlFromText(args: HtmlFromTextRequest): Promise<string | undefined>;
 
-  hfm(args: unknown): Promise<unknown>;
+  hfm(args: HFMArguments): Promise<unknown>;
 }
 
 export class MLServiceClientImpl implements MLServiceClient {
@@ -163,9 +169,10 @@ export class MLServiceClientImpl implements MLServiceClient {
     return html ?? undefined;
   }
 
-  async hfm(_: unknown): Promise<unknown> {
-    //
-    return undefined;
+  async hfm(args: unknown): Promise<unknown> {
+    const response = await this.client.post<unknown>("/report/hfm", args);
+
+    return ZHFMRespose.parse(response.data);
   }
 }
 
@@ -173,6 +180,14 @@ const ZTokenLengthResponse = z.object({
   gpt4: z.number(),
   claude100k: z.number(),
 });
+
+const ZHFMRespose = z
+  .object({
+    ok: z.boolean(),
+  })
+  .transform((row) => ({
+    row: row.ok,
+  }));
 
 const ZScanResponse = z
   .object({

@@ -1,3 +1,4 @@
+import { LOGGER } from "../logger";
 import { MLServiceClient } from "../ml/ml-service";
 import { ProcessedFileStore } from "../processed-file-store";
 
@@ -29,7 +30,51 @@ export class HFMHandlerImpl implements HFMHandler {
         [DOCUMENT_KEY]: text,
       },
     });
-    this.mlService;
-    console.log(raw);
+
+    const kickoff = parseArgs(raw);
+    if (!kickoff) {
+      LOGGER.warn("Could not parse analysis for hfm");
+      return;
+    }
+
+    const result = await this.mlService.hfm({
+      ...kickoff,
+      text,
+    });
+
+    debugger;
+
+    console.log(kickoff, result);
   }
+}
+
+interface KickoffArgs {
+  analysis: string[];
+  personas: string[];
+}
+
+function parseArgs(raw: string): KickoffArgs | undefined {
+  const splat = raw.split("\n");
+
+  const lines = splat.filter(
+    (line) => !line.startsWith("Here") && line.length > 0,
+  );
+
+  const seperator = lines.findIndex((line) => line === "___");
+  if (seperator === -1) {
+    return undefined;
+  }
+  const analysis = lines.slice(0, seperator).map(trimLine);
+  const personas = lines.slice(seperator + 1).map(trimLine);
+  return {
+    analysis,
+    personas,
+  };
+}
+
+function trimLine(line: string): string {
+  if (line.startsWith("- ")) {
+    return line.slice(2).trim();
+  }
+  return line.trim();
 }

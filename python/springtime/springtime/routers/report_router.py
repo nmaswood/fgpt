@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 
+from springtime.services.hfm_service import HFMService
 from springtime.services.report_service import (
     PageOfQuestions,
     PageOfTerms,
@@ -19,6 +20,12 @@ class GenerateQuestionsResponse(BaseModel):
 
 class GenerateTermsResponse(BaseModel):
     terms: list[PageOfTerms]
+
+
+class HFMRequest(BaseModel):
+    analysis: list[str]
+    personas: list[str]
+    text: str
 
 
 class ScanRequest(BaseModel):
@@ -40,9 +47,11 @@ class ReportRouter:
         self,
         gpt_report_service: ReportService,
         scan_service: ScanService,
+        hfm_service: HFMService,
     ) -> None:
         self.gpt_report_service = gpt_report_service
         self.scan_service = scan_service
+        self.hfm_service = hfm_service
 
     def get_router(self):
         router = APIRouter(prefix="/report")
@@ -61,5 +70,9 @@ class ReportRouter:
         @router.post("/scan")
         def scan_route(req: ScanRequest):
             return self.scan_service.scan(file_name=req.file_name, text=req.text)
+
+        @router.post("/hfm")
+        def hfm_route(req: HFMRequest):
+            return self.hfm_service.run(req)
 
         return router

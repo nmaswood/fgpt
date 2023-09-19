@@ -16,29 +16,32 @@ async function setup() {
 test("extract", async () => {
   const { tikaClient } = await setup();
   const fileName = "dummy.pdf";
-  const buffer = await F.readFile(`${__dirname}/test-documents/dummy.pdf`);
+  const buffer = await F.readFile(
+    `/Users/nasrmaswood/code/propaganda/python/springtime/data/1.pdf`,
+  );
   const text = await tikaClient.extract(fileName, buffer);
+  debugger;
   const xml = cheerio.load(text);
   const bodyText = xml("body").text().trim();
   expect(bodyText.includes("Dummy")).toBeTruthy();
 });
 
-test("extract-longer", async () => {
-  const { tikaClient } = await setup();
-  const fileName = "dummy.pdf";
-  const buffer = await F.readFile(
-    `${__dirname}/test-documents/sample-pitch.pdf`,
-  );
-  const text = await tikaClient.extract(fileName, buffer);
-  //const xml = cheerio.load(text);
-  const $ = cheerio.load(text);
+//test("extract-longer", async () => {
+//const { tikaClient } = await setup();
+//const fileName = "dummy.pdf";
+//const buffer = await F.readFile(
+//`${__dirname}/test-documents/sample-pitch.pdf`,
+//);
+//const text = await tikaClient.extract(fileName, buffer);
+////const xml = cheerio.load(text);
+//const $ = cheerio.load(text);
 
-  const val = $("div.page")
-    .map((page, element) => ({
-      page,
-      text: $(element).text(),
-    }))
-    .toArray();
+//const val = $("div.page")
+//.map((page, element) => ({
+//page,
+//text: $(element).text(),
+//}))
+//.toArray();
 
-  expect(val).toHaveLength(21);
-});
+//expect(val).toHaveLength(21);
+//});

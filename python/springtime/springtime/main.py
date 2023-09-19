@@ -17,6 +17,7 @@ from springtime.routers.vector_router import VectorRouter
 from springtime.services.chat_service import OpenAIChatService
 from springtime.services.embeddings_service import OpenAIEmbeddingsService
 from springtime.services.excel_analyzer import ClaudeExcelAnalyzer
+from springtime.services.hfm_service import HFMServiceImpl
 from springtime.services.prompt_service import PromptServiceImpl
 from springtime.services.report_service import OpenAIReportService
 from springtime.services.scan_service import OpenAIScanService
@@ -65,14 +66,12 @@ OPENAI_REPORT_SERVICE = OpenAIReportService()
 CHAT_SERVICE = OpenAIChatService(OpenAIModel.gpt3_16k)
 
 PROMPT_SERVICE = PromptServiceImpl(ANTHROPIC_CLIENT)
+HFM_SERVICE = HFMServiceImpl(ANTHROPIC_CLIENT)
 
 
 app.include_router(ChatRouter(CHAT_SERVICE).get_router())
 app.include_router(
-    ReportRouter(
-        OPENAI_REPORT_SERVICE,
-        SCAN_SERVICE,
-    ).get_router(),
+    ReportRouter(OPENAI_REPORT_SERVICE, SCAN_SERVICE, HFM_SERVICE).get_router(),
 )
 app.include_router(
     PdfRouter(TABLE_EXTRACTOR, OBJECT_STORE, THUMBNAIL_SERVICE).get_router(),
