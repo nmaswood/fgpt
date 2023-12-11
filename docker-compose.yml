@@ -1,0 +1,72 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:15.0-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=fgpt
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+  db_migration:
+    image: db_migration
+    build: ./db
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/fgpt?sslmode=disable
+  db_test_migration:
+    image: db_migration
+    build: ./db
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/fgpt-test?sslmode=disable
+  tika:
+    image: apache/tika:latest-full
+    ports:
+      - "9998:9998"
+  pubsub:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:latest
+    ports:
+      - "8085:8085"
+    container_name: gcloud-pubsub_test_node
+    entrypoint: gcloud beta emulators pubsub start --project fgpt --host-port 0.0.0.0:8085
+    volumes:
+      - "pubsub:/data"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085"]
+      interval: 5s
+      timeout: 10s
+      retries: 3
+
+  pubsub_config:
+    image: alpine/curl
+    restart: "no"
+    depends_on:
+      pubsub:
+        condition: service_healthy
+    links:
+      - pubsub
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        curl  -X PUT 'http://pubsub:8085/v1/projects/fgpt/topics/task_queue'
+        curl  -X PUT 'http://pubsub:8085/v1/projects/fgpt/topics/task_queue_dead_letter'
+        curl  -X PUT 'http://pubsub:8085/v1/projects/fgpt/subscriptions/task_subscription' -H 'Content-Type: application/json' --data '{"topic":"projects/fgpt/topics/task_queue","pushConfig":{"pushEndpoint":"http://host.docker.internal:8002"},"ackDeadlineSeconds":300,"retryPolicy":{"minimumBackoff":"10s","maximumBackoff":"300s"},"deadLetterPolicy":{"deadLetterTopic":"projects/fgpt/topics/task_queue_dead_letter","maxDeliveryAttempts":5}}'
+        curl -X PUT 'http://pubsub:8085/v1/projects/fgpt/subscriptions/task_subscription_dead_letter' -H 'Content-Type: application/json' --data '{"topic":"projects/fgpt/topics/task_queue_dead_letter","pushConfig":{"pushEndpoint":"http://host.docker.internal:8002/dead-letter"},"ackDeadlineSeconds":300}'
+
+        echo "-Finished configuring pubsub"
+volumes:
+  db:
+    driver: local
+  pubsub:
+    driver: local

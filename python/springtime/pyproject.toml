@@ -1,0 +1,59 @@
+[tool.poetry]
+name = "springtime"
+version = "0.1.0"
+description = ""
+authors = ["Nasr Maswood <nasrmaswood@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pydantic = "^1.10.7"
+fastapi = "^0.95.1"
+uvicorn = "^0.22.0"
+autopep8 = "^2.0.2"
+python-dotenv = "^1.0.0"
+openai = "^0.27.5"
+pytest = "^7.3.1"
+pinecone-client = "^2.2.1"
+retry = "^0.9.2"
+tiktoken = "^0.4.0"
+tabula-py = "^2.7.0"
+xlsxwriter = "^3.1.2"
+google-cloud-storage = "^2.9.0"
+pandas = "^2.0.2"
+openpyxl = "^3.1.2"
+httpx = "^0.24.1"
+anthropic = "^0.3.2"
+pymupdf = "^1.22.5"
+pillow = "^10.0.0"
+opentelemetry-instrumentation-fastapi = "^0.40b0"
+opentelemetry-api = "^1.19.0"
+opentelemetry-sdk = "^1.19.0"
+opentelemetry-exporter-gcp-trace = "^1.5.0"
+opentelemetry-exporter-gcp-monitoring = "^1.5.0a0"
+markdown = "^3.4.3"
+bleach = "^6.0.0"
+fastapi-utils = "^0.2.1"
+json5 = "^0.9.14"
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.0.271"
+black = "^23.3.0"
+pyright = "^1.1.317"
+
+
+[tool.ruff]
+select = ["ALL"]
+ignore = ["F841", "E501", "D102", "ANN101", "D107", "D101", "D106", "D100", "S101", "D103", "ANN201", "ANN202", "ANN205", "INP001","PTH120", "PTH118"]
+
+[tool.ruff.pydocstyle]
+convention = "google"
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+start = "springtime.main:start"

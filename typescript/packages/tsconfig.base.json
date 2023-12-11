@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "String Base Config",
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    { "path": "./precedent-iso" },
+    { "path": "./api" },
+    { "path": "./app" }
+  ],
+  "compilerOptions": {
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "allowJs": false,
+    "sourceMap": true,
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true
+  }
+}

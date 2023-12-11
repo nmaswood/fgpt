@@ -1,0 +1,11 @@
+@media (max-width: 767px) {
+  .display-asset {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .display-asset {
+    display: flex;
+  }
+}

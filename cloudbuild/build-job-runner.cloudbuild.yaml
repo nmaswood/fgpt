@@ -1,0 +1,36 @@
+steps:
+  - name: "gcr.io/kaniko-project/executor:latest"
+    args:
+      [
+        "--dockerfile=./typescript/packages/job-runner/Dockerfile",
+        "--context=./typescript",
+        "--destination=${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/job-runner:$SHORT_SHA",
+        "--cache=true",
+        "--cache-ttl=6h",
+      ]
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "artifacts",
+        "docker",
+        "tags",
+        "add",
+        "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/job-runner:$SHORT_SHA",
+        "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/job-runner:latest",
+      ]
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "run",
+        "deploy",
+        "${_PROJECT_SLUG}-job-runner-server",
+        "--image",
+        "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/job-runner:$SHORT_SHA",
+        "--region",
+        "${_LOCATION}",
+        "--platform",
+        "managed",
+      ]
+
+options:
+  logging: CLOUD_LOGGING_ONLY

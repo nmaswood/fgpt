@@ -1,0 +1,37 @@
+steps:
+  - name: "gcr.io/kaniko-project/executor:latest"
+    args:
+      [
+        "--dockerfile=./db/Dockerfile",
+        "--context=./db",
+        "--destination=${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/db:$SHORT_SHA",
+        "--cache=true",
+        "--cache-ttl=6h",
+      ]
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "artifacts",
+        "docker",
+        "tags",
+        "add",
+        "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/db:$SHORT_SHA",
+        "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/db:latest",
+      ]
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "beta",
+        "run",
+        "jobs",
+        "update",
+        "fgpt-db",
+        "--image",
+        "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/db:$SHORT_SHA",
+        "--region",
+        "${_LOCATION}",
+        "--wait",
+      ]
+
+options:
+  logging: CLOUD_LOGGING_ONLY
